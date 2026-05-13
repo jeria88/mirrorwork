@@ -90,3 +90,7 @@ def dashboard(request):
         'recent_results': recent_results,
         'token_balance': token_balance,
     })
+
+
+def bienvenido(request):
+    return render(request, 'bienvenido.html')
