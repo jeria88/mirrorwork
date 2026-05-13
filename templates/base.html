@@ -4,416 +4,555 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}MirrorWork{% endblock %}</title>
+
+  <!-- Fonts: EB Garamond (headings) + Inter (UI) — mismos que endonautas.cl -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+    /* ── TOKENS ──────────────────────────────────────────────────────── */
     :root {
-      --bg:        #08080f;
-      --surface:   #111118;
-      --surface2:  #1a1a26;
-      --border:    #2a2a3a;
-      --text:      #e2e2f0;
-      --muted:     #7070a0;
-      --accent:    #4ecdc4;
-      --accent2:   #7c6dfa;
+      /* Background siempre negro — el color viene de las auroras */
+      --bg:       #000000;
 
-      --luz-intensa:    #f0c040;
-      --luz:            #4ecdc4;
-      --transicion:     #f4a035;
-      --sombra:         #7c6dfa;
-      --sombra-dom:     #e05050;
+      /* Surfaces: glassmorphism sobre el fondo negro */
+      --surface:  rgba(255,255,255,0.03);
+      --surface2: rgba(255,255,255,0.06);
+      --surface3: rgba(255,255,255,0.10);
+
+      /* Bordes */
+      --border:   rgba(255,255,255,0.08);
+      --border2:  rgba(255,255,255,0.15);
+
+      /* Texto */
+      --text:     #FFFFFF;
+      --muted:    #A1A1AA;
+      --dim:      #52525B;
+
+      /* Acento — cambia con el tema */
+      --accent:   #4ecdc4;
+      --accent2:  #7c6dfa;
+
+      /* Colores aurora — cambian con el tema */
+      --aurora1:  #0C3535;
+      --aurora2:  #180A42;
+
+      /* Polaridad sombra/luz */
+      --luz-intensa:  #f0c040;
+      --luz:          #4ecdc4;
+      --transicion:   #f4a035;
+      --sombra:       #7c6dfa;
+      --sombra-dom:   #e05050;
+
+      /* Tipografía */
+      --font-heading: 'EB Garamond', Georgia, serif;
+      --font-ui:      'Inter', system-ui, -apple-system, sans-serif;
     }
 
-    html { font-size: 16px; }
-
+    /* ── RESET ───────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; scroll-behavior: smooth; }
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'SF Pro Text', system-ui, -apple-system, sans-serif;
+      font-family: var(--font-ui);
+      font-weight: 300;
       line-height: 1.6;
       min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
-
-    a { color: var(--accent); text-decoration: none; }
+    a { color: var(--accent); text-decoration: none; transition: opacity 0.2s; }
     a:hover { opacity: 0.8; }
 
+    /* ── FONDO ESPACIAL (fijo, bajo todo) ───────────────────────────── */
+    #space-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      overflow: hidden;
+      pointer-events: none;
+      background: var(--bg);
+    }
+    .aurora {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(110px);
+      opacity: 0.3;
+      animation: floatAurora 28s infinite alternate ease-in-out;
+    }
+    .aurora-1 {
+      top: -15%; right: -10%;
+      width: 700px; height: 700px;
+      background: var(--aurora1);
+    }
+    .aurora-2 {
+      bottom: -20%; left: -15%;
+      width: 900px; height: 900px;
+      background: var(--aurora2);
+      animation-delay: -9s;
+      opacity: 0.22;
+    }
+    @keyframes floatAurora {
+      0%   { transform: translate(0,0) scale(1); }
+      100% { transform: translate(-40px, 55px) scale(1.12); }
+    }
+
+    /* ── NAVEGACIÓN ─────────────────────────────────────────────────── */
     nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 2rem;
       height: 60px;
-      background: var(--surface);
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
     }
 
     .nav-logo {
-      font-size: 1.1rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
+      font-family: var(--font-heading);
+      font-size: 1.3rem;
+      font-weight: 400;
+      letter-spacing: 0.01em;
       color: var(--text);
+      text-decoration: none;
     }
-
-    .nav-logo span { color: var(--accent); }
+    .nav-logo em { font-style: italic; color: var(--muted); }
 
     .nav-links {
       display: flex;
       align-items: center;
       gap: 1.5rem;
-      font-size: 0.875rem;
+      font-size: 0.8rem;
+      font-weight: 400;
+    }
+    .nav-links a {
       color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+      opacity: 1;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* ── UTILIDADES GLASS ───────────────────────────────────────────── */
+    .glass {
+      background: var(--surface);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      transition: background 0.25s, border-color 0.25s, transform 0.35s cubic-bezier(0.16,1,0.3,1);
+    }
+    .glass:hover {
+      background: var(--surface2);
+      border-color: var(--border2);
+    }
+    .glass-lift:hover {
+      transform: translateY(-3px);
     }
 
-    .nav-links a { color: var(--muted); }
-    .nav-links a:hover { color: var(--text); opacity: 1; }
+    /* ── TIPOGRAFÍA ─────────────────────────────────────────────────── */
+    .heading {
+      font-family: var(--font-heading);
+      font-weight: 400;
+      line-height: 1.15;
+    }
+    .tag-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .tag-label::before {
+      content: '';
+      display: block;
+      width: 20px;
+      height: 1px;
+      background: var(--dim);
+    }
 
+    /* ── BOTONES ────────────────────────────────────────────────────── */
     .btn {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 0.4rem;
-      padding: 0.5rem 1.2rem;
-      border-radius: 6px;
-      font-size: 0.875rem;
+      padding: 0.55rem 1.3rem;
+      border-radius: 100px;
+      font-family: var(--font-ui);
+      font-size: 0.8rem;
       font-weight: 500;
+      letter-spacing: 0.04em;
       cursor: pointer;
-      border: none;
-      transition: opacity 0.15s;
+      border: 1px solid transparent;
+      text-decoration: none;
+      transition: all 0.2s ease;
     }
-    .btn:hover { opacity: 0.85; }
-    .btn-primary { background: var(--accent); color: var(--bg); }
-    .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+    .btn:hover { opacity: 1; }
+    .btn-primary {
+      background: #FFFFFF;
+      color: #000000;
+      border-color: transparent;
+    }
+    .btn-primary:hover {
+      background: #E4E4E7;
+      transform: scale(1.02);
+    }
+    .btn-ghost {
+      background: transparent;
+      color: var(--text);
+      border-color: var(--border);
+    }
+    .btn-ghost:hover {
+      background: var(--surface2);
+      border-color: var(--border2);
+    }
+    .btn-accent {
+      background: var(--accent);
+      color: #000;
+    }
+    .btn-accent:hover { opacity: 0.85; }
 
+    /* ── CARD (glass) ────────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    /* ── CONTENEDOR ──────────────────────────────────────────────────── */
     .container {
       max-width: 960px;
       margin: 0 auto;
       padding: 2rem 1.5rem;
     }
 
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.5rem;
-    }
-
+    /* ── BADGES ─────────────────────────────────────────────────────── */
     .badge {
       display: inline-block;
-      padding: 0.2rem 0.65rem;
+      padding: 0.18rem 0.6rem;
       border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      letter-spacing: 0.03em;
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
     }
+    .badge-luz-intensa { background: rgba(240,192,64,0.12); color: var(--luz-intensa); }
+    .badge-luz        { background: rgba(78,205,196,0.12);  color: var(--luz); }
+    .badge-transicion { background: rgba(244,160,53,0.12);  color: var(--transicion); }
+    .badge-sombra     { background: rgba(124,109,250,0.12); color: var(--sombra); }
+    .badge-sombra-dominante { background: rgba(224,80,80,0.12); color: var(--sombra-dom); }
+    .badge-validado  { background: rgba(78,205,196,0.12);  color: var(--luz); }
+    .badge-adaptado  { background: rgba(244,160,53,0.12);  color: var(--transicion); }
+    .badge-endonauta { background: rgba(124,109,250,0.12); color: var(--sombra); }
 
-    .badge-luz-intensa { background: rgba(240,192,64,0.15); color: var(--luz-intensa); }
-    .badge-luz        { background: rgba(78,205,196,0.15);  color: var(--luz); }
-    .badge-transicion { background: rgba(244,160,53,0.15);  color: var(--transicion); }
-    .badge-sombra     { background: rgba(124,109,250,0.15); color: var(--sombra); }
-    .badge-sombra-dominante { background: rgba(224,80,80,0.15); color: var(--sombra-dom); }
-
-    .badge-validado  { background: rgba(78,205,196,0.15);  color: var(--luz); }
-    .badge-adaptado  { background: rgba(244,160,53,0.15);  color: var(--transicion); }
-    .badge-endonauta { background: rgba(124,109,250,0.15); color: var(--sombra); }
-
+    /* ── BARRAS DE POLARIDAD ─────────────────────────────────────────── */
     .progress-bar-wrap {
-      background: var(--surface2);
+      background: rgba(255,255,255,0.06);
       border-radius: 4px;
-      height: 6px;
+      height: 5px;
       overflow: hidden;
     }
-
-    .progress-bar {
-      height: 100%;
-      border-radius: 4px;
-      transition: width 0.5s ease;
-    }
-
-    .bar-luz-intensa    { background: var(--luz-intensa); }
-    .bar-luz            { background: var(--luz); }
-    .bar-transicion     { background: var(--transicion); }
-    .bar-sombra         { background: var(--sombra); }
+    .progress-bar { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+    .bar-luz-intensa      { background: var(--luz-intensa); }
+    .bar-luz              { background: var(--luz); }
+    .bar-transicion       { background: var(--transicion); }
+    .bar-sombra           { background: var(--sombra); }
     .bar-sombra-dominante { background: var(--sombra-dom); }
-    .bar-default        { background: var(--muted); }
+    .bar-default          { background: var(--muted); }
 
+    /* ── FORMULARIOS ─────────────────────────────────────────────────── */
     .form-group { margin-bottom: 1.25rem; }
-
     .form-group label {
       display: block;
-      font-size: 0.875rem;
+      font-size: 0.78rem;
       color: var(--muted);
       margin-bottom: 0.4rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
     }
-
-    .form-group input {
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
       width: 100%;
-      background: var(--surface2);
+      background: rgba(255,255,255,0.04);
       border: 1px solid var(--border);
       color: var(--text);
-      padding: 0.6rem 0.9rem;
-      border-radius: 8px;
+      padding: 0.65rem 0.9rem;
+      border-radius: 10px;
       font-size: 0.9rem;
+      font-family: var(--font-ui);
+      font-weight: 300;
       outline: none;
-      transition: border-color 0.15s;
+      transition: border-color 0.2s;
     }
-
-    .form-group input:focus { border-color: var(--accent); }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus { border-color: var(--accent); }
+    .form-group input::placeholder,
+    .form-group textarea::placeholder { color: var(--dim); }
 
     .errorlist {
       list-style: none;
       color: var(--sombra-dom);
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       margin-top: 0.3rem;
     }
 
-    .messages-list {
-      list-style: none;
-      margin-bottom: 1rem;
-    }
-
+    /* ── MENSAJES DJANGO ─────────────────────────────────────────────── */
+    .messages-list { list-style: none; margin-bottom: 1rem; }
     .messages-list li {
       padding: 0.7rem 1rem;
-      border-radius: 6px;
-      font-size: 0.875rem;
-      background: rgba(78,205,196,0.1);
-      border: 1px solid rgba(78,205,196,0.3);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      background: rgba(78,205,196,0.06);
+      border: 1px solid rgba(78,205,196,0.2);
       color: var(--accent);
     }
 
+    /* ── SCROLL REVEAL ───────────────────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1),
+                  transform 0.8s cubic-bezier(0.16,1,0.3,1);
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* ── RESPONSIVE ──────────────────────────────────────────────────── */
     @media (max-width: 640px) {
       nav { padding: 0 1rem; }
       .container { padding: 1.5rem 1rem; }
+      .nav-links { gap: 1rem; font-size: 0.75rem; }
     }
   </style>
   {% block extra_head %}{% endblock %}
 </head>
 <body>
-  <nav>
-    <a class="nav-logo" href="{% url 'home' %}">Mirror<span>Work</span></a>
-    <div class="nav-links">
-      {% if user.is_authenticated %}
-        <a href="{% url 'psychometrics:test_list' %}">Tests</a>
-        <a href="{% url 'psychometrics:my_results' %}">Mis resultados</a>
-        <a href="{% url 'mirror:home' %}">Espejo</a>
-        <a href="{% url 'reports:dashboard' %}">Progreso</a>
-        <a href="{% url 'practitioners:lista' %}">Clientes</a>
-        <a href="{% url 'tokens:planes' %}">Planes</a>
-        <a href="{% url 'tokens:balance' %}" style="display:flex;align-items:center;gap:0.3rem;" title="Mis tokens">
-          <span style="color:var(--accent);font-weight:700;">
-            {% with tb=request.user.token_balance %}{{ tb.balance|default:0 }}{% endwith %}
-          </span>
-          <span style="font-size:0.75rem;">tkn</span>
-        </a>
-        <a href="{% url 'accounts:logout' %}">Salir</a>
-      {% else %}
-        <a href="{% url 'accounts:login' %}">Entrar</a>
-        <a href="{% url 'accounts:register' %}" class="btn btn-primary">Comenzar</a>
-      {% endif %}
-    </div>
-  </nav>
 
-  {% if messages %}
-    <div class="container" style="padding-bottom:0">
-      <ul class="messages-list">
-        {% for msg in messages %}<li>{{ msg }}</li>{% endfor %}
-      </ul>
-    </div>
-  {% endif %}
+<!-- FONDO ESPACIAL ─────────────────────────────────────────────────── -->
+<div id="space-bg" aria-hidden="true">
+  <div class="aurora aurora-1"></div>
+  <div class="aurora aurora-2"></div>
+  <canvas id="space-canvas"></canvas>
+</div>
 
-  {% block content %}{% endblock %}
-
-  <!-- ── BURBUJA ESPEJO ── -->
-  {% if user.is_authenticated %}
-  <style>
-    #mirror-bubble {
-      position: fixed;
-      bottom: 1.5rem;
-      left: 1.5rem;
-      z-index: 9998;
-    }
-    #mirror-bubble a {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-      text-decoration: none;
-      font-size: 1.3rem;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    #mirror-bubble a:hover {
-      transform: scale(1.08);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.5);
-      opacity: 1;
-    }
-    #mirror-bubble .bubble-tooltip {
-      position: absolute;
-      left: 56px;
-      bottom: 50%;
-      transform: translateY(50%);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-size: 0.78rem;
-      padding: 0.3rem 0.7rem;
-      border-radius: 6px;
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.15s;
-    }
-    #mirror-bubble a:hover + .bubble-tooltip,
-    #mirror-bubble:hover .bubble-tooltip { opacity: 1; }
-  </style>
-  <div id="mirror-bubble">
-    <a href="{% url 'mirror:home' %}" title="Espejo de Conflictos">◎</a>
-    <span class="bubble-tooltip">Espejo de Conflictos</span>
+<!-- NAV ────────────────────────────────────────────────────────────── -->
+<nav>
+  <a class="nav-logo" href="{% url 'home' %}">Mirror<em>Work</em></a>
+  <div class="nav-links">
+    {% if user.is_authenticated %}
+      <a href="{% url 'psychometrics:test_list' %}">Tests</a>
+      <a href="{% url 'psychometrics:my_results' %}">Resultados</a>
+      <a href="{% url 'mirror:home' %}">Espejo</a>
+      <a href="{% url 'reports:dashboard' %}">Progreso</a>
+      <a href="{% url 'practitioners:lista' %}">Clientes</a>
+      <a href="{% url 'tokens:balance' %}" title="Mis tokens" style="color:var(--accent)">
+        {% with tb=request.user.token_balance %}{{ tb.balance|default:0 }}{% endwith %}&thinsp;tkn
+      </a>
+      <a href="{% url 'accounts:logout' %}">Salir</a>
+    {% else %}
+      <a href="{% url 'accounts:login' %}">Entrar</a>
+      <a href="{% url 'accounts:register' %}" class="btn btn-primary" style="padding:7px 20px;">Comenzar</a>
+    {% endif %}
   </div>
-  {% endif %}
-  <!-- ── /BURBUJA ESPEJO ── -->
+</nav>
 
-  <!-- ── THEME SWITCHER TEMPORAL — eliminar después de decidir paleta ── -->
-  <style>
-    #ts-fab { position:fixed; bottom:1.5rem; right:1.5rem; z-index:9999; }
-    #ts-toggle {
-      width:44px; height:44px; border-radius:50%; border:none; cursor:pointer;
-      background:var(--surface2); border:1px solid var(--border);
-      font-size:1.2rem; display:flex; align-items:center; justify-content:center;
-      box-shadow:0 4px 20px rgba(0,0,0,0.5);
-    }
-    #ts-panel {
-      display:none; position:absolute; bottom:54px; right:0;
-      background:var(--surface); border:1px solid var(--border);
-      border-radius:12px; padding:1rem; width:220px;
-      box-shadow:0 8px 32px rgba(0,0,0,0.6);
-      font-size:0.78rem;
-    }
-    #ts-panel.open { display:block; }
-    .ts-label { color:var(--muted); font-size:0.7rem; text-transform:uppercase; letter-spacing:.1em; margin:0.75rem 0 0.4rem; }
-    .ts-label:first-child { margin-top:0; }
-    .ts-row { display:flex; flex-wrap:wrap; gap:0.4rem; }
-    .ts-btn {
-      padding:0.3rem 0.7rem; border-radius:6px; border:1px solid var(--border);
-      background:var(--surface2); color:var(--text); cursor:pointer;
-      font-size:0.75rem; transition:all .15s;
-    }
-    .ts-btn:hover { border-color:var(--accent); color:var(--accent); }
-    .ts-btn.active { background:var(--accent); border-color:var(--accent); color:var(--bg); font-weight:600; }
-    .ts-swatch { width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:4px; vertical-align:middle; }
-  </style>
-
-  <div id="ts-fab">
-    <div id="ts-panel">
-      <div class="ts-label">Paleta</div>
-      <div class="ts-row">
-        <button class="ts-btn active" data-theme="espejo" onclick="setTheme(this)">
-          <span class="ts-swatch" style="background:#4ecdc4"></span>Espejo
-        </button>
-        <button class="ts-btn" data-theme="endonautas" onclick="setTheme(this)">
-          <span class="ts-swatch" style="background:#c8a855"></span>Endonautas
-        </button>
-        <button class="ts-btn" data-theme="abismo" onclick="setTheme(this)">
-          <span class="ts-swatch" style="background:#4488ee"></span>Abismo
-        </button>
-        <button class="ts-btn" data-theme="crepusculo" onclick="setTheme(this)">
-          <span class="ts-swatch" style="background:#d46fa0"></span>Crepúsculo
-        </button>
-      </div>
-      <div class="ts-label">Tipografía</div>
-      <div class="ts-row">
-        <button class="ts-btn active" data-font="sistema" onclick="setFont(this)">Sistema</button>
-        <button class="ts-btn" data-font="literaria" onclick="setFont(this)">Literaria</button>
-        <button class="ts-btn" data-font="inter" onclick="setFont(this)">Inter</button>
-      </div>
-      <div style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--border);color:var(--muted);font-size:0.68rem;line-height:1.5;">
-        Temporal — elegir y eliminar<br>de base.html cuando decidas
-      </div>
-    </div>
-    <button id="ts-toggle" onclick="document.getElementById('ts-panel').classList.toggle('open')" title="Cambiar tema">🎨</button>
+{% if messages %}
+  <div class="container" style="padding-bottom:0">
+    <ul class="messages-list">
+      {% for msg in messages %}<li>{{ msg }}</li>{% endfor %}
+    </ul>
   </div>
+{% endif %}
 
-  <script>
-  const THEMES = {
-    espejo: {
-      '--bg':'#08080f','--surface':'#111118','--surface2':'#1a1a26',
-      '--border':'#2a2a3a','--text':'#e2e2f0','--muted':'#7070a0',
-      '--accent':'#4ecdc4','--accent2':'#7c6dfa',
-      '--luz-intensa':'#f0c040','--luz':'#4ecdc4','--transicion':'#f4a035',
-      '--sombra':'#7c6dfa','--sombra-dom':'#e05050'
-    },
-    endonautas: {
-      '--bg':'#0b0906','--surface':'#161008','--surface2':'#201810',
-      '--border':'#302416','--text':'#ede0c4','--muted':'#8a7a5a',
-      '--accent':'#c8a855','--accent2':'#9e6b3a',
-      '--luz-intensa':'#d4b040','--luz':'#c8a855','--transicion':'#c47a35',
-      '--sombra':'#9e6b3a','--sombra-dom':'#a84030'
-    },
-    abismo: {
-      '--bg':'#060810','--surface':'#0c1020','--surface2':'#121830',
-      '--border':'#1a2440','--text':'#d0e4f4','--muted':'#4870a0',
-      '--accent':'#4488ee','--accent2':'#9966ff',
-      '--luz-intensa':'#88ddff','--luz':'#44aaff','--transicion':'#ff9944',
-      '--sombra':'#8866ff','--sombra-dom':'#ff4455'
-    },
-    crepusculo: {
-      '--bg':'#0d080e','--surface':'#180e1a','--surface2':'#221426',
-      '--border':'#301e34','--text':'#f0d8ec','--muted':'#8060a0',
-      '--accent':'#d46fa0','--accent2':'#7c50d8',
-      '--luz-intensa':'#f0c860','--luz':'#d46fa0','--transicion':'#e08040',
-      '--sombra':'#7c50d8','--sombra-dom':'#e03050'
+{% block content %}{% endblock %}
+
+<!-- BURBUJA ESPEJO ──────────────────────────────────────────────────── -->
+{% if user.is_authenticated %}
+<style>
+  #mirror-bubble { position:fixed; bottom:1.5rem; left:1.5rem; z-index:9998; }
+  #mirror-bubble a {
+    display:flex; align-items:center; justify-content:center;
+    width:48px; height:48px; border-radius:50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    box-shadow:0 4px 20px rgba(0,0,0,0.5);
+    font-size:1.25rem; transition:transform 0.2s, box-shadow 0.2s;
+    text-decoration:none;
+  }
+  #mirror-bubble a:hover { transform:scale(1.08); box-shadow:0 6px 28px rgba(0,0,0,0.6); opacity:1; }
+  #mirror-bubble .bubble-tip {
+    position:absolute; left:56px; bottom:50%; transform:translateY(50%);
+    background:rgba(0,0,0,0.85); backdrop-filter:blur(12px);
+    border:1px solid var(--border);
+    color:var(--text); font-size:0.72rem; padding:0.3rem 0.7rem;
+    border-radius:6px; white-space:nowrap; opacity:0; pointer-events:none;
+    transition:opacity 0.15s;
+  }
+  #mirror-bubble:hover .bubble-tip { opacity:1; }
+</style>
+<div id="mirror-bubble">
+  <a href="{% url 'mirror:home' %}" title="Espejo de Conflictos">◎</a>
+  <span class="bubble-tip">Espejo de Conflictos</span>
+</div>
+{% endif %}
+
+<!-- SELECTOR DE PALETA ──────────────────────────────────────────────── -->
+<style>
+  #ts-fab { position:fixed; bottom:1.5rem; right:1.5rem; z-index:9999; }
+  #ts-toggle {
+    width:44px; height:44px; border-radius:50%; cursor:pointer;
+    background:rgba(255,255,255,0.06); border:1px solid var(--border);
+    backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    font-size:1rem; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 20px rgba(0,0,0,0.5); color:var(--muted);
+    transition:background 0.2s;
+  }
+  #ts-toggle:hover { background:rgba(255,255,255,0.1); }
+  #ts-panel {
+    display:none; position:absolute; bottom:58px; right:0;
+    background:rgba(0,0,0,0.82); backdrop-filter:blur(28px); -webkit-backdrop-filter:blur(28px);
+    border:1px solid var(--border); border-radius:16px;
+    padding:1.2rem; width:220px;
+    box-shadow:0 12px 48px rgba(0,0,0,0.75);
+  }
+  #ts-panel.open { display:block; }
+  .ts-label { color:var(--muted); font-size:0.66rem; text-transform:uppercase; letter-spacing:.14em; margin:0.8rem 0 0.45rem; }
+  .ts-label:first-child { margin-top:0; }
+  .ts-row { display:flex; flex-wrap:wrap; gap:0.35rem; }
+  .ts-btn {
+    padding:0.28rem 0.7rem; border-radius:100px;
+    border:1px solid var(--border); background:rgba(255,255,255,0.04);
+    color:var(--muted); cursor:pointer; font-size:0.7rem;
+    transition:all 0.15s; letter-spacing:0.03em;
+    display:flex; align-items:center; gap:5px;
+  }
+  .ts-btn:hover { border-color:var(--accent); color:var(--text); }
+  .ts-btn.active { background:var(--accent); border-color:var(--accent); color:#000; font-weight:500; }
+  .ts-swatch { width:7px; height:7px; border-radius:50%; display:inline-block; }
+  .ts-divider { margin-top:0.8rem; padding-top:0.75rem; border-top:1px solid var(--border); color:var(--dim); font-size:0.63rem; line-height:1.5; }
+</style>
+<div id="ts-fab">
+  <div id="ts-panel">
+    <div class="ts-label">Paleta de color</div>
+    <div class="ts-row">
+      <button class="ts-btn active" data-theme="espejo"     onclick="setTheme(this)"><span class="ts-swatch" style="background:#4ecdc4"></span>Espejo</button>
+      <button class="ts-btn"        data-theme="endonautas" onclick="setTheme(this)"><span class="ts-swatch" style="background:#d4b040"></span>Dorado</button>
+      <button class="ts-btn"        data-theme="abismo"     onclick="setTheme(this)"><span class="ts-swatch" style="background:#4488ee"></span>Abismo</button>
+      <button class="ts-btn"        data-theme="crepusculo" onclick="setTheme(this)"><span class="ts-swatch" style="background:#d46fa0"></span>Crepúsculo</button>
+    </div>
+    <div class="ts-divider">MirrorWork · Personalización</div>
+  </div>
+  <button id="ts-toggle" onclick="document.getElementById('ts-panel').classList.toggle('open')" title="Cambiar paleta">◑</button>
+</div>
+
+<!-- SCRIPTS GLOBALES ────────────────────────────────────────────────── -->
+<script>
+// ── STARS CANVAS ─────────────────────────────────────────────────────
+(function() {
+  const canvas = document.getElementById('space-canvas');
+  if (!canvas) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    canvas.style.display = 'none'; return;
+  }
+  const ctx = canvas.getContext('2d', { alpha: false });
+  let w, h, paused = false;
+  const stars = Array.from({length: 480}, () => ({
+    x: Math.random(), y: Math.random(),
+    s: Math.random() < 0.88 ? 1 : 1.5,
+    baseAlpha: 0.07 + Math.random() * 0.42,
+    phase: Math.random() * Math.PI * 2,
+    speed: 0.0003 + Math.random() * 0.0007
+  }));
+  function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
+  window.addEventListener('resize', resize); resize();
+  document.addEventListener('visibilitychange', () => { paused = document.hidden; if (!paused) loop(performance.now()); });
+  function loop(now) {
+    if (paused) return;
+    requestAnimationFrame(loop);
+    ctx.fillStyle = '#000000'; ctx.fillRect(0, 0, w, h);
+    for (const star of stars) {
+      const a = star.baseAlpha + Math.sin(now * star.speed + star.phase) * 0.22;
+      if (a > 0.04) {
+        ctx.fillStyle = `rgba(255,255,255,${Math.min(1, Math.max(0, a))})`;
+        ctx.fillRect(star.x * w, star.y * h, star.s, star.s);
+      }
     }
-  };
-  const FONTS = {
-    sistema: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-    literaria: "Georgia, 'Palatino Linotype', 'Book Antiqua', serif",
-    inter: "'Inter', system-ui, sans-serif"
-  };
+  }
+  loop(performance.now());
+})();
 
-  function applyTheme(name) {
-    const t = THEMES[name]; if(!t) return;
-    const root = document.documentElement;
-    Object.entries(t).forEach(([k,v]) => root.style.setProperty(k,v));
-  }
-  function applyFont(name) {
-    document.body.style.fontFamily = FONTS[name] || FONTS.sistema;
-    if(name === 'inter' && !document.getElementById('inter-font')) {
-      const l = document.createElement('link');
-      l.id='inter-font'; l.rel='stylesheet';
-      l.href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap';
-      document.head.appendChild(l);
-    }
-  }
-  function setTheme(btn) {
-    document.querySelectorAll('[data-theme]').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    const name = btn.dataset.theme;
-    applyTheme(name);
-    localStorage.setItem('mw_theme', name);
-  }
-  function setFont(btn) {
-    document.querySelectorAll('[data-font]').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    const name = btn.dataset.font;
-    applyFont(name);
-    localStorage.setItem('mw_font', name);
-  }
+// ── SCROLL REVEAL ────────────────────────────────────────────────────
+if ('IntersectionObserver' in window) {
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+} else {
+  document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+}
 
-  // Restore on load
-  (function(){
-    const t = localStorage.getItem('mw_theme') || 'espejo';
-    const f = localStorage.getItem('mw_font') || 'sistema';
-    applyTheme(t); applyFont(f);
-    const tb = document.querySelector(`[data-theme="${t}"]`);
-    const fb = document.querySelector(`[data-font="${f}"]`);
-    if(tb){ document.querySelectorAll('[data-theme]').forEach(b=>b.classList.remove('active')); tb.classList.add('active'); }
-    if(fb){ document.querySelectorAll('[data-font]').forEach(b=>b.classList.remove('active')); fb.classList.add('active'); }
-  })();
-  </script>
-  <!-- ── /THEME SWITCHER ── -->
+// ── THEME SWITCHER ───────────────────────────────────────────────────
+const THEMES = {
+  espejo: {
+    '--accent':'#4ecdc4','--accent2':'#7c6dfa',
+    '--aurora1':'#0C3535','--aurora2':'#180A42',
+    '--luz':'#4ecdc4','--luz-intensa':'#f0c040','--transicion':'#f4a035',
+    '--sombra':'#7c6dfa','--sombra-dom':'#e05050'
+  },
+  endonautas: {
+    '--accent':'#d4b040','--accent2':'#9e6b3a',
+    '--aurora1':'#251600','--aurora2':'#180A42',
+    '--luz':'#d4b040','--luz-intensa':'#f0c050','--transicion':'#c47a35',
+    '--sombra':'#9e6b3a','--sombra-dom':'#a84030'
+  },
+  abismo: {
+    '--accent':'#4488ee','--accent2':'#9966ff',
+    '--aurora1':'#061530','--aurora2':'#180A42',
+    '--luz':'#44aaff','--luz-intensa':'#88ddff','--transicion':'#ff9944',
+    '--sombra':'#8866ff','--sombra-dom':'#ff4455'
+  },
+  crepusculo: {
+    '--accent':'#d46fa0','--accent2':'#7c50d8',
+    '--aurora1':'#280630','--aurora2':'#180A42',
+    '--luz':'#d46fa0','--luz-intensa':'#f0c860','--transicion':'#e08040',
+    '--sombra':'#7c50d8','--sombra-dom':'#e03050'
+  }
+};
+
+function applyTheme(name) {
+  const t = THEMES[name]; if (!t) return;
+  Object.entries(t).forEach(([k, v]) => document.documentElement.style.setProperty(k, v));
+}
+function setTheme(btn) {
+  document.querySelectorAll('[data-theme]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyTheme(btn.dataset.theme);
+  localStorage.setItem('mw_theme', btn.dataset.theme);
+}
+(function() {
+  const saved = localStorage.getItem('mw_theme') || 'espejo';
+  applyTheme(saved);
+  const btn = document.querySelector(`[data-theme="${saved}"]`);
+  if (btn) { document.querySelectorAll('[data-theme]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+})();
+</script>
+
+{% block extra_body %}{% endblock %}
 </body>
 </html>
