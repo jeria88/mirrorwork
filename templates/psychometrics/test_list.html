@@ -108,7 +108,7 @@
   <p class="page-sub">Cada test es un mapa, no un juicio. Explora a tu ritmo.</p>
 
   {% for key, tests in by_dimension.items %}
-  <div class="dim-section">
+  <div class="dim-section" id="dim-{{ key.0 }}">
     <div class="dim-title">{{ key.1 }}</div>
 
     {% for test in tests %}

@@ -50,7 +50,7 @@ def register_view(request):
             password=form.cleaned_data['password'],
         )
         login(request, user)
-        return redirect('dashboard')
+        return redirect('onboarding_mapa')
     return render(request, 'accounts/register.html', {'form': form})
 
 
@@ -79,18 +79,108 @@ def logout_view(request):
 
 @login_required
 def dashboard(request):
-    from psychometrics.models import TestResult
+    try:
+        if not request.user.profile.map_aesthetic:
+            return redirect('onboarding_mapa')
+    except Exception:
+        return redirect('onboarding_mapa')
+
+    from psychometrics.models import TestResult, Test
     from tokens.models import TokenBalance
     recent_results = TestResult.objects.filter(user=request.user).select_related('test')[:5]
     try:
         token_balance = request.user.token_balance
     except Exception:
         token_balance = None
+    total_tests = Test.objects.filter(active=True).count()
+    completed_tests = (
+        TestResult.objects.filter(user=request.user).values('test').distinct().count()
+    )
+    map_pct = round(completed_tests / total_tests * 100) if total_tests else 0
     return render(request, 'dashboard.html', {
         'recent_results': recent_results,
         'token_balance': token_balance,
+        'map_aesthetic': request.user.profile.map_aesthetic,
+        'map_pct': map_pct,
+        'completed_tests': completed_tests,
+        'total_tests': total_tests,
     })
+
+
+_VALID_AESTHETICS = {'cosmos', 'mandala', 'archipielago', 'arbol'}
+
+@login_required
+def onboarding_mapa(request):
+    try:
+        profile = request.user.profile
+    except Exception:
+        from .models import UserProfile
+        profile = UserProfile.objects.create(user=request.user)
+
+    if profile.map_aesthetic:
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        choice = request.POST.get('map_aesthetic', '')
+        if choice in _VALID_AESTHETICS:
+            profile.map_aesthetic = choice
+            profile.save(update_fields=['map_aesthetic'])
+            return redirect('dashboard')
+
+    return render(request, 'accounts/onboarding_mapa.html')
 
 
 def bienvenido(request):
     return render(request, 'bienvenido.html')
+
+
+_DIMENSION_LABELS = {
+    'identidad':      'Identidad',
+    'emociones':      'Emociones',
+    'sombra':         'Sombra',
+    'cuerpo':         'Cuerpo',
+    'mente':          'Mente',
+    'proposito':      'Propósito',
+    'espiritualidad': 'Espiritualidad',
+    'vinculos':       'Vínculos',
+    'creatividad':    'Creatividad',
+    'comunidad':      'Comunidad',
+    'suenos':         'Sueños',
+    'abundancia':     'Abundancia',
+}
+
+
+@login_required
+def mapa_interior(request):
+    import json
+    try:
+        profile = request.user.profile
+    except Exception:
+        return redirect('onboarding_mapa')
+    if not profile.map_aesthetic:
+        return redirect('onboarding_mapa')
+
+    from psychometrics.models import Test, TestResult
+
+    dim_data = {}
+    for dim, label in _DIMENSION_LABELS.items():
+        total = Test.objects.filter(dimension=dim, active=True).count()
+        completed = (
+            TestResult.objects.filter(user=request.user, test__dimension=dim)
+            .values('test').distinct().count()
+        )
+        pct = round(completed / total * 100) if total else 0
+        dim_data[dim] = {'label': label, 'total': total, 'completed': completed, 'pct': pct}
+
+    total_tests = sum(d['total'] for d in dim_data.values())
+    completed_tests = sum(d['completed'] for d in dim_data.values())
+    total_pct = round(completed_tests / total_tests * 100) if total_tests else 0
+
+    return render(request, 'accounts/mapa_interior.html', {
+        'dim_data': dim_data,
+        'dim_data_json': json.dumps(dim_data),
+        'aesthetic': profile.map_aesthetic,
+        'total_pct': total_pct,
+        'completed_tests': completed_tests,
+        'total_tests': total_tests,
+    })

@@ -26,6 +26,14 @@ class UserProfile(models.Model):
     plan_active_since = models.DateField(null=True, blank=True)
     hotmart_subscriber_code = models.CharField(max_length=120, blank=True)
     tokens_last_renewed = models.DateField(null=True, blank=True)
+    MAP_AESTHETIC_CHOICES = [
+        ('cosmos',       'Cosmos'),
+        ('mandala',      'Mandala'),
+        ('archipielago', 'Archipiélago'),
+        ('arbol',        'Árbol'),
+    ]
+    map_aesthetic = models.CharField(max_length=20, choices=MAP_AESTHETIC_CHOICES, blank=True, default='')
+
     bio = models.TextField(blank=True)
     profession = models.CharField(max_length=120, blank=True)
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
