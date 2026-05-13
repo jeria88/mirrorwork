@@ -87,7 +87,7 @@ def process_webhook(payload):
     subscriber_code = (sub_data.get("subscriber") or {}).get("code", "")
 
     if not buyer_email:
-        return False, "no buyer email in payload"
+        return True, "no buyer email — ignored"
 
     user = _get_user_by_email(buyer_email)
     if not user:
