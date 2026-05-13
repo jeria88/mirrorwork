@@ -27,9 +27,9 @@ REVOKE_EVENTS = {
 }
 
 
-def get_plan_for_product(product_id):
-    """Returns plan key ('navegante'|'practicante') or None."""
-    return settings.HOTMART_PRODUCT_PLAN_MAP.get(str(product_id))
+def get_plan_for_offer(offer_code):
+    """Returns plan key ('navegante'|'practicante') by offer code or None."""
+    return settings.HOTMART_OFFER_PLAN_MAP.get(str(offer_code))
 
 
 def _get_user_by_email(email):
@@ -82,7 +82,7 @@ def process_webhook(payload):
     data = payload.get("data", {})
 
     buyer_email = (data.get("buyer") or {}).get("email", "").strip().lower()
-    product_id  = str((data.get("product") or {}).get("id", ""))
+    offer_code  = str((data.get("purchase") or {}).get("offer", {}).get("code", ""))
     sub_data    = data.get("subscription") or {}
     subscriber_code = (sub_data.get("subscriber") or {}).get("code", "")
 
@@ -91,15 +91,14 @@ def process_webhook(payload):
 
     user = _get_user_by_email(buyer_email)
     if not user:
-        # Buyer hasn't registered yet — log and return OK so Hotmart doesn't retry
         logger.warning(f"[Hotmart] {event}: no user found for {buyer_email}")
         return True, f"user {buyer_email} not found — ignored"
 
     if event in ACTIVATE_EVENTS:
-        plan = get_plan_for_product(product_id)
+        plan = get_plan_for_offer(offer_code)
         if not plan:
-            logger.warning(f"[Hotmart] product {product_id} not mapped to any plan")
-            return True, f"product {product_id} not mapped"
+            logger.warning(f"[Hotmart] offer {offer_code} not mapped to any plan")
+            return True, f"offer {offer_code} not mapped"
         activate_plan(user, plan, subscriber_code=subscriber_code)
         return True, f"plan {plan} activated for {buyer_email}"
 

@@ -113,14 +113,15 @@ DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY', '')
 # HOTMART_WEBHOOK_TOKEN  → "Seguridad del webhook" en Hotmart > Herramientas > Webhook
 # HOTMART_PRODUCT_ID_*  → ID numérico del producto en Hotmart
 HOTMART_WEBHOOK_TOKEN = os.getenv('HOTMART_WEBHOOK_TOKEN', '')
-HOTMART_PRODUCT_PLAN_MAP = {
-    os.getenv('HOTMART_PRODUCT_ID_NAVEGANTE', ''):   'navegante',
-    os.getenv('HOTMART_PRODUCT_ID_PRACTICANTE', ''): 'practicante',
+# Offer codes (off=xxxx en la URL de checkout) → plan interno
+HOTMART_OFFER_PLAN_MAP = {
+    os.getenv('HOTMART_OFFER_BASIC', ''):  'navegante',
+    os.getenv('HOTMART_OFFER_SEED', ''): 'practicante',
 }
-# Checkout URLs — pegar el enlace de pago de cada producto en Hotmart
+# Checkout URLs
 HOTMART_CHECKOUT_URLS = {
-    'navegante':   os.getenv('HOTMART_CHECKOUT_NAVEGANTE', '#'),
-    'practicante': os.getenv('HOTMART_CHECKOUT_PRACTICANTE', '#'),
+    'navegante':   os.getenv('HOTMART_CHECKOUT_BASIC', '#'),
+    'practicante': os.getenv('HOTMART_CHECKOUT_SEED', '#'),
 }
 DEEPSEEK_BASE_URL = 'https://api.deepseek.com'
 DEEPSEEK_MODEL = 'deepseek-chat'
