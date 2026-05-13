@@ -998,6 +998,71 @@ La meditación en el contexto endonauta es la práctica central del Observador: 
 Las formas de meditación relevantes para el endonauta incluyen: mindfulness (atención plena al momento presente), meditación de compasión (metta, cultivo del amor incondicional), meditación trascendental, meditación en movimiento (yoga, tai chi, qigong), y exploración del sueño lúcido como práctica meditativa extendida al sueño.""",
         ],
     },
+
+    # ──────────────────────────────────────────────────────────────────
+    # BIODESCODIFICACIÓN
+    # ──────────────────────────────────────────────────────────────────
+
+    {
+        "nombre": "Biodescodificación — El Cuerpo como Mensajero",
+        "categoria": "marco_teorico",
+        "autor_ref": "Christian Flèche / Enric Corbera",
+        "chunks": [
+            """La biodescodificación (también llamada biodecodificación o biodescodificación biológica) es un enfoque que propone que los síntomas físicos son mensajes del inconsciente biológico: expresiones somáticas de conflictos emocionales no resueltos. Sus principales sistematizadores son el terapeuta francés Christian Flèche ("Mi cuerpo para curarme") y el catalán Enric Corbera ("El observador en la consulta").
+
+El principio central: cada órgano, sistema o región del cuerpo corresponde a un tipo de conflicto emocional específico. Cuando ese conflicto no se procesa en el plano psíquico, el cuerpo lo expresa mediante un síntoma físico. El síntoma no es un error del organismo sino una solución biológica de emergencia —la mejor respuesta posible del cuerpo ante una situación que la psique no pudo resolver.
+
+Para el endonauta, este enfoque es especialmente relevante cuando emergen síntomas físicos en el relato del usuario. La pregunta guía no es "¿qué tiene?" sino "¿qué conflicto emocional lleva el cuerpo a ese órgano o sistema?".""",
+
+            """CORRESPONDENCIAS PRINCIPALES POR ÓRGANO Y SISTEMA:
+
+PIEL: límites del yo, identidad, contacto y separación. La piel es la frontera entre el yo y el mundo. Enfermedades de piel (eccema, psoriasis, dermatitis) suelen vincularse a conflictos de separación ("quiero/no quiero contacto") o de identidad ("¿quién soy ante los demás?"). La zona afectada aporta información sobre el tipo de contacto en conflicto.
+
+PULMONES: territorio respiratorio, libertad, duelo. Los pulmones representan la capacidad de "inhalar la vida". Conflictos de duelo (pérdida real o simbólica), miedo a la muerte, sensación de que "el territorio me es robado" o de que "no puedo respirar en este espacio". La tos crónica puede ser conflicto de territorio ("quiero echar a alguien de mi territorio").
+
+CORAZÓN: centro del afecto, conflictos de amor. Problemas cardíacos frecuentemente vinculados a pérdidas afectivas profundas, conflictos relacionales de "territorio del corazón" (la familia, la pareja), o emociones de gran intensidad cronificadas. La hipertensión puede relacionarse con el exceso de control emocional o la presión interna que no se libera.
+
+HÍGADO: cólera, territorialidad, repartos. El hígado procesa las toxinas —también las emociones tóxicas. La rabia acumulada, los conflictos de injusticia, la cólera que no se expresa ni se digiere son los conflictos más frecuentes del hígado. "No puedo digerir lo que me hicieron."
+
+RIÑONES: miedo existencial, líquido vital, supervivencia. Los riñones filtran y mantienen el equilibrio. Conflictos de "no voy a sobrevivir", miedo profundo a la existencia, inseguridad fundamental. El edema y la retención de líquidos pueden señalar un conflicto de abandono o de falta de sostén.
+
+ESTÓMAGO: indigestión emocional, angustia por obtener lo necesario. "No puedo digerir esto" —una situación, una persona, un evento. El estómago también se vincula a la angustia de no poder conseguir lo que se necesita para sobrevivir o para nutrir a otros. Gastritis, úlceras: conflicto de "rabia que corroe desde adentro".""",
+
+            """SISTEMA MUSCULOESQUELÉTICO Y NEUROLÓGICO:
+
+COLUMNA CERVICAL (cuello/nuca): el futuro, lo que "no quiero ver" delante de mí. Tensión en el cuello: rigidez ante los cambios, conflicto con lo que viene, bloqueo de la visión del futuro o de una situación que se avecina.
+
+COLUMNA DORSAL (entre hombros): la carga simbólica, culpa, responsabilidad excesiva. "Cargo demasiado en la espalda." Cuando uno se siente responsable por todo y por todos. La zona entre los omóplatos corresponde especialmente a conflictos de afecto y culpa.
+
+COLUMNA LUMBAR (zona baja): soporte material, dinero, territorio de lo doméstico. Problemas lumbares frecuentemente vinculados a conflictos económicos, inseguridad material, sensación de falta de apoyo fundamental. "No tengo donde apoyarme."
+
+HUESOS: desvalorización profunda de la identidad. Los huesos son la estructura, el sostén. Fracturas, osteoporosis: conflictos de desvalorización intensa ("no valgo", "soy débil en mi núcleo"). La parte del cuerpo afectada indica el tipo de desvalorización (deportiva, sexual, intelectual, etc.).
+
+MÚSCULOS: conflictos de acción e impotencia. La musculatura representa la capacidad de actuar, de moverse en el mundo, de ejercer fuerza. Contracturas crónicas: conflicto entre "quiero hacer" y "no puedo hacer" o "no me permiten hacer".
+
+ARTICULACIONES: flexibilidad, cambios de dirección, decisiones. Las articulaciones permiten los giros. La rigidez articular (artritis, artrosis) puede vincularse a rigidez interna, dificultad para cambiar de dirección vital, conflicto con la adaptabilidad.
+
+SISTEMA NERVIOSO: relación con el mundo, control. El sistema nervioso coordina la relación del organismo con el entorno. Neuralgias: conflicto de separación muy preciso ("me separan de algo o alguien que me es esencial"). Parálisis: conflicto de "no puedo moverme ante esto".""",
+
+            """OTROS SISTEMAS Y PATRONES CRÓNICOS:
+
+INTESTINO DELGADO: separar lo útil de lo inútil. Dificultad para discernir qué es bueno para uno, qué nutrir y qué desechar. Conflicto de "tragarse" situaciones que no se puede ni digerir ni eliminar.
+
+INTESTINO GRUESO / COLON: soltar, dejar ir. Estreñimiento crónico puede vincularse a incapacidad de soltar, control excesivo, "no puedo dejar ir". Diarrea: urgencia de expulsar, rechazo violento de algo. Colon irritable: dualidad entre retener y soltar, ambivalencia crónica.
+
+TIROIDES: conflicto de tiempo y urgencia. "No tengo tiempo para hacer lo que quiero." "Tengo que hacerlo todo muy rápido." El hipotiroidismo (lentitud) puede relacionarse con un conflicto de "no puedo avanzar". El hipertiroidismo (aceleración) con "debo hacerlo todo ya".
+
+SISTEMA INMUNE (autoinmunes): conflicto de identidad, "¿qué es mío y qué no?". En enfermedades autoinmunes el sistema ataca al propio organismo —metáfora del autoataque, el autoboicot, la confusión entre lo propio y lo ajeno.
+
+OJOS: conflicto con lo que se ve o no se quiere ver. Miopía: conflicto con el futuro ("no quiero ver lo que viene"), visión de lejos borrosa. Hipermetropía: conflicto con lo cercano ("no quiero ver lo que tengo cerca"). Problemas de visión súbitos: algo que el inconsciente "no quiere ver".
+
+OÍDOS: conflicto con lo que se escucha o no se quiere escuchar. Sordera, tinnitus: "no quiero oír más esto", saturación del campo auditivo por un conflicto repetitivo.
+
+GARGANTA / VOZ: expresión bloqueada, verdad no dicha. Nudo en la garganta, afonía, faringitis crónica: "no puedo decir lo que pienso", "hay algo que no puedo expresar". La garganta es el puente entre el corazón y la mente.
+
+PATRONES CRÓNICOS: toda enfermedad crónica sugiere un conflicto cronificado —no resuelto en el plano psíquico, mantenido activo por la repetición de la situación o del estado emocional. La clave diagnóstica es identificar qué conflicto apareció antes del primer síntoma, o qué patrón emocional acompaña al síntoma desde siempre.""",
+        ],
+    },
 ]
 
 
