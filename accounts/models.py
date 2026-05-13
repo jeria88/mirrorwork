@@ -25,6 +25,7 @@ class UserProfile(models.Model):
     plan = models.CharField(max_length=20, choices=PLAN_CHOICES, default='free')
     plan_active_since = models.DateField(null=True, blank=True)
     hotmart_subscriber_code = models.CharField(max_length=120, blank=True)
+    tokens_last_renewed = models.DateField(null=True, blank=True)
     bio = models.TextField(blank=True)
     profession = models.CharField(max_length=120, blank=True)
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)

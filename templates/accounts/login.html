@@ -58,6 +58,9 @@
     </form>
 
     <div class="auth-foot">
+      ¿Olvidaste tu contraseña? <a href="{% url 'accounts:password_reset' %}">Recupérala aquí</a>
+    </div>
+    <div class="auth-foot">
       ¿Primera vez? <a href="{% url 'accounts:register' %}">Crear cuenta gratis</a>
     </div>
   </div>
