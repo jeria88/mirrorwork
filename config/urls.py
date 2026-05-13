@@ -11,5 +11,6 @@ urlpatterns = [
     path('espejo/', include('mirror.urls')),
     path('practicantes/', include('practitioners.urls')),
     path('reportes/', include('reports.urls')),
+    path('nacimiento/', include('birth.urls')),
     path('', include('accounts.urls_public')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

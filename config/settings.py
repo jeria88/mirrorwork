@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'mirror',
     'practitioners',
     'reports',
+    'birth',
 ]
 
 MIDDLEWARE = [

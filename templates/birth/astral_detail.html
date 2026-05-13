@@ -1,0 +1,436 @@
+{% extends "base.html" %}
+{% block title %}Carta Astral — MirrorWork{% endblock %}
+
+{% block extra_head %}
+<style>
+  .astral-wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 8rem;
+  }
+
+  .astral-tag {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1.25rem;
+  }
+  .astral-tag::before { content:''; display:block; width:20px; height:1px; background:var(--dim); }
+
+  .astral-heading {
+    font-family: var(--font-heading);
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    font-weight: 400;
+    line-height: 1.15;
+    margin-bottom: 0.5rem;
+  }
+  .astral-heading em { font-style: italic; color: var(--muted); }
+
+  .astral-meta {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-bottom: 3rem;
+  }
+  {% if not bp.birth_time %}
+  .astral-meta .no-time {
+    display: inline-block;
+    background: rgba(244,160,53,0.1);
+    border: 1px solid rgba(244,160,53,0.2);
+    border-radius: 6px;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.75rem;
+    color: var(--transicion);
+    margin-left: 0.5rem;
+  }
+  {% endif %}
+
+  /* ── Big Three ── */
+  .big-three {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 3rem;
+  }
+  .big-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem 1.25rem;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+  .big-card:hover { border-color: rgba(78,205,196,0.3); }
+  .big-card-symbol { font-size: 2rem; line-height: 1; margin-bottom: 0.5rem; }
+  .big-card-planet {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+  }
+  .big-card-sign {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: var(--text);
+  }
+  .big-card-degree { font-size: 0.75rem; color: var(--dim); margin-top: 0.2rem; }
+
+  .el-fire { color: #f4804a; }
+  .el-earth { color: #7cb87a; }
+  .el-air { color: #88aaee; }
+  .el-water { color: var(--accent2); }
+
+  /* ── Tabla planetas ── */
+  .section-title {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .planet-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 3rem;
+    font-size: 0.88rem;
+  }
+  .planet-table th {
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dim);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .planet-table td {
+    padding: 0.7rem 0.75rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: middle;
+  }
+  .planet-table tr:last-child td { border-bottom: none; }
+  .planet-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .p-symbol { font-size: 1.1rem; width: 1.6rem; text-align: center; }
+  .p-name { color: var(--text); }
+  .p-sign { font-family: var(--font-heading); font-size: 0.95rem; }
+  .p-degree { color: var(--dim); font-size: 0.8rem; }
+  .p-house { color: var(--muted); font-size: 0.82rem; }
+  .p-retro {
+    font-size: 0.72rem;
+    color: var(--transicion);
+    padding: 0.1rem 0.4rem;
+    border: 1px solid rgba(244,160,53,0.3);
+    border-radius: 4px;
+  }
+  .p-retro-empty { width: 2rem; display: inline-block; }
+
+  /* ── Separador puntos ── */
+  .points-row td { background: rgba(255,255,255,0.015) !important; }
+
+  /* ── Sección interpretación ── */
+  .interp-section { margin-top: 1rem; }
+
+  .interp-spinner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+  }
+  .spin-ring {
+    width: 28px;
+    height: 28px;
+    border: 2px solid rgba(78,205,196,0.2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .interp-spinner p {
+    font-size: 0.88rem;
+    color: var(--muted);
+    margin: 0;
+    line-height: 1.5;
+  }
+  .interp-spinner p strong { color: var(--text); font-weight: 400; }
+
+  .interp-text {
+    font-size: 0.92rem;
+    line-height: 1.8;
+    color: var(--text);
+    white-space: pre-wrap;
+  }
+  .interp-text.fade-in {
+    animation: fadeUp 0.5s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .interp-failed {
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  .no-tokens-note {
+    font-size: 0.82rem;
+    color: var(--dim);
+    padding: 1rem 1.25rem;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    line-height: 1.6;
+  }
+  .no-tokens-note a { color: var(--accent); }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 3rem;
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .back-link:hover { color: var(--accent); }
+
+  @media (max-width: 520px) {
+    .big-three { grid-template-columns: 1fr; }
+    .planet-table .p-degree, .planet-table .p-house { display: none; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="astral-wrap">
+
+  <div class="astral-tag reveal">Carta Astral</div>
+  <h1 class="astral-heading reveal">
+    {{ request.user.first_name|default:request.user.email }}<br>
+    <em>el cielo en tu nacimiento</em>
+  </h1>
+  <p class="astral-meta reveal">
+    {% if bp %}
+      {{ bp.birth_date }}
+      {% if bp.birth_time %} · {{ bp.birth_time|time:"H:i" }}{% endif %}
+      · {{ bp.birth_place }}
+      {% if not bp.birth_time %}<span class="no-time">Sin hora exacta — Ascendente aproximado</span>{% endif %}
+    {% endif %}
+  </p>
+
+  {% with chart=report.chart_data %}
+  {% if chart %}
+
+    <!-- Big Three -->
+    {% with planets=chart.planets asc=chart.ascendant %}
+    {% for p in planets %}{% if p.key == 'sun' %}{% with sun=p %}
+    {% for q in planets %}{% if q.key == 'moon' %}{% with moon=q %}
+
+    <div class="big-three reveal">
+      <div class="big-card">
+        <div class="big-card-symbol
+          {% if sun.sign == 'Aries' or sun.sign == 'Leo' or sun.sign == 'Sagitario' %}el-fire
+          {% elif sun.sign == 'Tauro' or sun.sign == 'Virgo' or sun.sign == 'Capricornio' %}el-earth
+          {% elif sun.sign == 'Géminis' or sun.sign == 'Libra' or sun.sign == 'Acuario' %}el-air
+          {% else %}el-water{% endif %}">☉</div>
+        <div class="big-card-planet">Sol</div>
+        <div class="big-card-sign">{{ sun.sign }}</div>
+        <div class="big-card-degree">Casa {{ sun.house }} · {{ sun.degree }}°</div>
+      </div>
+
+      <div class="big-card">
+        <div class="big-card-symbol
+          {% if moon.sign == 'Aries' or moon.sign == 'Leo' or moon.sign == 'Sagitario' %}el-fire
+          {% elif moon.sign == 'Tauro' or moon.sign == 'Virgo' or moon.sign == 'Capricornio' %}el-earth
+          {% elif moon.sign == 'Géminis' or moon.sign == 'Libra' or moon.sign == 'Acuario' %}el-air
+          {% else %}el-water{% endif %}">☽</div>
+        <div class="big-card-planet">Luna</div>
+        <div class="big-card-sign">{{ moon.sign }}</div>
+        <div class="big-card-degree">Casa {{ moon.house }} · {{ moon.degree }}°</div>
+      </div>
+
+      <div class="big-card">
+        <div class="big-card-symbol
+          {% if asc.sign == 'Aries' or asc.sign == 'Leo' or asc.sign == 'Sagitario' %}el-fire
+          {% elif asc.sign == 'Tauro' or asc.sign == 'Virgo' or asc.sign == 'Capricornio' %}el-earth
+          {% elif asc.sign == 'Géminis' or asc.sign == 'Libra' or asc.sign == 'Acuario' %}el-air
+          {% else %}el-water{% endif %}">↑</div>
+        <div class="big-card-planet">Ascendente</div>
+        <div class="big-card-sign">{{ asc.sign }}</div>
+        <div class="big-card-degree">{{ asc.degree }}°</div>
+      </div>
+    </div>
+
+    {% endwith %}{% endif %}{% endfor %}
+    {% endwith %}{% endif %}{% endfor %}
+    {% endwith %}
+
+    <!-- Tabla de planetas -->
+    <div class="section-title reveal">Posiciones planetarias</div>
+    <table class="planet-table reveal">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Planeta</th>
+          <th>Signo</th>
+          <th>Grado</th>
+          <th>Casa</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in chart.planets %}
+        <tr>
+          <td class="p-symbol">
+            {% if p.key == 'sun' %}☉
+            {% elif p.key == 'moon' %}☽
+            {% elif p.key == 'mercury' %}☿
+            {% elif p.key == 'venus' %}♀
+            {% elif p.key == 'mars' %}♂
+            {% elif p.key == 'jupiter' %}♃
+            {% elif p.key == 'saturn' %}♄
+            {% elif p.key == 'uranus' %}♅
+            {% elif p.key == 'neptune' %}♆
+            {% elif p.key == 'pluto' %}♇
+            {% endif %}
+          </td>
+          <td class="p-name">{{ p.label }}</td>
+          <td class="p-sign
+            {% if p.sign == 'Aries' or p.sign == 'Leo' or p.sign == 'Sagitario' %}el-fire
+            {% elif p.sign == 'Tauro' or p.sign == 'Virgo' or p.sign == 'Capricornio' %}el-earth
+            {% elif p.sign == 'Géminis' or p.sign == 'Libra' or p.sign == 'Acuario' %}el-air
+            {% else %}el-water{% endif %}
+          ">{{ p.sign }}</td>
+          <td class="p-degree">{{ p.degree }}°</td>
+          <td class="p-house">Casa {{ p.house }}</td>
+          <td>{% if p.retrograde %}<span class="p-retro">℞</span>{% else %}<span class="p-retro-empty"></span>{% endif %}</td>
+        </tr>
+        {% endfor %}
+        <!-- Puntos angulares -->
+        <tr class="points-row">
+          <td class="p-symbol">↑</td>
+          <td class="p-name">Ascendente</td>
+          <td class="p-sign
+            {% with s=chart.ascendant.sign %}
+            {% if s == 'Aries' or s == 'Leo' or s == 'Sagitario' %}el-fire
+            {% elif s == 'Tauro' or s == 'Virgo' or s == 'Capricornio' %}el-earth
+            {% elif s == 'Géminis' or s == 'Libra' or s == 'Acuario' %}el-air
+            {% else %}el-water{% endif %}
+            {% endwith %}
+          ">{{ chart.ascendant.sign }}</td>
+          <td class="p-degree">{{ chart.ascendant.degree }}°</td>
+          <td class="p-house">Casa 1</td>
+          <td></td>
+        </tr>
+        <tr class="points-row">
+          <td class="p-symbol">↑<sub style="font-size:0.5em">MC</sub></td>
+          <td class="p-name">Medio Cielo</td>
+          <td class="p-sign
+            {% with s=chart.midheaven.sign %}
+            {% if s == 'Aries' or s == 'Leo' or s == 'Sagitario' %}el-fire
+            {% elif s == 'Tauro' or s == 'Virgo' or s == 'Capricornio' %}el-earth
+            {% elif s == 'Géminis' or s == 'Libra' or s == 'Acuario' %}el-air
+            {% else %}el-water{% endif %}
+            {% endwith %}
+          ">{{ chart.midheaven.sign }}</td>
+          <td class="p-degree">{{ chart.midheaven.degree }}°</td>
+          <td class="p-house">Casa 10</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+
+  {% endif %}
+  {% endwith %}
+
+  <!-- Interpretación -->
+  <div class="section-title reveal">Lectura del Espejo</div>
+  <div class="interp-section reveal">
+
+    {% if report.status == 'complete' %}
+      {% if report.interpretation %}
+        <div class="interp-text">{{ report.interpretation }}</div>
+      {% else %}
+        <p class="no-tokens-note">
+          La carta astral está calculada. Para recibir la lectura del Espejo necesitás tokens disponibles.
+          <a href="{% url 'tokens:balance' %}">Ver mis tokens →</a>
+        </p>
+      {% endif %}
+
+    {% elif report.status == 'processing' %}
+      <div class="interp-spinner" id="interp-container"
+           data-poll-url="{{ poll_url }}"
+           data-status="{{ report.status }}">
+        <div class="spin-ring"></div>
+        <p><strong>El Espejo está leyendo tu mapa celeste</strong><br>
+           Esto puede tomar unos segundos. Podés seguir navegando — la lectura estará aquí cuando vuelvas.</p>
+      </div>
+
+    {% elif report.status == 'failed' %}
+      <p class="interp-failed">No se pudo generar la lectura en este momento. Intentalo de nuevo más tarde.</p>
+
+    {% endif %}
+
+  </div>
+
+  <a href="{% url 'birth:profile' %}" class="back-link">← Volver a nacimiento</a>
+
+</div>
+{% endblock %}
+
+{% block extra_body %}
+<script>
+(function() {
+  const container = document.getElementById('interp-container');
+  if (!container) return;
+
+  const pollUrl = container.dataset.pollUrl;
+
+  function poll() {
+    fetch(pollUrl)
+      .then(r => r.json())
+      .then(data => {
+        if (data.status === 'complete') {
+          if (data.interpretation) {
+            const div = document.createElement('div');
+            div.className = 'interp-text fade-in';
+            div.textContent = data.interpretation;
+            container.replaceWith(div);
+          } else {
+            container.innerHTML = `<p class="no-tokens-note">
+              La carta astral está calculada. Para recibir la lectura del Espejo necesitás tokens disponibles.
+              <a href="/tokens/">Ver mis tokens →</a>
+            </p>`;
+          }
+        } else if (data.status === 'failed') {
+          container.innerHTML = '<p class="interp-failed">No se pudo generar la lectura en este momento.</p>';
+        } else {
+          setTimeout(poll, 2500);
+        }
+      })
+      .catch(() => setTimeout(poll, 5000));
+  }
+
+  setTimeout(poll, 2500);
+})();
+</script>
+{% endblock %}
