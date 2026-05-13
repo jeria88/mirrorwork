@@ -392,113 +392,102 @@
     {% elif aesthetic == 'mandala' %}
     <!-- ═══════════ MANDALA ═══════════ -->
     <!-- viewBox center at (280, 260), r_nodes=170 -->
-    <svg viewBox="0 0 560 520" xmlns="http://www.w3.org/2000/svg" fill="none">
+    <!-- viewBox 560×400 — centro (280,200), r=170 → nodos entre y=30 y y=370 -->
+    <svg viewBox="0 0 560 400" xmlns="http://www.w3.org/2000/svg" fill="none">
       <!-- Decorative concentric rings -->
-      <circle cx="280" cy="260" r="205" stroke="white" stroke-width="0.5" opacity="0.06"/>
-      <circle cx="280" cy="260" r="170" stroke="white" stroke-width="0.4" opacity="0.08"/>
-      <circle cx="280" cy="260" r="130" style="stroke:var(--accent)" stroke-width="0.6" opacity="0.15"/>
-      <circle cx="280" cy="260" r="90" stroke="white" stroke-width="0.4" opacity="0.1"/>
-      <circle cx="280" cy="260" r="50" style="stroke:var(--accent)" stroke-width="0.6" opacity="0.2"/>
+      <circle cx="280" cy="200" r="190" stroke="white" stroke-width="0.5" opacity="0.05"/>
+      <circle cx="280" cy="200" r="170" stroke="white" stroke-width="0.4" opacity="0.08"/>
+      <circle cx="280" cy="200" r="130" style="stroke:var(--accent)" stroke-width="0.6" opacity="0.15"/>
+      <circle cx="280" cy="200" r="90" stroke="white" stroke-width="0.4" opacity="0.1"/>
+      <circle cx="280" cy="200" r="50" style="stroke:var(--accent)" stroke-width="0.6" opacity="0.2"/>
       <!-- Center dot -->
-      <circle cx="280" cy="260" r="7" style="fill:var(--accent)" opacity="0.8"/>
-      <circle cx="280" cy="260" r="14" style="fill:var(--accent)" opacity="0.1"/>
-      <!-- 12 radial spokes (dibujados manualmente) -->
-      <!-- 0°→top(creatividad): 280,90 -->
-      <line x1="280" y1="260" x2="280" y2="90" stroke="white" stroke-width="0.4" opacity="0.1"/>
-      <!-- 30°→espiritualidad: 365,113 -->
-      <line x1="280" y1="260" x2="365" y2="113" stroke="white" stroke-width="0.4" opacity="0.1"/>
-      <!-- 60°→proposito: 427,175 -->
-      <line x1="280" y1="260" x2="427" y2="175" stroke="white" stroke-width="0.4" opacity="0.1"/>
-      <!-- 90°→identidad: 450,260 -->
-      <line x1="280" y1="260" x2="450" y2="260" stroke="white" stroke-width="0.4" opacity="0.1"/>
-      <!-- 120°→mente: 427,345 -->
-      <line x1="280" y1="260" x2="427" y2="345" stroke="white" stroke-width="0.4" opacity="0.1"/>
-      <!-- 150°→comunidad: 365,407 -->
-      <line x1="280" y1="260" x2="365" y2="407" stroke="white" stroke-width="0.4" opacity="0.1"/>
-      <!-- 180°→abundancia: 280,430 -->
-      <line x1="280" y1="260" x2="280" y2="430" stroke="white" stroke-width="0.4" opacity="0.1"/>
-      <!-- 210°→suenos: 195,407 -->
-      <line x1="280" y1="260" x2="195" y2="407" stroke="white" stroke-width="0.4" opacity="0.1"/>
-      <!-- 240°→vinculos: 133,345 -->
-      <line x1="280" y1="260" x2="133" y2="345" stroke="white" stroke-width="0.4" opacity="0.1"/>
-      <!-- 270°→cuerpo: 110,260 -->
-      <line x1="280" y1="260" x2="110" y2="260" stroke="white" stroke-width="0.4" opacity="0.1"/>
-      <!-- 300°→emociones: 133,175 -->
-      <line x1="280" y1="260" x2="133" y2="175" stroke="white" stroke-width="0.4" opacity="0.1"/>
-      <!-- 330°→sombra: 195,113 -->
-      <line x1="280" y1="260" x2="195" y2="113" stroke="white" stroke-width="0.4" opacity="0.1"/>
-      <!-- NODES (r=170 from center at 280,260) -->
-      <!-- creatividad: 280, 90 (0°) -->
+      <circle cx="280" cy="200" r="7" style="fill:var(--accent)" opacity="0.8"/>
+      <circle cx="280" cy="200" r="14" style="fill:var(--accent)" opacity="0.1"/>
+      <!-- 12 radial spokes (ángulos cada 30° desde arriba, horario) -->
+      <line x1="280" y1="200" x2="280" y2="30"  stroke="white" stroke-width="0.4" opacity="0.1"/>
+      <line x1="280" y1="200" x2="365" y2="53"  stroke="white" stroke-width="0.4" opacity="0.1"/>
+      <line x1="280" y1="200" x2="427" y2="115" stroke="white" stroke-width="0.4" opacity="0.1"/>
+      <line x1="280" y1="200" x2="450" y2="200" stroke="white" stroke-width="0.4" opacity="0.1"/>
+      <line x1="280" y1="200" x2="427" y2="285" stroke="white" stroke-width="0.4" opacity="0.1"/>
+      <line x1="280" y1="200" x2="365" y2="347" stroke="white" stroke-width="0.4" opacity="0.1"/>
+      <line x1="280" y1="200" x2="280" y2="370" stroke="white" stroke-width="0.4" opacity="0.1"/>
+      <line x1="280" y1="200" x2="195" y2="347" stroke="white" stroke-width="0.4" opacity="0.1"/>
+      <line x1="280" y1="200" x2="133" y2="285" stroke="white" stroke-width="0.4" opacity="0.1"/>
+      <line x1="280" y1="200" x2="110" y2="200" stroke="white" stroke-width="0.4" opacity="0.1"/>
+      <line x1="280" y1="200" x2="133" y2="115" stroke="white" stroke-width="0.4" opacity="0.1"/>
+      <line x1="280" y1="200" x2="195" y2="53"  stroke="white" stroke-width="0.4" opacity="0.1"/>
+      <!-- NODES (r=170 desde centro 280,200) -->
+      <!-- creatividad: (280, 30) — 0° -->
       <g class="map-node" data-dim="creatividad" onclick="selectNode('creatividad')">
-        <circle cx="280" cy="90" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
-        <circle cx="280" cy="90" r="6" fill="white" class="n-base" opacity="0.2"/>
-        <circle cx="280" cy="90" r="6" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="280" cy="30"  r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="280" cy="30"  r="6"  fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="280" cy="30"  r="6"  class="n-accent" style="fill:var(--accent)" opacity="0"/>
       </g>
-      <!-- espiritualidad: 365, 113 (30°) -->
+      <!-- espiritualidad: (365, 53) — 30° -->
       <g class="map-node" data-dim="espiritualidad" onclick="selectNode('espiritualidad')">
-        <circle cx="365" cy="113" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
-        <circle cx="365" cy="113" r="6" fill="white" class="n-base" opacity="0.2"/>
-        <circle cx="365" cy="113" r="6" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="365" cy="53"  r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="365" cy="53"  r="6"  fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="365" cy="53"  r="6"  class="n-accent" style="fill:var(--accent)" opacity="0"/>
       </g>
-      <!-- proposito: 427, 175 (60°) -->
+      <!-- proposito: (427, 115) — 60° -->
       <g class="map-node" data-dim="proposito" onclick="selectNode('proposito')">
-        <circle cx="427" cy="175" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
-        <circle cx="427" cy="175" r="6" fill="white" class="n-base" opacity="0.2"/>
-        <circle cx="427" cy="175" r="6" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="427" cy="115" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="427" cy="115" r="6"  fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="427" cy="115" r="6"  class="n-accent" style="fill:var(--accent)" opacity="0"/>
       </g>
-      <!-- identidad: 450, 260 (90°) -->
+      <!-- identidad: (450, 200) — 90° -->
       <g class="map-node" data-dim="identidad" onclick="selectNode('identidad')">
-        <circle cx="450" cy="260" r="22" class="n-glow" style="fill:var(--accent)" opacity="0"/>
-        <circle cx="450" cy="260" r="7" fill="white" class="n-base" opacity="0.2"/>
-        <circle cx="450" cy="260" r="7" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="450" cy="200" r="22" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="450" cy="200" r="7"  fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="450" cy="200" r="7"  class="n-accent" style="fill:var(--accent)" opacity="0"/>
       </g>
-      <!-- mente: 427, 345 (120°) -->
+      <!-- mente: (427, 285) — 120° -->
       <g class="map-node" data-dim="mente" onclick="selectNode('mente')">
-        <circle cx="427" cy="345" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
-        <circle cx="427" cy="345" r="6" fill="white" class="n-base" opacity="0.2"/>
-        <circle cx="427" cy="345" r="6" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="427" cy="285" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="427" cy="285" r="6"  fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="427" cy="285" r="6"  class="n-accent" style="fill:var(--accent)" opacity="0"/>
       </g>
-      <!-- comunidad: 365, 407 (150°) -->
+      <!-- comunidad: (365, 347) — 150° -->
       <g class="map-node" data-dim="comunidad" onclick="selectNode('comunidad')">
-        <circle cx="365" cy="407" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
-        <circle cx="365" cy="407" r="6" fill="white" class="n-base" opacity="0.2"/>
-        <circle cx="365" cy="407" r="6" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="365" cy="347" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="365" cy="347" r="6"  fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="365" cy="347" r="6"  class="n-accent" style="fill:var(--accent)" opacity="0"/>
       </g>
-      <!-- abundancia: 280, 430 (180°) -->
+      <!-- abundancia: (280, 370) — 180° -->
       <g class="map-node" data-dim="abundancia" onclick="selectNode('abundancia')">
-        <circle cx="280" cy="430" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
-        <circle cx="280" cy="430" r="6" fill="white" class="n-base" opacity="0.2"/>
-        <circle cx="280" cy="430" r="6" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="280" cy="370" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="280" cy="370" r="6"  fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="280" cy="370" r="6"  class="n-accent" style="fill:var(--accent)" opacity="0"/>
       </g>
-      <!-- suenos: 195, 407 (210°) -->
+      <!-- suenos: (195, 347) — 210° -->
       <g class="map-node" data-dim="suenos" onclick="selectNode('suenos')">
-        <circle cx="195" cy="407" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
-        <circle cx="195" cy="407" r="6" fill="white" class="n-base" opacity="0.2"/>
-        <circle cx="195" cy="407" r="6" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="195" cy="347" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="195" cy="347" r="6"  fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="195" cy="347" r="6"  class="n-accent" style="fill:var(--accent)" opacity="0"/>
       </g>
-      <!-- vinculos: 133, 345 (240°) -->
+      <!-- vinculos: (133, 285) — 240° -->
       <g class="map-node" data-dim="vinculos" onclick="selectNode('vinculos')">
-        <circle cx="133" cy="345" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
-        <circle cx="133" cy="345" r="6" fill="white" class="n-base" opacity="0.2"/>
-        <circle cx="133" cy="345" r="6" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="133" cy="285" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="133" cy="285" r="6"  fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="133" cy="285" r="6"  class="n-accent" style="fill:var(--accent)" opacity="0"/>
       </g>
-      <!-- cuerpo: 110, 260 (270°) -->
+      <!-- cuerpo: (110, 200) — 270° -->
       <g class="map-node" data-dim="cuerpo" onclick="selectNode('cuerpo')">
-        <circle cx="110" cy="260" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
-        <circle cx="110" cy="260" r="6" fill="white" class="n-base" opacity="0.2"/>
-        <circle cx="110" cy="260" r="6" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="110" cy="200" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="110" cy="200" r="6"  fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="110" cy="200" r="6"  class="n-accent" style="fill:var(--accent)" opacity="0"/>
       </g>
-      <!-- emociones: 133, 175 (300°) -->
+      <!-- emociones: (133, 115) — 300° -->
       <g class="map-node" data-dim="emociones" onclick="selectNode('emociones')">
-        <circle cx="133" cy="175" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
-        <circle cx="133" cy="175" r="6" fill="white" class="n-base" opacity="0.2"/>
-        <circle cx="133" cy="175" r="6" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="133" cy="115" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="133" cy="115" r="6"  fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="133" cy="115" r="6"  class="n-accent" style="fill:var(--accent)" opacity="0"/>
       </g>
-      <!-- sombra: 195, 113 (330°) -->
+      <!-- sombra: (195, 53) — 330° -->
       <g class="map-node" data-dim="sombra" onclick="selectNode('sombra')">
-        <circle cx="195" cy="113" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
-        <circle cx="195" cy="113" r="6" fill="white" class="n-base" opacity="0.2"/>
-        <circle cx="195" cy="113" r="6" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="195" cy="53"  r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="195" cy="53"  r="6"  fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="195" cy="53"  r="6"  class="n-accent" style="fill:var(--accent)" opacity="0"/>
       </g>
     </svg>
 
