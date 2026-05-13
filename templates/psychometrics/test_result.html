@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+{% block title %}Resultados: {{ result.test.name }} — MirrorWork{% endblock %}
+
+{% block extra_head %}
+<style>
+  .result-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .breadcrumb { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.75rem; }
+  .breadcrumb a { color: var(--muted); }
+  .result-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; }
+  .result-meta { font-size: 0.8rem; color: var(--muted); }
+
+  .dim-list { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; }
+
+  .dim-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+  }
+
+  .dim-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .dim-name { font-size: 0.95rem; font-weight: 600; }
+  .dim-nivel { font-size: 0.75rem; color: var(--muted); margin-top: 0.15rem; }
+
+  .bar-section { margin-bottom: 0.85rem; }
+  .bar-label { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); margin-bottom: 0.3rem; }
+
+  .dim-msg {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-top: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+  }
+  .dim-msg strong { color: var(--text); display: block; margin-bottom: 0.25rem; }
+  .dim-action {
+    margin-top: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--accent);
+    font-style: italic;
+  }
+
+  .conclusion-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+    line-height: 1.75;
+    color: var(--muted);
+  }
+  .conclusion-box h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 0.75rem; }
+
+  .action-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+  }
+
+  /* polarity legend */
+  .legend {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  .legend-item { display: flex; align-items: center; gap: 0.35rem; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:760px">
+  <div class="result-header">
+    <div class="breadcrumb">
+      <a href="{% url 'psychometrics:test_list' %}">← Tests</a>
+      &nbsp;/&nbsp;
+      <a href="{% url 'psychometrics:my_results' %}">Mis resultados</a>
+    </div>
+    <div class="result-title">{{ result.test.name }}</div>
+    <div class="result-meta" style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+      <span>Completado el {{ result.completed_at|date:"d \d\e F \d\e Y" }}</span>
+      {% if result.test.instrument_type == 'clinical' %}
+        <span class="badge badge-validado">Instrumento validado</span>
+      {% elif result.test.instrument_type == 'adapted' %}
+        <span class="badge badge-adaptado">Adaptación orientativa</span>
+      {% else %}
+        <span class="badge badge-endonauta">Herramienta endonauta</span>
+      {% endif %}
+    </div>
+  </div>
+  {% if result.test.instrument_type == 'adapted' %}
+  <div style="background:rgba(244,160,53,0.06);border:1px solid rgba(244,160,53,0.2);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1.5rem;font-size:0.8rem;color:var(--transicion);line-height:1.6;">
+    Este test es una adaptación de un instrumento validado — los ítems o el número de preguntas difieren del original. Los resultados son <strong>orientativos</strong>, no equivalentes a la aplicación clínica del instrumento completo.
+  </div>
+  {% elif result.test.instrument_type == 'custom' %}
+  <div style="background:rgba(124,109,250,0.06);border:1px solid rgba(124,109,250,0.2);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1.5rem;font-size:0.8rem;color:var(--sombra);line-height:1.6;">
+    Esta herramienta no es un instrumento psicométrico validado. Está diseñada para la reflexión personal dentro del marco endonauta — úsala como un espejo, no como un diagnóstico.
+  </div>
+  {% endif %}
+
+  {% with ev=result.evaluation %}
+
+  {% if ev.conclusion %}
+  <div class="conclusion-box">
+    <h3>Síntesis endonáutica</h3>
+    {{ ev.conclusion }}
+  </div>
+  {% endif %}
+
+  {% if result.ai_insight %}
+  <div class="conclusion-box" style="border-left-color:var(--accent2);margin-bottom:2rem;">
+    <h3 style="color:var(--accent2);">Lectura del Espejo ◎</h3>
+    <div style="white-space:pre-wrap;color:var(--text);">{{ result.ai_insight }}</div>
+  </div>
+  {% endif %}
+
+  <div class="legend">
+    <span class="legend-item"><span class="legend-dot" style="background:var(--luz-intensa)"></span> Luz intensa</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--luz)"></span> Luz</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--transicion)"></span> Transición</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--sombra)"></span> Sombra</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--sombra-dom)"></span> Sombra dominante</span>
+  </div>
+
+  {% if ev.dimensiones %}
+  <div class="dim-list">
+    {% for dim in ev.dimensiones %}
+    {% with pol=dim.polaridad|default:"" %}
+    <div class="dim-card">
+      <div class="dim-card-top">
+        <div>
+          <div class="dim-name">{{ dim.nombre }}</div>
+          {% if dim.nivel %}<div class="dim-nivel">{{ dim.nivel }}</div>{% endif %}
+        </div>
+        {% if pol %}
+        <span class="badge
+          {% if pol == 'luz_intensa' %}badge-luz-intensa
+          {% elif pol == 'luz' %}badge-luz
+          {% elif pol == 'transicion' %}badge-transicion
+          {% elif pol == 'sombra' %}badge-sombra
+          {% elif pol == 'sombra_dominante' %}badge-sombra-dominante
+          {% endif %}">
+          {% if pol == 'luz_intensa' %}Luz intensa
+          {% elif pol == 'luz' %}Luz
+          {% elif pol == 'transicion' %}Transición
+          {% elif pol == 'sombra' %}Sombra
+          {% elif pol == 'sombra_dominante' %}Sombra dominante
+          {% else %}{{ pol }}{% endif %}
+        </span>
+        {% endif %}
+      </div>
+
+      <div class="bar-section">
+        <div class="bar-label">
+          <span>{{ dim.puntos|default:0 }} / {{ dim.max|default:0 }} pts</span>
+          <span>{{ dim.pct|floatformat:0 }}%</span>
+        </div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar
+            {% if pol == 'luz_intensa' %}bar-luz-intensa
+            {% elif pol == 'luz' %}bar-luz
+            {% elif pol == 'transicion' %}bar-transicion
+            {% elif pol == 'sombra' %}bar-sombra
+            {% elif pol == 'sombra_dominante' %}bar-sombra-dominante
+            {% else %}bar-default{% endif %}"
+            style="width:{{ dim.pct|floatformat:0 }}%">
+          </div>
+        </div>
+      </div>
+
+      {% if dim.descripcion or dim.analisis or dim.mensaje_polaridad %}
+      <div class="dim-msg">
+        {% if dim.analisis %}<strong>{{ dim.analisis }}</strong>{% endif %}
+        {% if dim.descripcion %}<span>{{ dim.descripcion }}</span>{% endif %}
+        {% if dim.mensaje_polaridad %}<p style="margin-top:0.4rem">{{ dim.mensaje_polaridad }}</p>{% endif %}
+        {% if dim.accion_sugerida %}<p class="dim-action">→ {{ dim.accion_sugerida }}</p>{% endif %}
+      </div>
+      {% endif %}
+    </div>
+    {% endwith %}
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% endwith %}
+
+  <div class="action-row">
+    <a href="{% url 'psychometrics:test_list' %}" class="btn btn-ghost">Explorar otros tests</a>
+    <a href="{% url 'dashboard' %}" class="btn btn-primary">Ir al dashboard</a>
+  </div>
+</div>
+{% endblock %}

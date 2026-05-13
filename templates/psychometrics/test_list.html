@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% block title %}Tests de autoconocimiento — MirrorWork{% endblock %}
+
+{% block extra_head %}
+<style>
+  .page-header { margin-bottom: 2.5rem; }
+  .page-title { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.3rem; }
+  .page-sub { color: var(--muted); font-size: 0.9rem; }
+
+  .dim-section { margin-bottom: 2.5rem; }
+  .dim-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .tests-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 0.85rem;
+  }
+
+  .test-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    transition: border-color 0.15s;
+    position: relative;
+  }
+  .test-card:hover { border-color: var(--accent); }
+
+  .test-card-name { font-size: 0.95rem; font-weight: 600; }
+  .test-card-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.5; flex: 1; }
+  .test-card-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  .test-card-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .done-dot {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .test-card-badges { display: flex; gap: 0.4rem; margin-top: 0.25rem; flex-wrap: wrap; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <div class="page-title">Tests de autoconocimiento</div>
+    <p class="page-sub">Explora tus dimensiones — cada test es un mapa, no un juicio.</p>
+  </div>
+
+  {% for key, tests in by_dimension.items %}
+  <div class="dim-section">
+    <div class="dim-title">{{ key.1 }}</div>
+    <div class="tests-grid">
+      {% for test in tests %}
+      <a href="{% url 'psychometrics:test_take' test.slug %}" class="test-card-link">
+        <div class="test-card">
+          {% if test.id in completed_ids %}<div class="done-dot" title="Completado"></div>{% endif %}
+          <div class="test-card-name">{{ test.name }}</div>
+          <div class="test-card-badges">
+            {% if test.instrument_type == 'clinical' %}
+              <span class="badge badge-validado">Validado</span>
+            {% elif test.instrument_type == 'adapted' %}
+              <span class="badge badge-adaptado">Adaptado</span>
+            {% else %}
+              <span class="badge badge-endonauta">Endonauta</span>
+            {% endif %}
+          </div>
+          <div class="test-card-desc">{{ test.description|truncatechars:120 }}</div>
+          <div class="test-card-meta">
+            <span>~ {{ test.estimated_minutes }} min</span>
+            <span>{{ test.questions.count }} preguntas</span>
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% empty %}
+  <div class="card" style="text-align:center;padding:3rem;">
+    <p style="color:var(--muted);margin-bottom:1rem;">No hay tests disponibles aún.</p>
+    <code style="font-size:0.8rem;color:var(--accent)">python manage.py seed_tests</code>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

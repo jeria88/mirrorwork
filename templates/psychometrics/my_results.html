@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Mis resultados — MirrorWork{% endblock %}
+
+{% block extra_head %}
+<style>
+  .page-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.3rem; }
+  .page-sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 2rem; }
+
+  .results-list { display: flex; flex-direction: column; gap: 0.75rem; }
+  .result-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.1rem 1.25rem;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.15s;
+  }
+  .result-row:hover { border-color: var(--accent); }
+
+  .result-left { display: flex; flex-direction: column; gap: 0.2rem; }
+  .result-name { font-size: 0.95rem; font-weight: 600; }
+  .result-dim { font-size: 0.78rem; color: var(--muted); }
+  .result-date { font-size: 0.8rem; color: var(--muted); }
+
+  .arrow { color: var(--muted); font-size: 1.1rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-title">Mis resultados</div>
+  <p class="page-sub">Tu historial de autoexploración.</p>
+
+  {% if results %}
+  <div class="results-list">
+    {% for r in results %}
+    <a href="{% url 'psychometrics:test_result' r.pk %}" class="result-row">
+      <div class="result-left">
+        <div class="result-name">{{ r.test.name }}</div>
+        <div class="result-dim">{{ r.test.get_dimension_display }}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:1.5rem;">
+        <div class="result-date">{{ r.completed_at|date:"d M Y" }}</div>
+        <span class="arrow">→</span>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="card" style="text-align:center;padding:3rem;">
+    <p style="color:var(--muted);margin-bottom:1.5rem;">Aún no has completado ningún test.</p>
+    <a href="{% url 'psychometrics:test_list' %}" class="btn btn-primary">Explorar tests</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

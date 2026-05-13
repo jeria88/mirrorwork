@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Mis tokens — MirrorWork{% endblock %}
+
+{% block content %}
+<style>
+  .tokens-header { margin-bottom: 2rem; }
+  .tokens-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.25rem; }
+  .balance-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+  .balance-number { font-size: 3rem; font-weight: 800; color: var(--accent); line-height: 1; }
+  .balance-label { font-size: 0.85rem; color: var(--muted); margin-top: 0.25rem; }
+  .costs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 2.5rem;
+  }
+  .cost-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.9rem 1.1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .cost-name { font-size: 0.82rem; color: var(--muted); }
+  .cost-amount { font-size: 0.9rem; font-weight: 700; color: var(--text); }
+  .cost-amount.free { color: var(--luz); }
+
+  .section-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 1rem; }
+  .tx-list { display: flex; flex-direction: column; gap: 0.5rem; }
+  .tx-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .tx-reason { font-size: 0.85rem; color: var(--text); }
+  .tx-date { font-size: 0.75rem; color: var(--muted); }
+  .tx-amount { font-size: 0.9rem; font-weight: 700; }
+  .tx-amount.positive { color: var(--luz); }
+  .tx-amount.negative { color: var(--sombra-dom); }
+  .empty-tx { padding: 1.5rem; text-align: center; color: var(--muted); font-size: 0.9rem; }
+</style>
+
+<div class="container" style="max-width:760px">
+  <div class="tokens-header">
+    <div class="tokens-title">Mis tokens</div>
+  </div>
+
+  {% if profile %}
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0.75rem 1.25rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
+    <div>
+      <span style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;">Plan actual</span>
+      <div style="font-weight:700;font-size:1rem;margin-top:0.15rem;">
+        {% if profile.plan == 'free' %}Free
+        {% elif profile.plan == 'navegante' %}Navegante
+        {% elif profile.plan == 'practicante' %}Practicante
+        {% else %}{{ profile.plan|capfirst }}{% endif %}
+      </div>
+    </div>
+    {% if profile.plan == 'free' %}
+      <a href="{% url 'tokens:planes' %}" class="btn btn-primary" style="font-size:0.82rem;padding:0.45rem 1rem;">Mejorar plan →</a>
+    {% else %}
+      <a href="{% url 'tokens:planes' %}" class="btn btn-ghost" style="font-size:0.82rem;padding:0.45rem 1rem;">Ver planes</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <div class="balance-card">
+    <div>
+      <div class="balance-number">{{ balance.balance }}</div>
+      <div class="balance-label">tokens disponibles</div>
+    </div>
+    <div style="font-size:0.82rem;color:var(--muted);line-height:1.7;">
+      Los tokens se consumen al usar features premium.<br>
+      {% if profile and profile.plan != 'free' %}
+        Recibes {{ profile.plan_config.monthly_tokens }} tokens cada mes con tu plan.
+      {% else %}
+        <a href="{% url 'tokens:planes' %}" style="color:var(--accent);">Suscríbete</a> para recibir tokens mensuales.
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-bottom:0.75rem;">Costo por feature</div>
+  <div class="costs-grid" style="margin-bottom:2rem;">
+    <div class="cost-card">
+      <span class="cost-name">Tests psicométricos</span>
+      <span class="cost-amount free">Gratis</span>
+    </div>
+    <div class="cost-card">
+      <span class="cost-name">Lectura del Espejo (AI)</span>
+      <span class="cost-amount">5 tokens</span>
+    </div>
+    <div class="cost-card">
+      <span class="cost-name">Sesión Espejo de Conflictos</span>
+      <span class="cost-amount">10 tokens</span>
+    </div>
+    <div class="cost-card">
+      <span class="cost-name">Generar reporte</span>
+      <span class="cost-amount">3 tokens</span>
+    </div>
+  </div>
+
+  <div class="section-title">Historial de movimientos</div>
+  {% if transactions %}
+  <div class="tx-list">
+    {% for tx in transactions %}
+    <div class="tx-row">
+      <div>
+        <div class="tx-reason">{{ tx.reason|default:"Movimiento" }}</div>
+        <div class="tx-date">{{ tx.created_at|date:"d M Y, H:i" }}</div>
+      </div>
+      <div class="tx-amount {% if tx.amount > 0 %}positive{% else %}negative{% endif %}">
+        {% if tx.amount > 0 %}+{% endif %}{{ tx.amount }}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-tx">Aún no hay movimientos de tokens.</div>
+  {% endif %}
+</div>
+{% endblock %}

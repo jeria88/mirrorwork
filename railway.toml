@@ -1,0 +1,7 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "python manage.py migrate && python manage.py seed_tests && python manage.py seed_mirror_kb && python manage.py collectstatic --noinput && gunicorn config.wsgi --workers 1 --timeout 300 --log-file -"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3

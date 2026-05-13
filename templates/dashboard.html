@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — MirrorWork{% endblock %}
+
+{% block extra_head %}
+<style>
+  .dash-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  @media (max-width: 680px) { .dash-grid { grid-template-columns: 1fr; } }
+
+  .greeting { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; }
+  .greeting span { color: var(--accent); }
+  .sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 2rem; }
+
+  .stat-row { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; flex: 1; min-width: 120px; }
+  .stat-num { font-size: 1.8rem; font-weight: 700; color: var(--accent); }
+  .stat-label { font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem; }
+
+  .recent-list { display: flex; flex-direction: column; gap: 0.75rem; }
+  .result-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+    font-size: 0.875rem;
+  }
+  .result-name { font-weight: 500; }
+  .result-date { color: var(--muted); font-size: 0.8rem; }
+
+  .section-title {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+
+  .quick-links { display: flex; flex-direction: column; gap: 0.5rem; }
+  .quick-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 0.875rem;
+    transition: border-color 0.15s;
+  }
+  .quick-link:hover { border-color: var(--accent); opacity: 1; color: var(--text); }
+  .quick-link-icon { font-size: 1.1rem; width: 24px; text-align: center; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="greeting">Hola, <span>{{ user.first_name|default:user.email }}</span></div>
+  <p class="sub">Tu espejo está listo.</p>
+
+  <div class="stat-row">
+    <div class="stat">
+      <div class="stat-num">{{ recent_results|length }}</div>
+      <div class="stat-label">Tests completados</div>
+    </div>
+    {% if token_balance %}
+    <div class="stat">
+      <div class="stat-num">{{ token_balance.balance }}</div>
+      <div class="stat-label">Tokens disponibles</div>
+    </div>
+    {% endif %}
+    <div class="stat">
+      <div class="stat-num">{{ user.profile.get_plan_display|default:"Free" }}</div>
+      <div class="stat-label">Plan actual</div>
+    </div>
+  </div>
+
+  <div class="dash-grid">
+    <div>
+      <div class="section-title">Acceso rápido</div>
+      <div class="quick-links">
+        <a href="{% url 'psychometrics:test_list' %}" class="quick-link">
+          <span class="quick-link-icon">◎</span> Explorar tests
+        </a>
+        <a href="{% url 'psychometrics:my_results' %}" class="quick-link">
+          <span class="quick-link-icon">◈</span> Mis resultados
+        </a>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">Actividad reciente</div>
+      {% if recent_results %}
+      <div class="recent-list">
+        {% for r in recent_results %}
+        <a href="{% url 'psychometrics:test_result' r.pk %}" class="result-row" style="text-decoration:none;color:inherit;">
+          <div>
+            <div class="result-name">{{ r.test.name }}</div>
+            <div class="result-date">{{ r.completed_at|date:"d M Y" }}</div>
+          </div>
+          <span style="color:var(--muted)">→</span>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="card" style="text-align:center;padding:2rem;">
+        <p style="color:var(--muted);margin-bottom:1rem;">Aún no has completado ningún test.</p>
+        <a href="{% url 'psychometrics:test_list' %}" class="btn btn-primary">Explorar tests</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
