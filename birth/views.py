@@ -171,7 +171,16 @@ def birth_profile(request):
                 'error': 'La fecha y el lugar de nacimiento son obligatorios.',
             })
 
-        lat, lng = _geocode(birth_place)
+        # Prefer coordinates sent from the autocomplete (already confirmed by user)
+        lat_raw = request.POST.get('latitude', '').strip()
+        lng_raw = request.POST.get('longitude', '').strip()
+        if lat_raw and lng_raw:
+            try:
+                lat, lng = float(lat_raw), float(lng_raw)
+            except ValueError:
+                lat, lng = None, None
+        else:
+            lat, lng = _geocode(birth_place)
         tz_str = _get_timezone(lat, lng) if lat else 'UTC'
 
         if bp:

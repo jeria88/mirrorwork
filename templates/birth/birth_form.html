@@ -193,6 +193,45 @@
     padding-top: 1.5rem;
     border-top: 1px solid var(--border);
   }
+
+  /* ── Autocomplete lugar ── */
+  .place-wrap { position: relative; }
+  .place-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: #1a1a26;
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    z-index: 100;
+    overflow: hidden;
+    display: none;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  .place-item {
+    padding: 0.65rem 1rem;
+    font-size: 0.85rem;
+    color: var(--text);
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    line-height: 1.4;
+    transition: background 0.1s;
+  }
+  .place-item:last-child { border-bottom: none; }
+  .place-item:hover, .place-item.active { background: rgba(78,205,196,0.1); color: var(--accent); }
+  .place-item small { display: block; font-size: 0.72rem; color: var(--muted); margin-top: 0.1rem; }
+  .place-searching {
+    padding: 0.65rem 1rem;
+    font-size: 0.8rem;
+    color: var(--dim);
+  }
+  .place-confirmed {
+    font-size: 0.72rem;
+    color: var(--accent);
+    margin-top: 0.3rem;
+    display: none;
+  }
+  .place-confirmed.visible { display: block; }
 </style>
 {% endblock %}
 
@@ -279,12 +318,20 @@
     <details style="margin-top:2.5rem">
       <summary class="edit-toggle">Actualizar datos de nacimiento</summary>
       <div class="edit-form">
-        <form method="post">
+        <form method="post" class="birth-form">
           {% csrf_token %}
+          <input type="hidden" name="latitude" class="f-lat" value="{{ bp.latitude|default:'' }}">
+          <input type="hidden" name="longitude" class="f-lng" value="{{ bp.longitude|default:'' }}">
           <div class="field-group">
             <div class="field">
               <label>Lugar de nacimiento</label>
-              <input type="text" name="birth_place" value="{{ bp.birth_place }}" placeholder="Ciudad, País" required>
+              <div class="place-wrap">
+                <input type="text" name="birth_place" class="f-place" value="{{ bp.birth_place }}" placeholder="Escribe tu ciudad…" autocomplete="off" required>
+                <div class="place-dropdown"></div>
+              </div>
+              <span class="place-confirmed {% if bp.latitude %}visible{% endif %}">
+                ✓ Ubicación confirmada{% if bp.latitude %} ({{ bp.latitude|floatformat:2 }}°, {{ bp.longitude|floatformat:2 }}°){% endif %}
+              </span>
             </div>
             <div class="row-2">
               <div class="field">
@@ -306,12 +353,18 @@
   {% else %}
 
     <!-- Primer ingreso -->
-    <form method="post">
+    <form method="post" class="birth-form">
       {% csrf_token %}
+      <input type="hidden" name="latitude" class="f-lat" value="">
+      <input type="hidden" name="longitude" class="f-lng" value="">
       <div class="field-group">
         <div class="field">
           <label>Lugar de nacimiento</label>
-          <input type="text" name="birth_place" placeholder="Ciudad, País" required autofocus>
+          <div class="place-wrap">
+            <input type="text" name="birth_place" class="f-place" placeholder="Escribe tu ciudad…" autocomplete="off" required autofocus>
+            <div class="place-dropdown"></div>
+          </div>
+          <span class="place-confirmed">✓ Ubicación confirmada</span>
         </div>
         <div class="row-2">
           <div class="field">
@@ -331,4 +384,111 @@
   {% endif %}
 
 </div>
+{% endblock %}
+
+{% block extra_body %}
+<script>
+(function() {
+  function initAutocomplete(form) {
+    const placeInput  = form.querySelector('.f-place');
+    const latInput    = form.querySelector('.f-lat');
+    const lngInput    = form.querySelector('.f-lng');
+    const dropdown    = form.querySelector('.place-dropdown');
+    const confirmed   = form.querySelector('.place-confirmed');
+
+    let timer, currentIdx = -1;
+
+    function showDropdown(items) {
+      dropdown.innerHTML = '';
+      if (!items.length) { dropdown.style.display = 'none'; return; }
+      items.forEach((place, i) => {
+        const parts = place.display_name.split(',');
+        const primary   = parts.slice(0, 2).join(',').trim();
+        const secondary = parts.slice(2, 4).join(',').trim();
+        const item = document.createElement('div');
+        item.className = 'place-item';
+        item.dataset.lat = place.lat;
+        item.dataset.lng = place.lon;
+        item.dataset.name = primary;
+        item.innerHTML = primary + (secondary ? `<small>${secondary}</small>` : '');
+        item.addEventListener('mousedown', e => {
+          e.preventDefault();
+          selectPlace(item);
+        });
+        dropdown.appendChild(item);
+      });
+      dropdown.style.display = 'block';
+      currentIdx = -1;
+    }
+
+    function selectPlace(item) {
+      placeInput.value = item.dataset.name;
+      latInput.value   = item.dataset.lat;
+      lngInput.value   = item.dataset.lng;
+      dropdown.style.display = 'none';
+      confirmed.textContent = `✓ Ubicación confirmada (${parseFloat(item.dataset.lat).toFixed(2)}°, ${parseFloat(item.dataset.lng).toFixed(2)}°)`;
+      confirmed.classList.add('visible');
+    }
+
+    placeInput.addEventListener('input', function() {
+      // Clear coords when user edits the field
+      latInput.value = '';
+      lngInput.value = '';
+      confirmed.classList.remove('visible');
+      clearTimeout(timer);
+      const q = this.value.trim();
+      if (q.length < 3) { dropdown.style.display = 'none'; return; }
+      dropdown.innerHTML = '<div class="place-searching">Buscando…</div>';
+      dropdown.style.display = 'block';
+      timer = setTimeout(() => {
+        fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=6&addressdetails=1&accept-language=es`, {
+          headers: { 'User-Agent': 'MirrorWork/1.0' }
+        })
+        .then(r => r.json())
+        .then(data => showDropdown(data))
+        .catch(() => { dropdown.style.display = 'none'; });
+      }, 380);
+    });
+
+    // Keyboard navigation
+    placeInput.addEventListener('keydown', function(e) {
+      const items = dropdown.querySelectorAll('.place-item');
+      if (!items.length) return;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        currentIdx = Math.min(currentIdx + 1, items.length - 1);
+        items.forEach((el, i) => el.classList.toggle('active', i === currentIdx));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        currentIdx = Math.max(currentIdx - 1, 0);
+        items.forEach((el, i) => el.classList.toggle('active', i === currentIdx));
+      } else if (e.key === 'Enter' && currentIdx >= 0) {
+        e.preventDefault();
+        selectPlace(items[currentIdx]);
+      } else if (e.key === 'Escape') {
+        dropdown.style.display = 'none';
+      }
+    });
+
+    // Validate coords on submit
+    form.addEventListener('submit', function(e) {
+      if (!latInput.value || !lngInput.value) {
+        e.preventDefault();
+        placeInput.style.borderColor = 'var(--transicion)';
+        placeInput.focus();
+        dropdown.innerHTML = '<div class="place-searching">Seleccioná una opción de la lista para confirmar la ubicación.</div>';
+        dropdown.style.display = 'block';
+        return;
+      }
+      placeInput.style.borderColor = '';
+    });
+
+    document.addEventListener('click', function(e) {
+      if (!form.contains(e.target)) dropdown.style.display = 'none';
+    });
+  }
+
+  document.querySelectorAll('.birth-form').forEach(initAutocomplete);
+})();
+</script>
 {% endblock %}
