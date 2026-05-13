@@ -208,15 +208,77 @@
   .reciente-nombre { font-weight: 400; }
   .reciente-fecha { color: var(--muted); font-size: 0.75rem; font-weight: 300; }
 
-  /* ── Estado vacío ── */
-  .empty-hint {
-    padding: 2rem 0 1rem;
-    color: var(--muted);
-    font-size: 0.9rem;
-    line-height: 1.8;
-    font-weight: 300;
+  /* ── Primer paso ── */
+  .primer-paso {
+    margin-bottom: 3rem;
   }
-  .empty-hint a { color: var(--accent); }
+  .pp-tag {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .pp-tag::before { content: ''; display: block; width: 20px; height: 1px; background: var(--dim); }
+  .pp-text {
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.75;
+    font-weight: 300;
+    max-width: 520px;
+    margin-bottom: 1.25rem;
+  }
+  .pp-tests { display: flex; flex-direction: column; gap: 0.5rem; }
+  .pp-test {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.2s, border-color 0.2s, transform 0.3s cubic-bezier(0.16,1,0.3,1);
+  }
+  .pp-test:hover {
+    background: rgba(255,255,255,0.05);
+    border-color: var(--accent);
+    transform: translateX(4px);
+    opacity: 1;
+  }
+  .pp-test-num {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    color: var(--accent);
+    opacity: 0.6;
+    min-width: 28px;
+    font-style: italic;
+  }
+  .pp-test-name {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--text);
+    margin-bottom: 0.15rem;
+  }
+  .pp-test-desc {
+    font-size: 0.72rem;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.4;
+  }
+  .pp-arrow {
+    margin-left: auto;
+    color: var(--dim);
+    font-size: 0.85rem;
+    transition: color 0.15s;
+  }
+  .pp-test:hover .pp-arrow { color: var(--accent); }
 
   /* ── Tokens ── */
   .token-row {
@@ -354,7 +416,42 @@
     </a>
   </div>
 
-  {% if recent_results %}
+  {% if not recent_results %}
+  <!-- Primer paso del viaje — solo cuando no hay tests completados -->
+  <div class="primer-paso reveal">
+    <div class="pp-tag">Por donde empezar</div>
+    <p class="pp-text">
+      Tu mapa está en blanco. Estos tres tests son el punto de partida del viaje endonauta:
+      revelan el terreno, las raíces y los recursos con los que navegas.
+    </p>
+    <div class="pp-tests">
+      <a href="{% url 'psychometrics:test_take' 'rueda-de-la-vida-integracion' %}" class="pp-test">
+        <span class="pp-test-num">01</span>
+        <div>
+          <div class="pp-test-name">Rueda de la Vida</div>
+          <div class="pp-test-desc">Una mirada panorámica a las 8 áreas de tu vida hoy</div>
+        </div>
+        <span class="pp-arrow">→</span>
+      </a>
+      <a href="{% url 'psychometrics:test_take' 'big-five-inventario-de-personalidad' %}" class="pp-test">
+        <span class="pp-test-num">02</span>
+        <div>
+          <div class="pp-test-name">Big Five</div>
+          <div class="pp-test-desc">El perfil de personalidad que ancora todo lo demás</div>
+        </div>
+        <span class="pp-arrow">→</span>
+      </a>
+      <a href="{% url 'psychometrics:test_take' 'heridas-de-la-infancia-lise-bourbeau' %}" class="pp-test">
+        <span class="pp-test-num">03</span>
+        <div>
+          <div class="pp-test-name">Heridas de la Infancia</div>
+          <div class="pp-test-desc">Las raíces del patrón que sigues repitiendo</div>
+        </div>
+        <span class="pp-arrow">→</span>
+      </a>
+    </div>
+  </div>
+  {% else %}
     <div class="section-label reveal">Últimas exploraciones</div>
     {% for r in recent_results %}
       <a href="{% url 'psychometrics:test_result' r.pk %}" class="reciente-item reveal" style="transition-delay:{{ forloop.counter0|add:'0' }}00ms">
@@ -362,11 +459,6 @@
         <span class="reciente-fecha">{{ r.completed_at|date:"d M Y" }}</span>
       </a>
     {% endfor %}
-  {% else %}
-    <div class="empty-hint reveal">
-      Aún no has completado ningún test.<br>
-      <a href="{% url 'psychometrics:test_list' %}">Empieza a mapear tu interior →</a>
-    </div>
   {% endif %}
 
   {% if token_balance %}

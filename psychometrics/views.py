@@ -108,17 +108,7 @@ def test_submit(request, slug):
 
     evaluation = evaluate_test(test.name, raw_scores)
 
-    # Try to generate AI insight (costs 5 tokens; skip if balance insufficient)
-    ai_insight = ""
-    try:
-        from tokens.models import TokenBalance
-        balance, _ = TokenBalance.objects.get_or_create(
-            user=request.user, defaults={"balance": 0}
-        )
-        if balance.spend(5, reason=f"AI insight — {test.name}"):
-            ai_insight = _generate_ai_insight(test.name, test.instrument_type, evaluation)
-    except Exception:
-        pass
+    ai_insight = _generate_ai_insight(test.name, test.instrument_type, evaluation)
 
     result = TestResult.objects.create(
         user=request.user,

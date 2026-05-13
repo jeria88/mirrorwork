@@ -117,7 +117,8 @@ def onboarding_mapa(request):
         from .models import UserProfile
         profile = UserProfile.objects.create(user=request.user)
 
-    if profile.map_aesthetic:
+    cambiar = request.GET.get('cambiar') == '1'
+    if profile.map_aesthetic and not cambiar:
         return redirect('dashboard')
 
     if request.method == 'POST':
@@ -132,6 +133,33 @@ def onboarding_mapa(request):
 
 def bienvenido(request):
     return render(request, 'bienvenido.html')
+
+
+@login_required
+def perfil(request):
+    try:
+        profile = request.user.profile
+    except Exception:
+        from .models import UserProfile
+        profile = UserProfile.objects.create(user=request.user)
+
+    saved = False
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name', '').strip()
+        bio = request.POST.get('bio', '').strip()
+        profession = request.POST.get('profession', '').strip()
+        if first_name:
+            request.user.first_name = first_name
+            request.user.save(update_fields=['first_name'])
+        profile.bio = bio
+        profile.profession = profession
+        profile.save(update_fields=['bio', 'profession'])
+        saved = True
+
+    return render(request, 'accounts/perfil.html', {
+        'profile': profile,
+        'saved': saved,
+    })
 
 
 _DIMENSION_LABELS = {

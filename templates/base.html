@@ -365,6 +365,7 @@
       <a href="{% url 'tokens:balance' %}" title="Mis tokens" style="color:var(--accent)">
         {% with tb=request.user.token_balance %}{{ tb.balance|default:0 }}{% endwith %}&thinsp;tkn
       </a>
+      <a href="{% url 'perfil' %}">Perfil</a>
       <a href="{% url 'accounts:logout' %}">Salir</a>
     {% else %}
       <a href="{% url 'accounts:login' %}">Entrar</a>

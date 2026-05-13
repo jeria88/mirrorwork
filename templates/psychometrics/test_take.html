@@ -3,134 +3,274 @@
 
 {% block extra_head %}
 <style>
-  .test-header {
-    margin-bottom: 2rem;
+  .take-wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 8rem;
+  }
+
+  /* ── Header ── */
+  .take-breadcrumb {
+    font-size: 0.75rem;
+    color: var(--dim);
+    margin-bottom: 1.5rem;
+  }
+  .take-breadcrumb a { color: var(--muted); text-decoration: none; }
+  .take-breadcrumb a:hover { color: var(--text); }
+
+  .take-title {
+    font-family: var(--font-heading);
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    font-weight: 400;
+    line-height: 1.2;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.01em;
+  }
+  .take-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-weight: 300;
+    margin-bottom: 1.5rem;
     padding-bottom: 1.5rem;
     border-bottom: 1px solid var(--border);
   }
-  .breadcrumb { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.75rem; }
-  .breadcrumb a { color: var(--muted); }
-  .test-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.4rem; }
-  .test-meta { font-size: 0.85rem; color: var(--muted); display: flex; gap: 1.5rem; }
 
+  .take-desc {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 1.1rem 1.4rem;
+    font-size: 0.875rem;
+    color: var(--muted);
+    line-height: 1.75;
+    margin-bottom: 2rem;
+  }
+
+  /* ── Progress ── */
   .progress-sticky {
     position: sticky;
     top: 60px;
-    background: var(--bg);
+    background: rgba(8,8,15,0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     padding: 0.75rem 0;
     z-index: 10;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    margin-bottom: 2rem;
   }
-  .progress-info { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.4rem; }
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-bottom: 0.45rem;
+    font-weight: 300;
+  }
+  .progress-track {
+    height: 3px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.4s cubic-bezier(0.16,1,0.3,1);
+  }
 
+  /* ── Question block ── */
   .question-block {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.5rem;
+    background: rgba(255,255,255,0.025);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 1.75rem 1.75rem 1.5rem;
     margin-bottom: 1rem;
-    transition: border-color 0.15s;
+    transition: border-color 0.2s, background 0.2s;
   }
-  .question-block.answered { border-color: rgba(78,205,196,0.35); }
+  .question-block.answered {
+    border-color: rgba(78,205,196,0.3);
+    background: rgba(78,205,196,0.025);
+  }
+  .question-num {
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 0.75rem;
+  }
+  .question-text {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+    font-weight: 400;
+  }
 
-  .question-num { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.5rem; }
-  .question-text { font-size: 0.95rem; line-height: 1.6; margin-bottom: 1rem; }
+  /* ── Scale range hint ── */
+  .scale-range {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.65rem;
+    color: var(--dim);
+    font-weight: 300;
+    margin-bottom: 0.6rem;
+    padding: 0 2px;
+  }
 
-  /* Likert scale */
+  /* ── Likert row ── */
   .scale-row {
     display: flex;
     gap: 0.5rem;
     flex-wrap: wrap;
   }
-  .scale-option { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; cursor: pointer; }
+  .scale-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+  }
   .scale-option input[type="radio"] { display: none; }
   .scale-btn {
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
-    border: 1.5px solid var(--border);
-    background: var(--surface2);
-    color: var(--muted);
-    font-size: 0.85rem;
-    font-weight: 600;
+    border: 1.5px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04);
+    color: var(--text);
+    font-size: 0.88rem;
+    font-weight: 500;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.15s;
     cursor: pointer;
   }
+  .scale-btn:hover {
+    border-color: rgba(255,255,255,0.28);
+    background: rgba(255,255,255,0.08);
+  }
   .scale-option input:checked + .scale-btn {
     background: var(--accent);
     border-color: var(--accent);
-    color: var(--bg);
+    color: #000;
+    font-weight: 700;
+    box-shadow: 0 0 0 3px rgba(78,205,196,0.2);
   }
-  .scale-label { font-size: 0.65rem; color: var(--muted); text-align: center; max-width: 60px; }
+  .scale-label {
+    font-size: 0.62rem;
+    color: var(--dim);
+    text-align: center;
+    max-width: 52px;
+    line-height: 1.3;
+  }
 
-  /* Binary */
+  /* likert7 — 7 opciones, botones más pequeños */
+  .likert7-row { gap: 0.3rem; }
+  .likert7-row .scale-btn { width: 40px; height: 40px; font-size: 0.78rem; }
+  .likert7-row .scale-label { max-width: 46px; font-size: 0.58rem; }
+
+  /* ── Binary ── */
   .binary-row { display: flex; gap: 0.75rem; }
   .binary-option { display: flex; align-items: center; }
   .binary-option input { display: none; }
   .binary-btn {
-    padding: 0.5rem 1.5rem;
-    border-radius: 8px;
-    border: 1.5px solid var(--border);
-    background: var(--surface2);
-    color: var(--muted);
+    padding: 0.6rem 2rem;
+    border-radius: 100px;
+    border: 1.5px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04);
+    color: var(--text);
     font-size: 0.9rem;
     cursor: pointer;
     transition: all 0.15s;
+    font-weight: 400;
+  }
+  .binary-btn:hover {
+    border-color: rgba(255,255,255,0.28);
+    background: rgba(255,255,255,0.08);
   }
   .binary-option input:checked + .binary-btn {
     background: var(--accent);
     border-color: var(--accent);
-    color: var(--bg);
+    color: #000;
     font-weight: 600;
   }
 
+  /* ── Submit ── */
   .submit-section {
-    margin-top: 2rem;
-    padding-top: 1.5rem;
+    margin-top: 2.5rem;
+    padding-top: 2rem;
     border-top: 1px solid var(--border);
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 1.25rem;
     flex-wrap: wrap;
   }
   .btn-submit {
-    padding: 0.75rem 2.5rem;
-    font-size: 1rem;
+    padding: 0.85rem 2.5rem;
+    border-radius: 100px;
+    background: var(--accent);
+    color: #000;
+    font-family: var(--font-ui);
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s;
   }
-  .submit-hint { font-size: 0.8rem; color: var(--muted); }
+  .btn-submit:hover { opacity: 0.88; transform: scale(1.02); }
+  .submit-hint {
+    font-size: 0.75rem;
+    color: var(--dim);
+    font-weight: 300;
+  }
+  #submit-warning {
+    font-size: 0.75rem;
+    color: #e05050;
+    display: none;
+  }
 
-  .likert7-row { gap: 0.35rem; }
-  .likert7-row .scale-btn { width: 38px; height: 38px; font-size: 0.8rem; }
+  @media (max-width: 520px) {
+    .question-block { padding: 1.25rem 1.1rem; }
+    .scale-btn { width: 42px; height: 42px; }
+    .likert7-row .scale-btn { width: 34px; height: 34px; }
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container" style="max-width:720px">
-  <div class="test-header">
-    <div class="breadcrumb"><a href="{% url 'psychometrics:test_list' %}">← Tests</a></div>
-    <div class="test-title">{{ test.name }}</div>
-    <div class="test-meta">
-      <span>{{ questions|length }} preguntas</span>
-      <span>~ {{ test.estimated_minutes }} min</span>
-      <span>{{ test.get_dimension_display }}</span>
-      {% if test.instrument_type == 'clinical' %}
-        <span class="badge badge-validado">Instrumento validado</span>
-      {% elif test.instrument_type == 'adapted' %}
-        <span class="badge badge-adaptado">Adaptación orientativa</span>
-      {% else %}
-        <span class="badge badge-endonauta">Herramienta endonauta</span>
-      {% endif %}
-    </div>
+<div class="take-wrap">
+
+  <div class="take-breadcrumb">
+    <a href="{% url 'psychometrics:test_list' %}">← Tests</a>
+  </div>
+
+  <h1 class="take-title">{{ test.name }}</h1>
+  <div class="take-meta">
+    <span>{{ questions|length }} preguntas</span>
+    <span>~ {{ test.estimated_minutes }} min</span>
+    <span>{{ test.get_dimension_display }}</span>
+    {% if test.instrument_type == 'clinical' %}
+      <span class="badge badge-validado">Instrumento validado</span>
+    {% elif test.instrument_type == 'adapted' %}
+      <span class="badge badge-adaptado">Adaptación orientativa</span>
+    {% else %}
+      <span class="badge badge-endonauta">Herramienta endonauta</span>
+    {% endif %}
   </div>
 
   {% if test.description %}
-  <div class="card" style="margin-bottom:1.5rem;font-size:0.875rem;color:var(--muted);line-height:1.7;">
-    {{ test.description }}
-  </div>
+  <div class="take-desc">{{ test.description }}</div>
   {% endif %}
 
   <form method="post" action="{% url 'psychometrics:test_submit' test.slug %}" id="test-form">
@@ -138,17 +278,17 @@
 
     <div class="progress-sticky">
       <div class="progress-info">
-        <span id="answered-count">0</span> / {{ questions|length }} respondidas
+        <span><span id="answered-count">0</span> / {{ questions|length }} respondidas</span>
         <span id="pct-label">0%</span>
       </div>
-      <div class="progress-bar-wrap">
-        <div class="progress-bar bar-luz" id="progress-fill" style="width:0%"></div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill"></div>
       </div>
     </div>
 
     {% for q in questions %}
     <div class="question-block" id="qblock-{{ q.id }}" data-qid="{{ q.id }}">
-      <div class="question-num">{{ forloop.counter }}.</div>
+      <div class="question-num">{{ forloop.counter }} de {{ questions|length }}</div>
       <div class="question-text">{{ q.text }}</div>
 
       {% if q.scale == 'binary' %}
@@ -163,7 +303,8 @@
         </label>
       </div>
 
-      {% elif q.scale == 'likert3' %}{# 0-3: GAD-7, BDI, PSQI #}
+      {% elif q.scale == 'likert3' %}
+      <div class="scale-range"><span>Nunca</span><span>Casi siempre</span></div>
       <div class="scale-row">
         <label class="scale-option"><input type="radio" name="q_{{ q.id }}" value="0" required><span class="scale-btn">0</span><span class="scale-label">Nunca</span></label>
         <label class="scale-option"><input type="radio" name="q_{{ q.id }}" value="1"><span class="scale-btn">1</span><span class="scale-label">Varios días</span></label>
@@ -171,7 +312,8 @@
         <label class="scale-option"><input type="radio" name="q_{{ q.id }}" value="3"><span class="scale-btn">3</span><span class="scale-label">Casi siempre</span></label>
       </div>
 
-      {% elif q.scale == 'likert4' %}{# 0-4: PSS-10 #}
+      {% elif q.scale == 'likert4' %}
+      <div class="scale-range"><span>Nunca</span><span>Siempre</span></div>
       <div class="scale-row">
         <label class="scale-option"><input type="radio" name="q_{{ q.id }}" value="0" required><span class="scale-btn">0</span><span class="scale-label">Nunca</span></label>
         <label class="scale-option"><input type="radio" name="q_{{ q.id }}" value="1"><span class="scale-btn">1</span><span class="scale-label">Casi nunca</span></label>
@@ -181,84 +323,88 @@
       </div>
 
       {% elif q.scale == 'likert7' %}
+      <div class="scale-range"><span>Muy en desacuerdo</span><span>Muy de acuerdo</span></div>
       <div class="scale-row likert7-row">
-        <label class="scale-option"><input type="radio" name="q_{{ q.id }}" value="1" required><span class="scale-btn">1</span><span class="scale-label">Muy en desacuerdo</span></label>
+        <label class="scale-option"><input type="radio" name="q_{{ q.id }}" value="1" required><span class="scale-btn">1</span><span class="scale-label"></span></label>
         <label class="scale-option"><input type="radio" name="q_{{ q.id }}" value="2"><span class="scale-btn">2</span><span class="scale-label"></span></label>
         <label class="scale-option"><input type="radio" name="q_{{ q.id }}" value="3"><span class="scale-btn">3</span><span class="scale-label"></span></label>
         <label class="scale-option"><input type="radio" name="q_{{ q.id }}" value="4"><span class="scale-btn">4</span><span class="scale-label">Neutral</span></label>
         <label class="scale-option"><input type="radio" name="q_{{ q.id }}" value="5"><span class="scale-btn">5</span><span class="scale-label"></span></label>
         <label class="scale-option"><input type="radio" name="q_{{ q.id }}" value="6"><span class="scale-btn">6</span><span class="scale-label"></span></label>
-        <label class="scale-option"><input type="radio" name="q_{{ q.id }}" value="7"><span class="scale-btn">7</span><span class="scale-label">Muy de acuerdo</span></label>
+        <label class="scale-option"><input type="radio" name="q_{{ q.id }}" value="7"><span class="scale-btn">7</span><span class="scale-label"></span></label>
       </div>
 
-      {% elif q.scale == 'likert5a' %}{# acuerdo: BFI-44, TAS-20, Dirty Dozen #}
+      {% elif q.scale == 'likert5a' %}
+      <div class="scale-range"><span>Totalmente en desacuerdo</span><span>Totalmente de acuerdo</span></div>
       <div class="scale-row">
-        <label class="scale-option"><input type="radio" name="q_{{ q.id }}" value="1" required><span class="scale-btn">1</span><span class="scale-label">Totalmente en desacuerdo</span></label>
+        <label class="scale-option"><input type="radio" name="q_{{ q.id }}" value="1" required><span class="scale-btn">1</span><span class="scale-label">Total­mente en desacuerdo</span></label>
         <label class="scale-option"><input type="radio" name="q_{{ q.id }}" value="2"><span class="scale-btn">2</span><span class="scale-label">En desacuerdo</span></label>
         <label class="scale-option"><input type="radio" name="q_{{ q.id }}" value="3"><span class="scale-btn">3</span><span class="scale-label">Neutral</span></label>
         <label class="scale-option"><input type="radio" name="q_{{ q.id }}" value="4"><span class="scale-btn">4</span><span class="scale-label">De acuerdo</span></label>
-        <label class="scale-option"><input type="radio" name="q_{{ q.id }}" value="5"><span class="scale-btn">5</span><span class="scale-label">Totalmente de acuerdo</span></label>
+        <label class="scale-option"><input type="radio" name="q_{{ q.id }}" value="5"><span class="scale-btn">5</span><span class="scale-label">Total­mente de acuerdo</span></label>
       </div>
 
-      {% else %}{# default: likert5 frecuencia #}
+      {% else %}{# likert5 frecuencia — default #}
+      <div class="scale-range"><span>Nunca</span><span>Siempre</span></div>
       <div class="scale-row">
-        <label class="scale-option">
-          <input type="radio" name="q_{{ q.id }}" value="1" required>
-          <span class="scale-btn">1</span>
-          <span class="scale-label">Nunca</span>
-        </label>
-        <label class="scale-option">
-          <input type="radio" name="q_{{ q.id }}" value="2">
-          <span class="scale-btn">2</span>
-          <span class="scale-label">Casi nunca</span>
-        </label>
-        <label class="scale-option">
-          <input type="radio" name="q_{{ q.id }}" value="3">
-          <span class="scale-btn">3</span>
-          <span class="scale-label">A veces</span>
-        </label>
-        <label class="scale-option">
-          <input type="radio" name="q_{{ q.id }}" value="4">
-          <span class="scale-btn">4</span>
-          <span class="scale-label">Frecuente</span>
-        </label>
-        <label class="scale-option">
-          <input type="radio" name="q_{{ q.id }}" value="5">
-          <span class="scale-btn">5</span>
-          <span class="scale-label">Siempre</span>
-        </label>
+        <label class="scale-option"><input type="radio" name="q_{{ q.id }}" value="1" required><span class="scale-btn">1</span><span class="scale-label">Nunca</span></label>
+        <label class="scale-option"><input type="radio" name="q_{{ q.id }}" value="2"><span class="scale-btn">2</span><span class="scale-label">Casi nunca</span></label>
+        <label class="scale-option"><input type="radio" name="q_{{ q.id }}" value="3"><span class="scale-btn">3</span><span class="scale-label">A veces</span></label>
+        <label class="scale-option"><input type="radio" name="q_{{ q.id }}" value="4"><span class="scale-btn">4</span><span class="scale-label">Frecuente</span></label>
+        <label class="scale-option"><input type="radio" name="q_{{ q.id }}" value="5"><span class="scale-btn">5</span><span class="scale-label">Siempre</span></label>
       </div>
       {% endif %}
     </div>
     {% endfor %}
 
     <div class="submit-section">
-      <button type="submit" class="btn btn-primary btn-submit">Ver mis resultados →</button>
-      <span class="submit-hint">Asegúrate de responder todas las preguntas.</span>
+      <button type="submit" class="btn-submit" id="btn-submit">
+        Ver mis resultados →
+      </button>
+      <span class="submit-hint">Puedes volver atrás y cambiar tus respuestas.</span>
+      <span id="submit-warning">Hay preguntas sin responder.</span>
     </div>
   </form>
-</div>
 
+</div>
+{% endblock %}
+
+{% block extra_body %}
 <script>
   const total = {{ questions|length }};
-  let answered = 0;
 
   function updateProgress() {
     const names = new Set();
     document.querySelectorAll('#test-form input[type=radio]:checked').forEach(r => names.add(r.name));
-    answered = names.size;
+    const answered = names.size;
     document.getElementById('answered-count').textContent = answered;
     const pct = total > 0 ? Math.round((answered / total) * 100) : 0;
     document.getElementById('pct-label').textContent = pct + '%';
     document.getElementById('progress-fill').style.width = pct + '%';
   }
 
-  document.getElementById('test-form').addEventListener('change', function(e) {
-    if (e.target.type === 'radio') {
-      const qid = e.target.name.replace('q_', '');
-      const block = document.getElementById('qblock-' + qid);
-      if (block) block.classList.add('answered');
-      updateProgress();
+  document.getElementById('test-form').addEventListener('change', e => {
+    if (e.target.type !== 'radio') return;
+    const qid = e.target.name.replace('q_', '');
+    const block = document.getElementById('qblock-' + qid);
+    if (block) block.classList.add('answered');
+    updateProgress();
+  });
+
+  document.getElementById('btn-submit').addEventListener('click', e => {
+    const names = new Set();
+    document.querySelectorAll('#test-form input[type=radio]:checked').forEach(r => names.add(r.name));
+    if (names.size < total) {
+      e.preventDefault();
+      document.getElementById('submit-warning').style.display = 'inline';
+      // Scroll to first unanswered
+      const allNames = Array.from(document.querySelectorAll('#test-form input[type=radio]'))
+        .map(r => r.name);
+      const unanswered = [...new Set(allNames)].find(n => !names.has(n));
+      if (unanswered) {
+        const qid = unanswered.replace('q_', '');
+        document.getElementById('qblock-' + qid)?.scrollIntoView({behavior:'smooth', block:'center'});
+      }
     }
   });
 </script>
