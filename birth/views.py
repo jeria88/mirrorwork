@@ -15,7 +15,7 @@ from .models import BirthProfile, BirthReport, SIGN_ES, HOUSE_NUM
 # The wheel starts at HD_WHEEL_START degrees of tropical longitude.
 # Empirically derived from Jovian Archive reference data: gate 41 aligns
 # at ~302.5° tropical, meaning the wheel goes clockwise from that point.
-HD_WHEEL_START = 302.5
+HD_WHEEL_START = 302.0
 
 HD_GATES = [
     41,19,13,49,30,55,37,63,22,36,25,17,21,51,42, 3,
@@ -530,8 +530,20 @@ def _calculate_hd_chart(bp):
         birth_utc.hour, birth_utc.minute,
         lat=lat, lng=lng, tz_str='UTC', zodiac_type='Tropical')
 
-    # Design chart: exactly 88 days before birth (UTC)
-    design_utc = birth_utc - timedelta(days=88)
+    # Design chart: moment when the sun was exactly 88° before birth sun.
+    # Jovian Archive uses solar arc, not calendar days — difference ~11 hours
+    # (sun moves ~1°/day but not exactly). We iterate to converge.
+    _target_lon = (p.sun.abs_pos - 88.0 + 360) % 360
+    design_utc = birth_utc - timedelta(days=89)
+    for _ in range(10):
+        _ds = AstrologicalSubject('_ds',
+            design_utc.year, design_utc.month, design_utc.day,
+            design_utc.hour, design_utc.minute,
+            lat=lat, lng=lng, tz_str='UTC', zodiac_type='Tropical')
+        _diff = ((_ds.sun.abs_pos - _target_lon) + 180) % 360 - 180
+        if abs(_diff) < 0.001:
+            break
+        design_utc -= timedelta(hours=_diff * 24.0)
     d = AstrologicalSubject('d',
         design_utc.year, design_utc.month, design_utc.day,
         design_utc.hour, design_utc.minute,
