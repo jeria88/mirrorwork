@@ -328,6 +328,10 @@
        style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.55rem 1.1rem;background:rgba(124,109,250,0.1);border:1px solid rgba(124,109,250,0.3);border-radius:100px;font-size:0.82rem;color:var(--accent2);text-decoration:none;">
       ◎ {% if report.interpretation and report.interpretation != 'processing' %}Ver lectura endonauta{% else %}Lectura pendiente{% endif %}
     </a>
+    <form method="post" action="{% url 'birth:hd_generate' %}" style="display:inline;">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-ghost" style="font-size:0.78rem;">↺ Recalcular</button>
+    </form>
     <button class="print-btn" onclick="window.print()">↓ Imprimir como PDF</button>
   </div>
 </div>
