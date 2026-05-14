@@ -11,11 +11,17 @@ from django.shortcuts import get_object_or_404, redirect, render
 from .models import BirthProfile, BirthReport, SIGN_ES, HOUSE_NUM
 
 # ── Human Design constants ─────────────────────────────────────────────────
+# Standard Rave Mandala gate sequence (gate 41 at 0° of the wheel).
+# The wheel starts at HD_WHEEL_START degrees of tropical longitude.
+# Empirically derived from Jovian Archive reference data: gate 41 aligns
+# at ~302.5° tropical, meaning the wheel goes clockwise from that point.
+HD_WHEEL_START = 302.5
+
 HD_GATES = [
-    25,17,21,51,42, 3,27,24, 2,23, 8,20,16,35,45,12,
-    15,52,39,53,62,56,31,33, 7, 4,29,59,40,64,47, 6,
-    46,18,48,57,32,50,28,44, 1,43,14,34, 9, 5,26,11,
-    10,58,38,54,61,60,41,19,13,49,30,55,37,63,22,36,
+    41,19,13,49,30,55,37,63,22,36,25,17,21,51,42, 3,
+    27,24, 2,23, 8,20,16,35,45,12,15,52,39,53,62,56,
+    31,33, 7, 4,29,59,40,64,47, 6,46,18,48,57,32,50,
+    28,44, 1,43,14,34, 9, 5,26,11,10,58,38,54,61,60,
 ]
 
 HD_GATE_NAMES = {
@@ -82,7 +88,7 @@ HD_CROSS_THEMES = {
     17:'de las Preguntas',      18:'de la Corrección',
     19:'de la Necesidad',       20:'del Ahora',
     21:'del Control',           22:'de la Gracia',
-    23:'de la Asimilación',     24:'de la Dualidad',
+    23:'de la Asimilación',     24:'de los Cuatro Caminos',
     25:'de la Inocencia',       26:'del Gran Engañador',
     27:'de la Preservación',    28:'del Fatalismo',
     29:'del Compromiso',        30:'del Destino',
@@ -492,10 +498,11 @@ def report_status(request, pk):
 # ── Human Design ───────────────────────────────────────────────────────────
 
 def _lon_to_gate_line(lon):
-    gate_size = 360 / 64
-    idx = int(lon / gate_size) % 64
+    gate_size = 360.0 / 64
+    wheel_pos = (lon - HD_WHEEL_START + 360) % 360
+    idx = int(wheel_pos / gate_size) % 64
     gate = HD_GATES[idx]
-    line = int((lon % gate_size) / (gate_size / 6)) + 1
+    line = int((wheel_pos % gate_size) / (gate_size / 6)) + 1
     return gate, min(line, 6)
 
 
@@ -717,15 +724,13 @@ def _calculate_hd_chart(bp):
     _profile_key = (p_sun_l, d_sun_l)
     if _profile_key == (4, 1):
         _cross_type = 'Yuxtaposición'
-        _cross_variant = ''
     elif _profile_key in _LEFT_ANGLE_PROFILES:
         _cross_type = 'Ángulo Izquierdo'
-        _cross_variant = ' (2)' if p_sun_l >= 4 else ' (1)'
     else:
         _cross_type = 'Ángulo Derecho'
-        _cross_variant = ' (2)' if p_sun_l >= 4 else ' (1)'
     _theme = HD_CROSS_THEMES.get(p_sun_g, '')
-    cross_name = f'Cruz de {_cross_type} {_theme}{_cross_variant}'.strip()
+    _gate_notation = f'({p_sun_g}/{p_earth_g} | {d_sun_g}/{d_earth_g})'
+    cross_name = f'Cruz de {_cross_type} {_theme} {_gate_notation}'.strip()
 
     return {
         'type':             hd_type,
