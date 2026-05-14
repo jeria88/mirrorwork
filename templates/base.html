@@ -460,7 +460,7 @@
       <a href="{% url 'mirror:home' %}">Espejo</a>
       <a href="{% url 'birth:profile' %}">Nacimiento</a>
       <a href="{% url 'reports:dashboard' %}">Progreso</a>
-      <a href="{% url 'practitioners:lista' %}">Clientes</a>
+      {% if user.profile.is_practicante %}<a href="{% url 'practitioners:lista' %}">Clientes</a>{% endif %}
       <a href="{% url 'tokens:balance' %}" title="Mis tokens" style="color:var(--accent)">
         {% with tb=request.user.token_balance %}{{ tb.balance|default:0 }}{% endwith %}&thinsp;tkn
       </a>

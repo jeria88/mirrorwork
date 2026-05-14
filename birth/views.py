@@ -194,28 +194,117 @@ def _calculate_astral_chart(bp):
     }
 
 
+_SYSTEM_ESPEJO = """\
+Eres el Espejo Endonauta: un acompañante de autoconocimiento que integra astrología, sistemas de personalidad y filosofía del mundo interior. Tu voz es cálida, directa y poética — no genérica ni clínica.
+
+Marco conceptual que usas:
+• Las 12 dimensiones endonautas: Identidad (quién soy en esencia), Sombra (lo rechazado/reprimido), Cuerpo (el cuerpo como mapa), Emociones (el mundo interno), Mente (patrones y creencias), Propósito (dirección y sentido), Espiritualidad (conexión con algo mayor), Vínculos (relaciones e interdependencia), Creatividad (expresión y generatividad), Comunidad (lugar en el mundo), Sueños (inconsciente y visión), Abundancia (relación con recursos y flujo).
+• La ley espejo: el mundo exterior refleja el mundo interior; cada configuración natal es una arquitectura de potenciales, no un destino fijo.
+• La sombra junguiana: lo que no se integra se proyecta; los planetas retrógrados o en tensión son invitaciones a internalizar.
+• El viaje endonauta tiene etapas: despertar, exploración, integración, expresión.
+
+Prohibiciones absolutas:
+— No diagnostiques ni pronostiques (no digas "tendrás", "te pasará").
+— No seas vago ni genérico: cada lectura debe ser específica a los datos exactos del chart.
+— No repitas las palabras clave del chart textualmente sin interpretarlas.
+— No uses jerga técnica sin explicar su significado en términos de experiencia interior.
+— No hagas listas ni uses títulos de sección. Solo párrafos fluidos.
+
+Idioma: español rioplatense/chileno, informal pero profundo.\
+"""
+
+
+def _kb_context(keywords):
+    """Pull 1-2 relevant KB chunks by keyword match for prompt enrichment."""
+    try:
+        from mirror.models import MirrorChunk
+        from django.db.models import Q
+        q = Q()
+        for kw in keywords:
+            q |= Q(contenido__icontains=kw)
+        chunks = list(MirrorChunk.objects.filter(q).order_by('?')[:2])
+        if chunks:
+            return '\n'.join(
+                f'[Referencia: {c.documento.nombre}]\n"{c.contenido[:350].strip()}"'
+                for c in chunks
+            )
+    except Exception:
+        pass
+    return ''
+
+
 def _build_astral_prompt(chart_data, birth_place):
     planets = chart_data['planets']
-    sun = next(p for p in planets if p['key'] == 'sun')
+    sun  = next(p for p in planets if p['key'] == 'sun')
     moon = next(p for p in planets if p['key'] == 'moon')
-    asc = chart_data['ascendant']
+    asc  = chart_data['ascendant']
+    mc   = chart_data['midheaven']
 
-    lines = [f"  - {p['label']}: {p['sign']} (Casa {p['house']}){' ℞' if p['retrograde'] else ''}"
-             for p in planets]
-    tabla = '\n'.join(lines)
-
-    return (
-        f"Eres el Espejo Endonauta. Un usuario nacido en {birth_place} acaba de recibir su carta astral.\n\n"
-        f"Sus tres puntos cardinales: Sol en {sun['sign']} (Casa {sun['house']}), "
-        f"Luna en {moon['sign']} (Casa {moon['house']}), Ascendente en {asc['sign']}.\n\n"
-        f"Posiciones completas:\n{tabla}\n\n"
-        "Escribe una lectura endonauta de 4-5 párrafos. No diagnostiques. Conecta cada posición "
-        "con el viaje interior del usuario, usando el lenguaje de las dimensiones endonautas "
-        "(identidad, sombra, cuerpo, emociones, mente, propósito, espiritualidad, vínculos, "
-        "creatividad, comunidad, sueños, abundancia) cuando sea natural. "
-        "Termina con una pregunta de exploración. Tono cálido, curioso, empoderador. En español. "
-        "Formato: párrafos separados por salto de línea, sin títulos ni bullets."
+    retros = [p['label'] for p in planets if p['retrograde']]
+    tabla = '\n'.join(
+        f"  {p['label']}: {p['sign']} Casa {p['house']}{' ℞' if p['retrograde'] else ''}"
+        for p in planets
     )
+
+    # Dominant element from sign distribution
+    elem_count = {}
+    for p in planets:
+        from birth.models import SIGN_ELEMENT
+        e = SIGN_ELEMENT.get(p['sign'], '')
+        if e:
+            elem_count[e] = elem_count.get(e, 0) + 1
+    dominant_elem = max(elem_count, key=elem_count.get) if elem_count else ''
+    weakest_elem  = min(elem_count, key=elem_count.get) if elem_count else ''
+
+    kb = _kb_context(['sombra', 'proyección', 'arquetipo', 'individuación'])
+
+    prompt = f"""\
+CHART COMPLETO — {birth_place}
+━━━━━━━━━━━━━━━━━━━━━━━━━
+SOL: {sun['sign']} Casa {sun['house']}  |  LUNA: {moon['sign']} Casa {moon['house']}  |  ASC: {asc['sign']}
+MC: {mc['sign']}
+Retrógrados: {', '.join(retros) if retros else 'ninguno'}
+Elemento dominante en el chart: {dominant_elem} | Elemento menos presente: {weakest_elem}
+
+Posiciones completas:
+{tabla}
+━━━━━━━━━━━━━━━━━━━━━━━━━
+{"CONTEXTO DE LA BASE DE CONOCIMIENTOS:" + chr(10) + kb + chr(10) + "━━━━━━━━━━━━━━━━━━━━━━━━━" if kb else ""}
+
+INSTRUCCIÓN DE FORMATO — 5 párrafos en este orden exacto:
+
+1. EL SOL Y LA IDENTIDAD CENTRAL: qué arquetipo de identidad (dimensión Identidad/Propósito) activa el Sol en {sun['sign']} Casa {sun['house']}. Qué brilla naturalmente en esta persona y qué puede costarle admitir de ese mismo brillo.
+
+2. LA LUNA Y EL MUNDO EMOCIONAL: cómo procesa y necesita las emociones (dimensión Emociones/Sombra) con Luna en {moon['sign']} Casa {moon['house']}. Qué patrones emocionales inconscientes puede traer esta posición lunar específica.
+
+3. EL ASCENDENTE Y EL UMBRAL RELACIONAL: cómo se presenta al mundo y qué tipo de experiencias atrae (dimensión Vínculos/Cuerpo) con ASC en {asc['sign']}. La tensión entre la máscara y el interior.
+
+4. EL PATRÓN COMPLETO Y LA SOMBRA DEL CHART: a partir del resto de posiciones y los {len(retros)} planetas retrógrados, qué patrón de sombra o potencial sin desarrollar emerge. Qué elemento o energía el chart pide integrar (dimensión Sombra/Creatividad/Mente).
+
+5. LA INVITACIÓN ACTUAL: sintetizar en qué etapa del viaje endonauta (despertar, exploración, integración, expresión) parece estar esta persona según la configuración del chart, y qué práctica o pregunta interior podría abrir la siguiente etapa.
+
+Termina con UNA pregunta de exploración concreta, no retórica — algo que la persona pueda llevar a su diario o práctica.\
+"""
+    return prompt
+
+
+def _deepseek_call(api_key, system_prompt, user_prompt, temperature=0.78, max_tokens=1200):
+    resp = requests.post(
+        'https://api.deepseek.com/v1/chat/completions',
+        headers={'Authorization': f'Bearer {api_key}', 'Content-Type': 'application/json'},
+        json={
+            'model': 'deepseek-chat',
+            'messages': [
+                {'role': 'system', 'content': system_prompt},
+                {'role': 'user',   'content': user_prompt},
+            ],
+            'temperature': temperature,
+            'max_tokens': max_tokens,
+        },
+        timeout=60,
+    )
+    resp.raise_for_status()
+    return resp.json()['choices'][0]['message']['content']
 
 
 def _generate_interpretation_async(report_pk, birth_place):
@@ -224,31 +313,13 @@ def _generate_interpretation_async(report_pk, birth_place):
 
     api_key = os.getenv('DEEPSEEK_API_KEY', '')
     if not api_key:
-        BirthReport.objects.filter(pk=report_pk).update(
-            status=BirthReport.STATUS_FAILED
-        )
+        BirthReport.objects.filter(pk=report_pk).update(status=BirthReport.STATUS_FAILED)
         return
 
     try:
         report = BirthReport.objects.get(pk=report_pk)
         prompt = _build_astral_prompt(report.chart_data, birth_place)
-
-        resp = requests.post(
-            'https://api.deepseek.com/v1/chat/completions',
-            headers={
-                'Authorization': f'Bearer {api_key}',
-                'Content-Type': 'application/json',
-            },
-            json={
-                'model': 'deepseek-chat',
-                'messages': [{'role': 'user', 'content': prompt}],
-                'temperature': 0.75,
-                'max_tokens': 800,
-            },
-            timeout=40,
-        )
-        resp.raise_for_status()
-        text = resp.json()['choices'][0]['message']['content']
+        text = _deepseek_call(api_key, _SYSTEM_ESPEJO, prompt)
         report.interpretation = text
         report.status = BirthReport.STATUS_COMPLETE
         report.save(update_fields=['interpretation', 'status', 'updated_at'])
@@ -646,33 +717,54 @@ def _calculate_hd_chart(bp):
 def _build_hd_prompt(chart_data, birth_place):
     p = chart_data['personality']
     d = chart_data['design']
-    channels = ', '.join(ch['gates'] for ch in chart_data.get('defined_channels', []))
-    return (
-        f"Eres el Espejo Endonauta. Un usuario nacido en {birth_place} acaba de recibir su chart de Diseño Humano.\n\n"
-        f"TIPO: {chart_data['type']}\n"
-        f"ESTRATEGIA: {chart_data['strategy']}\n"
-        f"AUTORIDAD: {chart_data.get('authority', '')}\n"
-        f"PERFIL: {chart_data['profile']}\n"
-        f"DEFINICIÓN: {chart_data.get('definition', '')}\n"
-        f"TEMA NO-YO: {chart_data['not_self_theme']}\n"
-        f"FIRMA: {chart_data.get('signature', '')}\n\n"
-        f"PUERTAS CLAVE:\n"
-        f"  Personalidad Sol: {p['sun']['gate']} — {p['sun']['name']} (Línea {p['sun']['line']})\n"
-        f"  Personalidad Tierra: {p['earth']['gate']} — {p['earth']['name']} (Línea {p['earth']['line']})\n"
-        f"  Diseño Sol: {d['sun']['gate']} — {d['sun']['name']} (Línea {d['sun']['line']})\n"
-        f"  Diseño Tierra: {d['earth']['gate']} — {d['earth']['name']} (Línea {d['earth']['line']})\n\n"
-        f"CENTROS DEFINIDOS: {', '.join(chart_data['defined_centers'])}\n"
-        f"CANALES DEFINIDOS: {channels}\n\n"
-        "Escribe una lectura endonauta de 5 párrafos:\n"
-        "1. El Tipo y la Estrategia — cómo esta persona está diseñada para moverse en el mundo\n"
-        "2. La Autoridad interior — cómo toma decisiones alineadas consigo misma\n"
-        "3. El Perfil — el rol kármico y el patrón de vida\n"
-        "4. Las puertas del Sol (Personalidad y Diseño) — el propósito consciente e inconsciente\n"
-        "5. Los centros definidos y el tema No-Yo — dónde hay energía consistente y dónde hay condicionamiento\n\n"
-        "Termina con una pregunta de exploración endonauta.\n"
-        "Tono: cálido, empoderador, sin jerga técnica. En español. "
-        "Párrafos separados por doble salto de línea, sin títulos ni bullets."
-    )
+    channels_str = ', '.join(
+        f"{ch['gates']} ({ch['name']})"
+        for ch in chart_data.get('defined_channels', [])
+    ) or 'ninguno definido'
+    centers_str = ', '.join(chart_data['defined_centers'])
+    undefined = [c for c in ['Cabeza','Ajna','Garganta','Identidad','Corazón',
+                              'Plexo Solar','Sacral','Bazo','Raíz']
+                 if c not in chart_data['defined_centers']]
+
+    kb = _kb_context(['autorregulación', 'observador', 'toma de decisiones', 'cuerpo energético'])
+
+    prompt = f"""\
+DISEÑO HUMANO — {birth_place}
+━━━━━━━━━━━━━━━━━━━━━━━━━
+TIPO: {chart_data['type']}
+ESTRATEGIA: {chart_data['strategy']}
+AUTORIDAD: {chart_data.get('authority','')}
+PERFIL: {chart_data['profile']}
+DEFINICIÓN: {chart_data.get('definition','')}
+TEMA NO-YO / FIRMA: {chart_data['not_self_theme']} → {chart_data.get('signature','')}
+
+PUERTAS DEL SOL (consciente ↔ inconsciente):
+  Personalidad Sol: Puerta {p['sun']['gate']} — {p['sun']['name']} (Línea {p['sun']['line']})
+  Personalidad Tierra: Puerta {p['earth']['gate']} — {p['earth']['name']} (Línea {p['earth']['line']})
+  Diseño Sol: Puerta {d['sun']['gate']} — {d['sun']['name']} (Línea {d['sun']['line']})
+  Diseño Tierra: Puerta {d['earth']['gate']} — {d['earth']['name']} (Línea {d['earth']['line']})
+
+CENTROS DEFINIDOS ({len(chart_data['defined_centers'])}): {centers_str}
+CENTROS ABIERTOS ({len(undefined)}): {', '.join(undefined) if undefined else 'ninguno'}
+CANALES DEFINIDOS: {channels_str}
+━━━━━━━━━━━━━━━━━━━━━━━━━
+{"CONTEXTO DE LA BASE DE CONOCIMIENTOS:" + chr(10) + kb + chr(10) + "━━━━━━━━━━━━━━━━━━━━━━━━━" if kb else ""}
+
+INSTRUCCIÓN DE FORMATO — 5 párrafos en este orden exacto:
+
+1. TIPO Y ESTRATEGIA EN LA VIDA COTIDIANA: no describas el tipo en abstracto — muestra cómo se manifiesta concretamente ser un {chart_data['type']} con estrategia "{chart_data['strategy']}" en el día a día, en el trabajo, en las relaciones. Qué fricción genera ignorar esta estrategia (dimensión Identidad/Cuerpo).
+
+2. AUTORIDAD INTERIOR — LA FORMA DE DECIDIR: explica cómo esta persona toma decisiones alineadas con su diseño usando su autoridad {chart_data.get('authority','')}. Sé específico sobre el proceso interno (esperar, sentir, saber): no la definas en abstracto, muéstrala en una situación concreta (dimensión Emociones/Mente).
+
+3. EL PERFIL Y EL ROL DE VIDA: el perfil {chart_data['profile']} define el patrón de cómo esta persona aprende y contribuye. Describe qué tipo de experiencias tiende a atraer, qué conflicto interno genera el perfil y cuál es el don que emerge cuando lo vive conscientemente (dimensión Propósito/Vínculos).
+
+4. LAS PUERTAS DEL SOL — EL HILO CONSCIENTE E INCONSCIENTE: la Puerta {p['sun']['gate']} ({p['sun']['name']}) es la energía que esta persona irradia conscientemente; la Puerta {d['sun']['gate']} ({d['sun']['name']}) opera desde el inconsciente como una corriente de fondo. Cómo se integran o se tensionan (dimensión Creatividad/Sombra/Espiritualidad).
+
+5. CENTROS DEFINIDOS, CENTROS ABIERTOS Y EL TEMA NO-YO: los centros definidos ({centers_str}) son energías consistentes que esta persona tiene para dar. Los centros abiertos son donde más fácilmente absorbe y se condiciona. Cómo se manifiesta el tema No-Yo "{chart_data['not_self_theme']}" y cómo reconocer cuando uno está viviendo desde el diseño vs. el condicionamiento (dimensión Sombra/Abundancia/Comunidad).
+
+Termina con UNA pregunta de exploración concreta — algo que apunte directamente a la tensión más viva que surge de este diseño específico.\
+"""
+    return prompt
 
 
 def _generate_hd_async(report_pk, birth_place):
@@ -685,15 +777,8 @@ def _generate_hd_async(report_pk, birth_place):
     try:
         report = BirthReport.objects.get(pk=report_pk)
         prompt = _build_hd_prompt(report.chart_data, birth_place)
-        resp = requests.post(
-            'https://api.deepseek.com/v1/chat/completions',
-            headers={'Authorization': f'Bearer {api_key}', 'Content-Type': 'application/json'},
-            json={'model': 'deepseek-chat', 'messages': [{'role': 'user', 'content': prompt}],
-                  'temperature': 0.75, 'max_tokens': 800},
-            timeout=40,
-        )
-        resp.raise_for_status()
-        report.interpretation = resp.json()['choices'][0]['message']['content']
+        text = _deepseek_call(api_key, _SYSTEM_ESPEJO, prompt)
+        report.interpretation = text
         report.status = BirthReport.STATUS_COMPLETE
         report.save(update_fields=['interpretation', 'status', 'updated_at'])
     except Exception:
@@ -923,48 +1008,71 @@ def _build_saju_prompt(chart_data, birth_place):
     daewoon = chart_data.get('daewoon')
 
     p_lines = '\n'.join(
-        f"  {p['label']}: {p['stem']}({p['rom_stem']}) {p['branch']}({p['rom_branch']}) | "
-        f"Tallo: {p['elem_stem']} | Rama: {p['elem_branch']} | Animal: {p['animal']}"
+        f"  Pilar {p['label']}: {p['stem']} ({p['rom_stem']}) — {p['elem_stem']} | "
+        f"Rama {p['branch']} ({p['rom_branch']}) — {p['elem_branch']}, {p['animal']}"
         for p in pillars
     )
+    elem_line = '  ' + ' | '.join(f"{e}: {ec.get(e,0)}" for e in ELEMENTS_ES)
 
-    elem_line = ' | '.join(f"{e}: {ec.get(e,0)}" for e in ELEMENTS_ES)
-
-    daewoon_block = ''
+    current = None
+    next_cycle = None
     if daewoon:
         current = daewoon.get('current_cycle')
         if current:
-            daewoon_block = (
-                f"\nCICLO VITAL ACTUAL (大運): {current['stem']}{current['branch']} "
-                f"({current['elem_stem']} / {current['elem_branch']}) "
-                f"— edades {current['age_start']}-{current['age_end']} "
-                f"({current['year_start']}-{current['year_end']})\n"
-                f"Próximo ciclo: {daewoon['cycles'][daewoon['cycles'].index(current)+1]['stem']}"
-                f"{daewoon['cycles'][daewoon['cycles'].index(current)+1]['branch']}"
-                if daewoon['cycles'].index(current) < len(daewoon['cycles'])-1 else ''
+            idx = daewoon['cycles'].index(current)
+            next_cycle = daewoon['cycles'][idx+1] if idx < len(daewoon['cycles'])-1 else None
+
+    daewoon_block = ''
+    if current:
+        daewoon_block = (
+            f"\nCICLO VITAL ACTUAL (大運):\n"
+            f"  {current['stem']}{current['branch']} — {current['elem_stem']} sobre {current['elem_branch']}\n"
+            f"  Período: edades {current['age_start']}–{current['age_end']} "
+            f"({current['year_start']}–{current['year_end']})\n"
+        )
+        if next_cycle:
+            daewoon_block += (
+                f"Próximo ciclo (comienza ~{next_cycle['year_start']}): "
+                f"{next_cycle['stem']}{next_cycle['branch']} — {next_cycle['elem_stem']}\n"
             )
 
-    return (
-        f"Eres el Espejo Endonauta especializado en Saju — los Cuatro Pilares del Destino.\n\n"
-        f"CARTA: nacido/a en {birth_place}\n"
-        f"Maestro del Día (identidad central): {chart_data['day_master']}\n"
-        f"Animal del año: {chart_data['lunar_year_animal']}\n\n"
-        f"CUATRO PILARES (四柱八字):\n{p_lines}\n\n"
-        f"BALANCE ELEMENTAL (8 caracteres): {elem_line}\n"
-        f"Elemento dominante: {chart_data['dominant_element']}\n"
-        f"Elemento ausente o mínimo: {chart_data.get('weakest_element','equilibrado')}\n"
-        f"{daewoon_block}\n"
-        "Escribe una lectura endonauta profunda de 5 párrafos:\n"
-        "1. El Maestro del Día — la naturaleza esencial, el tipo de energía que es esta persona en su núcleo\n"
-        "2. El balance elemental — qué energías dominan la vida y cuál es el elemento a cultivar para el crecimiento\n"
-        "3. El animal del año y los patrones relacionales — cómo se vincula con el mundo y con otros\n"
-        "4. La tensión interna — qué conflictos o patrones se repiten (usa los pilares de Mes/Día/Hora)\n"
-        "5. El ciclo vital actual y lo que invita en este período de vida\n\n"
-        "Termina con una pregunta de exploración endonauta.\n"
-        "Tono: cálido, profundo, empoderador. En español. Párrafos separados por doble salto de línea.\n"
-        "Usa el lenguaje de las dimensiones endonautas cuando sea natural. "
-        "No uses jerga técnica coreana/china sino su traducción al significado interior."
-    )
+    kb = _kb_context(['cinco elementos', 'yin yang', 'fluir', 'Qi', 'madera fuego tierra metal agua'])
+
+    # Day master decomposed: e.g. "Madera Yang" → element=Madera, polarity=Yang
+    day_master_parts = chart_data['day_master'].split()
+    dm_elem = day_master_parts[0] if day_master_parts else chart_data['day_master']
+    dm_pol  = day_master_parts[1] if len(day_master_parts) > 1 else ''
+
+    prompt = f"""\
+SAJU — CUATRO PILARES DEL DESTINO — {birth_place}
+━━━━━━━━━━━━━━━━━━━━━━━━━
+MAESTRO DEL DÍA: {chart_data['day_master']} (elemento {dm_elem}, polaridad {dm_pol})
+ANIMAL DEL AÑO: {chart_data['lunar_year_animal']}
+
+CUATRO PILARES (四柱八字):
+{p_lines}
+
+BALANCE ELEMENTAL (8 caracteres totales):
+{elem_line}
+  Dominante: {chart_data['dominant_element']} | Mínimo/ausente: {chart_data.get('weakest_element','equilibrado')}
+{daewoon_block}━━━━━━━━━━━━━━━━━━━━━━━━━
+{"CONTEXTO DE LA BASE DE CONOCIMIENTOS:" + chr(10) + kb + chr(10) + "━━━━━━━━━━━━━━━━━━━━━━━━━" if kb else ""}
+
+INSTRUCCIÓN DE FORMATO — 5 párrafos en este orden exacto:
+
+1. EL MAESTRO DEL DÍA — LA NATURALEZA CENTRAL: el Maestro del Día {chart_data['day_master']} define la energía esencial. No describas el elemento en abstracto — explica cómo se manifiesta como carácter, como forma de relacionarse con el mundo, qué tipo de fuerza interna tiene y dónde esa misma fuerza puede convertirse en rigidez o herida (dimensión Identidad/Cuerpo). Usa el elemento {dm_elem} como metáfora viva.
+
+2. EL BALANCE ELEMENTAL — LO QUE SOBRA Y LO QUE FALTA: con {chart_data['dominant_element']} como elemento dominante y {chart_data.get('weakest_element','equilibrio') or 'equilibrio'} como el menos presente, describe qué tipo de energía gobierna la vida de esta persona y qué área de vida (emoción, relación, acción, reflexión, flujo) tiende a estar subdesarrollada. Qué prácticas o arquetipos podrían cultivar el elemento faltante (dimensión Emociones/Abundancia/Cuerpo).
+
+3. EL ANIMAL DEL AÑO Y LOS PATRONES RELACIONALES: el {chart_data['lunar_year_animal']} como arquetipo relacional — cómo esta persona se mueve en sus vínculos, qué tipo de dinámicas tiende a atraer y qué patrón inconsciente en las relaciones refleja el animal (dimensión Vínculos/Sombra).
+
+4. LAS TENSIONES INTERNAS — EL PATRÓN QUE SE REPITE: leyendo los pilares de Mes, Día y Hora juntos (los tres pilares más personales), qué tensión o fricción elemental existe entre ellos. Qué conflicto interno se repite, qué patrón inconsciente emerge de esa configuración específica y cómo se manifiesta en decisiones o bloqueos recurrentes (dimensión Mente/Sombra/Creatividad).
+
+5. EL CICLO VITAL ACTUAL — EL CAPÍTULO PRESENTE: {"con el ciclo actual de " + current['elem_stem'] + " sobre " + current['elem_branch'] + " (edades " + str(current['age_start']) + "–" + str(current['age_end']) + "), qué tipo de energía y aprendizaje está disponible en este período. Qué está pidiendo ser soltado y qué está emergiendo. Cómo prepararse para el próximo ciclo" + (" de " + next_cycle['elem_stem'] if next_cycle else "") + " (dimensión Propósito/Espiritualidad/Sueños)." if current else "describirás los ciclos vitales generales según los pilares disponibles, ya que no se cuenta con el ciclo 大運 actual."}
+
+Termina con UNA pregunta de exploración concreta — algo específico a esta carta, no una pregunta genérica sobre crecimiento personal.\
+"""
+    return prompt
 
 
 def _generate_saju_async(report_pk, birth_place):
@@ -977,15 +1085,8 @@ def _generate_saju_async(report_pk, birth_place):
     try:
         report = BirthReport.objects.get(pk=report_pk)
         prompt = _build_saju_prompt(report.chart_data, birth_place)
-        resp = requests.post(
-            'https://api.deepseek.com/v1/chat/completions',
-            headers={'Authorization': f'Bearer {api_key}', 'Content-Type': 'application/json'},
-            json={'model': 'deepseek-chat', 'messages': [{'role': 'user', 'content': prompt}],
-                  'temperature': 0.75, 'max_tokens': 800},
-            timeout=40,
-        )
-        resp.raise_for_status()
-        report.interpretation = resp.json()['choices'][0]['message']['content']
+        text = _deepseek_call(api_key, _SYSTEM_ESPEJO, prompt)
+        report.interpretation = text
         report.status = BirthReport.STATUS_COMPLETE
         report.save(update_fields=['interpretation', 'status', 'updated_at'])
     except Exception:
