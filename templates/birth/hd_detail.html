@@ -118,11 +118,78 @@
     .type-grid { grid-template-columns: 1fr 1fr; }
     .planets-table th, .planets-table td { padding: 0.35rem 0.4rem; font-size: 0.75rem; }
   }
+
+  @media print {
+    .hd-wrap { padding: 0 !important; max-width: 100% !important; }
+    .hd-tag { display: none; }
+    .hd-heading { font-size: 18pt !important; margin-bottom: 4pt !important; }
+    .hd-heading em { display: none; }
+    .hd-meta { font-size: 8pt !important; color: #6a6a8a !important; margin-bottom: 10pt !important; }
+
+    .type-card {
+      background: rgba(90,77,196,0.06) !important;
+      border: 1pt solid rgba(90,77,196,0.25) !important;
+      border-radius: 8pt !important; padding: 10pt 12pt !important; margin-bottom: 12pt !important;
+    }
+    .type-top { margin-bottom: 8pt !important; }
+    .type-label { font-size: 6.5pt !important; color: #5a4dc4 !important; }
+    .type-value { font-size: 16pt !important; }
+    .type-sub { font-size: 8pt !important; color: #4a4a6a !important; }
+    .type-grid { grid-template-columns: repeat(3,1fr) !important; gap: 6pt !important; }
+    .field-label { font-size: 6pt !important; }
+    .field-value { font-size: 8.5pt !important; }
+    .signature-chip { font-size: 7pt !important; color: #5a4dc4 !important; background: rgba(90,77,196,0.1) !important; border-color: rgba(90,77,196,0.2) !important; }
+
+    .cross-row { gap: 5pt !important; margin-bottom: 10pt !important; }
+    .cross-gate { background: #f8f8fb !important; border: 1pt solid #d4d4e0 !important; border-radius: 5pt !important; padding: 5pt 8pt !important; min-width: 0 !important; }
+    .cross-gate-num { font-size: 13pt !important; color: #5a4dc4 !important; }
+    .cross-gate-name { font-size: 6pt !important; }
+    .cross-sep { font-size: 8pt !important; }
+
+    .planets-wrap { overflow: visible !important; margin-bottom: 10pt !important; }
+    .planets-table { font-size: 7.5pt !important; }
+    .planets-table th { padding: 3pt 5pt !important; font-size: 6.5pt !important; border-bottom-color: #d4d4e0 !important; }
+    .planets-table td { padding: 3pt 5pt !important; border-bottom-color: #ebebf0 !important; }
+    .gate-num-sm { font-size: 9pt !important; color: #5a4dc4 !important; }
+    .gate-name-sm { font-size: 7pt !important; color: #4a4a6a !important; }
+    .gate-line-sm { font-size: 6.5pt !important; }
+
+    .channels-wrap { gap: 5pt !important; margin-bottom: 10pt !important; }
+    .channel-chip {
+      font-size: 7pt !important; padding: 2pt 7pt !important;
+      border-color: rgba(90,77,196,0.25) !important;
+      color: #5a4dc4 !important; background: rgba(90,77,196,0.06) !important;
+    }
+    .channel-chip span { font-size: 6.5pt !important; color: #8888aa !important; }
+
+    .centers-wrap { gap: 5pt !important; margin-bottom: 10pt !important; }
+    .center-badge { font-size: 7.5pt !important; padding: 2pt 8pt !important; border-color: rgba(90,77,196,0.3) !important; color: #5a4dc4 !important; background: rgba(90,77,196,0.08) !important; }
+  }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="hd-wrap">
+
+  <!-- PRINT HEADER -->
+  <div class="print-header">
+    <div>
+      <div class="ph-brand-name">endonautas</div>
+      <div class="ph-brand-url">app.endonautas.cl</div>
+    </div>
+    <div class="ph-report">
+      <div class="ph-report-type">Diseño Humano</div>
+      <div class="ph-report-user">{{ request.user.first_name|default:request.user.email }}{% if bp %} · {{ bp.birth_place }}{% endif %}</div>
+      <div class="ph-report-date">{% if bp %}{{ bp.birth_date }}{% if bp.birth_time %} · {{ bp.birth_time|time:"H:i" }}{% endif %}{% endif %}</div>
+    </div>
+  </div>
+
+  <!-- PRINT FOOTER -->
+  <div class="print-footer">
+    <span>app.endonautas.cl</span>
+    <span>MirrorWork · Sistema de Autoconocimiento Endonauta</span>
+    <span>Generado el {% now "j \d\e N \d\e Y" %}</span>
+  </div>
 
   <div class="hd-tag reveal">Diseño Humano</div>
   <h1 class="hd-heading reveal">
@@ -270,7 +337,10 @@
     {% endif %}
   </div>
 
-  <a href="{% url 'birth:profile' %}" class="back-link">← Volver a nacimiento</a>
+  <div style="display:flex;align-items:center;gap:1rem;margin-top:3rem;">
+    <a href="{% url 'birth:profile' %}" class="back-link" style="margin-top:0">← Volver a nacimiento</a>
+    <button class="print-btn" onclick="window.print()">↓ Imprimir como PDF</button>
+  </div>
 </div>
 {% endblock %}
 

@@ -217,11 +217,59 @@
     .big-three { grid-template-columns: 1fr; }
     .planet-table .p-degree, .planet-table .p-house { display: none; }
   }
+
+  @media print {
+    .astral-wrap { padding: 0 !important; max-width: 100% !important; }
+    .astral-tag, .astral-heading em { display: none; }
+    .astral-heading { font-size: 18pt !important; margin-bottom: 4pt !important; }
+    .astral-meta { font-size: 8pt !important; color: #6a6a8a !important; margin-bottom: 12pt !important; }
+
+    .big-three { grid-template-columns: repeat(3,1fr) !important; gap: 8pt !important; margin-bottom: 14pt !important; }
+    .big-card {
+      background: #f5f5fa !important; border: 1pt solid #d4d4e0 !important;
+      border-radius: 8pt !important; padding: 10pt 8pt !important;
+    }
+    .big-card-symbol { font-size: 18pt !important; }
+    .big-card-sign { font-size: 11pt !important; }
+    .big-card-planet, .big-card-degree { font-size: 7pt !important; }
+
+    .planet-table { font-size: 8.5pt !important; margin-bottom: 14pt !important; }
+    .planet-table th { font-size: 7pt !important; padding: 4pt 6pt !important; border-bottom-color: #d4d4e0 !important; }
+    .planet-table td { padding: 4pt 6pt !important; border-bottom-color: #ebebf0 !important; }
+    .planet-table tr:hover td { background: transparent !important; }
+    .p-sign { font-size: 9pt !important; }
+    .p-retro { border-color: #c8a020 !important; color: #c8a020 !important; }
+    .points-row td { background: #f8f8fb !important; }
+    .el-fire { color: #c85020 !important; }
+    .el-earth { color: #3a7a3a !important; }
+    .el-air  { color: #3060a0 !important; }
+    .el-water { color: #5040b0 !important; }
+  }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="astral-wrap">
+
+  <!-- PRINT HEADER -->
+  <div class="print-header">
+    <div>
+      <div class="ph-brand-name">endonautas</div>
+      <div class="ph-brand-url">app.endonautas.cl</div>
+    </div>
+    <div class="ph-report">
+      <div class="ph-report-type">Carta Astral</div>
+      <div class="ph-report-user">{{ request.user.first_name|default:request.user.email }}{% if bp %} · {{ bp.birth_place }}{% endif %}</div>
+      <div class="ph-report-date">{% if bp %}{{ bp.birth_date }}{% if bp.birth_time %} · {{ bp.birth_time|time:"H:i" }}{% endif %}{% endif %}</div>
+    </div>
+  </div>
+
+  <!-- PRINT FOOTER -->
+  <div class="print-footer">
+    <span>app.endonautas.cl</span>
+    <span>MirrorWork · Sistema de Autoconocimiento Endonauta</span>
+    <span>Generado el {% now "j \d\e N \d\e Y" %}</span>
+  </div>
 
   <div class="astral-tag reveal">Carta Astral</div>
   <h1 class="astral-heading reveal">
@@ -392,7 +440,10 @@
 
   </div>
 
-  <a href="{% url 'birth:profile' %}" class="back-link">← Volver a nacimiento</a>
+  <div style="display:flex;align-items:center;gap:1rem;margin-top:3rem;">
+    <a href="{% url 'birth:profile' %}" class="back-link" style="margin-top:0">← Volver a nacimiento</a>
+    <button class="print-btn" onclick="window.print()">↓ Imprimir como PDF</button>
+  </div>
 
 </div>
 {% endblock %}

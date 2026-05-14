@@ -340,6 +340,104 @@
       .container { padding: 1.5rem 1rem; }
       .nav-links { gap: 1rem; font-size: 0.75rem; }
     }
+
+    /* ── PRINT BUTTON ─────────────────────────────────────────────────── */
+    .print-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.45rem 1.1rem; border-radius: 100px;
+      font-size: 0.78rem; font-weight: 400; letter-spacing: 0.04em;
+      cursor: pointer; border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04); color: var(--muted);
+      font-family: var(--font-ui); transition: all 0.2s;
+    }
+    .print-btn:hover { border-color: var(--border2); color: var(--text); }
+
+    /* ── PRINT HEADER / FOOTER (screen: hidden) ───────────────────────── */
+    .print-header, .print-footer { display: none; }
+
+    /* ── GLOBAL PRINT STYLES ──────────────────────────────────────────── */
+    @media print {
+      @page {
+        size: Letter portrait;
+        margin: 2.2cm 1.8cm 2cm;
+      }
+
+      /* Hide web-only chrome */
+      nav, #space-bg, #mirror-bubble, #ts-fab,
+      .print-btn, .back-link, .spin-ring,
+      .interp-spinner, .no-tokens-note { display: none !important; }
+
+      /* Reset dark theme → white */
+      :root {
+        --bg: #ffffff;
+        --surface: #ffffff;
+        --surface2: #f8f8fb;
+        --border: #d4d4e0;
+        --text: #1a1a2e;
+        --muted: #4a4a6a;
+        --dim: #8888aa;
+        --accent: #3a8c86;
+        --accent2: #5a4dc4;
+        --luz-intensa: #c49a10;
+        --luz: #3a8c86;
+      }
+      body {
+        background: #ffffff !important;
+        color: #1a1a2e !important;
+        font-size: 10pt;
+        line-height: 1.55;
+      }
+      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+      .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+
+      /* Print header */
+      .print-header {
+        display: flex !important;
+        justify-content: space-between;
+        align-items: flex-end;
+        border-bottom: 1.5pt solid #1a1a2e;
+        padding-bottom: 6pt;
+        margin-bottom: 18pt;
+      }
+      .ph-brand-name { font-family: var(--font-heading); font-size: 16pt; font-weight: 400; color: #1a1a2e; line-height: 1; }
+      .ph-brand-url { font-size: 7pt; letter-spacing: 0.12em; color: #8888aa; text-transform: uppercase; margin-top: 2pt; }
+      .ph-report { text-align: right; }
+      .ph-report-type { font-size: 8pt; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: #1a1a2e; }
+      .ph-report-user { font-size: 8.5pt; color: #4a4a6a; margin-top: 2pt; }
+      .ph-report-date { font-size: 7.5pt; color: #8888aa; }
+
+      /* Print footer */
+      .print-footer {
+        display: flex !important;
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        border-top: 0.75pt solid #d4d4e0;
+        padding-top: 5pt;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 7pt;
+        color: #8888aa;
+        letter-spacing: 0.05em;
+      }
+
+      .section-title {
+        color: #4a4a6a !important;
+        border-bottom-color: #d4d4e0 !important;
+        margin-bottom: 8pt !important;
+      }
+      .interp-text {
+        font-size: 9.5pt !important;
+        line-height: 1.65 !important;
+        color: #1a1a2e !important;
+      }
+      .disclaimer {
+        background: #f5f5fa !important;
+        border-color: #d4d4e0 !important;
+        color: #6a6a8a !important;
+        font-size: 7.5pt !important;
+      }
+    }
   </style>
   {% block extra_head %}{% endblock %}
 </head>

@@ -119,11 +119,76 @@
   .disclaimer { font-size: 0.75rem; color: var(--dim); line-height: 1.6; padding: 0.75rem 1rem; background: rgba(255,255,255,0.02); border-radius: 8px; margin-bottom: 2rem; }
 
   @media (max-width: 520px) { .pillars-grid { grid-template-columns: repeat(2,1fr); } .summary-cards { grid-template-columns: 1fr; } }
+
+  @media print {
+    .saju-wrap { padding: 0 !important; max-width: 100% !important; }
+    .saju-tag { display: none; }
+    .saju-heading { font-size: 18pt !important; margin-bottom: 4pt !important; }
+    .saju-heading em { display: none; }
+    .saju-meta { font-size: 8pt !important; color: #6a6a8a !important; margin-bottom: 10pt !important; }
+
+    .pillars-grid { grid-template-columns: repeat(4,1fr) !important; gap: 6pt !important; margin-bottom: 12pt !important; }
+    .pillar {
+      background: #f5f5fa !important; border: 1pt solid #d4d4e0 !important;
+      border-radius: 6pt !important; padding: 8pt 6pt !important;
+    }
+    .pillar-char { font-size: 20pt !important; }
+    .pillar-char-branch { font-size: 16pt !important; }
+    .pillar-label { font-size: 6.5pt !important; }
+    .pillar-rom { font-size: 7pt !important; }
+    .pillar-elem { font-size: 6.5pt !important; padding: 1pt 4pt !important; }
+    .pillar-animal { font-size: 7.5pt !important; }
+
+    .elem-madera { background: rgba(100,180,100,0.15) !important; color: #2a7a2a !important; }
+    .elem-fuego  { background: rgba(244,128,74,0.15) !important;  color: #c04020 !important; }
+    .elem-tierra { background: rgba(180,150,80,0.15) !important;  color: #8a6a10 !important; }
+    .elem-metal  { background: rgba(120,120,160,0.15) !important; color: #5050a0 !important; }
+    .elem-agua   { background: rgba(80,120,200,0.15) !important;  color: #2050a0 !important; }
+
+    .summary-cards { grid-template-columns: repeat(2,1fr) !important; gap: 6pt !important; margin-bottom: 12pt !important; }
+    .sum-card { background: #f8f8fb !important; border: 1pt solid #d4d4e0 !important; border-radius: 6pt !important; padding: 8pt !important; }
+    .sum-label { font-size: 6.5pt !important; }
+    .sum-value { font-size: 11pt !important; }
+
+    .elem-balance { gap: 6pt !important; margin-bottom: 12pt !important; }
+    .elem-chip { font-size: 8pt !important; padding: 3pt 8pt !important; border-color: #d4d4e0 !important; }
+    .elem-chip.absent { opacity: 0.5 !important; }
+
+    .daewoon-wrap { margin-bottom: 12pt !important; }
+    .daewoon-grid { grid-template-columns: repeat(5,1fr) !important; gap: 5pt !important; }
+    .dw-cell { background: #f8f8fb !important; border: 1pt solid #d4d4e0 !important; border-radius: 5pt !important; padding: 5pt 4pt !important; }
+    .dw-cell.current { border-color: #c49a10 !important; background: rgba(196,154,16,0.08) !important; }
+    .dw-ages { font-size: 6.5pt !important; }
+    .dw-chars { font-size: 11pt !important; }
+    .dw-elem { font-size: 6pt !important; }
+    .dw-current-badge { font-size: 6pt !important; color: #c49a10 !important; }
+    .daewoon-start { font-size: 8pt !important; color: #6a6a8a !important; }
+  }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="saju-wrap">
+
+  <!-- PRINT HEADER -->
+  <div class="print-header">
+    <div>
+      <div class="ph-brand-name">endonautas</div>
+      <div class="ph-brand-url">app.endonautas.cl</div>
+    </div>
+    <div class="ph-report">
+      <div class="ph-report-type">Saju — Cuatro Pilares del Destino</div>
+      <div class="ph-report-user">{{ request.user.first_name|default:request.user.email }}{% if bp %} · {{ bp.birth_place }}{% endif %}</div>
+      <div class="ph-report-date">{% if bp %}{{ bp.birth_date }}{% if bp.birth_time %} · {{ bp.birth_time|time:"H:i" }}{% endif %}{% endif %}</div>
+    </div>
+  </div>
+
+  <!-- PRINT FOOTER -->
+  <div class="print-footer">
+    <span>app.endonautas.cl</span>
+    <span>MirrorWork · Sistema de Autoconocimiento Endonauta</span>
+    <span>Generado el {% now "j \d\e N \d\e Y" %}</span>
+  </div>
 
   <div class="saju-tag reveal">Saju — 사주</div>
   <h1 class="saju-heading reveal">
@@ -254,7 +319,10 @@
     {% endif %}
   </div>
 
-  <a href="{% url 'birth:profile' %}" class="back-link">← Volver a nacimiento</a>
+  <div style="display:flex;align-items:center;gap:1rem;margin-top:3rem;">
+    <a href="{% url 'birth:profile' %}" class="back-link" style="margin-top:0">← Volver a nacimiento</a>
+    <button class="print-btn" onclick="window.print()">↓ Imprimir como PDF</button>
+  </div>
 </div>
 {% endblock %}
 
