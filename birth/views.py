@@ -42,6 +42,18 @@ def _get_timezone(lat, lng):
         return 'UTC'
 
 
+def _ensure_timezone(bp):
+    """Re-derive timezone from coordinates and fix it in DB if wrong.
+    Called before every chart calculation so stale 'UTC' values self-correct.
+    """
+    if not (bp.latitude and bp.longitude):
+        return
+    correct = _get_timezone(bp.latitude, bp.longitude)
+    if correct != 'UTC' and bp.timezone_str != correct:
+        bp.timezone_str = correct
+        bp.save(update_fields=['timezone_str'])
+
+
 
 _SYSTEM_ESPEJO = """\
 Eres el Espejo Endonauta: un acompañante de autoconocimiento que integra astrología, sistemas de personalidad y filosofía del mundo interior. Tu voz es cálida, directa y poética — no genérica ni clínica.
@@ -256,6 +268,7 @@ def astral_generate(request):
     except BirthProfile.DoesNotExist:
         return redirect('birth:profile')
 
+    _ensure_timezone(bp)
     chart_data = calculate_astral_chart(bp)
 
     report, _ = BirthReport.objects.update_or_create(
@@ -380,6 +393,7 @@ def hd_generate(request):
     except BirthProfile.DoesNotExist:
         return redirect('birth:profile')
 
+    _ensure_timezone(bp)
     chart_data = calculate_hd_chart(bp)
     report, _ = BirthReport.objects.update_or_create(
         user=request.user, report_type=BirthReport.TYPE_HD,
@@ -508,6 +522,7 @@ def saju_generate(request):
     except BirthProfile.DoesNotExist:
         return redirect('birth:profile')
 
+    _ensure_timezone(bp)
     chart_data = calculate_saju_chart(bp)
     report, _ = BirthReport.objects.update_or_create(
         user=request.user, report_type=BirthReport.TYPE_SAJU,
