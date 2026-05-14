@@ -497,7 +497,7 @@
   input.addEventListener("keydown", e => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   });
-  sendBtn.addEventListener("click", sendMessage);
+  sendBtn.addEventListener("click", () => sendMessage());
 
   function useChip(el) {
     input.value = el.textContent;
@@ -575,8 +575,8 @@
   }
 
   async function sendMessage(overrideText) {
-    const text = (overrideText !== undefined) ? overrideText : input.value.trim();
-    if (!text && !overrideText) return;
+    const text = (overrideText !== undefined) ? String(overrideText).trim() : input.value.trim();
+    if (!text) return;
 
     if (welcome) welcome.style.display = "none";
 
