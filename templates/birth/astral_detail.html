@@ -410,78 +410,14 @@
   {% endif %}
   {% endwith %}
 
-  <!-- Interpretación -->
-  <div class="section-title reveal">Lectura del Espejo</div>
-  <div class="interp-section reveal">
-
-    {% if report.status == 'complete' %}
-      {% if report.interpretation %}
-        <div class="interp-text">{{ report.interpretation }}</div>
-      {% else %}
-        <p class="no-tokens-note">
-          La carta astral está calculada. Para recibir la lectura del Espejo necesitás tokens disponibles.
-          <a href="{% url 'tokens:balance' %}">Ver mis tokens →</a>
-        </p>
-      {% endif %}
-
-    {% elif report.status == 'processing' %}
-      <div class="interp-spinner" id="interp-container"
-           data-poll-url="{{ poll_url }}"
-           data-status="{{ report.status }}">
-        <div class="spin-ring"></div>
-        <p><strong>El Espejo está leyendo tu mapa celeste</strong><br>
-           Esto puede tomar unos segundos. Podés seguir navegando — la lectura estará aquí cuando vuelvas.</p>
-      </div>
-
-    {% elif report.status == 'failed' %}
-      <p class="interp-failed">No se pudo generar la lectura en este momento. Intentalo de nuevo más tarde.</p>
-
-    {% endif %}
-
-  </div>
-
-  <div style="display:flex;align-items:center;gap:1rem;margin-top:3rem;">
+  <div style="display:flex;align-items:center;gap:1rem;margin-top:3rem;flex-wrap:wrap;">
     <a href="{% url 'birth:profile' %}" class="back-link" style="margin-top:0">← Volver a nacimiento</a>
+    <a href="/nacimiento/reporte/{{ report.pk }}/astral/lectura/"
+       style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.55rem 1.1rem;background:rgba(124,109,250,0.1);border:1px solid rgba(124,109,250,0.3);border-radius:100px;font-size:0.82rem;color:var(--accent2);text-decoration:none;">
+      ◎ {% if report.interpretation and report.interpretation != 'processing' %}Ver lectura endonauta{% else %}Lectura pendiente{% endif %}
+    </a>
     <button class="print-btn" onclick="window.print()">↓ Imprimir como PDF</button>
   </div>
 
 </div>
-{% endblock %}
-
-{% block extra_body %}
-<script>
-(function() {
-  const container = document.getElementById('interp-container');
-  if (!container) return;
-
-  const pollUrl = container.dataset.pollUrl;
-
-  function poll() {
-    fetch(pollUrl)
-      .then(r => r.json())
-      .then(data => {
-        if (data.status === 'complete') {
-          if (data.interpretation) {
-            const div = document.createElement('div');
-            div.className = 'interp-text fade-in';
-            div.textContent = data.interpretation;
-            container.replaceWith(div);
-          } else {
-            container.innerHTML = `<p class="no-tokens-note">
-              La carta astral está calculada. Para recibir la lectura del Espejo necesitás tokens disponibles.
-              <a href="/tokens/">Ver mis tokens →</a>
-            </p>`;
-          }
-        } else if (data.status === 'failed') {
-          container.innerHTML = '<p class="interp-failed">No se pudo generar la lectura en este momento.</p>';
-        } else {
-          setTimeout(poll, 2500);
-        }
-      })
-      .catch(() => setTimeout(poll, 5000));
-  }
-
-  setTimeout(poll, 2500);
-})();
-</script>
 {% endblock %}

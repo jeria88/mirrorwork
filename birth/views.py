@@ -64,6 +64,47 @@ HD_PROFILES = {
     (6,4):'6/4 — Modelo de Rol/Oportunista',
 }
 
+# Cross type by profile (P☉ line, D☉ line)
+_LEFT_ANGLE_PROFILES  = {(5,1),(5,2),(6,2),(6,3)}
+_RIGHT_ANGLE_PROFILES = {(1,3),(1,4),(2,4),(2,5),(3,5),(4,6)}
+# (4,1) = Juxtaposition; other profiles = Right Angle by default
+
+# Incarnation cross theme names by P☉ gate (Ra Uru Hu convention, Spanish)
+HD_CROSS_THEMES = {
+     1:'del Amor Propio',        2:'del Retorno',
+     3:'de la Mutación',         4:'de la Formulación',
+     5:'del Tiempo',             6:'de la Fricción',
+     7:'de la Esfinge',          8:'del Contagio',
+     9:'del Foco',              10:'del Comportamiento',
+    11:'de la Curiosidad',      12:'de la Articulación',
+    13:'de la Esfinge',         14:'del Gran Candelabro',
+    15:'de las Ondas Cruzadas', 16:'de las Habilidades',
+    17:'de las Preguntas',      18:'de la Corrección',
+    19:'de la Necesidad',       20:'del Ahora',
+    21:'del Control',           22:'de la Gracia',
+    23:'de la Asimilación',     24:'de la Dualidad',
+    25:'de la Inocencia',       26:'del Gran Engañador',
+    27:'de la Preservación',    28:'del Fatalismo',
+    29:'del Compromiso',        30:'del Destino',
+    31:'del Liderazgo',         32:'de la Transformación',
+    33:'del Retiro',            34:'del Gran Poder',
+    35:'del Cambio',            36:'de los Ciclos',
+    37:'de los Pactos',         38:'de la Oposición',
+    39:'de la Provocación',     40:'de la Abnegación',
+    41:'del Deseo',             42:'del Madurar',
+    43:'de la Penetración',     44:'de la Alerta',
+    45:'del Dominio',           46:'del Descubrimiento',
+    47:'de la Realización',     48:'de la Polaridad',
+    49:'del Principio',         50:'de los Valores',
+    51:'de la Iniciación',      52:'de la Quietud',
+    53:'del Comienzo',          54:'de la Ambición',
+    55:'de la Abundancia',      56:'del Estímulo',
+    57:'de la Claridad',        58:'de la Vitalidad',
+    59:'de la Intimidad',       60:'de la Aceptación',
+    61:'del Misterio',          62:'de los Detalles',
+    63:'de las Preguntas',      64:'de la Confusión',
+}
+
 # Centers and their gates
 HD_CENTER_GATES = {
     'Cabeza':    [64, 61, 63],
@@ -414,32 +455,10 @@ def astral_generate(request):
         report_type=BirthReport.TYPE_ASTRAL,
         defaults={
             'chart_data': chart_data,
-            'status': BirthReport.STATUS_PROCESSING,
+            'status': BirthReport.STATUS_COMPLETE,
             'interpretation': '',
         },
     )
-
-    has_tokens = False
-    try:
-        from tokens.models import TokenBalance
-        balance, _ = TokenBalance.objects.get_or_create(
-            user=request.user, defaults={'balance': 50}
-        )
-        has_tokens = balance.spend(5, reason='Interpretación carta astral')
-    except Exception:
-        pass
-
-    if has_tokens:
-        t = threading.Thread(
-            target=_generate_interpretation_async,
-            args=[report.pk, bp.birth_place],
-            daemon=True,
-        )
-        t.start()
-    else:
-        report.status = BirthReport.STATUS_COMPLETE
-        report.save(update_fields=['status', 'updated_at'])
-
     return redirect('birth:astral_detail', pk=report.pk)
 
 
@@ -567,11 +586,17 @@ def _calculate_hd_chart(bp):
         for g in gates:
             gate_to_center[g] = center
 
-    # Defined centers (any gate active → center defined)
+    # Centers defined ONLY through complete channels (both gates active)
     defined_centers = set()
-    for center, gates in HD_CENTER_GATES.items():
-        if any(g in active_gates for g in gates):
-            defined_centers.add(center)
+    for ch in HD_CHANNELS:
+        g_a, g_b = ch
+        if g_a in active_gates and g_b in active_gates:
+            ctr_a = gate_to_center.get(g_a)
+            ctr_b = gate_to_center.get(g_b)
+            if ctr_a:
+                defined_centers.add(ctr_a)
+            if ctr_b:
+                defined_centers.add(ctr_b)
 
     # Center adjacency from defined channels (both gates must be active)
     center_adj = {}
@@ -688,6 +713,20 @@ def _calculate_hd_chart(bp):
         {'gate': d_earth_g, 'name': HD_GATE_NAMES.get(d_earth_g, ''), 'role': 'D ⊕'},
     ]
 
+    # Named incarnation cross
+    _profile_key = (p_sun_l, d_sun_l)
+    if _profile_key == (4, 1):
+        _cross_type = 'Yuxtaposición'
+        _cross_variant = ''
+    elif _profile_key in _LEFT_ANGLE_PROFILES:
+        _cross_type = 'Ángulo Izquierdo'
+        _cross_variant = ' (2)' if p_sun_l >= 4 else ' (1)'
+    else:
+        _cross_type = 'Ángulo Derecho'
+        _cross_variant = ' (2)' if p_sun_l >= 4 else ' (1)'
+    _theme = HD_CROSS_THEMES.get(p_sun_g, '')
+    cross_name = f'Cruz de {_cross_type} {_theme}{_cross_variant}'.strip()
+
     return {
         'type':             hd_type,
         'strategy':         strategy,
@@ -701,6 +740,7 @@ def _calculate_hd_chart(bp):
         'defined_channels': defined_channels,
         'cross_gates':      cross_gate_info,
         'cross_str':        f'{p_sun_g}/{p_earth_g} | {d_sun_g}/{d_earth_g}',
+        'cross_name':       cross_name,
         'design_date':      design_utc.strftime('%Y-%m-%d'),
         'planets_paired':   planets_paired,
         'personality': {
@@ -797,24 +837,8 @@ def hd_generate(request):
     chart_data = _calculate_hd_chart(bp)
     report, _ = BirthReport.objects.update_or_create(
         user=request.user, report_type=BirthReport.TYPE_HD,
-        defaults={'chart_data': chart_data, 'status': BirthReport.STATUS_PROCESSING, 'interpretation': ''},
+        defaults={'chart_data': chart_data, 'status': BirthReport.STATUS_COMPLETE, 'interpretation': ''},
     )
-
-    has_tokens = False
-    try:
-        from tokens.models import TokenBalance
-        balance, _ = TokenBalance.objects.get_or_create(user=request.user, defaults={'balance': 50})
-        has_tokens = balance.spend(5, reason='Interpretación Diseño Humano')
-    except Exception:
-        pass
-
-    if has_tokens:
-        t = threading.Thread(target=_generate_hd_async, args=[report.pk, bp.birth_place], daemon=True)
-        t.start()
-    else:
-        report.status = BirthReport.STATUS_COMPLETE
-        report.save(update_fields=['status', 'updated_at'])
-
     return redirect('birth:hd_detail', pk=report.pk)
 
 
@@ -1105,24 +1129,8 @@ def saju_generate(request):
     chart_data = _calculate_saju_chart(bp)
     report, _ = BirthReport.objects.update_or_create(
         user=request.user, report_type=BirthReport.TYPE_SAJU,
-        defaults={'chart_data': chart_data, 'status': BirthReport.STATUS_PROCESSING, 'interpretation': ''},
+        defaults={'chart_data': chart_data, 'status': BirthReport.STATUS_COMPLETE, 'interpretation': ''},
     )
-
-    has_tokens = False
-    try:
-        from tokens.models import TokenBalance
-        balance, _ = TokenBalance.objects.get_or_create(user=request.user, defaults={'balance': 50})
-        has_tokens = balance.spend(5, reason='Interpretación Saju')
-    except Exception:
-        pass
-
-    if has_tokens:
-        t = threading.Thread(target=_generate_saju_async, args=[report.pk, bp.birth_place], daemon=True)
-        t.start()
-    else:
-        report.status = BirthReport.STATUS_COMPLETE
-        report.save(update_fields=['status', 'updated_at'])
-
     return redirect('birth:saju_detail', pk=report.pk)
 
 
@@ -1137,3 +1145,103 @@ def saju_detail(request, pk):
         'report': report, 'bp': bp,
         'poll_url': f'/nacimiento/reporte/{report.pk}/estado/',
     })
+
+
+# ── Lectura endonauta (vistas de interpretación AI) ───────────────────────
+
+_BIRTH_TYPE_LABELS = {
+    BirthReport.TYPE_ASTRAL: 'Carta Astral',
+    BirthReport.TYPE_HD:     'Diseño Humano',
+    BirthReport.TYPE_SAJU:   'Saju',
+}
+
+_BIRTH_ASYNC_FNS = {
+    BirthReport.TYPE_ASTRAL: _generate_interpretation_async,
+    BirthReport.TYPE_HD:     _generate_hd_async,
+    BirthReport.TYPE_SAJU:   _generate_saju_async,
+}
+
+_BIRTH_LECTURA_NAMES = {
+    BirthReport.TYPE_ASTRAL: 'astral_lectura',
+    BirthReport.TYPE_HD:     'hd_lectura',
+    BirthReport.TYPE_SAJU:   'saju_lectura',
+}
+
+
+def _birth_lectura_view(request, pk, report_type):
+    from django.urls import reverse
+    report = get_object_or_404(BirthReport, pk=pk, user=request.user, report_type=report_type)
+    is_processing = report.interpretation == 'processing'
+    is_revealed   = bool(report.interpretation) and report.interpretation != 'processing'
+    back_view = f'birth:{report_type}_detail'
+    return render(request, 'birth/lectura.html', {
+        'report':        report,
+        'label':         _BIRTH_TYPE_LABELS.get(report_type, ''),
+        'is_processing': is_processing,
+        'is_revealed':   is_revealed,
+        'poll_url':      f'/nacimiento/reporte/{report.pk}/lectura-estado/',
+        'reveal_url':    f'/nacimiento/reporte/{report.pk}/revelar/',
+        'back_url':      reverse(back_view, args=[report.pk]),
+    })
+
+
+@login_required
+def astral_lectura(request, pk):
+    return _birth_lectura_view(request, pk, BirthReport.TYPE_ASTRAL)
+
+
+@login_required
+def hd_lectura(request, pk):
+    return _birth_lectura_view(request, pk, BirthReport.TYPE_HD)
+
+
+@login_required
+def saju_lectura(request, pk):
+    return _birth_lectura_view(request, pk, BirthReport.TYPE_SAJU)
+
+
+@login_required
+def birth_insight_reveal(request, pk):
+    if request.method != 'POST':
+        return redirect('birth:profile')
+    report = get_object_or_404(BirthReport, pk=pk, user=request.user)
+
+    if report.interpretation and report.interpretation != 'processing':
+        lectura_name = _BIRTH_LECTURA_NAMES.get(report.report_type, 'profile')
+        return redirect(f'birth:{lectura_name}', pk=pk)
+
+    try:
+        bp = request.user.birth_profile
+    except BirthProfile.DoesNotExist:
+        return redirect('birth:profile')
+
+    try:
+        from tokens.models import TokenBalance
+        balance, _ = TokenBalance.objects.get_or_create(
+            user=request.user, defaults={'balance': 50}
+        )
+        label = _BIRTH_TYPE_LABELS.get(report.report_type, 'Lectura')
+        balance.spend(5, reason=f'Lectura endonauta — {label}')
+    except Exception:
+        pass
+
+    BirthReport.objects.filter(pk=pk).update(
+        interpretation='processing',
+        status=BirthReport.STATUS_PROCESSING,
+    )
+    fn = _BIRTH_ASYNC_FNS.get(report.report_type)
+    if fn:
+        threading.Thread(target=fn, args=[report.pk, bp.birth_place], daemon=True).start()
+
+    lectura_name = _BIRTH_LECTURA_NAMES.get(report.report_type, 'profile')
+    return redirect(f'birth:{lectura_name}', pk=pk)
+
+
+@login_required
+def birth_insight_status(request, pk):
+    report = get_object_or_404(BirthReport, pk=pk, user=request.user)
+    if report.interpretation in ('', 'processing'):
+        return JsonResponse({'status': 'processing'})
+    if report.status == BirthReport.STATUS_FAILED:
+        return JsonResponse({'status': 'failed'})
+    return JsonResponse({'status': 'complete', 'interpretation': report.interpretation})
