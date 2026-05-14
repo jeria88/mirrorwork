@@ -1173,7 +1173,12 @@ def _birth_lectura_view(request, pk, report_type):
     report = get_object_or_404(BirthReport, pk=pk, user=request.user, report_type=report_type)
     is_processing = report.interpretation == 'processing'
     is_revealed   = bool(report.interpretation) and report.interpretation != 'processing'
-    back_view = f'birth:{report_type}_detail'
+    _detail_names = {
+        BirthReport.TYPE_ASTRAL: 'birth:astral_detail',
+        BirthReport.TYPE_HD:     'birth:hd_detail',
+        BirthReport.TYPE_SAJU:   'birth:saju_detail',
+    }
+    back_view = _detail_names.get(report_type, 'birth:profile')
     return render(request, 'birth/lectura.html', {
         'report':        report,
         'label':         _BIRTH_TYPE_LABELS.get(report_type, ''),
