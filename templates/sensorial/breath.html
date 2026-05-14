@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+{% block title %}{{ pattern.name }} — MirrorWork{% endblock %}
+
+{% block extra_head %}
+<style>
+  html, body { height: 100%; }
+  .breath-wrap {
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 2rem 1.5rem 4rem;
+    position: relative; overflow: hidden;
+  }
+
+  /* Background ambient */
+  .breath-bg {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(78,205,196,0.04) 0%, transparent 70%);
+    transition: opacity 1s ease;
+  }
+
+  .breath-content { position: relative; z-index: 1; text-align: center; width: 100%; max-width: 420px; }
+
+  .breath-name {
+    font-size: 0.75rem; font-weight: 500; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 2.5rem;
+  }
+
+  /* Orb */
+  .orb-wrap {
+    width: 200px; height: 200px; margin: 0 auto 2.5rem;
+    position: relative; display: flex; align-items: center; justify-content: center;
+  }
+  .orb-ring {
+    position: absolute; inset: 0; border-radius: 50%;
+    border: 1.5px solid rgba(78,205,196,0.2);
+    transition: transform 0.3s ease, border-color 0.8s ease;
+  }
+  .orb-ring-2 {
+    position: absolute; inset: 16px; border-radius: 50%;
+    border: 1px solid rgba(78,205,196,0.1);
+  }
+  .orb {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: radial-gradient(circle at 38% 38%, rgba(78,205,196,0.5), rgba(78,205,196,0.15));
+    box-shadow: 0 0 32px rgba(78,205,196,0.2), 0 0 8px rgba(78,205,196,0.3);
+    transition: transform 0.15s ease, box-shadow 0.3s ease, background 0.8s ease;
+    will-change: transform;
+  }
+
+  /* Phase label */
+  .phase-label {
+    font-family: var(--font-heading); font-size: 1.6rem; font-weight: 400;
+    color: var(--text); margin-bottom: 0.4rem; min-height: 2rem;
+    transition: opacity 0.3s ease;
+  }
+  .phase-timer {
+    font-size: 3rem; font-weight: 300; font-variant-numeric: tabular-nums;
+    color: var(--accent); line-height: 1; margin-bottom: 0.3rem;
+    min-height: 3.5rem;
+  }
+  .cycle-count {
+    font-size: 0.78rem; color: var(--dim); margin-bottom: 2.5rem;
+  }
+
+  /* Progress arc */
+  .arc-wrap { position: absolute; inset: 0; pointer-events: none; }
+  .arc-track { fill: none; stroke: rgba(78,205,196,0.08); stroke-width: 2; }
+  .arc-fill {
+    fill: none; stroke: var(--accent); stroke-width: 2;
+    stroke-linecap: round;
+    stroke-dasharray: 565;
+    stroke-dashoffset: 565;
+    transform: rotate(-90deg); transform-origin: center;
+    transition: stroke-dashoffset 0.25s linear, stroke 0.8s ease;
+  }
+
+  /* Controls */
+  .controls { display: flex; gap: 1rem; justify-content: center; margin-top: 1rem; }
+  .btn-ctrl {
+    padding: 0.7rem 1.8rem; border-radius: 100px;
+    font-size: 0.85rem; font-family: var(--font-ui); font-weight: 500;
+    border: none; cursor: pointer; transition: opacity 0.15s, transform 0.1s;
+  }
+  .btn-ctrl:hover { opacity: 0.88; transform: scale(1.03); }
+  .btn-ctrl:active { transform: scale(0.97); }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-secondary { background: rgba(255,255,255,0.06); color: var(--muted); border: 1px solid var(--border); }
+
+  /* Done state */
+  .done-msg {
+    display: none; flex-direction: column; align-items: center; gap: 0.75rem;
+    padding: 2rem; background: rgba(78,205,196,0.06); border: 1px solid rgba(78,205,196,0.2);
+    border-radius: 16px; margin-top: 1rem;
+  }
+  .done-msg h3 { font-family: var(--font-heading); font-size: 1.3rem; font-weight: 400; margin: 0; }
+  .done-msg p { font-size: 0.85rem; color: var(--muted); margin: 0; line-height: 1.6; }
+  .done-msg a { font-size: 0.82rem; color: var(--accent); text-decoration: none; margin-top: 0.5rem; }
+
+  @media (max-width: 480px) {
+    .orb-wrap { width: 160px; height: 160px; }
+    .orb { width: 64px; height: 64px; }
+    .phase-timer { font-size: 2.5rem; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="breath-wrap">
+  <div class="breath-bg" id="breathBg"></div>
+
+  <div class="breath-content">
+    <div class="breath-name">{{ pattern.name }}</div>
+
+    <div class="orb-wrap" id="orbWrap">
+      <svg class="arc-wrap" viewBox="0 0 200 200">
+        <circle class="arc-track" cx="100" cy="100" r="90"/>
+        <circle class="arc-fill" id="arcFill" cx="100" cy="100" r="90"/>
+      </svg>
+      <div class="orb-ring" id="orbRing"></div>
+      <div class="orb-ring-2"></div>
+      <div class="orb" id="orb"></div>
+    </div>
+
+    <div class="phase-label" id="phaseLabel">—</div>
+    <div class="phase-timer" id="phaseTimer">—</div>
+    <div class="cycle-count" id="cycleCount">Ciclo 0 / {{ pattern.recommended_cycles }}</div>
+
+    <div class="controls" id="controls">
+      <button class="btn-ctrl btn-primary" id="btnStart">Comenzar</button>
+      <a href="{% url 'sensorial:home' %}" class="btn-ctrl btn-secondary">Volver</a>
+    </div>
+
+    <div class="done-msg" id="doneMsg">
+      <h3>Sesión completa</h3>
+      <p>Tomá un momento para sentir el estado de tu cuerpo.<br>Llevá esta quietud contigo.</p>
+      <a href="{% url 'sensorial:home' %}">← Volver a respiración</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_body %}
+<script>
+(function() {
+  const PHASES   = {{ phases_json|safe }};
+  const REC_CYCLES = {{ pattern.recommended_cycles }};
+  const PATTERN  = '{{ pattern_key }}';
+  const LOG_URL  = '{% url "sensorial:log" %}';
+  const CSRF     = '{{ csrf_token }}';
+  const CIRCUMFERENCE = 2 * Math.PI * 90; // ≈ 565.5
+
+  const phaseLabel  = document.getElementById('phaseLabel');
+  const phaseTimer  = document.getElementById('phaseTimer');
+  const cycleCount  = document.getElementById('cycleCount');
+  const orb         = document.getElementById('orb');
+  const orbRing     = document.getElementById('orbRing');
+  const arcFill     = document.getElementById('arcFill');
+  const btnStart    = document.getElementById('btnStart');
+  const controls    = document.getElementById('controls');
+  const doneMsg     = document.getElementById('doneMsg');
+  const breathBg    = document.getElementById('breathBg');
+
+  arcFill.style.strokeDasharray  = CIRCUMFERENCE;
+  arcFill.style.strokeDashoffset = CIRCUMFERENCE;
+
+  let running = false;
+  let cycle   = 0;
+  let phaseIdx = 0;
+  let remaining = 0;
+  let ticker  = null;
+  let sessionStart = null;
+
+  function getPhaseScale(label) {
+    if (label === 'Inhala') return 1.55;
+    if (label === 'Sostén') return 1.35;
+    return 0.75;
+  }
+
+  function getPhaseColor(label) {
+    if (label === 'Inhala') return PHASES[phaseIdx].color || '#4ecdc4';
+    if (label === 'Sostén') return '#c8a855';
+    return '#7c6dfa';
+  }
+
+  function setArc(fraction, color) {
+    const offset = CIRCUMFERENCE * (1 - fraction);
+    arcFill.style.strokeDashoffset = offset;
+    arcFill.style.stroke = color || '#4ecdc4';
+  }
+
+  function applyPhaseVisuals(phase) {
+    const scale = getPhaseScale(phase.label);
+    const color = phase.color || '#4ecdc4';
+    orb.style.transform   = `scale(${scale})`;
+    orb.style.background  = `radial-gradient(circle at 38% 38%, ${color}80, ${color}26)`;
+    orb.style.boxShadow   = `0 0 ${32 * scale}px ${color}40, 0 0 8px ${color}60`;
+    orbRing.style.borderColor = `${color}50`;
+    breathBg.style.background = `radial-gradient(ellipse 70% 70% at 50% 50%, ${color}08 0%, transparent 70%)`;
+  }
+
+  function tick() {
+    if (!running) return;
+    const phase = PHASES[phaseIdx];
+    const total = phase.seconds;
+    const elapsed = total - remaining;
+    const fraction = elapsed / total;
+
+    phaseLabel.textContent = phase.label;
+    phaseTimer.textContent = remaining.toFixed(1);
+    setArc(fraction, phase.color);
+    applyPhaseVisuals(phase);
+
+    if (remaining <= 0.05) {
+      clearInterval(ticker);
+      nextPhase();
+      return;
+    }
+    remaining -= 0.1;
+  }
+
+  function nextPhase() {
+    phaseIdx++;
+    if (phaseIdx >= PHASES.length) {
+      phaseIdx = 0;
+      cycle++;
+      cycleCount.textContent = `Ciclo ${cycle} / ${REC_CYCLES}`;
+
+      if (cycle >= REC_CYCLES) {
+        finishSession();
+        return;
+      }
+    }
+    startPhase();
+  }
+
+  function startPhase() {
+    const phase = PHASES[phaseIdx];
+    remaining = phase.seconds;
+    ticker = setInterval(tick, 100);
+  }
+
+  function finishSession() {
+    running = false;
+    phaseLabel.textContent = 'Completado';
+    phaseTimer.textContent  = '';
+    orb.style.transform = 'scale(1.1)';
+    controls.style.display = 'none';
+    doneMsg.style.display   = 'flex';
+
+    const duration = sessionStart ? Math.round((Date.now() - sessionStart) / 1000) : 0;
+    fetch(LOG_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+      body: JSON.stringify({ pattern: PATTERN, cycles: cycle, duration }),
+    }).catch(() => {});
+  }
+
+  btnStart.addEventListener('click', function() {
+    if (running) return;
+    running = true;
+    sessionStart = Date.now();
+    this.textContent = 'Respirando…';
+    this.disabled = true;
+    startPhase();
+  });
+})();
+</script>
+{% endblock %}

@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'practitioners',
     'reports',
     'birth',
+    'sensorial',
 ]
 
 MIDDLEWARE = [

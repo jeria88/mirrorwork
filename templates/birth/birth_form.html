@@ -301,14 +301,70 @@
           <div class="rc-icon">⊕</div>
           <div class="rc-name">Saju</div>
           <div class="rc-desc">Los cuatro pilares del destino según la astrología oriental.</div>
-          <div class="rc-action"><span class="badge badge-soon">Próximamente</span></div>
+          <div class="rc-action">
+            {% if saju_report %}
+              {% if saju_report.status == 'complete' %}
+                <span class="badge badge-ok">Generado</span>
+                <div style="margin-top:0.6rem;display:flex;gap:0.5rem">
+                  <a href="{% url 'birth:saju_detail' saju_report.pk %}" class="btn-gen" style="text-decoration:none;text-align:center">Ver →</a>
+                </div>
+                <form method="post" action="{% url 'birth:saju_generate' %}" style="margin-top:0.5rem">
+                  {% csrf_token %}
+                  <button type="submit" class="btn-gen-outline">Regenerar</button>
+                </form>
+              {% elif saju_report.status == 'processing' %}
+                <span class="badge badge-working">Procesando…</span>
+                <div style="margin-top:0.6rem">
+                  <a href="{% url 'birth:saju_detail' saju_report.pk %}" style="font-size:0.78rem;color:var(--accent)">Ver progreso →</a>
+                </div>
+              {% else %}
+                <form method="post" action="{% url 'birth:saju_generate' %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn-gen">Generar</button>
+                </form>
+              {% endif %}
+            {% else %}
+              <form method="post" action="{% url 'birth:saju_generate' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn-gen">Generar</button>
+              </form>
+            {% endif %}
+          </div>
         </div>
 
         <div class="report-card">
           <div class="rc-icon">◈</div>
           <div class="rc-name">Diseño Humano</div>
           <div class="rc-desc">Tu tipo, estrategia y autoridad. Cómo tomás decisiones correctas.</div>
-          <div class="rc-action"><span class="badge badge-soon">Próximamente</span></div>
+          <div class="rc-action">
+            {% if hd_report %}
+              {% if hd_report.status == 'complete' %}
+                <span class="badge badge-ok">Generado</span>
+                <div style="margin-top:0.6rem;display:flex;gap:0.5rem">
+                  <a href="{% url 'birth:hd_detail' hd_report.pk %}" class="btn-gen" style="text-decoration:none;text-align:center">Ver →</a>
+                </div>
+                <form method="post" action="{% url 'birth:hd_generate' %}" style="margin-top:0.5rem">
+                  {% csrf_token %}
+                  <button type="submit" class="btn-gen-outline">Regenerar</button>
+                </form>
+              {% elif hd_report.status == 'processing' %}
+                <span class="badge badge-working">Procesando…</span>
+                <div style="margin-top:0.6rem">
+                  <a href="{% url 'birth:hd_detail' hd_report.pk %}" style="font-size:0.78rem;color:var(--accent)">Ver progreso →</a>
+                </div>
+              {% else %}
+                <form method="post" action="{% url 'birth:hd_generate' %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn-gen">Generar</button>
+                </form>
+              {% endif %}
+            {% else %}
+              <form method="post" action="{% url 'birth:hd_generate' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn-gen">Generar</button>
+              </form>
+            {% endif %}
+          </div>
         </div>
 
       </div>

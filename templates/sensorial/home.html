@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Regulación Sensorial — MirrorWork{% endblock %}
+
+{% block extra_head %}
+<style>
+  .sens-wrap { max-width: 680px; margin: 0 auto; padding: 4rem 1.5rem 8rem; }
+  .sens-tag {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--muted);
+    display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem;
+  }
+  .sens-tag::before { content:''; display:block; width:20px; height:1px; background:var(--dim); }
+  .sens-heading {
+    font-family: var(--font-heading); font-size: clamp(1.8rem,4vw,2.5rem);
+    font-weight: 400; line-height: 1.15; margin-bottom: 0.75rem;
+  }
+  .sens-heading em { font-style: italic; color: var(--muted); }
+  .sens-sub { font-size: 0.9rem; color: var(--muted); line-height: 1.65; margin-bottom: 3rem; }
+
+  .section-title {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: 1.1rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border);
+  }
+
+  .patterns-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; margin-bottom: 3rem; }
+  .pattern-card {
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    border-radius: 16px; padding: 1.5rem;
+    display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: start;
+    transition: border-color 0.2s;
+  }
+  .pattern-card:hover { border-color: rgba(78,205,196,0.35); }
+  .pc-name {
+    font-family: var(--font-heading); font-size: 1.15rem; font-weight: 400;
+    margin-bottom: 0.3rem;
+  }
+  .pc-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.55; margin-bottom: 0.75rem; }
+  .pc-note { font-size: 0.72rem; color: var(--dim); }
+  .pc-phases { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.6rem; }
+  .pc-phase {
+    font-size: 0.7rem; padding: 0.2rem 0.55rem; border-radius: 100px;
+    background: rgba(255,255,255,0.05); color: var(--muted);
+  }
+  .btn-start {
+    padding: 0.65rem 1.4rem; border-radius: 100px;
+    background: var(--accent); color: #000;
+    font-size: 0.82rem; font-weight: 500; font-family: var(--font-ui);
+    border: none; cursor: pointer; white-space: nowrap;
+    text-decoration: none; display: inline-block;
+    transition: opacity 0.15s, transform 0.15s;
+    align-self: center;
+  }
+  .btn-start:hover { opacity: 0.85; transform: scale(1.03); }
+
+  .recent-section { margin-top: 1rem; }
+  .recent-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.65rem 0; border-bottom: 1px solid var(--border);
+    font-size: 0.82rem;
+  }
+  .recent-item:last-child { border-bottom: none; }
+  .ri-pattern { color: var(--text); }
+  .ri-meta { color: var(--dim); font-size: 0.75rem; }
+
+  .back-link { display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 3rem; font-size: 0.8rem; color: var(--muted); text-decoration: none; transition: color 0.15s; }
+  .back-link:hover { color: var(--accent); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sens-wrap">
+
+  <div class="sens-tag reveal">Regulación sensorial</div>
+  <h1 class="sens-heading reveal">Respira<br><em>vuelve al centro</em></h1>
+  <p class="sens-sub reveal">
+    La respiración consciente es la herramienta de regulación más accesible que tenés.
+    Cada patrón activa distintos canales del sistema nervioso autónomo.
+    Elegí el que necesita tu momento.
+  </p>
+
+  <div class="section-title reveal">Patrones de respiración</div>
+  <div class="patterns-grid">
+
+    {% for key, p in patterns.items %}
+    <div class="pattern-card reveal">
+      <div>
+        <div class="pc-name">{{ p.name }}</div>
+        <div class="pc-phases">
+          {% for phase in p.phases %}
+          <span class="pc-phase">{{ phase.label }} {{ phase.seconds }}s</span>
+          {% endfor %}
+        </div>
+        <div class="pc-desc">{{ p.desc }}</div>
+        <div class="pc-note">{{ p.note }}</div>
+      </div>
+      <a href="{% url 'sensorial:session' key %}" class="btn-start">Iniciar</a>
+    </div>
+    {% endfor %}
+
+  </div>
+
+  {% if recent %}
+  <div class="recent-section reveal">
+    <div class="section-title">Sesiones recientes</div>
+    {% for s in recent %}
+    <div class="recent-item">
+      <span class="ri-pattern">{{ s.get_pattern_display }}</span>
+      <span class="ri-meta">{{ s.cycles_completed }} ciclos · {{ s.started_at|date:"d/m H:i" }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <a href="{% url 'accounts:dashboard' %}" class="back-link">← Volver al inicio</a>
+</div>
+{% endblock %}

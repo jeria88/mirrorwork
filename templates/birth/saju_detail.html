@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+{% block title %}Saju — MirrorWork{% endblock %}
+
+{% block extra_head %}
+<style>
+  .saju-wrap { max-width: 720px; margin: 0 auto; padding: 4rem 1.5rem 8rem; }
+  .saju-tag {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--muted);
+    display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem;
+  }
+  .saju-tag::before { content:''; display:block; width:20px; height:1px; background:var(--dim); }
+  .saju-heading {
+    font-family: var(--font-heading); font-size: clamp(1.8rem,4vw,2.5rem);
+    font-weight: 400; line-height: 1.15; margin-bottom: 0.5rem;
+  }
+  .saju-heading em { font-style: italic; color: var(--muted); }
+  .saju-meta { font-size: 0.82rem; color: var(--muted); margin-bottom: 3rem; }
+
+  /* Four pillars */
+  .pillars-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem; margin-bottom: 2.5rem;
+  }
+  .pillar {
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    border-radius: 14px; padding: 1.25rem 1rem; text-align: center;
+    display: flex; flex-direction: column; gap: 0.5rem;
+  }
+  .pillar-label {
+    font-size: 0.68rem; font-weight: 500; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .pillar-char { font-size: 2rem; line-height: 1; }
+  .pillar-char-branch { font-size: 1.6rem; }
+  .pillar-rom { font-size: 0.78rem; color: var(--muted); }
+  .pillar-elem {
+    font-size: 0.72rem; padding: 0.15rem 0.5rem; border-radius: 100px;
+    display: inline-block; margin: 0 auto;
+  }
+  .elem-madera { background: rgba(100,180,100,0.12); color: #7cb87a; }
+  .elem-fuego  { background: rgba(244,128,74,0.12);  color: #f4804a; }
+  .elem-tierra { background: rgba(180,150,80,0.12);  color: #c8a855; }
+  .elem-metal  { background: rgba(180,180,200,0.12); color: #aaaacc; }
+  .elem-agua   { background: rgba(100,150,220,0.12); color: #88aaee; }
+  .pillar-animal { font-size: 0.82rem; color: var(--dim); }
+
+  .section-title {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: 1rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border);
+  }
+
+  /* Elements balance */
+  .elem-balance { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2.5rem; }
+  .elem-chip {
+    display: flex; align-items: center; gap: 0.4rem;
+    padding: 0.35rem 0.8rem; border-radius: 100px; font-size: 0.8rem;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .elem-chip .dots { display: flex; gap: 3px; }
+  .elem-chip .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* Summary */
+  .summary-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2.5rem; }
+  .sum-card {
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    border-radius: 14px; padding: 1.25rem;
+  }
+  .sum-label { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); margin-bottom: 0.4rem; }
+  .sum-value { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 400; color: var(--text); }
+
+  /* Interpretation */
+  .interp-spinner {
+    display: flex; align-items: center; gap: 1rem; padding: 1.5rem;
+    background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 14px;
+  }
+  .spin-ring {
+    width: 28px; height: 28px; border: 2px solid rgba(200,168,85,0.2);
+    border-top-color: var(--luz-intensa); border-radius: 50%; animation: spin 1s linear infinite; flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .interp-spinner p { font-size: 0.88rem; color: var(--muted); margin: 0; line-height: 1.5; }
+  .interp-text { font-size: 0.92rem; line-height: 1.8; color: var(--text); white-space: pre-wrap; }
+  .interp-text.fade-in { animation: fadeUp 0.5s ease both; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  .no-tokens-note { font-size: 0.82rem; color: var(--dim); padding: 1rem 1.25rem; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px; line-height: 1.6; }
+  .no-tokens-note a { color: var(--accent); }
+  .back-link { display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 3rem; font-size: 0.8rem; color: var(--muted); text-decoration: none; transition: color 0.15s; }
+  .back-link:hover { color: var(--accent); }
+
+  .disclaimer { font-size: 0.75rem; color: var(--dim); line-height: 1.6; padding: 0.75rem 1rem; background: rgba(255,255,255,0.02); border-radius: 8px; margin-bottom: 2rem; }
+
+  @media (max-width: 520px) { .pillars-grid { grid-template-columns: repeat(2,1fr); } .summary-cards { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="saju-wrap">
+
+  <div class="saju-tag reveal">Saju — 사주</div>
+  <h1 class="saju-heading reveal">
+    {{ request.user.first_name|default:request.user.email }}<br>
+    <em>los cuatro pilares del destino</em>
+  </h1>
+  {% if bp %}
+  <p class="saju-meta reveal">{{ bp.birth_date }}{% if bp.birth_time %} · {{ bp.birth_time|time:"H:i" }}{% endif %} · {{ bp.birth_place }}</p>
+  {% endif %}
+
+  <p class="disclaimer reveal">
+    El Saju es la astrología oriental coreana basada en el calendario solar chino.
+    Calcula la energía de tu Año, Mes, Día y Hora de nacimiento como cuatro pilares que revelan tu naturaleza y ciclos vitales.
+    {% if not report.chart_data.hour_known %}La hora de nacimiento no fue ingresada — el Pilar de la Hora es aproximado.{% endif %}
+  </p>
+
+  {% with chart=report.chart_data %}
+  {% if chart %}
+
+  <!-- Cuatro pilares -->
+  <div class="section-title reveal">Los cuatro pilares</div>
+  <div class="pillars-grid reveal">
+    {% for p in chart.pillars %}
+    <div class="pillar">
+      <div class="pillar-label">{{ p.label }}</div>
+      <div class="pillar-char">{{ p.stem }}</div>
+      <div class="pillar-char-branch">{{ p.branch }}</div>
+      <div class="pillar-rom">{{ p.rom_stem }} · {{ p.rom_branch }}</div>
+      <span class="pillar-elem elem-{{ p.elem_stem|lower|truncatechars:6|cut:'.' }}">{{ p.elem_stem }}</span>
+      <div class="pillar-animal">{{ p.animal }}</div>
+      <span class="pillar-elem elem-{{ p.elem_branch|lower|truncatechars:6|cut:'.' }}" style="margin-top:-0.25rem">{{ p.elem_branch }}</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Resumen -->
+  <div class="section-title reveal">Síntesis energética</div>
+  <div class="summary-cards reveal">
+    <div class="sum-card">
+      <div class="sum-label">Maestro del Día</div>
+      <div class="sum-value">{{ chart.day_master }}</div>
+      <div style="font-size:0.78rem;color:var(--muted);margin-top:0.3rem">Tu identidad central — la energía desde la que navegás la vida</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-label">Animal del año</div>
+      <div class="sum-value">{{ chart.lunar_year_animal }}</div>
+      <div style="font-size:0.78rem;color:var(--muted);margin-top:0.3rem">El arquetipo del ciclo en que llegaste</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-label">Elemento dominante</div>
+      <div class="sum-value">{{ chart.dominant_element }}</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-label">Elemento más débil</div>
+      <div class="sum-value">{{ chart.weakest_element|default:"Equilibrado" }}</div>
+    </div>
+  </div>
+
+  <!-- Balance de elementos -->
+  <div class="section-title reveal">Balance de los 5 elementos</div>
+  <div class="elem-balance reveal">
+    {% for elem, count in chart.element_count.items %}
+    <div class="elem-chip elem-{{ elem|lower }}">
+      <span>{{ elem }}</span>
+      <span class="dots">
+        {% for i in "12345"|make_list %}{% if forloop.counter <= count %}<span class="dot" style="background:currentColor"></span>{% else %}<span class="dot" style="background:rgba(255,255,255,0.1)"></span>{% endif %}{% endfor %}
+      </span>
+      <span>{{ count }}</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% endif %}
+  {% endwith %}
+
+  <!-- Lectura del Espejo -->
+  <div class="section-title reveal">Lectura del Espejo</div>
+  <div class="interp-section reveal">
+    {% if report.status == 'complete' %}
+      {% if report.interpretation %}
+        <div class="interp-text">{{ report.interpretation }}</div>
+      {% else %}
+        <p class="no-tokens-note">El chart está calculado. Para la lectura del Espejo necesitás tokens. <a href="{% url 'tokens:balance' %}">Ver mis tokens →</a></p>
+      {% endif %}
+    {% elif report.status == 'processing' %}
+      <div class="interp-spinner" id="interp-container" data-poll-url="{{ poll_url }}">
+        <div class="spin-ring"></div>
+        <p><strong>El Espejo está leyendo tus cuatro pilares</strong><br>Podés seguir navegando — la lectura estará aquí cuando vuelvas.</p>
+      </div>
+    {% elif report.status == 'failed' %}
+      <p style="font-size:0.85rem;color:var(--muted);font-style:italic">No se pudo generar la lectura en este momento.</p>
+    {% endif %}
+  </div>
+
+  <a href="{% url 'birth:profile' %}" class="back-link">← Volver a nacimiento</a>
+</div>
+{% endblock %}
+
+{% block extra_body %}
+<script>
+(function() {
+  const c = document.getElementById('interp-container');
+  if (!c) return;
+  function poll() {
+    fetch(c.dataset.pollUrl).then(r=>r.json()).then(data=>{
+      if (data.status==='complete') {
+        if (data.interpretation) {
+          const d = document.createElement('div');
+          d.className='interp-text fade-in'; d.textContent=data.interpretation; c.replaceWith(d);
+        } else {
+          c.innerHTML='<p class="no-tokens-note">Chart calculado. Para la lectura necesitás tokens. <a href="/tokens/">Ver →</a></p>';
+        }
+      } else if (data.status==='failed') {
+        c.innerHTML='<p style="font-size:0.85rem;color:var(--muted)">No se pudo generar la lectura.</p>';
+      } else { setTimeout(poll, 2500); }
+    }).catch(()=>setTimeout(poll,5000));
+  }
+  setTimeout(poll, 2500);
+})();
+</script>
+{% endblock %}

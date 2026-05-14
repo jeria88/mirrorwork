@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+{% block title %}Diseño Humano — MirrorWork{% endblock %}
+
+{% block extra_head %}
+<style>
+  .hd-wrap { max-width: 720px; margin: 0 auto; padding: 4rem 1.5rem 8rem; }
+  .hd-tag {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--muted);
+    display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem;
+  }
+  .hd-tag::before { content:''; display:block; width:20px; height:1px; background:var(--dim); }
+  .hd-heading {
+    font-family: var(--font-heading); font-size: clamp(1.8rem,4vw,2.5rem);
+    font-weight: 400; line-height: 1.15; margin-bottom: 0.5rem;
+  }
+  .hd-heading em { font-style: italic; color: var(--muted); }
+  .hd-meta { font-size: 0.82rem; color: var(--muted); margin-bottom: 3rem; }
+
+  /* Type card */
+  .type-card {
+    background: rgba(124,109,250,0.07);
+    border: 1px solid rgba(124,109,250,0.25);
+    border-radius: 18px; padding: 1.75rem 2rem; margin-bottom: 2.5rem;
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;
+  }
+  .type-main { grid-column: 1 / -1; }
+  .type-label {
+    font-size: 0.7rem; font-weight: 500; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent2); margin-bottom: 0.35rem;
+  }
+  .type-value {
+    font-family: var(--font-heading); font-size: 1.6rem; font-weight: 400;
+    color: var(--text);
+  }
+  .type-sub { font-size: 0.82rem; color: var(--muted); margin-top: 0.25rem; }
+  .type-field { display: flex; flex-direction: column; gap: 0.25rem; }
+  .field-label { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); }
+  .field-value { font-size: 0.9rem; color: var(--text); }
+
+  /* Gates */
+  .section-title {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: 1rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border);
+  }
+  .gates-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2.5rem; }
+  .gate-card {
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    border-radius: 14px; padding: 1.25rem;
+  }
+  .gate-card-label {
+    font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem;
+  }
+  .gate-num {
+    font-family: var(--font-heading); font-size: 2rem; font-weight: 400;
+    color: var(--accent2); line-height: 1;
+  }
+  .gate-line { font-size: 0.75rem; color: var(--dim); margin-top: 0.15rem; }
+  .gate-name { font-size: 0.88rem; color: var(--text); margin-top: 0.3rem; }
+
+  /* Centers */
+  .centers-wrap { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2.5rem; }
+  .center-badge {
+    font-size: 0.75rem; padding: 0.3rem 0.75rem; border-radius: 100px;
+    border: 1px solid rgba(124,109,250,0.3); color: var(--accent2);
+    background: rgba(124,109,250,0.08);
+  }
+
+  /* Interpretation */
+  .interp-spinner {
+    display: flex; align-items: center; gap: 1rem; padding: 1.5rem;
+    background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 14px;
+  }
+  .spin-ring {
+    width: 28px; height: 28px; border: 2px solid rgba(124,109,250,0.2);
+    border-top-color: var(--accent2); border-radius: 50%; animation: spin 1s linear infinite; flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .interp-spinner p { font-size: 0.88rem; color: var(--muted); margin: 0; line-height: 1.5; }
+  .interp-text { font-size: 0.92rem; line-height: 1.8; color: var(--text); white-space: pre-wrap; }
+  .interp-text.fade-in { animation: fadeUp 0.5s ease both; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  .no-tokens-note { font-size: 0.82rem; color: var(--dim); padding: 1rem 1.25rem; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px; line-height: 1.6; }
+  .no-tokens-note a { color: var(--accent); }
+  .back-link { display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 3rem; font-size: 0.8rem; color: var(--muted); text-decoration: none; transition: color 0.15s; }
+  .back-link:hover { color: var(--accent); }
+
+  .disclaimer { font-size: 0.75rem; color: var(--dim); line-height: 1.6; padding: 0.75rem 1rem; background: rgba(255,255,255,0.02); border-radius: 8px; margin-bottom: 2rem; }
+
+  @media (max-width: 520px) {
+    .type-card { grid-template-columns: 1fr; }
+    .type-main { grid-column: 1; }
+    .gates-grid { grid-template-columns: 1fr; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hd-wrap">
+
+  <div class="hd-tag reveal">Diseño Humano</div>
+  <h1 class="hd-heading reveal">
+    {{ request.user.first_name|default:request.user.email }}<br>
+    <em>tu arquitectura de decisión</em>
+  </h1>
+  {% if bp %}
+  <p class="hd-meta reveal">{{ bp.birth_date }}{% if bp.birth_time %} · {{ bp.birth_time|time:"H:i" }}{% endif %} · {{ bp.birth_place }}</p>
+  {% endif %}
+
+  <p class="disclaimer reveal">
+    El Diseño Humano es un sistema de síntesis que combina astrología, I Ching, Kabbalah y física cuántica.
+    Este cálculo es orientativo — el Tipo puede variar levemente según la hora exacta de nacimiento.
+  </p>
+
+  {% with chart=report.chart_data %}
+  {% if chart %}
+
+  <!-- Tipo y estrategia -->
+  <div class="type-card reveal">
+    <div class="type-main">
+      <div class="type-label">Tipo</div>
+      <div class="type-value">{{ chart.type }}</div>
+      <div class="type-sub">Estrategia: {{ chart.strategy }}</div>
+    </div>
+    <div class="type-field">
+      <div class="field-label">Perfil</div>
+      <div class="field-value">{{ chart.profile }}</div>
+    </div>
+    <div class="type-field">
+      <div class="field-label">Tema No-Yo</div>
+      <div class="field-value">{{ chart.not_self_theme }}</div>
+    </div>
+    <div class="type-field">
+      <div class="field-label">Fecha Diseño</div>
+      <div class="field-value">{{ chart.design_date }}</div>
+    </div>
+  </div>
+
+  <!-- 4 puertas principales -->
+  <div class="section-title reveal">Las 4 puertas de activación</div>
+  <div class="gates-grid reveal">
+    <div class="gate-card">
+      <div class="gate-card-label">☉ Personalidad — Sol (consciente)</div>
+      <div class="gate-num">{{ chart.personality.sun.gate }}</div>
+      <div class="gate-line">Línea {{ chart.personality.sun.line }}</div>
+      <div class="gate-name">{{ chart.personality.sun.name }}</div>
+    </div>
+    <div class="gate-card">
+      <div class="gate-card-label">⊕ Personalidad — Tierra</div>
+      <div class="gate-num">{{ chart.personality.earth.gate }}</div>
+      <div class="gate-line">Línea {{ chart.personality.earth.line }}</div>
+      <div class="gate-name">{{ chart.personality.earth.name }}</div>
+    </div>
+    <div class="gate-card">
+      <div class="gate-card-label">☉ Diseño — Sol (inconsciente)</div>
+      <div class="gate-num">{{ chart.design.sun.gate }}</div>
+      <div class="gate-line">Línea {{ chart.design.sun.line }}</div>
+      <div class="gate-name">{{ chart.design.sun.name }}</div>
+    </div>
+    <div class="gate-card">
+      <div class="gate-card-label">⊕ Diseño — Tierra</div>
+      <div class="gate-num">{{ chart.design.earth.gate }}</div>
+      <div class="gate-line">Línea {{ chart.design.earth.line }}</div>
+      <div class="gate-name">{{ chart.design.earth.name }}</div>
+    </div>
+  </div>
+
+  <!-- Centros definidos -->
+  {% if chart.defined_centers %}
+  <div class="section-title reveal">Centros con energía definida</div>
+  <div class="centers-wrap reveal">
+    {% for center in chart.defined_centers %}
+    <span class="center-badge">{{ center }}</span>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% endif %}
+  {% endwith %}
+
+  <!-- Lectura del Espejo -->
+  <div class="section-title reveal">Lectura del Espejo</div>
+  <div class="interp-section reveal">
+    {% if report.status == 'complete' %}
+      {% if report.interpretation %}
+        <div class="interp-text">{{ report.interpretation }}</div>
+      {% else %}
+        <p class="no-tokens-note">El chart está calculado. Para la lectura del Espejo necesitás tokens. <a href="{% url 'tokens:balance' %}">Ver mis tokens →</a></p>
+      {% endif %}
+    {% elif report.status == 'processing' %}
+      <div class="interp-spinner" id="interp-container" data-poll-url="{{ poll_url }}">
+        <div class="spin-ring"></div>
+        <p><strong>El Espejo está leyendo tu diseño</strong><br>Podés seguir navegando — la lectura estará aquí cuando vuelvas.</p>
+      </div>
+    {% elif report.status == 'failed' %}
+      <p style="font-size:0.85rem;color:var(--muted);font-style:italic">No se pudo generar la lectura en este momento.</p>
+    {% endif %}
+  </div>
+
+  <a href="{% url 'birth:profile' %}" class="back-link">← Volver a nacimiento</a>
+</div>
+{% endblock %}
+
+{% block extra_body %}
+<script>
+(function() {
+  const c = document.getElementById('interp-container');
+  if (!c) return;
+  function poll() {
+    fetch(c.dataset.pollUrl).then(r=>r.json()).then(data=>{
+      if (data.status==='complete') {
+        if (data.interpretation) {
+          const d = document.createElement('div');
+          d.className='interp-text fade-in'; d.textContent=data.interpretation; c.replaceWith(d);
+        } else {
+          c.innerHTML='<p class="no-tokens-note">Chart calculado. Para la lectura necesitás tokens. <a href="/tokens/">Ver →</a></p>';
+        }
+      } else if (data.status==='failed') {
+        c.innerHTML='<p style="font-size:0.85rem;color:var(--muted)">No se pudo generar la lectura.</p>';
+      } else { setTimeout(poll, 2500); }
+    }).catch(()=>setTimeout(poll,5000));
+  }
+  setTimeout(poll, 2500);
+})();
+</script>
+{% endblock %}
