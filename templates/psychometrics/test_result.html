@@ -83,6 +83,15 @@
   }
   .legend-item { display: flex; align-items: center; gap: 0.35rem; }
   .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  @keyframes spin-insight {
+    to { transform: rotate(360deg); }
+  }
+  .insight-fade { animation: insight-fade 0.6s ease; }
+  @keyframes insight-fade {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
 </style>
 {% endblock %}
 
@@ -125,7 +134,16 @@
   </div>
   {% endif %}
 
-  {% if result.ai_insight %}
+  {% if result.ai_insight == "processing" %}
+  <div class="conclusion-box" id="insight-box" style="border-left-color:var(--accent2);margin-bottom:2rem;"
+       data-poll-url="{% url 'psychometrics:result_status' result.pk %}">
+    <h3 style="color:var(--accent2);">Lectura del Espejo ◎</h3>
+    <div id="insight-content" style="display:flex;align-items:center;gap:0.75rem;color:var(--muted);font-size:0.88rem;padding:0.5rem 0;">
+      <div style="width:16px;height:16px;border:2px solid var(--accent2);border-top-color:transparent;border-radius:50%;animation:spin-insight 0.9s linear infinite;flex-shrink:0;"></div>
+      El Espejo está leyendo tu exploración…
+    </div>
+  </div>
+  {% elif result.ai_insight and result.ai_insight != "—" %}
   <div class="conclusion-box" style="border-left-color:var(--accent2);margin-bottom:2rem;">
     <h3 style="color:var(--accent2);">Lectura del Espejo ◎</h3>
     <div style="white-space:pre-wrap;color:var(--text);">{{ result.ai_insight }}</div>
@@ -207,4 +225,36 @@
     <a href="{% url 'dashboard' %}" class="btn btn-primary">Ir al dashboard</a>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_body %}
+<script>
+(function() {
+  const box = document.getElementById('insight-box');
+  if (!box) return;
+
+  const pollUrl = box.dataset.pollUrl;
+  const content = document.getElementById('insight-content');
+
+  function poll() {
+    fetch(pollUrl)
+      .then(r => r.json())
+      .then(data => {
+        if (data.status === 'complete') {
+          if (data.insight) {
+            content.outerHTML = '<div class="insight-fade" style="white-space:pre-wrap;color:var(--text);">' +
+              data.insight.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>';
+          } else {
+            box.style.display = 'none';
+          }
+        } else {
+          setTimeout(poll, 2500);
+        }
+      })
+      .catch(() => setTimeout(poll, 4000));
+  }
+
+  setTimeout(poll, 2500);
+})();
+</script>
 {% endblock %}

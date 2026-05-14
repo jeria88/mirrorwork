@@ -1,8 +1,10 @@
 import json
 import os
+import threading
 
 import requests
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .evaluator import evaluate_test
@@ -45,6 +47,11 @@ def _generate_ai_insight(test_name, instrument_type, evaluation):
         return resp.json()["choices"][0]["message"]["content"]
     except Exception:
         return ""
+
+
+def _run_insight_thread(result_pk, test_name, instrument_type, evaluation):
+    insight = _generate_ai_insight(test_name, instrument_type, evaluation)
+    TestResult.objects.filter(pk=result_pk).update(ai_insight=insight or "—")
 
 
 @login_required
@@ -108,14 +115,13 @@ def test_submit(request, slug):
 
     evaluation = evaluate_test(test.name, raw_scores)
 
-    ai_insight = ""
+    has_tokens = False
     try:
         from tokens.models import TokenBalance
         balance, _ = TokenBalance.objects.get_or_create(
             user=request.user, defaults={"balance": 50}
         )
-        if balance.spend(5, reason=f"AI insight — {test.name}"):
-            ai_insight = _generate_ai_insight(test.name, test.instrument_type, evaluation)
+        has_tokens = balance.spend(5, reason=f"AI insight — {test.name}")
     except Exception:
         pass
 
@@ -124,8 +130,15 @@ def test_submit(request, slug):
         test=test,
         raw_scores=raw_scores,
         evaluation=evaluation,
-        ai_insight=ai_insight,
+        ai_insight="processing" if has_tokens else "",
     )
+
+    if has_tokens:
+        threading.Thread(
+            target=_run_insight_thread,
+            args=(result.pk, test.name, test.instrument_type, evaluation),
+            daemon=True,
+        ).start()
 
     return redirect("psychometrics:test_result", pk=result.pk)
 
@@ -140,3 +153,12 @@ def test_result(request, pk):
 def my_results(request):
     results = TestResult.objects.filter(user=request.user).select_related("test")
     return render(request, "psychometrics/my_results.html", {"results": results})
+
+
+@login_required
+def result_status(request, pk):
+    result = get_object_or_404(TestResult, pk=pk, user=request.user)
+    if result.ai_insight in ("", "processing"):
+        return JsonResponse({"status": "processing"})
+    insight = "" if result.ai_insight == "—" else result.ai_insight
+    return JsonResponse({"status": "complete", "insight": insight})

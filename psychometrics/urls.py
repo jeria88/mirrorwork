@@ -9,4 +9,5 @@ urlpatterns = [
     path('<slug:slug>/', views.test_take, name='test_take'),
     path('<slug:slug>/enviar/', views.test_submit, name='test_submit'),
     path('resultado/<int:pk>/', views.test_result, name='test_result'),
+    path('resultado/<int:pk>/estado/', views.result_status, name='result_status'),
 ]

@@ -126,7 +126,7 @@ def onboarding_mapa(request):
         if choice in _VALID_AESTHETICS:
             profile.map_aesthetic = choice
             profile.save(update_fields=['map_aesthetic'])
-            return redirect('dashboard')
+            return redirect('onboarding_tests')
 
     return render(request, 'accounts/onboarding_mapa.html')
 
@@ -211,4 +211,44 @@ def mapa_interior(request):
         'total_pct': total_pct,
         'completed_tests': completed_tests,
         'total_tests': total_tests,
+    })
+
+
+_ONBOARDING_SLUGS = [
+    'rueda-de-la-vida-integracion',
+    'big-five-inventario-de-personalidad',
+    'heridas-de-la-infancia-lise-bourbeau',
+]
+
+@login_required
+def onboarding_tests(request):
+    try:
+        profile = request.user.profile
+    except Exception:
+        return redirect('onboarding_mapa')
+    if not profile.map_aesthetic:
+        return redirect('onboarding_mapa')
+
+    from psychometrics.models import Test, TestResult
+
+    completed_slugs = set(
+        TestResult.objects.filter(user=request.user, test__slug__in=_ONBOARDING_SLUGS)
+        .values_list('test__slug', flat=True).distinct()
+    )
+
+    if len(completed_slugs) == len(_ONBOARDING_SLUGS):
+        return redirect('dashboard')
+
+    tests = []
+    for slug in _ONBOARDING_SLUGS:
+        try:
+            t = Test.objects.get(slug=slug, active=True)
+            tests.append({'test': t, 'done': slug in completed_slugs})
+        except Test.DoesNotExist:
+            pass
+
+    return render(request, 'accounts/onboarding_tests.html', {
+        'tests': tests,
+        'completed': len(completed_slugs),
+        'total': len(_ONBOARDING_SLUGS),
     })
