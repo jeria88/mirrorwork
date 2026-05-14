@@ -44,6 +44,7 @@
   .elem-metal  { background: rgba(180,180,200,0.12); color: #aaaacc; }
   .elem-agua   { background: rgba(100,150,220,0.12); color: #88aaee; }
   .pillar-animal { font-size: 0.82rem; color: var(--dim); }
+  .pillar-unknown { opacity: 0.45; border-style: dashed; justify-content: center; }
 
   .section-title {
     font-size: 11px; font-weight: 500; letter-spacing: 0.18em;
@@ -209,7 +210,9 @@
   <p class="disclaimer reveal">
     El Saju es la astrología oriental coreana basada en el calendario solar chino.
     Calcula la energía de tu Año, Mes, Día y Hora de nacimiento como cuatro pilares que revelan tu naturaleza y ciclos vitales.
-    {% with chart=report.chart_data %}{% if chart %}{% if not chart.hour_known %}La hora de nacimiento no fue ingresada — el Pilar de la Hora es aproximado.{% endif %}{% endif %}{% endwith %}
+    {% with chart=report.chart_data %}{% if chart and not chart.hour_known %}
+    <strong>Versión sin hora de nacimiento:</strong> se calcularon 3 de 4 pilares. El balance de elementos y la síntesis son parciales. Ingresa tu hora de nacimiento para el cuarto pilar.
+    {% endif %}{% endwith %}
   </p>
 
   {% with chart=report.chart_data %}
@@ -229,6 +232,15 @@
       <span class="pillar-elem elem-{{ p.elem_branch|lower }}" style="margin-top:-0.25rem">{{ p.elem_branch }}</span>
     </div>
     {% endfor %}
+    {% if not chart.hour_known %}
+    <div class="pillar pillar-unknown">
+      <div class="pillar-label">Hora</div>
+      <div class="pillar-char" style="font-size:1.4rem;color:var(--muted)">?</div>
+      <div class="pillar-char-branch" style="color:var(--muted)">?</div>
+      <div class="pillar-rom" style="color:var(--dim)">hora no ingresada</div>
+      <a href="{% url 'birth:profile' %}" style="font-size:0.72rem;color:var(--accent);margin-top:0.25rem">+ agregar hora</a>
+    </div>
+    {% endif %}
   </div>
 
   <!-- Resumen -->

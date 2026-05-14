@@ -991,11 +991,11 @@ def _calculate_saju_chart(bp):
     else:
         hour = None
 
-    hr_gz = sxtwl.getShiGz(dy.tg, hour if hour is not None else 12)
+    hour_known = hour is not None
 
     def gz_info(gz, label):
-        elem_full = TIAN_ES[gz.tg]          # e.g. 'Metal Yang'
-        elem_name = elem_full.split()[0]     # e.g. 'Metal'
+        elem_full = TIAN_ES[gz.tg]
+        elem_name = elem_full.split()[0]
         return {
             'label':          label,
             'stem':           TIANGAN[gz.tg],
@@ -1003,7 +1003,7 @@ def _calculate_saju_chart(bp):
             'rom_stem':       TIAN_ROM[gz.tg],
             'rom_branch':     DI_ROM[gz.dz],
             'elem_stem':      elem_full,
-            'elem_stem_name': elem_name,     # for CSS class
+            'elem_stem_name': elem_name,
             'animal':         DI_ANIMAL[gz.dz],
             'elem_branch':    DI_ELEM[gz.dz],
         }
@@ -1012,10 +1012,12 @@ def _calculate_saju_chart(bp):
         gz_info(yr, 'Año'),
         gz_info(mo, 'Mes'),
         gz_info(dy, 'Día'),
-        gz_info(hr_gz, 'Hora'),
     ]
+    if hour_known:
+        hr_gz = sxtwl.getShiGz(dy.tg, hour)
+        pillars.append(gz_info(hr_gz, 'Hora'))
 
-    # Element count — always all 5 elements, including zeros
+    # Element count — based only on known pillars
     full_count = {e: 0 for e in ELEMENTS_ES}
     for p in pillars:
         full_count[p['elem_stem_name']] += 1
@@ -1034,7 +1036,7 @@ def _calculate_saju_chart(bp):
         'dominant_element':   dominant,
         'weakest_element':    weakest,
         'day_master':         TIAN_ES[dy.tg],
-        'hour_known':         bp.birth_time is not None,
+        'hour_known':         hour_known,
         'lunar_year_animal':  DI_ANIMAL[yr.dz],
         'solar_correction_min': correction_min,
         'solar_hour':         solar_h,
@@ -1084,16 +1086,21 @@ def _build_saju_prompt(chart_data, birth_place):
     dm_elem = day_master_parts[0] if day_master_parts else chart_data['day_master']
     dm_pol  = day_master_parts[1] if len(day_master_parts) > 1 else ''
 
+    hour_known = chart_data.get('hour_known', True)
+    total_chars = len(pillars) * 2
+    pillar_refs = 'Mes, Día y Hora' if hour_known else 'Mes y Día'
+    hora_note = '' if hour_known else '\nNOTA: La hora de nacimiento no está disponible — el Pilar de la Hora no fue calculado. El balance elemental es parcial (basado en 6 de 8 caracteres).\n'
+
     prompt = f"""\
 SAJU — CUATRO PILARES DEL DESTINO — {birth_place}
 ━━━━━━━━━━━━━━━━━━━━━━━━━
 MAESTRO DEL DÍA: {chart_data['day_master']} (elemento {dm_elem}, polaridad {dm_pol})
 ANIMAL DEL AÑO: {chart_data['lunar_year_animal']}
-
-CUATRO PILARES (四柱八字):
+{hora_note}
+PILARES CALCULADOS (四柱八字):
 {p_lines}
 
-BALANCE ELEMENTAL (8 caracteres totales):
+BALANCE ELEMENTAL ({total_chars} caracteres conocidos):
 {elem_line}
   Dominante: {chart_data['dominant_element']} | Mínimo/ausente: {chart_data.get('weakest_element','equilibrado')}
 {daewoon_block}━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1107,7 +1114,7 @@ INSTRUCCIÓN DE FORMATO — 5 párrafos en este orden exacto:
 
 3. EL ANIMAL DEL AÑO Y LOS PATRONES RELACIONALES: el {chart_data['lunar_year_animal']} como arquetipo relacional — cómo esta persona se mueve en sus vínculos, qué tipo de dinámicas tiende a atraer y qué patrón inconsciente en las relaciones refleja el animal (dimensión Vínculos/Sombra).
 
-4. LAS TENSIONES INTERNAS — EL PATRÓN QUE SE REPITE: leyendo los pilares de Mes, Día y Hora juntos (los tres pilares más personales), qué tensión o fricción elemental existe entre ellos. Qué conflicto interno se repite, qué patrón inconsciente emerge de esa configuración específica y cómo se manifiesta en decisiones o bloqueos recurrentes (dimensión Mente/Sombra/Creatividad).
+4. LAS TENSIONES INTERNAS — EL PATRÓN QUE SE REPITE: leyendo los pilares de {pillar_refs} (los pilares más personales disponibles), qué tensión o fricción elemental existe entre ellos. Qué conflicto interno se repite, qué patrón inconsciente emerge de esa configuración específica y cómo se manifiesta en decisiones o bloqueos recurrentes (dimensión Mente/Sombra/Creatividad).
 
 5. EL CICLO VITAL ACTUAL — EL CAPÍTULO PRESENTE: {"con el ciclo actual de " + current['elem_stem'] + " sobre " + current['elem_branch'] + " (edades " + str(current['age_start']) + "–" + str(current['age_end']) + "), qué tipo de energía y aprendizaje está disponible en este período. Qué está pidiendo ser soltado y qué está emergiendo. Cómo prepararse para el próximo ciclo" + (" de " + next_cycle['elem_stem'] if next_cycle else "") + " (dimensión Propósito/Espiritualidad/Sueños)." if current else "describirás los ciclos vitales generales según los pilares disponibles, ya que no se cuenta con el ciclo 大運 actual."}
 
