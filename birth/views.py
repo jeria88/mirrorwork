@@ -253,6 +253,7 @@ def birth_profile(request):
         birth_date = request.POST.get('birth_date', '').strip()
         birth_time = request.POST.get('birth_time', '').strip() or None
         birth_place = request.POST.get('birth_place', '').strip()
+        gender = request.POST.get('gender', '').strip()
 
         if not birth_date or not birth_place:
             return render(request, 'birth/birth_form.html', {
@@ -279,6 +280,8 @@ def birth_profile(request):
             bp.latitude = lat
             bp.longitude = lng
             bp.timezone_str = tz_str
+            if gender in ('M', 'F'):
+                bp.gender = gender
             bp.save()
         else:
             bp = BirthProfile.objects.create(
@@ -289,6 +292,7 @@ def birth_profile(request):
                 latitude=lat,
                 longitude=lng,
                 timezone_str=tz_str,
+                gender=gender if gender in ('M', 'F') else '',
             )
 
         return redirect('birth:profile')
@@ -603,9 +607,104 @@ def hd_detail(request, pk):
 
 # ── Saju ───────────────────────────────────────────────────────────────────
 
-def _birth_hour_to_shichen(hour):
-    """Convert 24h hour to the 12 traditional Chinese time periods (each 2h)."""
-    return hour // 2
+def _true_solar_hour_minute(bp):
+    """Return (h, m, correction_minutes_int) adjusted for true solar time, or (None, None, 0)."""
+    if not bp.birth_time or bp.longitude is None or not bp.timezone_str:
+        return None, None, 0
+    try:
+        import pytz
+        from datetime import datetime as _dt, timedelta as _td
+        tz = pytz.timezone(bp.timezone_str)
+        naive = _dt(bp.birth_date.year, bp.birth_date.month, bp.birth_date.day,
+                    bp.birth_time.hour, bp.birth_time.minute)
+        aware = tz.localize(naive)
+        utc_offset_h = aware.utcoffset().total_seconds() / 3600
+        std_meridian = utc_offset_h * 15
+        correction = (bp.longitude - std_meridian) * 4  # minutes
+        corrected = naive + _td(minutes=correction)
+        return corrected.hour, corrected.minute, round(correction)
+    except Exception:
+        return bp.birth_time.hour, bp.birth_time.minute, 0
+
+
+def _calculate_daewoon(bp, mo_tg, mo_dz, yr_tg):
+    """Calculate 大運 10-year luck cycles using sxtwl month-GZ transitions as 節 markers."""
+    import sxtwl
+    from datetime import timedelta
+
+    gender = getattr(bp, 'gender', '') or ''
+    if not gender:
+        return None
+
+    # Yang stems: 甲(0) 丙(2) 戊(4) 庚(6) 壬(8) — even indices
+    is_yang_year = (yr_tg % 2 == 0)
+    is_male = (gender == 'M')
+    # 顺运 when year polarity matches gender polarity
+    forward = (is_yang_year == is_male)
+
+    birth_date = bp.birth_date
+    birth_d = sxtwl.fromSolar(birth_date.year, birth_date.month, birth_date.day)
+    birth_mo_tg = birth_d.getMonthGZ().tg
+    birth_mo_dz = birth_d.getMonthGZ().dz
+
+    # Find nearest 節 by detecting day when month GZ transitions
+    if not forward:
+        # Count back to previous 節 (last time month GZ changed)
+        for i in range(1, 45):
+            check = birth_date - timedelta(days=i)
+            chk_mo = sxtwl.fromSolar(check.year, check.month, check.day).getMonthGZ()
+            if chk_mo.tg != birth_mo_tg or chk_mo.dz != birth_mo_dz:
+                jie_date = check + timedelta(days=1)
+                days_diff = (birth_date - jie_date).days
+                break
+        else:
+            return None
+    else:
+        # Count forward to next 節
+        for i in range(1, 45):
+            check = birth_date + timedelta(days=i)
+            chk_mo = sxtwl.fromSolar(check.year, check.month, check.day).getMonthGZ()
+            if chk_mo.tg != birth_mo_tg or chk_mo.dz != birth_mo_dz:
+                jie_date = check
+                days_diff = (jie_date - birth_date).days
+                break
+        else:
+            return None
+
+    start_age = round(days_diff / 3)
+    step = 1 if forward else -1
+    import datetime
+    current_age = datetime.date.today().year - birth_date.year
+
+    cycles = []
+    tg, dz = mo_tg, mo_dz
+    for i in range(9):
+        tg = (tg + step) % 10
+        dz = (dz + step) % 12
+        age_start = start_age + i * 10
+        age_end   = age_start + 9
+        cycles.append({
+            'stem':        TIANGAN[tg],
+            'branch':      DIZHI[dz],
+            'rom_stem':    TIAN_ROM[tg],
+            'rom_branch':  DI_ROM[dz],
+            'elem_stem':   TIAN_ES[tg],
+            'elem_branch': DI_ELEM[dz],
+            'animal':      DI_ANIMAL[dz],
+            'age_start':   age_start,
+            'age_end':     age_end,
+            'year_start':  birth_date.year + age_start,
+            'year_end':    birth_date.year + age_end,
+            'is_current':  age_start <= current_age <= age_end,
+        })
+
+    current_cycle = next((c for c in cycles if c['is_current']), None)
+    return {
+        'cycles':        cycles,
+        'start_age':     start_age,
+        'direction':     'forward' if forward else 'backward',
+        'current_cycle': current_cycle,
+    }
 
 
 def _calculate_saju_chart(bp):
@@ -616,19 +715,30 @@ def _calculate_saju_chart(bp):
     mo = d.getMonthGZ()
     dy = d.getDayGZ()
 
-    hour = bp.birth_time.hour if bp.birth_time else None
+    # True solar time correction for the hour pillar
+    solar_h, solar_m, correction_min = _true_solar_hour_minute(bp)
+    if solar_h is not None:
+        hour = solar_h
+    elif bp.birth_time:
+        hour = bp.birth_time.hour
+    else:
+        hour = None
+
     hr_gz = sxtwl.getShiGz(dy.tg, hour if hour is not None else 12)
 
     def gz_info(gz, label):
+        elem_full = TIAN_ES[gz.tg]          # e.g. 'Metal Yang'
+        elem_name = elem_full.split()[0]     # e.g. 'Metal'
         return {
-            'label':   label,
-            'stem':    TIANGAN[gz.tg],
-            'branch':  DIZHI[gz.dz],
-            'rom_stem': TIAN_ROM[gz.tg],
-            'rom_branch': DI_ROM[gz.dz],
-            'elem_stem':  TIAN_ES[gz.tg],
-            'animal':  DI_ANIMAL[gz.dz],
-            'elem_branch': DI_ELEM[gz.dz],
+            'label':          label,
+            'stem':           TIANGAN[gz.tg],
+            'branch':         DIZHI[gz.dz],
+            'rom_stem':       TIAN_ROM[gz.tg],
+            'rom_branch':     DI_ROM[gz.dz],
+            'elem_stem':      elem_full,
+            'elem_stem_name': elem_name,     # for CSS class
+            'animal':         DI_ANIMAL[gz.dz],
+            'elem_branch':    DI_ELEM[gz.dz],
         }
 
     pillars = [
@@ -638,50 +748,81 @@ def _calculate_saju_chart(bp):
         gz_info(hr_gz, 'Hora'),
     ]
 
-    # Element count
-    elem_count = {}
+    # Element count — always all 5 elements, including zeros
+    full_count = {e: 0 for e in ELEMENTS_ES}
     for p in pillars:
-        for e in [p['elem_stem'].split()[0], p['elem_branch']]:
-            elem_count[e] = elem_count.get(e, 0) + 1
+        full_count[p['elem_stem_name']] += 1
+        full_count[p['elem_branch']]    += 1
 
-    dominant = max(elem_count, key=elem_count.get)
-    weakest  = min(elem_count, key=elem_count.get) if len(elem_count) > 1 else None
+    dominant = max(full_count, key=full_count.get)
+    min_val  = min(full_count.values())
+    weakest_list = [e for e, c in full_count.items() if c == min_val]
+    weakest = ' / '.join(weakest_list) if min_val < max(full_count.values()) else None
 
-    # Day Master (pilar día tallo celestial = identidad central)
-    day_master_stem = TIAN_ES[dy.tg]
+    daewoon = _calculate_daewoon(bp, mo.tg, mo.dz, yr.tg)
 
     return {
-        'pillars':         pillars,
-        'element_count':   elem_count,
-        'dominant_element': dominant,
-        'weakest_element':  weakest,
-        'day_master':      day_master_stem,
-        'hour_known':      bp.birth_time is not None,
-        'lunar_year_animal': DI_ANIMAL[yr.dz],
+        'pillars':            pillars,
+        'element_count':      full_count,
+        'dominant_element':   dominant,
+        'weakest_element':    weakest,
+        'day_master':         TIAN_ES[dy.tg],
+        'hour_known':         bp.birth_time is not None,
+        'lunar_year_animal':  DI_ANIMAL[yr.dz],
+        'solar_correction_min': correction_min,
+        'solar_hour':         solar_h,
+        'solar_minute':       solar_m,
+        'daewoon':            daewoon,
     }
 
 
 def _build_saju_prompt(chart_data, birth_place):
     pillars = chart_data['pillars']
-    p_text = '\n'.join(
-        f"  {p['label']}: {p['stem']}({p['rom_stem']}/{p['elem_stem']}) "
-        f"{p['branch']}({p['rom_branch']}/{p['animal']}/{p['elem_branch']})"
+    ec = chart_data['element_count']
+    daewoon = chart_data.get('daewoon')
+
+    p_lines = '\n'.join(
+        f"  {p['label']}: {p['stem']}({p['rom_stem']}) {p['branch']}({p['rom_branch']}) | "
+        f"Tallo: {p['elem_stem']} | Rama: {p['elem_branch']} | Animal: {p['animal']}"
         for p in pillars
     )
+
+    elem_line = ' | '.join(f"{e}: {ec.get(e,0)}" for e in ELEMENTS_ES)
+
+    daewoon_block = ''
+    if daewoon:
+        current = daewoon.get('current_cycle')
+        if current:
+            daewoon_block = (
+                f"\nCICLO VITAL ACTUAL (大運): {current['stem']}{current['branch']} "
+                f"({current['elem_stem']} / {current['elem_branch']}) "
+                f"— edades {current['age_start']}-{current['age_end']} "
+                f"({current['year_start']}-{current['year_end']})\n"
+                f"Próximo ciclo: {daewoon['cycles'][daewoon['cycles'].index(current)+1]['stem']}"
+                f"{daewoon['cycles'][daewoon['cycles'].index(current)+1]['branch']}"
+                if daewoon['cycles'].index(current) < len(daewoon['cycles'])-1 else ''
+            )
+
     return (
-        f"Eres el Espejo Endonauta. Un usuario nacido en {birth_place} acaba de recibir su carta Saju.\n\n"
+        f"Eres el Espejo Endonauta especializado en Saju — los Cuatro Pilares del Destino.\n\n"
+        f"CARTA: nacido/a en {birth_place}\n"
         f"Maestro del Día (identidad central): {chart_data['day_master']}\n"
-        f"Animal del año lunar: {chart_data['lunar_year_animal']}\n"
+        f"Animal del año: {chart_data['lunar_year_animal']}\n\n"
+        f"CUATRO PILARES (四柱八字):\n{p_lines}\n\n"
+        f"BALANCE ELEMENTAL (8 caracteres): {elem_line}\n"
         f"Elemento dominante: {chart_data['dominant_element']}\n"
-        f"Elemento más débil: {chart_data.get('weakest_element', 'equilibrado')}\n\n"
-        f"Los Cuatro Pilares:\n{p_text}\n\n"
-        "Escribe una lectura endonauta de 4-5 párrafos basada en los Cuatro Pilares del Destino (사주). "
-        "Explica el Maestro del Día como la energía central de la persona. "
-        "Conecta el elemento dominante y el más débil con áreas de fortaleza y crecimiento. "
-        "Menciona el animal del año y lo que aporta. "
-        "Conecta con las dimensiones endonautas cuando sea natural. "
-        "Termina con una pregunta de exploración. Tono cálido, curioso. En español. "
-        "Sin jerga técnica china innecesaria. Párrafos separados por salto de línea."
+        f"Elemento ausente o mínimo: {chart_data.get('weakest_element','equilibrado')}\n"
+        f"{daewoon_block}\n"
+        "Escribe una lectura endonauta profunda de 5 párrafos:\n"
+        "1. El Maestro del Día — la naturaleza esencial, el tipo de energía que es esta persona en su núcleo\n"
+        "2. El balance elemental — qué energías dominan la vida y cuál es el elemento a cultivar para el crecimiento\n"
+        "3. El animal del año y los patrones relacionales — cómo se vincula con el mundo y con otros\n"
+        "4. La tensión interna — qué conflictos o patrones se repiten (usa los pilares de Mes/Día/Hora)\n"
+        "5. El ciclo vital actual y lo que invita en este período de vida\n\n"
+        "Termina con una pregunta de exploración endonauta.\n"
+        "Tono: cálido, profundo, empoderador. En español. Párrafos separados por doble salto de línea.\n"
+        "Usa el lenguaje de las dimensiones endonautas cuando sea natural. "
+        "No uses jerga técnica coreana/china sino su traducción al significado interior."
     )
 
 

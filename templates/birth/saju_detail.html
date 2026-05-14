@@ -58,6 +58,7 @@
     padding: 0.35rem 0.8rem; border-radius: 100px; font-size: 0.8rem;
     border: 1px solid rgba(255,255,255,0.08);
   }
+  .elem-chip.absent { opacity: 0.4; }
   .elem-chip .dots { display: flex; gap: 3px; }
   .elem-chip .dot { width: 6px; height: 6px; border-radius: 50%; }
 
@@ -69,6 +70,32 @@
   }
   .sum-label { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); margin-bottom: 0.4rem; }
   .sum-value { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 400; color: var(--text); }
+
+  /* 大運 table */
+  .daewoon-wrap { margin-bottom: 2.5rem; }
+  .daewoon-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(100px,1fr));
+    gap: 0.6rem;
+  }
+  .dw-cell {
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    border-radius: 10px; padding: 0.75rem 0.6rem; text-align: center;
+    display: flex; flex-direction: column; gap: 0.3rem;
+  }
+  .dw-cell.current {
+    border-color: rgba(200,168,85,0.5); background: rgba(200,168,85,0.06);
+  }
+  .dw-ages { font-size: 0.65rem; color: var(--dim); }
+  .dw-chars { font-size: 1.2rem; line-height: 1.1; }
+  .dw-elem { font-size: 0.63rem; color: var(--muted); }
+  .dw-current-badge {
+    font-size: 0.6rem; font-weight: 500; letter-spacing: 0.05em;
+    color: var(--luz-intensa); text-transform: uppercase;
+  }
+  .daewoon-start { font-size: 0.78rem; color: var(--dim); margin-bottom: 0.75rem; }
+  .no-daewoon { font-size: 0.8rem; color: var(--dim); padding: 0.75rem 1rem;
+    background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+    border-radius: 10px; line-height: 1.6; }
 
   /* Interpretation */
   .interp-spinner {
@@ -104,13 +131,20 @@
     <em>los cuatro pilares del destino</em>
   </h1>
   {% if bp %}
-  <p class="saju-meta reveal">{{ bp.birth_date }}{% if bp.birth_time %} · {{ bp.birth_time|time:"H:i" }}{% endif %} · {{ bp.birth_place }}</p>
+  <p class="saju-meta reveal">
+    {{ bp.birth_date }}{% if bp.birth_time %} · {{ bp.birth_time|time:"H:i" }}{% endif %} · {{ bp.birth_place }}
+    {% with chart=report.chart_data %}
+    {% if chart.solar_correction_min and chart.solar_correction_min != 0 %}
+    · <span title="Corrección por longitud geográfica">Hora solar: {{ chart.solar_hour|stringformat:"02d" }}:{{ chart.solar_minute|stringformat:"02d" }} ({% if chart.solar_correction_min > 0 %}+{% endif %}{{ chart.solar_correction_min }}min)</span>
+    {% endif %}
+    {% endwith %}
+  </p>
   {% endif %}
 
   <p class="disclaimer reveal">
     El Saju es la astrología oriental coreana basada en el calendario solar chino.
     Calcula la energía de tu Año, Mes, Día y Hora de nacimiento como cuatro pilares que revelan tu naturaleza y ciclos vitales.
-    {% if not report.chart_data.hour_known %}La hora de nacimiento no fue ingresada — el Pilar de la Hora es aproximado.{% endif %}
+    {% with chart=report.chart_data %}{% if chart %}{% if not chart.hour_known %}La hora de nacimiento no fue ingresada — el Pilar de la Hora es aproximado.{% endif %}{% endif %}{% endwith %}
   </p>
 
   {% with chart=report.chart_data %}
@@ -125,9 +159,9 @@
       <div class="pillar-char">{{ p.stem }}</div>
       <div class="pillar-char-branch">{{ p.branch }}</div>
       <div class="pillar-rom">{{ p.rom_stem }} · {{ p.rom_branch }}</div>
-      <span class="pillar-elem elem-{{ p.elem_stem|lower|truncatechars:6|cut:'.' }}">{{ p.elem_stem }}</span>
+      <span class="pillar-elem elem-{{ p.elem_stem_name|lower }}">{{ p.elem_stem }}</span>
       <div class="pillar-animal">{{ p.animal }}</div>
-      <span class="pillar-elem elem-{{ p.elem_branch|lower|truncatechars:6|cut:'.' }}" style="margin-top:-0.25rem">{{ p.elem_branch }}</span>
+      <span class="pillar-elem elem-{{ p.elem_branch|lower }}" style="margin-top:-0.25rem">{{ p.elem_branch }}</span>
     </div>
     {% endfor %}
   </div>
@@ -150,23 +184,52 @@
       <div class="sum-value">{{ chart.dominant_element }}</div>
     </div>
     <div class="sum-card">
-      <div class="sum-label">Elemento más débil</div>
+      <div class="sum-label">Elemento ausente o mínimo</div>
       <div class="sum-value">{{ chart.weakest_element|default:"Equilibrado" }}</div>
     </div>
   </div>
 
-  <!-- Balance de elementos -->
+  <!-- Balance de elementos — siempre los 5 -->
   <div class="section-title reveal">Balance de los 5 elementos</div>
   <div class="elem-balance reveal">
     {% for elem, count in chart.element_count.items %}
-    <div class="elem-chip elem-{{ elem|lower }}">
+    <div class="elem-chip elem-{{ elem|lower }}{% if count == 0 %} absent{% endif %}">
       <span>{{ elem }}</span>
       <span class="dots">
-        {% for i in "12345"|make_list %}{% if forloop.counter <= count %}<span class="dot" style="background:currentColor"></span>{% else %}<span class="dot" style="background:rgba(255,255,255,0.1)"></span>{% endif %}{% endfor %}
+        {% for i in "12345"|make_list %}
+          {% if forloop.counter <= count %}
+            <span class="dot" style="background:currentColor"></span>
+          {% else %}
+            <span class="dot" style="background:rgba(255,255,255,0.1)"></span>
+          {% endif %}
+        {% endfor %}
       </span>
       <span>{{ count }}</span>
     </div>
     {% endfor %}
+  </div>
+
+  <!-- 大運 ciclos vitales -->
+  <div class="section-title reveal">Ciclos vitales — 大運</div>
+  <div class="daewoon-wrap reveal">
+    {% if chart.daewoon %}
+      <p class="daewoon-start">Los grandes ciclos de 10 años comienzan a los {{ chart.daewoon.start_age }} años.</p>
+      <div class="daewoon-grid">
+        {% for c in chart.daewoon.cycles %}
+        <div class="dw-cell {% if c.is_current %}current{% endif %}">
+          {% if c.is_current %}<div class="dw-current-badge">Ahora</div>{% endif %}
+          <div class="dw-ages">{{ c.age_start }}–{{ c.age_end }}</div>
+          <div class="dw-chars">{{ c.stem }}{{ c.branch }}</div>
+          <div class="dw-elem elem-{{ c.elem_stem|lower|truncatechars:7|cut:'…' }}">{{ c.elem_stem|truncatewords:1 }}</div>
+          <div style="font-size:0.62rem;color:var(--dim)">{{ c.year_start }}–{{ c.year_end }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    {% elif not bp.gender %}
+      <p class="no-daewoon">Para calcular los ciclos vitales se necesita el género asignado al nacer. <a href="{% url 'birth:profile' %}" style="color:var(--accent)">Actualizar datos →</a></p>
+    {% else %}
+      <p class="no-daewoon">Los ciclos vitales se calcularán al regenerar el reporte.</p>
+    {% endif %}
   </div>
 
   {% endif %}

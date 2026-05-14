@@ -34,6 +34,10 @@ SIGN_ELEMENT = {
 
 
 class BirthProfile(models.Model):
+    GENDER_MALE   = 'M'
+    GENDER_FEMALE = 'F'
+    GENDER_CHOICES = [('M', 'Masculino'), ('F', 'Femenino')]
+
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='birth_profile'
     )
@@ -43,6 +47,7 @@ class BirthProfile(models.Model):
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     timezone_str = models.CharField(max_length=60, blank=True)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

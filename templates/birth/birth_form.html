@@ -193,6 +193,17 @@
     padding-top: 1.5rem;
     border-top: 1px solid var(--border);
   }
+  .gender-row { display: flex; gap: 0.75rem; }
+  .gender-opt {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    gap: 0.5rem; padding: 0.6rem; border-radius: 8px; cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03);
+    font-size: 0.85rem; color: var(--muted); transition: all 0.15s;
+  }
+  .gender-opt input[type=radio] { display: none; }
+  .gender-opt:has(input:checked) {
+    border-color: var(--accent); color: var(--accent); background: rgba(78,205,196,0.07);
+  }
 
   /* ── Autocomplete lugar ── */
   .place-wrap { position: relative; }
@@ -400,6 +411,13 @@
                 <span class="note">Opcional</span>
               </div>
             </div>
+            <div class="field">
+              <label>Género asignado al nacer</label>
+              <div class="gender-row">
+                <label class="gender-opt"><input type="radio" name="gender" value="M" {% if bp.gender == 'M' %}checked{% endif %}> Masculino</label>
+                <label class="gender-opt"><input type="radio" name="gender" value="F" {% if bp.gender == 'F' %}checked{% endif %}> Femenino</label>
+              </div>
+            </div>
           </div>
           <button type="submit" class="btn-save">Actualizar</button>
         </form>
@@ -432,6 +450,14 @@
             <input type="time" name="birth_time">
             <span class="note">Opcional — mejora la precisión del Ascendente</span>
           </div>
+        </div>
+        <div class="field">
+          <label>Género asignado al nacer <span style="font-weight:400;text-transform:none;letter-spacing:0">(para el Saju)</span></label>
+          <div class="gender-row">
+            <label class="gender-opt"><input type="radio" name="gender" value="M"> Masculino</label>
+            <label class="gender-opt"><input type="radio" name="gender" value="F"> Femenino</label>
+          </div>
+          <span class="note">Necesario para calcular los ciclos vitales del Saju</span>
         </div>
       </div>
       <button type="submit" class="btn-save">Guardar y continuar</button>
