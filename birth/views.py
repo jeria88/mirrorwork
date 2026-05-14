@@ -77,12 +77,26 @@ HD_CENTER_GATES = {
     'Raíz':      [53, 60, 52, 19, 39, 41, 58, 38, 54],
 }
 
-# 36 channels: (gate_a, gate_b) — a channel is active if both gates are active
+# 36 HD channels — (gate_a, gate_b), each gate in a different center
 HD_CHANNELS = [
-    (64,47),(61,24),(63,4),(17,62),(43,23),(11,56),(31,7),(8,1),(33,13),
-    (20,10),(20,34),(45,21),(2,14),(46,29),(59,6),(27,50),(3,60),(9,52),
-    (5,15),(29,46),(42,53),(53,19),(39,55),(35,36),(37,40),(22,12),(36,35),
-    (30,41),(41,30),(19,49),(49,19),(18,58),(48,16),(57,34),(32,54),(28,38),
+    # Cabeza ↔ Ajna
+    (64,47),(61,24),(63,4),
+    # Ajna ↔ Garganta
+    (17,62),(43,23),(11,56),
+    # Garganta ↔ Identidad
+    (31,7),(8,1),(33,13),(20,10),
+    # Garganta ↔ Sacral / Corazón / Bazo / Plexo Solar
+    (20,34),(21,45),(16,48),(12,22),(35,36),
+    # Identidad ↔ Sacral / Corazón
+    (2,14),(5,15),(29,46),(25,51),
+    # Corazón ↔ Bazo / Plexo Solar
+    (26,44),(37,40),
+    # Plexo Solar ↔ Sacral / Raíz
+    (59,6),(19,49),(30,41),(39,55),
+    # Sacral ↔ Bazo / Raíz
+    (27,50),(34,57),(3,60),(9,52),(42,53),
+    # Bazo ↔ Raíz
+    (18,58),(28,38),(32,54),
 ]
 
 # ── Saju constants ─────────────────────────────────────────────────────────
@@ -143,7 +157,7 @@ def _calculate_astral_chart(bp):
         lat=lat,
         lng=lng,
         tz_str=tz,
-        zodiac_type='Tropic',
+        zodiac_type='Tropical',
     )
 
     planet_keys = [
@@ -397,6 +411,9 @@ def _lon_to_gate_line(lon):
 
 def _calculate_hd_chart(bp):
     from kerykeion import AstrologicalSubject
+    import pytz
+    from datetime import datetime as _dt
+    from collections import deque
 
     hour = bp.birth_time.hour if bp.birth_time else 12
     minute = bp.birth_time.minute if bp.birth_time else 0
@@ -404,133 +421,253 @@ def _calculate_hd_chart(bp):
     lng = bp.longitude or 0.0
     tz = bp.timezone_str or 'UTC'
 
-    # Personality (birth moment)
-    p = AstrologicalSubject('p', bp.birth_date.year, bp.birth_date.month, bp.birth_date.day,
-                            hour, minute, lat=lat, lng=lng, tz_str=tz, zodiac_type='Tropic')
+    # Convert birth time to UTC for accurate astronomical calculation
+    tz_obj = pytz.timezone(tz)
+    birth_naive = _dt(bp.birth_date.year, bp.birth_date.month, bp.birth_date.day, hour, minute)
+    birth_aware = tz_obj.localize(birth_naive)
+    birth_utc = birth_aware.astimezone(pytz.UTC)
 
-    p_sun_g, p_sun_l   = _lon_to_gate_line(p.sun.abs_pos)
-    p_earth_g, p_earth_l = _lon_to_gate_line((p.sun.abs_pos + 180) % 360)
-    p_moon_g, p_moon_l   = _lon_to_gate_line(p.moon.abs_pos)
-    p_nodes = {
-        'mercury': _lon_to_gate_line(p.mercury.abs_pos),
-        'venus':   _lon_to_gate_line(p.venus.abs_pos),
-        'mars':    _lon_to_gate_line(p.mars.abs_pos),
-        'jupiter': _lon_to_gate_line(p.jupiter.abs_pos),
-        'saturn':  _lon_to_gate_line(p.saturn.abs_pos),
-        'uranus':  _lon_to_gate_line(p.uranus.abs_pos),
-        'neptune': _lon_to_gate_line(p.neptune.abs_pos),
-        'pluto':   _lon_to_gate_line(p.pluto.abs_pos),
-    }
+    # Personality chart (birth moment in UTC)
+    p = AstrologicalSubject('p',
+        birth_utc.year, birth_utc.month, birth_utc.day,
+        birth_utc.hour, birth_utc.minute,
+        lat=lat, lng=lng, tz_str='UTC', zodiac_type='Tropical')
 
-    # Design (~88° before birth ≈ 89 days)
-    design_date = bp.birth_date - timedelta(days=89)
-    d = AstrologicalSubject('d', design_date.year, design_date.month, design_date.day,
-                            12, 0, lat=lat, lng=lng, tz_str=tz, zodiac_type='Tropic')
+    # Design chart: exactly 88 days before birth (UTC)
+    design_utc = birth_utc - timedelta(days=88)
+    d = AstrologicalSubject('d',
+        design_utc.year, design_utc.month, design_utc.day,
+        design_utc.hour, design_utc.minute,
+        lat=lat, lng=lng, tz_str='UTC', zodiac_type='Tropical')
 
-    d_sun_g, d_sun_l   = _lon_to_gate_line(d.sun.abs_pos)
-    d_earth_g, d_earth_l = _lon_to_gate_line((d.sun.abs_pos + 180) % 360)
+    def gl(lon):
+        return _lon_to_gate_line(lon)
 
-    # All active gates (Personality + Design, all planets)
+    def make_planet(label, symbol, lon):
+        g, l = gl(lon)
+        return {'label': label, 'symbol': symbol, 'gate': g, 'line': l, 'name': HD_GATE_NAMES.get(g, '')}
+
+    # Earth is always opposite the Sun (180°)
+    personality_planets = [
+        make_planet('Sol',      '⊙', p.sun.abs_pos),
+        make_planet('Tierra',   '⊕', (p.sun.abs_pos + 180) % 360),
+        make_planet('Luna',     '☽', p.moon.abs_pos),
+        make_planet('Mercurio', '☿', p.mercury.abs_pos),
+        make_planet('Venus',    '♀', p.venus.abs_pos),
+        make_planet('Marte',    '♂', p.mars.abs_pos),
+        make_planet('Júpiter',  '♃', p.jupiter.abs_pos),
+        make_planet('Saturno',  '♄', p.saturn.abs_pos),
+        make_planet('Urano',    '♅', p.uranus.abs_pos),
+        make_planet('Neptuno',  '♆', p.neptune.abs_pos),
+        make_planet('Plutón',   '♇', p.pluto.abs_pos),
+    ]
+
+    design_planets = [
+        make_planet('Sol',      '⊙', d.sun.abs_pos),
+        make_planet('Tierra',   '⊕', (d.sun.abs_pos + 180) % 360),
+        make_planet('Luna',     '☽', d.moon.abs_pos),
+        make_planet('Mercurio', '☿', d.mercury.abs_pos),
+        make_planet('Venus',    '♀', d.venus.abs_pos),
+        make_planet('Marte',    '♂', d.mars.abs_pos),
+        make_planet('Júpiter',  '♃', d.jupiter.abs_pos),
+        make_planet('Saturno',  '♄', d.saturn.abs_pos),
+        make_planet('Urano',    '♅', d.uranus.abs_pos),
+        make_planet('Neptuno',  '♆', d.neptune.abs_pos),
+        make_planet('Plutón',   '♇', d.pluto.abs_pos),
+    ]
+
+    p_sun_g, p_sun_l   = personality_planets[0]['gate'], personality_planets[0]['line']
+    p_earth_g, p_earth_l = personality_planets[1]['gate'], personality_planets[1]['line']
+    d_sun_g, d_sun_l   = design_planets[0]['gate'], design_planets[0]['line']
+    d_earth_g, d_earth_l = design_planets[1]['gate'], design_planets[1]['line']
+
+    # All active gates from both charts
     active_gates = set()
-    active_gates.update([p_sun_g, p_earth_g, p_moon_g, d_sun_g, d_earth_g])
-    for g, _ in p_nodes.values():
-        active_gates.add(g)
-    for planet in [d.mercury, d.venus, d.mars, d.jupiter, d.saturn, d.uranus, d.neptune, d.pluto]:
-        g, _ = _lon_to_gate_line(planet.abs_pos)
-        active_gates.add(g)
-    for planet in [d.moon]:
-        g, _ = _lon_to_gate_line(planet.abs_pos)
-        active_gates.add(g)
+    for pl in personality_planets + design_planets:
+        active_gates.add(pl['gate'])
 
-    # Defined centers
+    # Gate-to-center lookup
+    gate_to_center = {}
+    for center, gates in HD_CENTER_GATES.items():
+        for g in gates:
+            gate_to_center[g] = center
+
+    # Defined centers (any gate active → center defined)
     defined_centers = set()
     for center, gates in HD_CENTER_GATES.items():
         if any(g in active_gates for g in gates):
             defined_centers.add(center)
 
-    # Approximate type
-    sacral_defined = 'Sacral' in defined_centers or any(
-        g in active_gates for g in HD_CENTER_GATES['Sacral']
-    )
-    throat_motors = set()
-    motor_centers = {'Corazón', 'Plexo Solar', 'Raíz', 'Sacral'}
+    # Center adjacency from defined channels (both gates must be active)
+    center_adj = {}
+    defined_channels = []
     for ch in HD_CHANNELS:
         g_a, g_b = ch
-        ctr_a = next((c for c, gs in HD_CENTER_GATES.items() if g_a in gs), None)
-        ctr_b = next((c for c, gs in HD_CENTER_GATES.items() if g_b in gs), None)
         if g_a in active_gates and g_b in active_gates:
-            if ctr_a == 'Garganta' and ctr_b in motor_centers:
-                throat_motors.add(ctr_b)
-            if ctr_b == 'Garganta' and ctr_a in motor_centers:
-                throat_motors.add(ctr_a)
+            ctr_a = gate_to_center.get(g_a)
+            ctr_b = gate_to_center.get(g_b)
+            if ctr_a and ctr_b and ctr_a != ctr_b:
+                center_adj.setdefault(ctr_a, set()).add(ctr_b)
+                center_adj.setdefault(ctr_b, set()).add(ctr_a)
+                defined_channels.append({
+                    'gates': f'{g_a}–{g_b}',
+                    'name': f'{HD_GATE_NAMES.get(g_a, "")} / {HD_GATE_NAMES.get(g_b, "")}',
+                })
 
-    if sacral_defined and throat_motors - {'Sacral'}:
+    # BFS from Garganta to find reachable centers via defined channels
+    reachable_from_throat = set()
+    if 'Garganta' in center_adj:
+        queue = deque(['Garganta'])
+        visited = {'Garganta'}
+        while queue:
+            c = queue.popleft()
+            for neighbor in center_adj.get(c, []):
+                if neighbor not in visited:
+                    visited.add(neighbor)
+                    reachable_from_throat.add(neighbor)
+                    queue.append(neighbor)
+
+    sacral_defined = 'Sacral' in defined_centers
+    motor_centers = {'Corazón', 'Plexo Solar', 'Raíz', 'Sacral'}
+    motors_from_throat = reachable_from_throat & motor_centers
+
+    if sacral_defined and motors_from_throat:
         hd_type = 'Generador Manifestante'
         strategy = 'Responder y luego informar antes de actuar'
-        not_self = 'Frustración'
+        not_self = 'Frustración / Ira'
+        signature = 'Paz y satisfacción'
     elif sacral_defined:
         hd_type = 'Generador'
         strategy = 'Responder (esperar una señal del entorno)'
         not_self = 'Frustración'
-    elif throat_motors:
+        signature = 'Satisfacción'
+    elif motors_from_throat:
         hd_type = 'Manifestador'
         strategy = 'Informar antes de actuar'
         not_self = 'Ira'
+        signature = 'Paz'
+    elif defined_centers:
+        hd_type = 'Proyector'
+        strategy = 'Esperar la invitación'
+        not_self = 'Amargura'
+        signature = 'Éxito'
     else:
-        all_defined = len(defined_centers)
-        if all_defined == 0:
-            hd_type = 'Reflector'
-            strategy = 'Esperar un ciclo lunar completo (29 días)'
-            not_self = 'Decepción'
-        else:
-            hd_type = 'Proyector'
-            strategy = 'Esperar la invitación'
-            not_self = 'Amargura'
+        hd_type = 'Reflector'
+        strategy = 'Esperar un ciclo lunar completo (29 días)'
+        not_self = 'Decepción'
+        signature = 'Sorpresa'
 
-    profile = HD_PROFILES.get(
-        (p_sun_l, p_earth_l),
-        f'{p_sun_l}/{p_earth_l}'
-    )
+    # Profile = Personality Sun line + Design Sun line
+    profile = HD_PROFILES.get((p_sun_l, d_sun_l), f'{p_sun_l}/{d_sun_l}')
+
+    # Authority (center hierarchy)
+    if 'Plexo Solar' in defined_centers:
+        authority = 'Emocional — Plexo Solar'
+    elif 'Sacral' in defined_centers:
+        authority = 'Sacral'
+    elif 'Bazo' in defined_centers:
+        authority = 'Esplénico — Bazo'
+    elif 'Corazón' in defined_centers:
+        authority = 'Ego — Corazón'
+    elif 'Identidad' in defined_centers:
+        authority = 'Identidad — G'
+    elif hd_type == 'Reflector':
+        authority = 'Lunar — 29 días'
+    else:
+        authority = 'Mental — Externo'
+
+    # Definition: count connected components among defined centers
+    visited_def = set()
+    components = 0
+    for center in defined_centers:
+        if center not in visited_def:
+            components += 1
+            q = deque([center])
+            visited_def.add(center)
+            while q:
+                c = q.popleft()
+                for neighbor in center_adj.get(c, []):
+                    if neighbor in defined_centers and neighbor not in visited_def:
+                        visited_def.add(neighbor)
+                        q.append(neighbor)
+    if components == 0:
+        definition = 'Indefinido'
+    elif components == 1:
+        definition = 'Definición Simple'
+    elif components == 2:
+        definition = 'Definición Partida'
+    elif components == 3:
+        definition = 'Definición Partida Triple'
+    else:
+        definition = 'Definición Cuádruple'
+
+    planets_paired = [
+        {'p': pp, 'd': dp}
+        for pp, dp in zip(personality_planets, design_planets)
+    ]
+
+    cross_gate_info = [
+        {'gate': p_sun_g,   'name': HD_GATE_NAMES.get(p_sun_g, ''),   'role': 'P ☉'},
+        {'gate': p_earth_g, 'name': HD_GATE_NAMES.get(p_earth_g, ''), 'role': 'P ⊕'},
+        {'gate': d_sun_g,   'name': HD_GATE_NAMES.get(d_sun_g, ''),   'role': 'D ☉'},
+        {'gate': d_earth_g, 'name': HD_GATE_NAMES.get(d_earth_g, ''), 'role': 'D ⊕'},
+    ]
 
     return {
+        'type':             hd_type,
+        'strategy':         strategy,
+        'not_self_theme':   not_self,
+        'signature':        signature,
+        'profile':          profile,
+        'authority':        authority,
+        'definition':       definition,
+        'defined_centers':  sorted(defined_centers),
+        'active_gates':     sorted(active_gates),
+        'defined_channels': defined_channels,
+        'cross_gates':      cross_gate_info,
+        'cross_str':        f'{p_sun_g}/{p_earth_g} | {d_sun_g}/{d_earth_g}',
+        'design_date':      design_utc.strftime('%Y-%m-%d'),
+        'planets_paired':   planets_paired,
         'personality': {
             'sun':   {'gate': p_sun_g,   'line': p_sun_l,   'name': HD_GATE_NAMES.get(p_sun_g, '')},
             'earth': {'gate': p_earth_g, 'line': p_earth_l, 'name': HD_GATE_NAMES.get(p_earth_g, '')},
-            'moon':  {'gate': p_moon_g,  'line': p_moon_l,  'name': HD_GATE_NAMES.get(p_moon_g, '')},
         },
         'design': {
             'sun':   {'gate': d_sun_g,   'line': d_sun_l,   'name': HD_GATE_NAMES.get(d_sun_g, '')},
             'earth': {'gate': d_earth_g, 'line': d_earth_l, 'name': HD_GATE_NAMES.get(d_earth_g, '')},
         },
-        'profile':          profile,
-        'type':             hd_type,
-        'strategy':         strategy,
-        'not_self_theme':   not_self,
-        'defined_centers':  sorted(defined_centers),
-        'active_gates':     sorted(active_gates),
-        'design_date':      design_date.strftime('%Y-%m-%d'),
     }
 
 
 def _build_hd_prompt(chart_data, birth_place):
     p = chart_data['personality']
     d = chart_data['design']
+    channels = ', '.join(ch['gates'] for ch in chart_data.get('defined_channels', []))
     return (
         f"Eres el Espejo Endonauta. Un usuario nacido en {birth_place} acaba de recibir su chart de Diseño Humano.\n\n"
-        f"Tipo: {chart_data['type']}\n"
-        f"Estrategia: {chart_data['strategy']}\n"
-        f"Perfil: {chart_data['profile']}\n"
-        f"Tema No-Yo: {chart_data['not_self_theme']}\n\n"
-        f"Puerta Personalidad Sol: {p['sun']['gate']} — {p['sun']['name']} (Línea {p['sun']['line']})\n"
-        f"Puerta Personalidad Tierra: {p['earth']['gate']} — {p['earth']['name']} (Línea {p['earth']['line']})\n"
-        f"Puerta Diseño Sol: {d['sun']['gate']} — {d['sun']['name']} (Línea {d['sun']['line']})\n"
-        f"Puerta Diseño Tierra: {d['earth']['gate']} — {d['earth']['name']} (Línea {d['earth']['line']})\n"
-        f"Centros definidos: {', '.join(chart_data['defined_centers'])}\n\n"
-        "Escribe una lectura endonauta de 4-5 párrafos. Conecta el Tipo, la Estrategia y el Perfil con "
-        "el viaje interior del usuario. Explica qué significa su estrategia en la vida cotidiana. "
-        "Conecta con las dimensiones endonautas (identidad, propósito, vínculos, creatividad). "
-        "Termina con una pregunta de exploración. Tono cálido, empoderador, sin jerga técnica. En español. "
-        "Formato: párrafos separados por salto de línea, sin títulos ni bullets."
+        f"TIPO: {chart_data['type']}\n"
+        f"ESTRATEGIA: {chart_data['strategy']}\n"
+        f"AUTORIDAD: {chart_data.get('authority', '')}\n"
+        f"PERFIL: {chart_data['profile']}\n"
+        f"DEFINICIÓN: {chart_data.get('definition', '')}\n"
+        f"TEMA NO-YO: {chart_data['not_self_theme']}\n"
+        f"FIRMA: {chart_data.get('signature', '')}\n\n"
+        f"PUERTAS CLAVE:\n"
+        f"  Personalidad Sol: {p['sun']['gate']} — {p['sun']['name']} (Línea {p['sun']['line']})\n"
+        f"  Personalidad Tierra: {p['earth']['gate']} — {p['earth']['name']} (Línea {p['earth']['line']})\n"
+        f"  Diseño Sol: {d['sun']['gate']} — {d['sun']['name']} (Línea {d['sun']['line']})\n"
+        f"  Diseño Tierra: {d['earth']['gate']} — {d['earth']['name']} (Línea {d['earth']['line']})\n\n"
+        f"CENTROS DEFINIDOS: {', '.join(chart_data['defined_centers'])}\n"
+        f"CANALES DEFINIDOS: {channels}\n\n"
+        "Escribe una lectura endonauta de 5 párrafos:\n"
+        "1. El Tipo y la Estrategia — cómo esta persona está diseñada para moverse en el mundo\n"
+        "2. La Autoridad interior — cómo toma decisiones alineadas consigo misma\n"
+        "3. El Perfil — el rol kármico y el patrón de vida\n"
+        "4. Las puertas del Sol (Personalidad y Diseño) — el propósito consciente e inconsciente\n"
+        "5. Los centros definidos y el tema No-Yo — dónde hay energía consistente y dónde hay condicionamiento\n\n"
+        "Termina con una pregunta de exploración endonauta.\n"
+        "Tono: cálido, empoderador, sin jerga técnica. En español. "
+        "Párrafos separados por doble salto de línea, sin títulos ni bullets."
     )
 
 
