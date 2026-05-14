@@ -115,30 +115,13 @@ def test_submit(request, slug):
 
     evaluation = evaluate_test(test.name, raw_scores)
 
-    has_tokens = False
-    try:
-        from tokens.models import TokenBalance
-        balance, _ = TokenBalance.objects.get_or_create(
-            user=request.user, defaults={"balance": 50}
-        )
-        has_tokens = balance.spend(5, reason=f"AI insight — {test.name}")
-    except Exception:
-        pass
-
     result = TestResult.objects.create(
         user=request.user,
         test=test,
         raw_scores=raw_scores,
         evaluation=evaluation,
-        ai_insight="processing" if has_tokens else "",
+        ai_insight="",
     )
-
-    if has_tokens:
-        threading.Thread(
-            target=_run_insight_thread,
-            args=(result.pk, test.name, test.instrument_type, evaluation),
-            daemon=True,
-        ).start()
 
     return redirect("psychometrics:test_result", pk=result.pk)
 
@@ -162,3 +145,36 @@ def result_status(request, pk):
         return JsonResponse({"status": "processing"})
     insight = "" if result.ai_insight == "—" else result.ai_insight
     return JsonResponse({"status": "complete", "insight": insight})
+
+
+@login_required
+def insight_view(request, pk):
+    result = get_object_or_404(TestResult, pk=pk, user=request.user)
+    return render(request, "psychometrics/insight_view.html", {"result": result})
+
+
+@login_required
+def insight_reveal(request, pk):
+    if request.method != "POST":
+        return redirect("psychometrics:insight_view", pk=pk)
+    result = get_object_or_404(TestResult, pk=pk, user=request.user)
+
+    if result.ai_insight and result.ai_insight not in ("", "—"):
+        return redirect("psychometrics:insight_view", pk=pk)
+
+    try:
+        from tokens.models import TokenBalance
+        balance, _ = TokenBalance.objects.get_or_create(
+            user=request.user, defaults={"balance": 50}
+        )
+        balance.spend(5, reason=f"Lectura endonauta — {result.test.name}")
+    except Exception:
+        pass
+
+    TestResult.objects.filter(pk=pk).update(ai_insight="processing")
+    threading.Thread(
+        target=_run_insight_thread,
+        args=(result.pk, result.test.name, result.test.instrument_type, result.evaluation),
+        daemon=True,
+    ).start()
+    return redirect("psychometrics:insight_view", pk=pk)

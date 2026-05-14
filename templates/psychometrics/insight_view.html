@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+{% block title %}Lectura — {{ result.test.name }} — MirrorWork{% endblock %}
+
+{% block extra_head %}
+<style>
+  .insight-wrap {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 6rem;
+  }
+
+  .insight-breadcrumb {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 2rem;
+  }
+  .insight-breadcrumb a { color: var(--muted); text-decoration: none; }
+  .insight-breadcrumb a:hover { color: var(--text); }
+
+  .insight-header {
+    margin-bottom: 2.5rem;
+  }
+  .insight-tag {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--accent2);
+    font-weight: 500;
+    margin-bottom: 0.6rem;
+  }
+  .insight-title {
+    font-family: var(--font-heading);
+    font-size: clamp(1.5rem, 3.5vw, 2.1rem);
+    font-weight: 400;
+    line-height: 1.2;
+    margin-bottom: 0.4rem;
+  }
+  .insight-meta { font-size: 0.78rem; color: var(--muted); }
+
+  /* Pending state */
+  .insight-pending {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+  .insight-pending-symbol {
+    font-size: 2rem;
+    margin-bottom: 1.2rem;
+    opacity: 0.5;
+  }
+  .insight-pending h2 {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    font-weight: 400;
+    margin-bottom: 0.6rem;
+  }
+  .insight-pending p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 420px;
+    margin: 0 auto 2rem;
+  }
+  .btn-reveal {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.75rem;
+    background: var(--accent2);
+    color: #fff;
+    border: none;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    font-family: var(--font-ui);
+    cursor: pointer;
+    transition: opacity 0.2s;
+    text-decoration: none;
+  }
+  .btn-reveal:hover { opacity: 0.85; }
+
+  /* Loading state */
+  .insight-loading {
+    background: var(--surface);
+    border: 1px solid rgba(124,109,250,0.25);
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+  .loading-symbol {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    animation: pulse-symbol 2s ease-in-out infinite;
+  }
+  @keyframes pulse-symbol {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.06); }
+  }
+  .loading-msg {
+    font-size: 0.9rem;
+    color: var(--accent2);
+    margin-bottom: 0.4rem;
+    min-height: 1.4em;
+  }
+  .loading-sub { font-size: 0.78rem; color: var(--muted); }
+
+  /* Revealed state */
+  .insight-revealed {
+    background: var(--surface);
+    border: 1px solid rgba(124,109,250,0.2);
+    border-left: 3px solid var(--accent2);
+    border-radius: 0 16px 16px 0;
+    padding: 2rem 2rem 2rem 1.75rem;
+  }
+  .insight-revealed-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--accent2);
+    font-weight: 500;
+    margin-bottom: 1.25rem;
+  }
+  .insight-text {
+    font-size: 0.92rem;
+    color: var(--text);
+    line-height: 1.85;
+    white-space: pre-wrap;
+  }
+  .insight-text.fade-in { animation: insight-fade 0.7s ease; }
+  @keyframes insight-fade {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="insight-wrap">
+
+  <div class="insight-breadcrumb">
+    <a href="{% url 'psychometrics:test_result' result.pk %}">← {{ result.test.name }}</a>
+  </div>
+
+  <div class="insight-header">
+    <div class="insight-tag">Lectura endonauta</div>
+    <div class="insight-title">{{ result.test.name }}</div>
+    <div class="insight-meta">{{ result.completed_at|date:"d de F, Y" }}</div>
+  </div>
+
+  {% if result.ai_insight == "processing" %}
+  <!-- Loading -->
+  <div class="insight-loading" id="loading-box"
+       data-poll-url="{% url 'psychometrics:result_status' result.pk %}">
+    <div class="loading-symbol">◎</div>
+    <div class="loading-msg" id="loading-msg">Buscando patrones…</div>
+    <div class="loading-sub">El Espejo está leyendo tu exploración</div>
+  </div>
+
+  {% elif result.ai_insight and result.ai_insight != "—" %}
+  <!-- Revealed -->
+  <div class="insight-revealed">
+    <div class="insight-revealed-label">◎ El Espejo</div>
+    <div class="insight-text">{{ result.ai_insight }}</div>
+  </div>
+
+  {% else %}
+  <!-- Pending -->
+  <div class="insight-pending">
+    <div class="insight-pending-symbol">◎</div>
+    <h2>Lectura por revelar</h2>
+    <p>El Espejo puede leer tus resultados y conectarlos con tu viaje interior. Esta lectura queda guardada aquí, anclada a este resultado.</p>
+    <form method="post" action="{% url 'psychometrics:insight_reveal' result.pk %}">
+      {% csrf_token %}
+      <button type="submit" class="btn-reveal">Revelar lectura</button>
+    </form>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_body %}
+<script>
+(function () {
+  const box = document.getElementById('loading-box');
+  if (!box) return;
+
+  const pollUrl = box.dataset.pollUrl;
+  const msgEl   = document.getElementById('loading-msg');
+  const msgs    = [
+    'Buscando patrones…',
+    'Revisando repeticiones…',
+    'Escuchando lo que emerge…',
+    'Conectando dimensiones…',
+    'Tejiendo la lectura…',
+  ];
+  let idx = 0;
+  const rotate = setInterval(() => {
+    idx = (idx + 1) % msgs.length;
+    msgEl.textContent = msgs[idx];
+  }, 2800);
+
+  function poll() {
+    fetch(pollUrl)
+      .then(r => r.json())
+      .then(data => {
+        if (data.status === 'complete') {
+          clearInterval(rotate);
+          const revealed = document.createElement('div');
+          revealed.className = 'insight-revealed';
+          revealed.innerHTML = `
+            <div class="insight-revealed-label">◎ El Espejo</div>
+            <div class="insight-text fade-in">${escHtml(data.insight || '')}</div>`;
+          box.replaceWith(revealed);
+        } else if (data.status === 'failed') {
+          clearInterval(rotate);
+          box.innerHTML = '<p style="color:var(--muted);font-size:0.85rem">No se pudo generar la lectura en este momento.</p>';
+        } else {
+          setTimeout(poll, 2500);
+        }
+      })
+      .catch(() => setTimeout(poll, 4000));
+  }
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  }
+
+  setTimeout(poll, 2500);
+})();
+</script>
+{% endblock %}

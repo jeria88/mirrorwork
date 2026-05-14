@@ -6,9 +6,13 @@
   /* ── Layout ────────────────────────────────────────────────────────── */
   .espejo-wrap {
     display: grid;
-    grid-template-columns: 260px 1fr;
+    grid-template-columns: 260px 1fr 260px;
     height: calc(100vh - 60px);
     overflow: hidden;
+    transition: grid-template-columns 0.25s ease;
+  }
+  .espejo-wrap.panel-collapsed {
+    grid-template-columns: 260px 1fr 0px;
   }
 
   /* ── Sidebar ───────────────────────────────────────────────────────── */
@@ -375,10 +379,137 @@
     font-weight: 400;
   }
 
+  /* ── Panel de lecturas ───────────────────────────────────────────── */
+  .lecturas-panel {
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: width 0.25s ease;
+    width: 260px;
+  }
+  .lecturas-panel.collapsed { width: 0; border-left: none; overflow: hidden; }
+
+  .lecturas-header {
+    padding: 1.1rem 1rem 0.9rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .lecturas-title {
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .lecturas-toggle-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0 0.2rem;
+    line-height: 1;
+    transition: color 0.15s;
+  }
+  .lecturas-toggle-btn:hover { color: var(--text); }
+
+  .lecturas-body { flex: 1; overflow-y: auto; padding: 0.75rem 0.65rem; }
+
+  .lec-section-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    padding: 0.4rem 0.5rem 0.3rem;
+    opacity: 0.7;
+  }
+
+  .lec-card {
+    display: block;
+    padding: 0.7rem 0.85rem;
+    border-radius: 10px;
+    margin-bottom: 3px;
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: background 0.15s, border-color 0.15s;
+    cursor: pointer;
+  }
+  .lec-card:hover { background: var(--surface); border-color: var(--border); opacity: 1; }
+  .lec-card-name {
+    font-size: 0.77rem;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 400;
+    margin-bottom: 3px;
+  }
+  .lec-card-meta { display: flex; align-items: center; gap: 0.4rem; }
+  .lec-card-date { font-size: 0.64rem; color: var(--muted); }
+  .lec-badge {
+    font-size: 0.55rem;
+    padding: 1px 6px;
+    border-radius: 100px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .lec-badge-pending { background: rgba(112,112,160,0.15); color: var(--muted); }
+  .lec-badge-revealed { background: rgba(124,109,250,0.15); color: var(--accent2); }
+  .lec-badge-processing {
+    background: rgba(124,109,250,0.12);
+    color: var(--accent2);
+    animation: badge-pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes badge-pulse { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+  .lec-empty {
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-align: center;
+    padding: 1.5rem 1rem;
+    line-height: 1.6;
+  }
+
+  /* Toggle button fixed on the right edge of the chat area */
+  .panel-open-btn {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+    padding: 0.55rem 0.45rem;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 0.7rem;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: background 0.15s, color 0.15s;
+    z-index: 10;
+    display: none;
+  }
+  .panel-open-btn.visible { display: flex; align-items: center; gap: 4px; }
+  .panel-open-btn:hover { background: var(--surface); color: var(--text); }
+
+  .espejo-chat { position: relative; }
+
   /* ── Mobile ──────────────────────────────────────────────────────── */
   @media (max-width: 660px) {
     .espejo-wrap { grid-template-columns: 1fr; }
     .espejo-sidebar { display: none; }
+    .lecturas-panel { display: none; }
     .msg { max-width: 92%; }
     .messages-area { padding: 1.25rem 1rem; }
   }
@@ -386,7 +517,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="espejo-wrap">
+<div class="espejo-wrap" id="espejo-wrap">
 
   <!-- SIDEBAR ──────────────────────────────────────────────────────── -->
   <aside class="espejo-sidebar">
@@ -466,7 +597,23 @@
       <p class="input-hint">Enter para enviar · Shift+Enter para nueva línea</p>
     </div>
 
+    <!-- OPEN BUTTON (visible when panel is collapsed) -->
+    <button class="panel-open-btn" id="panel-open-btn" title="Ver lecturas">
+      ◎ Lecturas
+    </button>
   </section>
+
+  <!-- PANEL DE LECTURAS ─────────────────────────────────────────────── -->
+  <aside class="lecturas-panel" id="lecturas-panel">
+    <div class="lecturas-header">
+      <span class="lecturas-title">◎ Lecturas</span>
+      <button class="lecturas-toggle-btn" id="panel-close-btn" title="Cerrar panel">✕</button>
+    </div>
+    <div class="lecturas-body" id="lecturas-body">
+      <div class="lec-empty">Cargando…</div>
+    </div>
+  </aside>
+
 </div>
 
 <div id="error-toast"></div>
@@ -632,5 +779,71 @@
 
   scrollBottom();
   input.focus();
+
+  // ── Panel de lecturas ─────────────────────────────────────────────
+  const wrap        = document.getElementById('espejo-wrap');
+  const panel       = document.getElementById('lecturas-panel');
+  const body        = document.getElementById('lecturas-body');
+  const closeBtn    = document.getElementById('panel-close-btn');
+  const openBtn     = document.getElementById('panel-open-btn');
+
+  function collapsePanel() {
+    wrap.classList.add('panel-collapsed');
+    panel.classList.add('collapsed');
+    openBtn.classList.add('visible');
+  }
+  function expandPanel() {
+    wrap.classList.remove('panel-collapsed');
+    panel.classList.remove('collapsed');
+    openBtn.classList.remove('visible');
+  }
+
+  closeBtn.addEventListener('click', collapsePanel);
+  openBtn.addEventListener('click', expandPanel);
+
+  function badgeHtml(status) {
+    if (status === 'revealed')   return '<span class="lec-badge lec-badge-revealed">Revelada</span>';
+    if (status === 'processing') return '<span class="lec-badge lec-badge-processing">Generando…</span>';
+    return '<span class="lec-badge lec-badge-pending">Por revelar</span>';
+  }
+
+  function renderCards(data) {
+    const { pending, revealed } = data;
+    if (!pending.length && !revealed.length) {
+      body.innerHTML = '<div class="lec-empty">Aquí aparecerán las lecturas de tus tests y reportes de nacimiento.</div>';
+      return;
+    }
+    let html = '';
+    if (pending.length) {
+      html += '<div class="lec-section-label">Por revelar</div>';
+      pending.forEach(c => {
+        html += `<a href="${escHtml(c.url)}" class="lec-card">
+          <div class="lec-card-name">${escHtml(c.title)}</div>
+          <div class="lec-card-meta">
+            <span class="lec-card-date">${escHtml(c.date)}</span>
+            ${badgeHtml(c.status)}
+          </div>
+        </a>`;
+      });
+    }
+    if (revealed.length) {
+      html += '<div class="lec-section-label" style="margin-top:0.75rem">Reveladas</div>';
+      revealed.forEach(c => {
+        html += `<a href="${escHtml(c.url)}" class="lec-card">
+          <div class="lec-card-name">${escHtml(c.title)}</div>
+          <div class="lec-card-meta">
+            <span class="lec-card-date">${escHtml(c.date)}</span>
+            ${badgeHtml(c.status)}
+          </div>
+        </a>`;
+      });
+    }
+    body.innerHTML = html;
+  }
+
+  fetch('/espejo/tarjetas/')
+    .then(r => r.json())
+    .then(renderCards)
+    .catch(() => { body.innerHTML = '<div class="lec-empty">No se pudieron cargar las lecturas.</div>'; });
 </script>
 {% endblock %}

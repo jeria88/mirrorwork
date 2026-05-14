@@ -9,6 +9,7 @@ from django.views.decorators.http import require_POST
 
 from mirror.models import ConflictSession, MirrorChunk
 from psychometrics.models import TestResult
+from birth.models import BirthReport
 
 
 # ── RAG helpers ───────────────────────────────────────────────────────────────
@@ -424,3 +425,65 @@ def espejo_archivar(request, pk):
     sesion.status = "archived"
     sesion.save(update_fields=["status"])
     return redirect("/espejo/")
+
+
+@login_required
+def espejo_tarjetas(request):
+    """Returns pending and revealed insight cards for the Espejo panel."""
+    cards = []
+
+    # Test result insights
+    results = (
+        TestResult.objects.filter(user=request.user)
+        .select_related("test")
+        .order_by("-completed_at")
+    )
+    for r in results:
+        if r.ai_insight == "processing":
+            status = "processing"
+        elif r.ai_insight and r.ai_insight != "—":
+            status = "revealed"
+        else:
+            status = "pending"
+        cards.append({
+            "id": f"test-{r.pk}",
+            "type": "test",
+            "title": r.test.name,
+            "date": r.completed_at.strftime("%d %b %Y") if r.completed_at else "",
+            "status": status,
+            "url": f"/psicometria/resultado/{r.pk}/lectura/",
+        })
+
+    # Birth report insights
+    birth_labels = {
+        BirthReport.TYPE_ASTRAL: "Carta Astral",
+        BirthReport.TYPE_HD:     "Diseño Humano",
+        BirthReport.TYPE_SAJU:   "Saju",
+    }
+    birth_paths = {
+        BirthReport.TYPE_ASTRAL: "astral",
+        BirthReport.TYPE_HD:     "hd",
+        BirthReport.TYPE_SAJU:   "saju",
+    }
+    reports = BirthReport.objects.filter(user=request.user).order_by("-updated_at")
+    for rep in reports:
+        if rep.interpretation == "processing":
+            status = "processing"
+        elif rep.interpretation and rep.interpretation != "processing":
+            status = "revealed"
+        else:
+            status = "pending"
+        path = birth_paths.get(rep.report_type, rep.report_type)
+        cards.append({
+            "id": f"birth-{rep.pk}",
+            "type": "birth",
+            "subtype": rep.report_type,
+            "title": birth_labels.get(rep.report_type, rep.report_type),
+            "date": rep.updated_at.strftime("%d %b %Y") if rep.updated_at else "",
+            "status": status,
+            "url": f"/nacimiento/reporte/{rep.pk}/{path}/lectura/",
+        })
+
+    pending  = [c for c in cards if c["status"] in ("pending", "processing")]
+    revealed = [c for c in cards if c["status"] == "revealed"]
+    return JsonResponse({"pending": pending, "revealed": revealed, "total": len(cards)})

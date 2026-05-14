@@ -8,4 +8,5 @@ urlpatterns = [
     path("nuevo/",    views.espejo_nuevo,   name="nuevo"),
     path("send/",     views.espejo_send,    name="send"),
     path("<int:pk>/archivar/", views.espejo_archivar, name="archivar"),
+    path("tarjetas/", views.espejo_tarjetas, name="tarjetas"),
 ]
