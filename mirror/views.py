@@ -681,8 +681,16 @@ def espejo_send(request):
     except Exception:
         pass
 
-    # Llamar a DeepSeek
-    parsed, error = _call_deepseek_json(history, kb_chunks, test_context, brain_context=_get_brain_context(request.user), mode=mode, enfoque=enfoque)
+    # Recopilar contexto cerebro antes de cerrar la conexión
+    brain_context = _get_brain_context(request.user)
+
+    # Cerrar la conexión DB antes del API call largo — evita NO_SOCKET/TCP_ABORT en Railway
+    # (Railway mata conexiones Postgres idle durante los 20-60s que tarda DeepSeek)
+    from django.db import connection as _db_conn
+    _db_conn.close()
+
+    # Llamar a DeepSeek (Django reabre la conexión automáticamente al guardar después)
+    parsed, error = _call_deepseek_json(history, kb_chunks, test_context, brain_context=brain_context, mode=mode, enfoque=enfoque)
 
     if error:
         return JsonResponse({"error": error}, status=503)
