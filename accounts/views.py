@@ -181,7 +181,8 @@ def perfil(request):
         saved = True
 
     _PILL_OPTS = [('si', 'Sí'), ('a-veces', 'A veces'), ('no', 'No')]
-    nucleo = profile.onboarding_nucleo or {}
+    raw_nucleo = profile.onboarding_nucleo
+    nucleo = raw_nucleo if isinstance(raw_nucleo, dict) else {}
     nucleo_fields = [
         ('transcendencia', '¿Crees en algo más grande que tú?',   _PILL_OPTS, nucleo.get('transcendencia', '')),
         ('cambio',         '¿Crees que puedes cambiar de verdad?', _PILL_OPTS, nucleo.get('cambio', '')),

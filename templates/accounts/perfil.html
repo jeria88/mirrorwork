@@ -333,12 +333,12 @@
 
         <div class="field">
           <label>Camino recorrido</label>
-          {% with prev=profile.onboarding_prior_exploration %}
+          {% with prev=profile.onboarding_prior_exploration|default:'' %}
           <div class="viaje-checks">
             {% for val, lbl in prior_opts %}
             <label class="viaje-check-label">
               <input type="checkbox" name="onboarding_prior_exploration" value="{{ val }}"
-                {% if val in prev %}checked{% endif %}>
+                {% if prev and val in prev %}checked{% endif %}>
               {{ lbl }}
             </label>
             {% endfor %}
