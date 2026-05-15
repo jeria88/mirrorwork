@@ -79,33 +79,33 @@ Idioma: español rioplatense/chileno, informal pero profundo.\
 # ── Diccionarios de descripción para hd_detail ───────────────────────────────
 
 _HD_TYPE_DESCS = {
-    'Generador': 'Eres el motor de la humanidad: energía vital sostenida que, cuando se usa bien, no se agota. Tu sistema está diseñado para responder, no para iniciar. Cuando esperás la señal del entorno antes de comprometerte, la energía fluye sin fricción.',
-    'Generador Manifestante': 'Combinás la energía motriz del Generador con la capacidad iniciadora del Manifestante. Podés iniciar Y responder, pero los demás necesitan saber qué estás haciendo antes de que lo hagas — sin eso, tu movimiento genera resistencia en lugar de apoyo.',
-    'Manifestador': 'Sos el único tipo diseñado para iniciar. Tu energía es un impacto: comienza en vos y se irradia al entorno. Informar a quienes te rodean antes de actuar no es pedir permiso — es reducir la resistencia para que tu impulso llegue completo.',
-    'Proyector': 'Sos un guía de energía, no un generador de ella. Tenés una capacidad inusual para leer a los demás y ver el todo del sistema. Tu diseño funciona con la invitación genuina: cuando alguien te reconoce y te convoca, la energía se alinea. Sin ese reconocimiento previo, el esfuerzo se convierte en agotamiento.',
-    'Reflector': 'Sos el espejo de la comunidad que te rodea — reflejás el estado colectivo del entorno con una claridad extraordinaria. Tu ciclo natural de decisión es el mes lunar: las decisiones tomadas en un día no aprovechan tu sabiduría más profunda. El entorno donde vivís importa más que para cualquier otro tipo.',
+    'Generador': 'Eres el motor de la humanidad: energía vital sostenida que, cuando se usa bien, no se agota. Tu sistema está diseñado para responder, no para iniciar. Cuando esperas la señal del entorno antes de comprometerte, la energía fluye sin fricción.',
+    'Generador Manifestante': 'Combinas la energía motriz del Generador con la capacidad iniciadora del Manifestante. Puedes iniciar Y responder, pero los demás necesitan saber qué estás haciendo antes de que lo hagas — sin eso, tu movimiento genera resistencia en lugar de apoyo.',
+    'Manifestador': 'Eres el único tipo diseñado para iniciar. Tu energía es un impacto: comienza en ti y se irradia al entorno. Informar a quienes te rodean antes de actuar no es pedir permiso — es reducir la resistencia para que tu impulso llegue completo.',
+    'Proyector': 'Eres un guía de energía, no un generador de ella. Tienes una capacidad inusual para leer a los demás y ver el todo del sistema. Tu diseño funciona con la invitación genuina: cuando alguien te reconoce y te convoca, la energía se alinea. Sin ese reconocimiento previo, el esfuerzo se convierte en agotamiento.',
+    'Reflector': 'Eres el espejo de la comunidad que te rodea — reflejas el estado colectivo del entorno con una claridad extraordinaria. Tu ciclo natural de decisión es el mes lunar: las decisiones tomadas en un día no aprovechan tu sabiduría más profunda. El entorno donde vives importa más que para cualquier otro tipo.',
 }
 
 _HD_STRATEGY_DESCS = {
-    'Responder (esperar una señal del entorno)': 'No inicies desde el pensamiento. Esperá que algo externo aparezca — una pregunta, una situación, una oportunidad — y observá la respuesta espontánea del cuerpo antes de comprometerte. El sí o el no viene antes que las razones.',
-    'Responder y luego informar antes de actuar': 'Primero escuchá la respuesta del cuerpo ante lo que el entorno trae. Una vez que hay un sí claro, informá a las personas clave de tu entorno antes de iniciar — no para pedir permiso, sino para que tu movimiento no llegue como una sorpresa.',
-    'Informar antes de actuar': 'Antes de iniciar algo, informá a las personas de tu entorno inmediato. No es pedir autorización — es preparar el terreno para que tu impacto no genere resistencia automática.',
-    'Esperar la invitación': 'En las áreas clave de vida — trabajo, amor, lugar donde vivís — esperá que alguien te reconozca y te invite a participar. Sin ese reconocimiento previo, tu energía se dispersa y genera amargura. La calidad de la invitación importa.',
-    'Esperar un ciclo lunar completo (29 días)': 'Para decisiones importantes, esperá un ciclo lunar completo antes de comprometerte. Cada día del ciclo te da una perspectiva diferente sobre la misma pregunta. La claridad no es intelectual — emerge a lo largo del tiempo.',
+    'Responder (esperar una señal del entorno)': 'No inicies desde el pensamiento. Espera que algo externo aparezca — una pregunta, una situación, una oportunidad — y observa la respuesta espontánea del cuerpo antes de comprometerte. El sí o el no viene antes que las razones.',
+    'Responder y luego informar antes de actuar': 'Primero escucha la respuesta del cuerpo ante lo que el entorno trae. Una vez que hay un sí claro, informa a las personas clave de tu entorno antes de iniciar — no para pedir permiso, sino para que tu movimiento no llegue como una sorpresa.',
+    'Informar antes de actuar': 'Antes de iniciar algo, informa a las personas de tu entorno inmediato. No es pedir autorización — es preparar el terreno para que tu impacto no genere resistencia automática.',
+    'Esperar la invitación': 'En las áreas clave de vida — trabajo, amor, lugar donde vives — espera que alguien te reconozca y te invite a participar. Sin ese reconocimiento previo, tu energía se dispersa y genera amargura. La calidad de la invitación importa.',
+    'Esperar un ciclo lunar completo (29 días)': 'Para decisiones importantes, espera un ciclo lunar completo antes de comprometerte. Cada día del ciclo te da una perspectiva diferente sobre la misma pregunta. La claridad no es intelectual — emerge a lo largo del tiempo.',
 }
 
 _HD_AUTHORITY_DESCS = {
-    'Sacral': 'Tu autoridad vive en las tripas: un "uh-huh" espontáneo o un "unh-unh" es tu guía más confiable. No es una decisión razonada — es una respuesta inmediata que viene antes del pensamiento. Si necesitás preguntarte dos veces, el Sacral ya respondió.',
+    'Sacral': 'Tu autoridad vive en las tripas: un "uh-huh" espontáneo o un "unh-unh" es tu guía más confiable. No es una decisión razonada — es una respuesta inmediata que viene antes del pensamiento. Si necesitas preguntarte dos veces, el Sacral ya respondió.',
     'Emocional — Plexo Solar': 'No hay claridad en el momento emocional. La regla es simple: esperar la ola. Ni el punto más alto (euforia) ni el más bajo (depresión) son el momento para decidir. La claridad llega cuando la ola encuentra su meseta — con el tiempo, no con la urgencia.',
-    'Esplénico — Bazo': 'Es la autoridad más antigua y sutil: una voz instintiva, en el momento presente. Habla una sola vez — si necesitás repetirte la señal, ya no viene del Bazo. Requiere confiar en lo que se siente en el instante, antes de que el miedo o la mente intervengan.',
-    'Ego — Corazón': 'Tu autoridad viene del corazón y la voluntad. Escuchás lo que realmente querés vs. lo que sentís que "deberías" querer. Si no hay un "yo quiero" genuino en la respuesta, no es correcto para vos. La voluntad propia no es egoísmo — es tu brújula.',
-    'Identidad — G': 'Tu autoridad es el entorno. La claridad llega cuando encontrás el espacio físico, las personas y las conversaciones correctas. Hablar tu proceso en voz alta con personas que te escuchan sin juzgar — y observar qué emerge — es tu camino de decisión.',
+    'Esplénico — Bazo': 'Es la autoridad más antigua y sutil: una voz instintiva, en el momento presente. Habla una sola vez — si necesitas repetirte la señal, ya no viene del Bazo. Requiere confiar en lo que se siente en el instante, antes de que el miedo o la mente intervengan.',
+    'Ego — Corazón': 'Tu autoridad viene del corazón y la voluntad. Escuchas lo que realmente quieres vs. lo que sientes que "deberías" querer. Si no hay un "yo quiero" genuino en la respuesta, no es correcto para ti. La voluntad propia no es egoísmo — es tu brújula.',
+    'Identidad — G': 'Tu autoridad es el entorno. La claridad llega cuando encuentras el espacio físico, las personas y las conversaciones correctas. Hablar tu proceso en voz alta con personas que te escuchan sin juzgar — y observar qué emerge — es tu camino de decisión.',
     'Mental — Externo': 'No hay autoridad interna definida. Las decisiones se clarifican verbalizando: hablar con distintas personas de confianza no para que te aconsejen, sino para escucharte hablar y notar qué resuena en tu cuerpo. El entorno exterior es tu espejo de claridad.',
-    'Lunar — 29 días': 'Tu autoridad es el ciclo lunar completo. Ninguna decisión importante se toma antes de haber observado cómo te sentís al respecto durante un mes entero. Consultás con personas distintas en distintos momentos del ciclo para recibir perspectivas variadas.',
+    'Lunar — 29 días': 'Tu autoridad es el ciclo lunar completo. Ninguna decisión importante se toma antes de haber observado cómo te sientes al respecto durante un mes entero. Consultas con personas distintas en distintos momentos del ciclo para recibir perspectivas variadas.',
 }
 
 _HD_PROFILE_LINE_DESCS = {
-    '1': 'La Línea 1 necesita base. Investigás, estudiás, te preparás antes de sentirte seguro/a para actuar. La inseguridad surge cuando no tenés suficiente fundamento — y esa inseguridad es real, no exagerada. Es una señal de que falta investigación.',
+    '1': 'La Línea 1 necesita base. Investigas, estudias, te preparas antes de sentirte seguro/a para actuar. La inseguridad surge cuando no tienes suficiente fundamento — y esa inseguridad es real, no exagerada. Es una señal de que falta investigación.',
     '2': 'La Línea 2 tiene dones naturales que a menudo no ve en sí misma. Necesita tiempo a solas para integrar lo que sabe. Generalmente es llamada por otros antes de sentirse "lista" — y esa llamada desde afuera puede ser la señal de que es momento de salir.',
     '3': 'La Línea 3 aprende a través del ensayo y el error. Los "fracasos" son parte del diseño, no señales de estar equivocado/a. Cada experiencia que no funciona deja una sabiduría práctica que ningún libro puede enseñar. La vida como laboratorio.',
     '4': 'La Línea 4 construye a través de relaciones y redes. Las oportunidades más importantes llegan a través de personas ya conocidas, no de desconocidos. La fundación de la vida es la calidad de los vínculos cercanos.',
@@ -114,48 +114,48 @@ _HD_PROFILE_LINE_DESCS = {
 }
 
 _HD_DEFINITION_DESCS = {
-    'Indefinido': 'Sin centros definidos, toda tu energía viene del entorno. Sos altamente sensible a las personas y lugares que te rodean — y podés amplificar y reflejar la energía de quienes están cerca con una claridad extraordinaria. El entorno donde vivís y trabajás importa profundamente.',
+    'Indefinido': 'Sin centros definidos, toda tu energía viene del entorno. Eres altamente sensible a las personas y lugares que te rodean — y puedes amplificar y reflejar la energía de quienes están cerca con una claridad extraordinaria. El entorno donde vives y trabajas importa profundamente.',
     'Definición Simple': 'Toda tu energía está conectada en un solo circuito interno. Sos consistente, predecible y relativamente independiente del entorno para funcionar. La sombra: puede ser difícil absorber nuevas perspectivas que no encajan fácilmente con la estructura ya definida.',
     'Definición Partida': 'Tenés dos circuitos de energía separados que no se conectan internamente. La brecha entre ellos es un punto de búsqueda inconsciente: tendés a encontrar personas o situaciones que "completen" esa conexión — lo cual puede llevar a dependencias o relaciones de completitud en lugar de elección.',
-    'Definición Partida Triple': 'Tres circuitos separados que operan de manera independiente. Sos adaptable y versátil — podés conectar con tipos muy distintos de personas y sistemas. La consistencia interna es menor, pero la capacidad de tender puentes entre mundos diferentes es mayor.',
+    'Definición Partida Triple': 'Tres circuitos separados que operan de manera independiente. Eres adaptable y versátil — puedes conectar con tipos muy distintos de personas y sistemas. La consistencia interna es menor, pero la capacidad de tender puentes entre mundos diferentes es mayor.',
     'Definición Cuádruple': 'Cuatro circuitos completamente separados. La adaptabilidad es máxima — cada circuito puede resonar con personas y contextos muy distintos. La experiencia interna puede sentirse fragmentada, pero es en realidad una flexibilidad extraordinaria que pocos comprenden.',
 }
 
 _HD_NOT_SELF_DESCS = {
     'Frustración': 'La frustración es la señal de que estás operando fuera de tu diseño — iniciando en lugar de esperar a responder, o comprometiendo energía donde no hay un sí genuino del cuerpo. No es algo a eliminar: es información sobre dónde la estrategia está siendo ignorada.',
     'Frustración / Ira': 'La frustración señala que estás iniciando sin responder primero. La ira indica que estás actuando sin informar. Ambas son avisos del cuerpo — no emociones a suprimir, sino señales de que el diseño no está siendo escuchado.',
-    'Ira': 'La ira aparece cuando actuás sin informar a tu entorno. No es que hiciste algo malo — es que el impacto de tu movimiento llegó sin preparación al campo de los demás, y eso genera resistencia automática. La ira es la señal de que faltó el paso de informar.',
-    'Amargura': 'La amargura surge cuando actuás sin invitación, cuando te esforzás sin que nadie te haya reconocido genuinamente, o cuando esperás más de lo que el entorno puede darte. Es la señal de que la estrategia de esperar el reconocimiento está siendo evitada.',
+    'Ira': 'La ira aparece cuando actúas sin informar a tu entorno. No es que hiciste algo malo — es que el impacto de tu movimiento llegó sin preparación al campo de los demás, y eso genera resistencia automática. La ira es la señal de que faltó el paso de informar.',
+    'Amargura': 'La amargura surge cuando actúas sin invitación, cuando te esfuerzas sin que nadie te haya reconocido genuinamente, o cuando esperas más de lo que el entorno puede darte. Es la señal de que la estrategia de esperar el reconocimiento está siendo evitada.',
     'Decepción': 'La decepción es la señal del Reflector de que está en un entorno que no lo nutre, o tomando decisiones sin haber esperado el ciclo lunar completo. Es la brújula que indica que algo en el campo externo o en el ritmo interno está fuera de alineación.',
 }
 
 _HD_CENTER_DEFINED_DESCS = {
-    'Cabeza':      'Centro de presión mental. Cuando está definido generás preguntas e inspiración de manera constante — no para resolverlas vos, sino para activar el pensamiento en quienes te rodean. Esa presión es real y confiable, pero no toda pregunta necesita respuesta.',
-    'Ajna':        'Centro conceptual. Tu forma de procesar y organizar información es consistente — tenés perspectivas propias que no cambian fácilmente. Podés ser una fuente confiable de conceptos y análisis para los demás, aunque a veces eso se vuelve rigidez.',
-    'Garganta':    'Centro de manifestación y comunicación. Tenés voz propia y capacidad de hacer cosas en el mundo de manera constante. Lo que decís tiene peso natural — no necesitás forzar para ser escuchado/a.',
-    'Identidad':   'Centro del yo y la dirección. Tenés un sentido de quién sos relativamente estable, independiente del entorno. Tu dirección en la vida no depende de encontrar a alguien que te "complete" — viene de adentro.',
-    'Corazón':     'Centro de la voluntad y el ego. Tu fuerza de voluntad es consistente — cuando decís que vas a hacer algo y realmente querés hacerlo, tenés la energía para sostenerlo. La clave es comprometerte solo con lo que genuinamente deseás.',
+    'Cabeza':      'Centro de presión mental. Cuando está definido generas preguntas e inspiración de manera constante — no para resolverlas tú, sino para activar el pensamiento en quienes te rodean. Esa presión es real y confiable, pero no toda pregunta necesita respuesta.',
+    'Ajna':        'Centro conceptual. Tu forma de procesar y organizar información es consistente — tienes perspectivas propias que no cambian fácilmente. Puedes ser una fuente confiable de conceptos y análisis para los demás, aunque a veces eso se vuelve rigidez.',
+    'Garganta':    'Centro de manifestación y comunicación. Tienes voz propia y capacidad de hacer cosas en el mundo de manera constante. Lo que dices tiene peso natural — no necesitas forzar para ser escuchado/a.',
+    'Identidad':   'Centro del yo y la dirección. Tienes un sentido de quién eres relativamente estable, independiente del entorno. Tu dirección en la vida no depende de encontrar a alguien que te "complete" — viene de adentro.',
+    'Corazón':     'Centro de la voluntad y el ego. Tu fuerza de voluntad es consistente — cuando dices que vas a hacer algo y realmente quieres hacerlo, tienes la energía para sostenerlo. La clave es comprometerte solo con lo que genuinamente deseas.',
     'Plexo Solar': 'Centro emocional activo. Tenés un rango emocional amplio y consistente. La claridad no llega en el pico ni en el valle — emerge en la meseta, con el tiempo. Aprender a esperar la ola antes de decidir es el trabajo central.',
-    'Sacral':      'Motor de energía vital. Tu energía para el trabajo y la vida es sostenida y renovable — cuando la usás en lo que realmente responde, no se agota. La señal del cuerpo (el sí o el no espontáneo) es tu brújula más confiable.',
+    'Sacral':      'Motor de energía vital. Tu energía para el trabajo y la vida es sostenida y renovable — cuando la usas en lo que realmente responde, no se agota. La señal del cuerpo (el sí o el no espontáneo) es tu brújula más confiable.',
     'Bazo':        'Centro del sistema inmune e intuitivo. Tenés señales espontáneas y consistentes sobre lo que es saludable, seguro y correcto en el momento presente. Esa voz habla una sola vez — si la ignorás habitualmente, el cuerpo eventualmente lo muestra.',
     'Raíz':        'Centro de presión adrenal. Tenés un motor constante de urgencia e impulso para actuar. Esa presión no desaparece — se trata de aprender a usarla conscientemente en lugar de dejar que te lleve.',
 }
 
 _HD_CHANNEL_DESCS = {
     '47-64': 'Abstracción: la mente procesa experiencia pasada hasta que la confusión se convierte en comprensión. El ciclo lleva tiempo — la claridad no se puede forzar.',
-    '24-61': 'Conocimiento: inspiración interior que busca convertirse en saber articulado. Podés recibir "saber que sabés" algo antes de poder explicarlo.',
+    '24-61': 'Conocimiento: inspiración interior que busca convertirse en saber articulado. Puedes recibir "saber que sabes" algo antes de poder explicarlo.',
     '4-63':  'Lógica: la duda como motor. Encontrás soluciones verificables a preguntas concretas — pero la certeza completa nunca llega, y eso es lo que mantiene la búsqueda.',
-    '17-62': 'Aceptación: opiniones bien formadas que necesitan ser probadas antes de compartidas. Tu pensamiento es sistemático — cuando lo expresás, aportás estructura.',
-    '23-43': 'Estructuración: percepción propia que busca el lenguaje correcto para ser transmitida. Podés tener insights genuinos que solo se entienden cuando encontrás las palabras exactas.',
+    '17-62': 'Aceptación: opiniones bien formadas que necesitan ser probadas antes de compartidas. Tu pensamiento es sistemático — cuando lo expresas, aportas estructura.',
+    '23-43': 'Estructuración: percepción propia que busca el lenguaje correcto para ser transmitida. Puedes tener insights genuinos que solo se entienden cuando encuentras las palabras exactas.',
     '11-56': 'Curiosidad: ideas que necesitan convertirse en historias para generar estimulación en otros. Tu mente conecta conceptos de formas que otros no ven.',
-    '7-31':  'Alfa: liderazgo por reconocimiento del grupo. Tu influencia hacia la dirección colectiva es genuina — pero funciona cuando te eligen, no cuando te imponés.',
-    '1-8':   'Inspiración: contribución creativa que hace una diferencia siendo auténtico/a. No necesitás un método — tu expresión natural ya es el aporte.',
+    '7-31':  'Alfa: liderazgo por reconocimiento del grupo. Tu influencia hacia la dirección colectiva es genuina — pero funciona cuando te eligen, no cuando te impones.',
+    '1-8':   'Inspiración: contribución creativa que hace una diferencia siendo auténtico/a. No necesitas un método — tu expresión natural ya es el aporte.',
     '13-33': 'Testigo: memoria del colectivo. Tenés la capacidad de retirarte, procesar la experiencia vivida, y luego transmitirla de manera que resuene para muchos.',
-    '10-20': 'Despertador: tu comportamiento en sí mismo enseña. La coherencia entre lo que valorás y lo que hacés tiene un impacto que no requiere palabras.',
+    '10-20': 'Despertador: tu comportamiento en sí mismo enseña. La coherencia entre lo que valoras y lo que haces tiene un impacto que no requiere palabras.',
     '20-34': 'Carisma: energía motriz conectada directamente a la acción y la voz. Podés estar completamente presente y actuar con una potencia que otros perciben como magnetismo.',
     '21-45': 'Dinero: gestión de recursos y dirección de la comunidad. Tenés capacidad natural para saber qué hacer con lo material y cómo sostener a un grupo.',
     '16-48': 'Longitud de onda: talento que emerge con práctica profunda y sostenida. La destreza genuina lleva tiempo — el proceso de aprendizaje es parte del don.',
-    '12-22': 'Comunicador abierto: expresión emocional selectiva y con timing. Sabés elegir cuándo y cómo hablar — y cuando lo hacés desde ese lugar, tiene gracia y resonancia.',
+    '12-22': 'Comunicador abierto: expresión emocional selectiva y con timing. Sabes elegir cuándo y cómo hablar — y cuando lo haces desde ese lugar, tiene gracia y resonancia.',
     '35-36': 'Transitoridad: búsqueda de experiencia como forma de aprendizaje. La crisis y el cambio son catalizadores — el aburrimiento en la rutina es real y tiene un propósito.',
     '2-14':  'Dirección del yo: cuando el camino está alineado con tu propósito, la abundancia fluye naturalmente. La clave es confiar en la dirección que emerge desde adentro.',
     '5-15':  'Ritmo: amor por los patrones naturales y los ciclos de la vida. Tenés la capacidad de adaptarte y fluir con los ritmos del entorno de una forma que otros encuentran armónica.',
@@ -164,17 +164,17 @@ _HD_CHANNEL_DESCS = {
     '26-44': 'Transmitor: memoria instintiva del pasado para anticipar lo que viene. Tenés una capacidad magnética para transmitir recursos, mensajes y valor de maneras que la gente recuerda.',
     '37-40': 'Comunidad: el trato y el acuerdo mutuo. Ofrecés sostén emocional genuino a cambio de recursos y trabajo — cuando el intercambio es claro, la comunidad funciona.',
     '6-59':  'Intimidad: apertura a la fusión y la profundidad relacional. Tu energía puede disolver barreras entre personas — en lo positivo, crea intimidad real; en lo inconsciente, puede crear dependencia.',
-    '19-49': 'Síntesis: sensibilidad extrema a las necesidades no satisfechas. Cuando los principios son violados o las necesidades ignoradas, podés impulsar cambios radicales.',
+    '19-49': 'Síntesis: sensibilidad extrema a las necesidades no satisfechas. Cuando los principios son violados o las necesidades ignoradas, puedes impulsar cambios radicales.',
     '30-41': 'Reconocimiento: deseo ardiente de experiencia nueva. Tenés una tensión viva entre el sueño de lo que podría ser y la realidad de lo que es — y esa tensión crea momentum.',
     '39-55': 'Fluctuación emocional: espíritu que provoca para despertar profundidad en el otro. La melancolía y la búsqueda de significado son parte del diseño, no algo a eliminar.',
     '27-50': 'Preservador: cuidado de los demás y de los valores que sostienen la vida colectiva. Tu energía se orienta naturalmente hacia proteger lo que tiene valor para el grupo.',
-    '34-57': 'Potencia: intuición corporal en tiempo real que mueve hacia la acción inmediata. Cuando confiás en esa señal espontánea del cuerpo, tu efectividad es extraordinaria.',
-    '3-60':  'Mutación: el cambio emerge desde adentro, de manera inesperada, transformando el statu quo. No podés forzarlo — pero cuando llega, es genuino y profundo.',
+    '34-57': 'Potencia: intuición corporal en tiempo real que mueve hacia la acción inmediata. Cuando confías en esa señal espontánea del cuerpo, tu efectividad es extraordinaria.',
+    '3-60':  'Mutación: el cambio emerge desde adentro, de manera inesperada, transformando el statu quo. No puedes forzarlo — pero cuando llega, es genuino y profundo.',
     '9-52':  'Concentración: enfoque sostenido en el detalle y la paciencia para esperar el momento correcto. Tu capacidad de mantener la atención en algo específico es un recurso real.',
     '42-53': 'Madurar: energía para iniciar ciclos que se desarrollan y completan. Necesitás cierres — los proyectos que quedan abiertos indefinidamente drenan tu energía de maneras invisibles.',
     '18-58': 'Juicio: entusiasmo por identificar lo que puede mejorarse. No es crítica vacía — es la alegría genuina de ver el potencial que hay en perfeccionar algo que vale la pena.',
     '28-38': 'Lucha: sentido de la vida que emerge cuando hay algo que vale la pena defender. La lucha no es el problema — es la señal de que encontraste algo con significado real.',
-    '32-54': 'Transformación: ambición que se mueve hacia la trascendencia del colectivo. Tu impulso de ascender no es para vos solo — está al servicio de la evolución del grupo.',
+    '32-54': 'Transformación: ambición que se mueve hacia la trascendencia del colectivo. Tu impulso de ascender no es solo para ti — está al servicio de la evolución del grupo.',
 }
 
 _HD_GATE_DESCS = {
@@ -191,7 +191,7 @@ _HD_GATE_DESCS = {
     11: 'Generás ideas constantemente para compartirlas — no necesariamente para implementarlas todas.',
     12: 'Expresión selectiva y con timing — cuando hablás desde este lugar, tus palabras tienen peso.',
     13: 'La capacidad de sostener los secretos y la historia de otros como repositorio del colectivo.',
-    14: 'El poder de acumular recursos y habilidades cuando trabajás alineado/a con tu propósito.',
+    14: 'El poder de acumular recursos y habilidades cuando trabajas alineado/a con tu propósito.',
     15: 'La tolerancia por la diversidad de ritmos y estilos — representás la amplitud de lo humano.',
     16: 'El entusiasmo como motor de la maestría — cuando algo te apasiona, la práctica fluye.',
     17: 'Opiniones sistemáticas que aportan estructura cuando las compartís con humildad.',
@@ -200,20 +200,20 @@ _HD_GATE_DESCS = {
     20: 'La capacidad de estar completamente en el ahora y expresar lo que es en este instante.',
     21: 'El impulso de tener control sobre los propios recursos y el territorio personal.',
     22: 'Una sensibilidad emocional que, en el momento correcto, puede generar gracia y apertura.',
-    23: 'Insights únicos que buscan su lenguaje — a veces sabés algo antes de poder articularlo.',
+    23: 'Insights únicos que buscan su lenguaje — a veces sabes algo antes de poder articularlo.',
     24: 'La mente procesa en bucle hasta encontrar sentido en lo confuso — dale tiempo.',
     25: 'Amor universal y pureza de intención — actuar sin agenda personal cuando el espíritu llama.',
     26: 'La habilidad de persuadir para que algo con valor genuino sea adoptado por otros.',
-    27: 'El impulso de nutrir y cuidar — sabés qué necesitan los demás, aunque te olvides de vos.',
+    27: 'El impulso de nutrir y cuidar — sabes qué necesitan los demás, aunque te olvides de ti.',
     28: 'La búsqueda de sentido a través del riesgo — comprometerse solo con lo que vale la pena.',
     29: 'El compromiso total del "sí" — el desafío es asegurarte de comprometerte con lo correcto.',
-    30: 'El fuego del deseo y los anhelos que impulsan hacia las experiencias que querés vivir.',
+    30: 'El fuego del deseo y los anhelos que impulsan hacia las experiencias que quieres vivir.',
     31: 'Liderazgo natural reconocido por otros — tu influencia surge cuando te eligen.',
     32: 'La intuición sobre qué puede sobrevivir y qué no en el largo plazo.',
     33: 'La necesidad de retirarse para procesar la experiencia vivida y luego transmitirla.',
-    34: 'Motor de energía pura — sostenés trabajo intenso cuando genuinamente responde a vos.',
+    34: 'Motor de energía pura — sostienes trabajo intenso cuando genuinamente responde a ti.',
     35: 'El deseo de experiencia variada — una amplitud de vivencias que muy pocos logran.',
-    36: 'Las crisis como fuente de sabiduría profunda que luego podés transmitir a otros.',
+    36: 'Las crisis como fuente de sabiduría profunda que luego puedes transmitir a otros.',
     37: 'La habilidad de crear vínculos de confianza y pertenencia — los pactos son tu lenguaje.',
     38: 'La determinación de luchar solo por lo que tiene sentido — tu "no" es tan poderoso como tu "sí".',
     39: 'La provocación como herramienta para despertar el espíritu dormido en otros.',
@@ -221,21 +221,21 @@ _HD_GATE_DESCS = {
     41: 'El inicio de todos los ciclos — imaginás posibilidades antes de que se materialicen.',
     42: 'Llevar las cosas hasta su conclusión — tu satisfacción viene de cerrar ciclos completos.',
     43: 'Comprensiones únicas que llegan desde adentro sin saber cómo — el desafío es articularlas.',
-    44: 'Memoria instintiva sobre patrones del pasado — reconocés qué comportamientos llevan a qué.',
-    45: 'La voz que lidera comunidades — sabés distribuir recursos y enfocar al grupo.',
+    44: 'Memoria instintiva sobre patrones del pasado — reconoces qué comportamientos llevan a qué.',
+    45: 'La voz que lidera comunidades — sabes distribuir recursos y enfocar al grupo.',
     46: 'El amor por el cuerpo y el placer de estar encarnado — la sincronicidad se activa desde aquí.',
     47: 'La reflexión que transforma confusión en sabiduría — el proceso toma tiempo.',
     48: 'Acceso a una profundidad y sabiduría que otros no ven hasta que decidís mostrarla.',
     49: 'La capacidad de revolucionar desde los principios cuando los valores fundamentales no se respetan.',
     50: 'La sensibilidad hacia los valores y las leyes que sostienen el bienestar colectivo.',
     51: 'La resiliencia ante el shock — atravesar lo imprevisto y volver al centro puede inspirar a otros.',
-    52: 'La quietud como base de la concentración — cuando te detenés, tu enfoque es extraordinario.',
+    52: 'La quietud como base de la concentración — cuando te detienes, tu enfoque es extraordinario.',
     53: 'El impulso de comenzar cosas nuevas — el desafío es discernir cuáles valen el compromiso.',
     54: 'El deseo de ascender y mejorar — la ambición transformadora conectada a un propósito.',
     55: 'La abundancia emocional que fluctúa con el humor — seguir el feeling genuino es el camino.',
     56: 'La habilidad de narrar historias que inspiran y estimulan imágenes vívidas en los demás.',
     57: 'Claridad intuitiva del momento presente — llega rápido y se va igual, hay que confiar en ella.',
-    58: 'El amor por la vida y el impulso de mejorar lo que existe — traés vitalidad que eleva a otros.',
+    58: 'El amor por la vida y el impulso de mejorar lo que existe — traes vitalidad que eleva a otros.',
     59: 'La energía para atravesar barreras y crear intimidad, vida y conexión profunda.',
     60: 'La aceptación de los límites como condición para la transformación real.',
     61: 'El conocimiento interior que no puede ser explicado racionalmente — pero es verdadero.',
@@ -245,18 +245,18 @@ _HD_GATE_DESCS = {
 }
 
 _HD_PLANET_DESCS = {
-    'Sol':        'La esencia más característica de tu ser — la energía que otros reconocen en vos y vos mismo/a sentís como más auténtica.',
-    'Tierra':     'El fundamento que balancea al Sol — lo que necesitás cultivar para anclar tu expresión y no desequilibrarte.',
-    'Luna':       'Los ciclos emocionales y el ritmo del cuerpo — cómo fluctuás y qué necesitás para sentirte en casa.',
+    'Sol':        'La esencia más característica de tu ser — la energía que otros reconocen en ti y tú mismo/a sientes como más auténtica.',
+    'Tierra':     'El fundamento que balancea al Sol — lo que necesitas cultivar para anclar tu expresión y no desequilibrarte.',
+    'Luna':       'Los ciclos emocionales y el ritmo del cuerpo — cómo fluctúas y qué necesitas para sentirte en casa.',
     'Nodo Norte': 'La dirección hacia donde va tu vida — el potencial que estás desplegando y todavía aprendiendo en esta encarnación.',
-    'Nodo Sur':   'El patrón familiar, lo que ya sabés hacer bien — el punto de partida conocido desde donde operás.',
+    'Nodo Sur':   'El patrón familiar, lo que ya sabes hacer bien — el punto de partida conocido desde donde operas.',
     'Mercurio':   'Cómo procesás y comunicás información — el estilo natural de tu pensamiento y expresión.',
     'Venus':      'Lo que valorás y lo que te atrae — tus afinidades naturales, sentido estético y vínculo con la abundancia.',
     'Marte':      'Tu impulso de acción — dónde ponés tu energía y cómo respondés ante la resistencia o el desafío.',
     'Júpiter':    'El área de expansión y sentido — dónde tendés a encontrar oportunidades genuinas de crecimiento.',
     'Saturno':    'La lección estructural de tu vida — qué área requiere consistencia para lograr solidez y maestría.',
     'Urano':      'Cómo tu presencia genera disrupción o innovación en el colectivo, muchas veces sin intentarlo.',
-    'Neptuno':    'La conexión con lo sutil y colectivo — dónde podés disolverte en algo más grande.',
+    'Neptuno':    'La conexión con lo sutil y colectivo — dónde puedes disolverte en algo más grande.',
     'Plutón':     'Las fuerzas de transformación profunda — dónde la regeneración radical puede ocurrir en tu vida.',
 }
 
@@ -274,7 +274,7 @@ _HD_SIGNATURE_DESCS = {
     'Satisfacción': 'La satisfacción no siempre es euforia — puede ser el simple placer de un trabajo que vale la pena, la sensación de que la energía fue bien usada. Es la confirmación interior de que el cuerpo respondió sí, y el compromiso honró esa respuesta.',
     'Paz y satisfacción': 'La paz llega cuando el movimiento fue claro e informado. La satisfacción cuando la energía fue bien respondida y usada. Juntas, señalan que el diseño está siendo vivido — no la tranquilidad de no hacer nada, sino la de actuar desde el lugar correcto.',
     'Paz': 'La paz no es resignación — es la quietud de quien actúa desde el momento correcto y sin imponer. Es la señal de que el impacto fue honrado y que el informar creó espacio en lugar de resistencia.',
-    'Éxito': 'El éxito del Proyector no es acumulación — es el reconocimiento genuino de que tu guía fue escuchada y que aportaste claridad donde otros no podían verla. No el éxito como validación social, sino como evidencia de que fuiste invitado/a e hiciste lo que mejor sabés hacer.',
+    'Éxito': 'El éxito del Proyector no es acumulación — es el reconocimiento genuino de que tu guía fue escuchada y que aportaste claridad donde otros no podían verla. No el éxito como validación social, sino como evidencia de que fuiste invitado/a e hiciste lo que mejor sabes hacer.',
     'Sorpresa': 'El deleite del Reflector es la rareza de encontrarse completamente sorprendido/a — sin expectativas cristalizadas, abierto/a a lo imprevisto como modo de vida. Es la señal de que el entorno es correcto y de que el ciclo de la luna está siendo respetado.',
 }
 
@@ -289,17 +289,17 @@ _SIGN_ELEM_CSS = {
 }
 
 _ASTRAL_PLANET_DESCS = {
-    'sun':     'Tu identidad central y el propósito hacia el que te dirigís. Muestra cómo necesitás brillar y expresarte en el mundo.',
-    'moon':    'Tu mundo emocional y tus necesidades más profundas. Revela cómo te sentís por dentro y qué necesitás para sentirte seguro/a.',
-    'mercury': 'Tu mente, tu forma de comunicarte y de procesar información. Indica cómo pensás, hablás y aprendés.',
+    'sun':     'Tu identidad central y el propósito hacia el que te diriges. Muestra cómo necesitas brillar y expresarte en el mundo.',
+    'moon':    'Tu mundo emocional y tus necesidades más profundas. Revela cómo te sientes por dentro y qué necesitas para sentirte seguro/a.',
+    'mercury': 'Tu mente, tu forma de comunicarte y de procesar información. Indica cómo piensas, hablas y aprendes.',
     'venus':   'Tu relación con el amor, la belleza y los valores. Muestra qué te atrae y cómo te vinculás afectivamente.',
-    'mars':    'Tu energía, tu impulso para la acción y cómo manejás el deseo y la voluntad. Revela tu forma de ir por lo que querés.',
+    'mars':    'Tu energía, tu impulso para la acción y cómo manejas el deseo y la voluntad. Revela tu forma de ir por lo que quieres.',
     'jupiter': 'Tus áreas de expansión y abundancia. Donde Júpiter está es donde la vida tiende a amplificarse y crecer.',
-    'saturn':  'El área donde tenés que trabajar más duro para construir algo duradero. Las restricciones de Saturno son también sus mayores enseñanzas.',
+    'saturn':  'El área donde tienes que trabajar más duro para construir algo duradero. Las restricciones de Saturno son también sus mayores enseñanzas.',
     'uranus':  'Donde experimentás transformación repentina y originalidad. Marca la ruptura con lo establecido y la necesidad de libertad.',
-    'neptune': 'El área donde vivís espiritualidad, ilusión y creatividad. Disolución de límites y conexión con lo invisible.',
+    'neptune': 'El área donde vives espiritualidad, ilusión y creatividad. Disolución de límites y conexión con lo invisible.',
     'pluto':   'Donde ocurren las transformaciones más profundas: ciclos de muerte y renacimiento. Energía intensa de regeneración.',
-    'asc':     'La máscara social y el cuerpo — cómo te mostrás al mundo espontáneamente y qué tipo de experiencias y personas atraés.',
+    'asc':     'La máscara social y el cuerpo — cómo te muestras al mundo espontáneamente y qué tipo de experiencias y personas atraes.',
     'mc':      'La vocación pública y la imagen social. Hacia dónde apunta tu ambición y cómo te ven en tu rol en el mundo.',
 }
 
@@ -319,13 +319,13 @@ _ASTRAL_SIGN_DESCS = {
 }
 
 _ASTRAL_HOUSE_DESCS = {
-    '1':  'La identidad y el cuerpo — cómo te presentás al mundo. Tu apariencia y la energía que proyectás de manera espontánea.',
+    '1':  'La identidad y el cuerpo — cómo te presentas al mundo. Tu apariencia y la energía que proyectas de manera espontánea.',
     '2':  'Los recursos propios: dinero, talentos y valores. Tu relación con la seguridad material y lo que considerás tuyo.',
     '3':  'La comunicación, el pensamiento cotidiano y el entorno inmediato. Los hermanos, los viajes cortos y el aprendizaje diario.',
-    '4':  'El hogar, la familia de origen y la base emocional. El suelo desde el que crecés y el mundo privado más íntimo.',
+    '4':  'El hogar, la familia de origen y la base emocional. El suelo desde el que creces y el mundo privado más íntimo.',
     '5':  'La creatividad, el juego, el romance y los hijos. La expresión espontánea del placer y el riesgo del corazón.',
     '6':  'El trabajo cotidiano, la salud y los hábitos. La rutina, el servicio y la relación con el cuerpo en el día a día.',
-    '7':  'Las relaciones comprometidas — pareja, socios. Lo que proyectás en el otro y lo que buscás en los vínculos.',
+    '7':  'Las relaciones comprometidas — pareja, socios. Lo que proyectas en el otro y lo que buscas en los vínculos.',
     '8':  'La transformación profunda, la intimidad real y los recursos compartidos. La muerte, el renacimiento y lo que se hereda.',
     '9':  'La filosofía, la espiritualidad y los viajes largos. La educación superior, las creencias y la búsqueda de sentido mayor.',
     '10': 'La carrera, la vocación pública y la reputación. La posición en la sociedad y el legado profesional.',
@@ -336,10 +336,10 @@ _ASTRAL_HOUSE_DESCS = {
 # ── Diccionarios para saju_detail ────────────────────────────────────────────
 
 _SAJU_PILLAR_DESCS = {
-    'Año':  'El gran ciclo heredado — los ancestros, el contexto social en que llegaste al mundo y los patrones familiares que traés contigo.',
+    'Año':  'El gran ciclo heredado — los ancestros, el contexto social en que llegaste al mundo y los patrones familiares que traes contigo.',
     'Mes':  'La influencia parental y profesional — la infancia, la relación con los padres y la energía que gobierna el trabajo y la carrera.',
-    'Día':  'El maestro del día — quién sos vos en esencia. Tu manera de relacionarte íntimamente y el núcleo de tu diseño personal.',
-    'Hora': 'La segunda mitad de la vida — los hijos, las creaciones propias y los frutos que cosechás en el camino recorrido.',
+    'Día':  'El maestro del día — quién eres en esencia. Tu manera de relacionarte íntimamente y el núcleo de tu diseño personal.',
+    'Hora': 'La segunda mitad de la vida — los hijos, las creaciones propias y los frutos que cosechas en el camino recorrido.',
 }
 
 _SAJU_ELEMENT_DESCS = {
