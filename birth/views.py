@@ -72,7 +72,7 @@ Prohibiciones absolutas:
 — No uses jerga técnica sin explicar su significado en términos de experiencia interior.
 — No hagas listas ni uses títulos de sección. Solo párrafos fluidos.
 
-Idioma: español rioplatense/chileno, informal pero profundo.\
+Idioma: español neutro latinoamericano, informal pero profundo.\
 """
 
 
