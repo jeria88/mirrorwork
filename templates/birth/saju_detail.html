@@ -119,7 +119,29 @@
 
   .disclaimer { font-size: 0.75rem; color: var(--dim); line-height: 1.6; padding: 0.75rem 1rem; background: rgba(255,255,255,0.02); border-radius: 8px; margin-bottom: 2rem; }
 
-  @media (max-width: 520px) { .pillars-grid { grid-template-columns: repeat(2,1fr); } .summary-cards { grid-template-columns: 1fr; } }
+  /* Pillar description */
+  .pillar-pilar-desc {
+    font-size: 0.68rem; color: var(--dim); line-height: 1.4;
+    margin-top: 0.3rem; text-align: center;
+    border-top: 1px solid var(--border); padding-top: 0.4rem;
+  }
+
+  /* Element desc cards */
+  .elem-cards { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 2.5rem; }
+  .elem-desc-card {
+    display: grid; grid-template-columns: 90px 1fr;
+    gap: 0.5rem 1rem; align-items: start;
+    padding: 0.75rem 1rem; border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .elem-desc-label { font-size: 0.78rem; font-weight: 600; padding-top: 0.05rem; }
+  .elem-desc-text  { font-size: 0.78rem; color: var(--dim); line-height: 1.6; }
+
+  @media (max-width: 520px) {
+    .pillars-grid { grid-template-columns: repeat(2,1fr); }
+    .summary-cards { grid-template-columns: 1fr; }
+    .elem-desc-card { grid-template-columns: 1fr; }
+  }
 
   @media print {
     .saju-wrap { padding: 0 !important; max-width: 100% !important; }
@@ -221,7 +243,7 @@
   <!-- Cuatro pilares -->
   <div class="section-title reveal">Los cuatro pilares</div>
   <div class="pillars-grid reveal">
-    {% for p in chart.pillars %}
+    {% for p in annotated_pillars %}
     <div class="pillar">
       <div class="pillar-label">{{ p.label }}</div>
       <div class="pillar-char">{{ p.stem }}</div>
@@ -230,6 +252,7 @@
       <span class="pillar-elem elem-{{ p.elem_stem_name|lower }}">{{ p.elem_stem }}</span>
       <div class="pillar-animal">{{ p.animal }}</div>
       <span class="pillar-elem elem-{{ p.elem_branch|lower }}" style="margin-top:-0.25rem">{{ p.elem_branch }}</span>
+      {% if p.pilar_desc %}<div class="pillar-pilar-desc">{{ p.pilar_desc }}</div>{% endif %}
     </div>
     {% endfor %}
     {% if not chart.hour_known %}
@@ -285,6 +308,25 @@
     </div>
     {% endfor %}
   </div>
+  {% if saju_elem_descs %}
+  <div class="elem-cards reveal">
+    {% for elem, count in chart.element_count.items %}
+    {% with desc=saju_elem_descs|default_if_none:'' %}
+    <div class="elem-desc-card elem-{{ elem|lower }}" style="background:rgba(255,255,255,0.02);">
+      <div class="elem-desc-label elem-{{ elem|lower }}">{{ elem }}{% if count == 0 %} <span style="font-size:0.62rem;opacity:0.5">(ausente)</span>{% else %} ×{{ count }}{% endif %}</div>
+      <div class="elem-desc-text">
+        {% if elem == 'Madera' %}{{ saju_elem_descs.Madera }}
+        {% elif elem == 'Fuego' %}{{ saju_elem_descs.Fuego }}
+        {% elif elem == 'Tierra' %}{{ saju_elem_descs.Tierra }}
+        {% elif elem == 'Metal' %}{{ saju_elem_descs.Metal }}
+        {% elif elem == 'Agua' %}{{ saju_elem_descs.Agua }}
+        {% endif %}
+      </div>
+    </div>
+    {% endwith %}
+    {% endfor %}
+  </div>
+  {% endif %}
 
   <!-- 大運 ciclos vitales -->
   <div class="section-title reveal">Ciclos vitales — 大運</div>

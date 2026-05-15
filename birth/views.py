@@ -196,6 +196,77 @@ _HD_SIGNATURE_DESCS = {
 }
 
 
+# ── Diccionarios para astral_detail ──────────────────────────────────────────
+
+_SIGN_ELEM_CSS = {
+    'Aries': 'fire', 'Leo': 'fire', 'Sagitario': 'fire',
+    'Tauro': 'earth', 'Virgo': 'earth', 'Capricornio': 'earth',
+    'Géminis': 'air', 'Libra': 'air', 'Acuario': 'air',
+    'Cáncer': 'water', 'Escorpio': 'water', 'Piscis': 'water',
+}
+
+_ASTRAL_PLANET_DESCS = {
+    'sun':     'Tu identidad central y el propósito hacia el que te dirigís. Muestra cómo necesitás brillar y expresarte en el mundo.',
+    'moon':    'Tu mundo emocional y tus necesidades más profundas. Revela cómo te sentís por dentro y qué necesitás para sentirte seguro/a.',
+    'mercury': 'Tu mente, tu forma de comunicarte y de procesar información. Indica cómo pensás, hablás y aprendés.',
+    'venus':   'Tu relación con el amor, la belleza y los valores. Muestra qué te atrae y cómo te vinculás afectivamente.',
+    'mars':    'Tu energía, tu impulso para la acción y cómo manejás el deseo y la voluntad. Revela tu forma de ir por lo que querés.',
+    'jupiter': 'Tus áreas de expansión y abundancia. Donde Júpiter está es donde la vida tiende a amplificarse y crecer.',
+    'saturn':  'El área donde tenés que trabajar más duro para construir algo duradero. Las restricciones de Saturno son también sus mayores enseñanzas.',
+    'uranus':  'Donde experimentás transformación repentina y originalidad. Marca la ruptura con lo establecido y la necesidad de libertad.',
+    'neptune': 'El área donde vivís espiritualidad, ilusión y creatividad. Disolución de límites y conexión con lo invisible.',
+    'pluto':   'Donde ocurren las transformaciones más profundas: ciclos de muerte y renacimiento. Energía intensa de regeneración.',
+    'asc':     'La máscara social y el cuerpo — cómo te mostrás al mundo espontáneamente y qué tipo de experiencias y personas atraés.',
+    'mc':      'La vocación pública y la imagen social. Hacia dónde apunta tu ambición y cómo te ven en tu rol en el mundo.',
+}
+
+_ASTRAL_SIGN_DESCS = {
+    'Aries':       'Iniciativa, valentía e impulso. Necesita moverse primero y reflexionar después. Energía directa y urgencia de ser el primero.',
+    'Tauro':       'Estabilidad, sensorialidad y perseverancia. Necesita tiempo y resultados concretos. Relación profunda con el cuerpo y los recursos.',
+    'Géminis':     'Curiosidad, adaptabilidad y comunicación. Procesa el mundo a través de ideas y palabras. Facilidad para conectar múltiples temas.',
+    'Cáncer':      'Sensibilidad, memoria emocional y protección. Necesita sentirse seguro/a. Profunda capacidad de cuidado y pertenencia.',
+    'Leo':         'Creatividad, generosidad y expresión propia. Necesita ser visto/a y reconocido/a. Liderazgo natural desde la autenticidad.',
+    'Virgo':       'Análisis, precisión y servicio. Atiende los detalles y busca la mejora constante. Mente discriminativa orientada a lo concreto.',
+    'Libra':       'Diplomacia, estética y búsqueda de equilibrio. Necesita armonía en los intercambios. Sentido natural de la justicia y la belleza.',
+    'Escorpio':    'Intensidad, profundidad y transformación. Va al fondo de todo. Capacidad para sostener lo que otros no pueden mirar.',
+    'Sagitario':   'Expansión, filosofía y aventura. Busca el significado mayor y la libertad. Optimismo y orientación hacia el horizonte lejano.',
+    'Capricornio': 'Estructura, ambición y visión a largo plazo. Construye con paciencia y disciplina. Sentido del deber y la responsabilidad.',
+    'Acuario':     'Originalidad, visión colectiva e innovación. Ve más allá del presente. Distancia emocional con perspectiva amplia y humanitaria.',
+    'Piscis':      'Empatía, espiritualidad y disolución. Siente todo y se funde con el entorno. Conexión con lo invisible y lo imaginario.',
+}
+
+_ASTRAL_HOUSE_DESCS = {
+    '1':  'La identidad y el cuerpo — cómo te presentás al mundo. Tu apariencia y la energía que proyectás de manera espontánea.',
+    '2':  'Los recursos propios: dinero, talentos y valores. Tu relación con la seguridad material y lo que considerás tuyo.',
+    '3':  'La comunicación, el pensamiento cotidiano y el entorno inmediato. Los hermanos, los viajes cortos y el aprendizaje diario.',
+    '4':  'El hogar, la familia de origen y la base emocional. El suelo desde el que crecés y el mundo privado más íntimo.',
+    '5':  'La creatividad, el juego, el romance y los hijos. La expresión espontánea del placer y el riesgo del corazón.',
+    '6':  'El trabajo cotidiano, la salud y los hábitos. La rutina, el servicio y la relación con el cuerpo en el día a día.',
+    '7':  'Las relaciones comprometidas — pareja, socios. Lo que proyectás en el otro y lo que buscás en los vínculos.',
+    '8':  'La transformación profunda, la intimidad real y los recursos compartidos. La muerte, el renacimiento y lo que se hereda.',
+    '9':  'La filosofía, la espiritualidad y los viajes largos. La educación superior, las creencias y la búsqueda de sentido mayor.',
+    '10': 'La carrera, la vocación pública y la reputación. La posición en la sociedad y el legado profesional.',
+    '11': 'Los amigos, los grupos y los ideales colectivos. Las esperanzas de futuro y la pertenencia a algo mayor que uno mismo.',
+    '12': 'Lo oculto, el inconsciente y la soledad fecunda. Lo que se procesa en silencio y los retiros necesarios para integrar.',
+}
+
+# ── Diccionarios para saju_detail ────────────────────────────────────────────
+
+_SAJU_PILLAR_DESCS = {
+    'Año':  'El gran ciclo heredado — los ancestros, el contexto social en que llegaste al mundo y los patrones familiares que traés contigo.',
+    'Mes':  'La influencia parental y profesional — la infancia, la relación con los padres y la energía que gobierna el trabajo y la carrera.',
+    'Día':  'El maestro del día — quién sos vos en esencia. Tu manera de relacionarte íntimamente y el núcleo de tu diseño personal.',
+    'Hora': 'La segunda mitad de la vida — los hijos, las creaciones propias y los frutos que cosechás en el camino recorrido.',
+}
+
+_SAJU_ELEMENT_DESCS = {
+    'Madera': 'Expansión, crecimiento y creatividad. Energía de la primavera: visión, impulso hacia adelante y flexibilidad. En exceso puede volverse rigidez; en ausencia, dificultad para iniciar o crecer.',
+    'Fuego':  'Expresión, carisma y calidez. Energía del verano: visibilidad, entusiasmo y presencia. En exceso puede ser impulsividad; en ausencia, dificultad para brillar y conectar.',
+    'Tierra': 'Estabilidad, cuidado y centro. Energía de las transiciones entre estaciones: sostén y capacidad de contener. En exceso puede ser rigidez; en ausencia, dificultad para enraizarse.',
+    'Metal':  'Estructura, precisión y claridad. Energía del otoño: discernimiento, límites y refinamiento. En exceso puede ser frialdad; en ausencia, dificultad para ordenar y priorizar.',
+    'Agua':   'Profundidad, sabiduría e intuición. Energía del invierno: introspección, fluir y conexión con lo invisible. En exceso puede ser miedo o dispersión; en ausencia, dificultad para sentir y soltar.',
+}
+
 # ── Configuraciones de secciones para lectura.html ───────────────────────────
 
 _SECTION_CONFIGS = {
@@ -460,11 +531,37 @@ def astral_detail(request, pk):
     except BirthProfile.DoesNotExist:
         bp = None
 
+    chart = report.chart_data or {}
+    raw_planets = chart.get('planets', [])
+
+    def _annotate(p, key_override=None):
+        key = key_override or p.get('key', '')
+        return {
+            **p,
+            'planet_desc': _ASTRAL_PLANET_DESCS.get(key, ''),
+            'sign_desc':   _ASTRAL_SIGN_DESCS.get(p.get('sign', ''), ''),
+            'house_desc':  _ASTRAL_HOUSE_DESCS.get(str(p.get('house', '')), ''),
+            'elem_css':    _SIGN_ELEM_CSS.get(p.get('sign', ''), 'water'),
+        }
+
+    annotated_planets = [_annotate(p) for p in raw_planets]
+    sun  = next((p for p in annotated_planets if p.get('key') == 'sun'), {})
+    moon = next((p for p in annotated_planets if p.get('key') == 'moon'), {})
+    asc_raw = chart.get('ascendant', {})
+    mc_raw  = chart.get('midheaven', {})
+    asc = _annotate({**asc_raw, 'house': 1,  'retrograde': False, 'degree': asc_raw.get('degree',''), 'label': 'Ascendente'}, key_override='asc')
+    mc  = _annotate({**mc_raw,  'house': 10, 'retrograde': False, 'degree': mc_raw.get('degree',''),  'label': 'Medio Cielo'}, key_override='mc')
+
     return render(request, 'birth/astral_detail.html', {
-        'report': report,
-        'bp': bp,
-        'poll_url': f'/nacimiento/reporte/{report.pk}/estado/',
-        'is_processing': report.status == BirthReport.STATUS_PROCESSING,
+        'report':             report,
+        'bp':                 bp,
+        'poll_url':           f'/nacimiento/reporte/{report.pk}/estado/',
+        'is_processing':      report.status == BirthReport.STATUS_PROCESSING,
+        'annotated_planets':  annotated_planets,
+        'sun':                sun,
+        'moon':               moon,
+        'asc':                asc,
+        'mc':                 mc,
     })
 
 
@@ -727,9 +824,17 @@ def saju_detail(request, pk):
         bp = request.user.birth_profile
     except BirthProfile.DoesNotExist:
         bp = None
+    chart = report.chart_data or {}
+    annotated_pillars = [
+        {**p, 'pilar_desc': _SAJU_PILLAR_DESCS.get(p.get('label', ''), '')}
+        for p in chart.get('pillars', [])
+    ]
     return render(request, 'birth/saju_detail.html', {
-        'report': report, 'bp': bp,
-        'poll_url': f'/nacimiento/reporte/{report.pk}/estado/',
+        'report':            report,
+        'bp':                bp,
+        'poll_url':          f'/nacimiento/reporte/{report.pk}/estado/',
+        'annotated_pillars': annotated_pillars,
+        'saju_elem_descs':   _SAJU_ELEMENT_DESCS,
     })
 
 

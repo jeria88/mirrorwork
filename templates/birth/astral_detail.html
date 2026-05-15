@@ -213,9 +213,83 @@
   }
   .back-link:hover { color: var(--accent); }
 
+  /* ── Planet cards (replaces table) ── */
+  .planets-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 3rem;
+  }
+  .planet-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.1rem 1.25rem;
+    transition: border-color 0.2s;
+  }
+  .planet-card:hover { border-color: rgba(78,205,196,0.25); }
+  .planet-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.65rem;
+  }
+  .planet-card-left { display: flex; align-items: center; gap: 0.55rem; }
+  .planet-card-symbol { font-size: 1.25rem; line-height: 1; }
+  .planet-card-name { font-size: 0.78rem; font-weight: 500; color: var(--text); }
+  .planet-card-badges { display: flex; align-items: center; gap: 0.35rem; }
+  .planet-sign-text {
+    font-family: var(--font-heading);
+    font-size: 0.88rem;
+  }
+  .planet-house-badge {
+    font-size: 0.65rem;
+    color: var(--dim);
+    padding: 0.1rem 0.4rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+  .planet-retro-badge {
+    font-size: 0.68rem;
+    color: var(--transicion);
+    padding: 0.1rem 0.35rem;
+    border: 1px solid rgba(244,160,53,0.3);
+    border-radius: 4px;
+  }
+  .planet-card-desc {
+    font-size: 0.76rem;
+    color: var(--muted);
+    line-height: 1.55;
+    margin-bottom: 0.5rem;
+  }
+  .planet-card-context {
+    border-top: 1px solid var(--border);
+    padding-top: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  .planet-ctx-line {
+    font-size: 0.72rem;
+    color: var(--dim);
+    line-height: 1.45;
+  }
+  .planet-ctx-line strong { color: var(--muted); font-weight: 500; }
+
+  /* Big Three enhanced */
+  .big-card-desc {
+    font-size: 0.72rem;
+    color: var(--dim);
+    line-height: 1.45;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+    text-align: left;
+  }
+
   @media (max-width: 520px) {
     .big-three { grid-template-columns: 1fr; }
-    .planet-table .p-degree, .planet-table .p-house { display: none; }
+    .planets-cards { grid-template-columns: 1fr; }
   }
 
   @media print {
@@ -233,17 +307,12 @@
     .big-card-sign { font-size: 11pt !important; }
     .big-card-planet, .big-card-degree { font-size: 7pt !important; }
 
-    .planet-table { font-size: 8.5pt !important; margin-bottom: 14pt !important; }
-    .planet-table th { font-size: 7pt !important; padding: 4pt 6pt !important; border-bottom-color: #d4d4e0 !important; }
-    .planet-table td { padding: 4pt 6pt !important; border-bottom-color: #ebebf0 !important; }
-    .planet-table tr:hover td { background: transparent !important; }
-    .p-sign { font-size: 9pt !important; }
-    .p-retro { border-color: #c8a020 !important; color: #c8a020 !important; }
-    .points-row td { background: #f8f8fb !important; }
-    .el-fire { color: #c85020 !important; }
-    .el-earth { color: #3a7a3a !important; }
-    .el-air  { color: #3060a0 !important; }
-    .el-water { color: #5040b0 !important; }
+    .planets-cards { grid-template-columns: repeat(2,1fr) !important; gap: 6pt !important; margin-bottom: 14pt !important; }
+    .planet-card { background: #f8f8fb !important; border: 1pt solid #d4d4e0 !important; border-radius: 6pt !important; padding: 8pt !important; }
+    .planet-card-name { font-size: 7.5pt !important; }
+    .planet-sign-text { font-size: 8.5pt !important; }
+    .planet-card-desc, .planet-ctx-line { font-size: 7pt !important; color: #5a5a7a !important; }
+    .planet-house-badge, .planet-retro-badge { font-size: 6.5pt !important; }
   }
 </style>
 {% endblock %}
@@ -289,123 +358,108 @@
   {% if chart %}
 
     <!-- Big Three -->
-    {% with planets=chart.planets asc=chart.ascendant %}
-    {% for p in planets %}{% if p.key == 'sun' %}{% with sun=p %}
-    {% for q in planets %}{% if q.key == 'moon' %}{% with moon=q %}
-
     <div class="big-three reveal">
       <div class="big-card">
-        <div class="big-card-symbol
-          {% if sun.sign == 'Aries' or sun.sign == 'Leo' or sun.sign == 'Sagitario' %}el-fire
-          {% elif sun.sign == 'Tauro' or sun.sign == 'Virgo' or sun.sign == 'Capricornio' %}el-earth
-          {% elif sun.sign == 'Géminis' or sun.sign == 'Libra' or sun.sign == 'Acuario' %}el-air
-          {% else %}el-water{% endif %}">☉</div>
+        <div class="big-card-symbol el-{{ sun.elem_css }}">☉</div>
         <div class="big-card-planet">Sol</div>
-        <div class="big-card-sign">{{ sun.sign }}</div>
+        <div class="big-card-sign el-{{ sun.elem_css }}">{{ sun.sign }}</div>
         <div class="big-card-degree">Casa {{ sun.house }} · {{ sun.degree }}°</div>
+        {% if sun.sign_desc %}<div class="big-card-desc">{{ sun.sign_desc }}</div>{% endif %}
       </div>
-
       <div class="big-card">
-        <div class="big-card-symbol
-          {% if moon.sign == 'Aries' or moon.sign == 'Leo' or moon.sign == 'Sagitario' %}el-fire
-          {% elif moon.sign == 'Tauro' or moon.sign == 'Virgo' or moon.sign == 'Capricornio' %}el-earth
-          {% elif moon.sign == 'Géminis' or moon.sign == 'Libra' or moon.sign == 'Acuario' %}el-air
-          {% else %}el-water{% endif %}">☽</div>
+        <div class="big-card-symbol el-{{ moon.elem_css }}">☽</div>
         <div class="big-card-planet">Luna</div>
-        <div class="big-card-sign">{{ moon.sign }}</div>
+        <div class="big-card-sign el-{{ moon.elem_css }}">{{ moon.sign }}</div>
         <div class="big-card-degree">Casa {{ moon.house }} · {{ moon.degree }}°</div>
+        {% if moon.sign_desc %}<div class="big-card-desc">{{ moon.sign_desc }}</div>{% endif %}
       </div>
-
       <div class="big-card">
-        <div class="big-card-symbol
-          {% if asc.sign == 'Aries' or asc.sign == 'Leo' or asc.sign == 'Sagitario' %}el-fire
-          {% elif asc.sign == 'Tauro' or asc.sign == 'Virgo' or asc.sign == 'Capricornio' %}el-earth
-          {% elif asc.sign == 'Géminis' or asc.sign == 'Libra' or asc.sign == 'Acuario' %}el-air
-          {% else %}el-water{% endif %}">↑</div>
+        <div class="big-card-symbol el-{{ asc.elem_css }}">↑</div>
         <div class="big-card-planet">Ascendente</div>
-        <div class="big-card-sign">{{ asc.sign }}</div>
+        <div class="big-card-sign el-{{ asc.elem_css }}">{{ asc.sign }}</div>
         <div class="big-card-degree">{{ asc.degree }}°</div>
+        {% if asc.sign_desc %}<div class="big-card-desc">{{ asc.sign_desc }}</div>{% endif %}
       </div>
     </div>
 
-    {% endwith %}{% endif %}{% endfor %}
-    {% endwith %}{% endif %}{% endfor %}
-    {% endwith %}
-
-    <!-- Tabla de planetas -->
+    <!-- Posiciones planetarias como tarjetas -->
     <div class="section-title reveal">Posiciones planetarias</div>
-    <table class="planet-table reveal">
-      <thead>
-        <tr>
-          <th></th>
-          <th>Planeta</th>
-          <th>Signo</th>
-          <th>Grado</th>
-          <th>Casa</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for p in chart.planets %}
-        <tr>
-          <td class="p-symbol">
-            {% if p.key == 'sun' %}☉
-            {% elif p.key == 'moon' %}☽
-            {% elif p.key == 'mercury' %}☿
-            {% elif p.key == 'venus' %}♀
-            {% elif p.key == 'mars' %}♂
-            {% elif p.key == 'jupiter' %}♃
-            {% elif p.key == 'saturn' %}♄
-            {% elif p.key == 'uranus' %}♅
-            {% elif p.key == 'neptune' %}♆
-            {% elif p.key == 'pluto' %}♇
-            {% endif %}
-          </td>
-          <td class="p-name">{{ p.label }}</td>
-          <td class="p-sign
-            {% if p.sign == 'Aries' or p.sign == 'Leo' or p.sign == 'Sagitario' %}el-fire
-            {% elif p.sign == 'Tauro' or p.sign == 'Virgo' or p.sign == 'Capricornio' %}el-earth
-            {% elif p.sign == 'Géminis' or p.sign == 'Libra' or p.sign == 'Acuario' %}el-air
-            {% else %}el-water{% endif %}
-          ">{{ p.sign }}</td>
-          <td class="p-degree">{{ p.degree }}°</td>
-          <td class="p-house">Casa {{ p.house }}</td>
-          <td>{% if p.retrograde %}<span class="p-retro">℞</span>{% else %}<span class="p-retro-empty"></span>{% endif %}</td>
-        </tr>
-        {% endfor %}
-        <!-- Puntos angulares -->
-        <tr class="points-row">
-          <td class="p-symbol">↑</td>
-          <td class="p-name">Ascendente</td>
-          <td class="p-sign
-            {% with s=chart.ascendant.sign %}
-            {% if s == 'Aries' or s == 'Leo' or s == 'Sagitario' %}el-fire
-            {% elif s == 'Tauro' or s == 'Virgo' or s == 'Capricornio' %}el-earth
-            {% elif s == 'Géminis' or s == 'Libra' or s == 'Acuario' %}el-air
-            {% else %}el-water{% endif %}
-            {% endwith %}
-          ">{{ chart.ascendant.sign }}</td>
-          <td class="p-degree">{{ chart.ascendant.degree }}°</td>
-          <td class="p-house">Casa 1</td>
-          <td></td>
-        </tr>
-        <tr class="points-row">
-          <td class="p-symbol">↑<sub style="font-size:0.5em">MC</sub></td>
-          <td class="p-name">Medio Cielo</td>
-          <td class="p-sign
-            {% with s=chart.midheaven.sign %}
-            {% if s == 'Aries' or s == 'Leo' or s == 'Sagitario' %}el-fire
-            {% elif s == 'Tauro' or s == 'Virgo' or s == 'Capricornio' %}el-earth
-            {% elif s == 'Géminis' or s == 'Libra' or s == 'Acuario' %}el-air
-            {% else %}el-water{% endif %}
-            {% endwith %}
-          ">{{ chart.midheaven.sign }}</td>
-          <td class="p-degree">{{ chart.midheaven.degree }}°</td>
-          <td class="p-house">Casa 10</td>
-          <td></td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="planets-cards reveal">
+      {% for p in annotated_planets %}
+      <div class="planet-card">
+        <div class="planet-card-header">
+          <div class="planet-card-left">
+            <span class="planet-card-symbol el-{{ p.elem_css }}">
+              {% if p.key == 'sun' %}☉
+              {% elif p.key == 'moon' %}☽
+              {% elif p.key == 'mercury' %}☿
+              {% elif p.key == 'venus' %}♀
+              {% elif p.key == 'mars' %}♂
+              {% elif p.key == 'jupiter' %}♃
+              {% elif p.key == 'saturn' %}♄
+              {% elif p.key == 'uranus' %}♅
+              {% elif p.key == 'neptune' %}♆
+              {% elif p.key == 'pluto' %}♇
+              {% else %}◎{% endif %}
+            </span>
+            <span class="planet-card-name">{{ p.label }}</span>
+          </div>
+          <div class="planet-card-badges">
+            <span class="planet-sign-text el-{{ p.elem_css }}">{{ p.sign }}</span>
+            <span class="planet-house-badge">Casa {{ p.house }}</span>
+            {% if p.retrograde %}<span class="planet-retro-badge">℞</span>{% endif %}
+          </div>
+        </div>
+        {% if p.planet_desc %}<div class="planet-card-desc">{{ p.planet_desc }}</div>{% endif %}
+        {% if p.sign_desc or p.house_desc %}
+        <div class="planet-card-context">
+          {% if p.sign_desc %}<div class="planet-ctx-line"><strong>{{ p.sign }}:</strong> {{ p.sign_desc }}</div>{% endif %}
+          {% if p.house_desc %}<div class="planet-ctx-line"><strong>Casa {{ p.house }}:</strong> {{ p.house_desc }}</div>{% endif %}
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+      <!-- Ascendente -->
+      <div class="planet-card">
+        <div class="planet-card-header">
+          <div class="planet-card-left">
+            <span class="planet-card-symbol el-{{ asc.elem_css }}">↑</span>
+            <span class="planet-card-name">Ascendente</span>
+          </div>
+          <div class="planet-card-badges">
+            <span class="planet-sign-text el-{{ asc.elem_css }}">{{ asc.sign }}</span>
+            <span class="planet-house-badge">Casa 1</span>
+          </div>
+        </div>
+        {% if asc.planet_desc %}<div class="planet-card-desc">{{ asc.planet_desc }}</div>{% endif %}
+        {% if asc.sign_desc or asc.house_desc %}
+        <div class="planet-card-context">
+          {% if asc.sign_desc %}<div class="planet-ctx-line"><strong>{{ asc.sign }}:</strong> {{ asc.sign_desc }}</div>{% endif %}
+          {% if asc.house_desc %}<div class="planet-ctx-line"><strong>Casa 1:</strong> {{ asc.house_desc }}</div>{% endif %}
+        </div>
+        {% endif %}
+      </div>
+      <!-- Medio Cielo -->
+      <div class="planet-card">
+        <div class="planet-card-header">
+          <div class="planet-card-left">
+            <span class="planet-card-symbol el-{{ mc.elem_css }}">↑<sub style="font-size:0.5em">MC</sub></span>
+            <span class="planet-card-name">Medio Cielo</span>
+          </div>
+          <div class="planet-card-badges">
+            <span class="planet-sign-text el-{{ mc.elem_css }}">{{ mc.sign }}</span>
+            <span class="planet-house-badge">Casa 10</span>
+          </div>
+        </div>
+        {% if mc.planet_desc %}<div class="planet-card-desc">{{ mc.planet_desc }}</div>{% endif %}
+        {% if mc.sign_desc or mc.house_desc %}
+        <div class="planet-card-context">
+          {% if mc.sign_desc %}<div class="planet-ctx-line"><strong>{{ mc.sign }}:</strong> {{ mc.sign_desc }}</div>{% endif %}
+          {% if mc.house_desc %}<div class="planet-ctx-line"><strong>Casa 10:</strong> {{ mc.house_desc }}</div>{% endif %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
 
   {% endif %}
   {% endwith %}
