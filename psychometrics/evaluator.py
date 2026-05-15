@@ -628,29 +628,84 @@ def _eval_ecr(details):
 # ─────────────────────────────────────────────────────────────────────
 
 def _eval_heridas(details):
-    MAX_PER_DIM = 20  # 4 ítems × 5
-    descripciones = {
-        'Rechazo': 'La herida más profunda — afecta el derecho a existir. Máscara: El Huidizo.',
-        'Abandono': 'Miedo a la soledad y a no ser apoyado/a. Máscara: El Dependiente.',
-        'Humillación': 'Dolor por la desaprobación física o moral. Máscara: El Masoquista.',
-        'Traición': 'Pérdida de confianza y control. Máscara: El Controlador.',
-        'Injusticia': 'Falta de apreciación de la individualidad. Máscara: El Rígido.'
+    MAX_PER_DIM = 5  # 5 ítems × 1 (binary)
+
+    INFO = {
+        'Abandono': {
+            'mascara': 'El Dependiente',
+            'cuerpo': 'Postura blanda, busca contacto, se "derrumba" ante el abandono.',
+            'sintomas_fisicos': 'Espalda baja, rodillas, riñones, tristeza crónica.',
+            'descripcion': 'Miedo profundo a la soledad y a no ser sostenido/a. Aguanta relaciones dañinas por no quedarse solo/a.',
+            'frases': ['Soy valioso/a.', 'Puedo cuidar de mí mismo/a.', 'Pongo límites sanos.', 'Tengo identidad propia.', 'Puedo tener relaciones libres.'],
+        },
+        'Rechazo': {
+            'mascara': 'El Huidizo',
+            'cuerpo': 'Cuerpo pequeño, delgado, tiende a hacerse invisible.',
+            'sintomas_fisicos': 'Vías respiratorias (asma, rinitis), piel (eczema, psoriasis), pulmones.',
+            'descripcion': 'La herida más profunda: afecta el derecho a existir. Se aísla antes de arriesgarse a ser rechazado/a.',
+            'frases': ['Soy capaz y puedo hacerlo.', 'Soy aceptado/a y parte de.', 'Soy importante.', 'Yo pertenezco y me hago presente.'],
+        },
+        'Humillación': {
+            'mascara': 'El Masoquista',
+            'cuerpo': 'Redondo, sobrepeso, se protege con volumen.',
+            'sintomas_fisicos': 'Sobrepeso, problemas digestivos, colon, tiroides lenta.',
+            'descripcion': 'Vergüenza de sí mismo/a, del cuerpo y de sus necesidades. Se sacrifica por los demás anulándose.',
+            'frases': ['Primero lo que yo necesito.', 'Respeto y acepto mi cuerpo.', 'Me siento orgulloso/a de…', 'Expreso lo que siento y necesito.'],
+        },
+        'Injusticia': {
+            'mascara': 'El Rígido',
+            'cuerpo': 'Erguido, rígido, perfectamente presentado.',
+            'sintomas_fisicos': 'Espalda alta, columna, contracturas, piel (rigidez, frialdad).',
+            'descripcion': 'No se reconoció su individualidad. Perfeccionismo y rigidez como escudo contra el dolor.',
+            'frases': ['Me permito ser flexible y espontáneo/a.', 'Puedo equivocarme y respetarme.', 'Disfruto lo que hago.', 'Mis emociones las permito y cultivo.'],
+        },
+        'Traición': {
+            'mascara': 'El Controlador',
+            'cuerpo': 'Fuerte, hombros expansivos, proyecta poder.',
+            'sintomas_fisicos': 'Estómago, hígado, vesícula, contracturas de hombros, tensión crónica.',
+            'descripcion': 'Alguien prometió y no cumplió. Controla el entorno para no volver a ser traicionado/a.',
+            'frases': ['Yo elijo en quién confiar y suelto.', 'Controlo mi mente, no la vida de otros.', 'Tengo expectativas flexibles y realistas.', 'Sé recibir y a veces me equivoco.'],
+        },
     }
+
     dimensiones = []
+    herida_dominante = None
+    max_score = -1
+
     for dim, score in details.items():
         pct = min((score / MAX_PER_DIM) * 100, 100)
-        nivel = "Herida Activa" if pct > 60 else "Herida Latente"
+        if score >= 4:
+            nivel = "Herida Activa"
+        elif score >= 2:
+            nivel = "Herida en Proceso"
+        else:
+            nivel = "Herida Latente"
         pol, msg, acc = _get_polarity(dim, pct, es_interferencia=True)
+        info = INFO.get(dim, {})
+        analisis = (
+            f"Máscara: {info.get('mascara','—')}. "
+            f"Cuerpo: {info.get('cuerpo','—')} "
+            f"Síntomas físicos frecuentes: {info.get('sintomas_fisicos','—')}"
+        )
         dimensiones.append({
             'nombre': dim, 'puntos': score, 'max': MAX_PER_DIM, 'pct': pct,
             'polaridad': pol, 'mensaje_polaridad': msg, 'accion_sugerida': acc,
-            'nivel': nivel, 'descripcion': descripciones.get(dim, ''),
-            'analisis': "Estado de activación de esta herida nuclear."
+            'nivel': nivel, 'descripcion': info.get('descripcion', ''),
+            'analisis': analisis,
+            'frases_sanadoras': info.get('frases', []),
         })
-    conclusion = ("Las heridas de la infancia son los filtros de color con los que el ego tiñe la realidad. "
-                  "Identificar tu herida dominante no es para culpar al pasado — es para reconocer la 'máscara' que usas hoy automáticamente. "
-                  "Sanar consiste en reconocer que hoy tienes los recursos que de niño/a no tenías. ⚠️ Modelo de Lise Bourbeau — no validado psicométricamente.")
-    return {"dimensiones": dimensiones, "conclusion": conclusion}
+        if score > max_score:
+            max_score = score
+            herida_dominante = dim
+
+    conclusion = (
+        f"Tu herida más activa es la de {herida_dominante}. "
+        "Las heridas de infancia son adaptaciones ante el dolor — decisiones que tomaste para dejar de sentir algo insoportable. "
+        "Hoy esa defensa opera automáticamente aunque ya no la necesites. "
+        "El camino no es eliminarla sino reconocerla: cuando la ves actuar, ya no eres ella. "
+        "⚠️ Modelo de Lise Bourbeau — orientativo, no diagnóstico."
+    )
+    return {"dimensiones": dimensiones, "conclusion": conclusion, "herida_dominante": herida_dominante}
 
 
 # ─────────────────────────────────────────────────────────────────────
