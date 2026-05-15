@@ -167,6 +167,84 @@
     transition: color 0.15s;
   }
   .perfil-link:hover { color: var(--accent); }
+
+  /* ── Sección viaje interior ── */
+  .viaje-select {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+    font-size: 0.9rem;
+    color: var(--text);
+    font-family: var(--font-ui);
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237070a0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.9rem center;
+    padding-right: 2.5rem;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .viaje-select:focus { border-color: var(--accent); }
+  .viaje-select option { background: #1a1a26; color: var(--text); }
+
+  .viaje-checks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.1rem;
+  }
+  .viaje-check-label {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 100px;
+    padding: 0.35rem 0.85rem;
+    font-size: 0.8rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color 0.18s, background 0.18s, color 0.18s;
+    user-select: none;
+  }
+  .viaje-check-label:has(input:checked) {
+    border-color: var(--accent);
+    background: rgba(78,205,196,0.09);
+    color: var(--accent);
+  }
+  .viaje-check-label input { display: none; }
+
+  .nucleo-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .nucleo-row { display: flex; flex-direction: column; gap: 0.35rem; }
+  .nucleo-q-label { font-size: 0.82rem; color: var(--muted); }
+  .nucleo-pills { display: flex; gap: 0.4rem; }
+  .nucleo-pill-label {
+    flex: 1;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 100px;
+    padding: 0.4rem 0.5rem;
+    font-size: 0.78rem;
+    font-family: var(--font-ui);
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color 0.18s, background 0.18s, color 0.18s;
+    user-select: none;
+  }
+  .nucleo-pill-label:has(input:checked) {
+    border-color: var(--accent);
+    background: rgba(78,205,196,0.09);
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .nucleo-pill-label input { display: none; }
 </style>
 {% endblock %}
 
@@ -220,6 +298,79 @@
           <label>Bio</label>
           <textarea name="bio" placeholder="Unas palabras sobre tu camino interior…">{{ profile.bio }}</textarea>
         </div>
+      </div>
+    </div>
+
+    <!-- ── Viaje interior ── -->
+    <div class="perfil-section reveal">
+      <div class="perfil-section-title">Tu viaje interior</div>
+      <div class="field-group">
+
+        <div class="field">
+          <label>¿Cómo llegaste aquí?</label>
+          <select name="onboarding_entry_point" class="viaje-select">
+            <option value="">— Sin responder —</option>
+            <option value="cambio"      {% if profile.onboarding_entry_point == 'cambio' %}selected{% endif %}>En medio de un cambio que no pedí</option>
+            <option value="ciclos"      {% if profile.onboarding_entry_point == 'ciclos' %}selected{% endif %}>Repitiendo ciclos que no entiendo</option>
+            <option value="busqueda"    {% if profile.onboarding_entry_point == 'busqueda' %}selected{% endif %}>Buscando algo que no sé nombrar</option>
+            <option value="algo-mas"    {% if profile.onboarding_entry_point == 'algo-mas' %}selected{% endif %}>Sintiendo que hay algo más de lo que veo</option>
+            <option value="entenderme"  {% if profile.onboarding_entry_point == 'entenderme' %}selected{% endif %}>Queriendo entenderme de verdad</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>¿Dónde sientes más el ruido?</label>
+          <select name="onboarding_noise_area" class="viaje-select">
+            <option value="">— Sin responder —</option>
+            <option value="trabajo"    {% if profile.onboarding_noise_area == 'trabajo' %}selected{% endif %}>Trabajo o dirección</option>
+            <option value="relaciones" {% if profile.onboarding_noise_area == 'relaciones' %}selected{% endif %}>Relaciones</option>
+            <option value="cuerpo"     {% if profile.onboarding_noise_area == 'cuerpo' %}selected{% endif %}>Cuerpo o salud</option>
+            <option value="identidad"  {% if profile.onboarding_noise_area == 'identidad' %}selected{% endif %}>Quién soy</option>
+            <option value="proposito"  {% if profile.onboarding_noise_area == 'proposito' %}selected{% endif %}>Para qué estoy aquí</option>
+            <option value="todo"       {% if profile.onboarding_noise_area == 'todo' %}selected{% endif %}>En todo al mismo tiempo</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Camino recorrido</label>
+          {% with prev=profile.onboarding_prior_exploration %}
+          <div class="viaje-checks">
+            {% for val, lbl in prior_opts %}
+            <label class="viaje-check-label">
+              <input type="checkbox" name="onboarding_prior_exploration" value="{{ val }}"
+                {% if val in prev %}checked{% endif %}>
+              {{ lbl }}
+            </label>
+            {% endfor %}
+          </div>
+          {% endwith %}
+        </div>
+
+        <div class="field">
+          <label>Tu pregunta guía</label>
+          <textarea name="onboarding_question" placeholder="La pregunta que guía tu viaje interior…" style="min-height:80px;">{{ profile.onboarding_question }}</textarea>
+        </div>
+
+        <div class="field">
+          <label>Tu núcleo de creencias</label>
+          <div class="nucleo-list" style="margin-top:0.4rem;">
+            {% for key, lbl, opts, cur_val in nucleo_fields %}
+            <div class="nucleo-row">
+              <div class="nucleo-q-label">{{ lbl }}</div>
+              <div class="nucleo-pills">
+                {% for oval, olbl in opts %}
+                <label class="nucleo-pill-label">
+                  <input type="radio" name="nucleo_{{ key }}" value="{{ oval }}"
+                    {% if oval == cur_val %}checked{% endif %}>
+                  {{ olbl }}
+                </label>
+                {% endfor %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
       </div>
     </div>
 

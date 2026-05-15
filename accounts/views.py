@@ -155,12 +155,48 @@ def perfil(request):
             request.user.save(update_fields=['first_name'])
         profile.bio = bio
         profile.profession = profession
-        profile.save(update_fields=['bio', 'profession'])
+
+        # Onboarding editable
+        profile.onboarding_question = request.POST.get('onboarding_question', '').strip()
+        profile.onboarding_entry_point = request.POST.get('onboarding_entry_point', '').strip()
+        profile.onboarding_noise_area = request.POST.get('onboarding_noise_area', '').strip()
+        prior = request.POST.getlist('onboarding_prior_exploration')
+        profile.onboarding_prior_exploration = ','.join(prior) if prior else ''
+
+        _NUCLEO_KEYS = ['transcendencia', 'cambio', 'merecimiento', 'perdon', 'sentido_dolor']
+        nucleo = {k: request.POST.get(f'nucleo_{k}', '') for k in _NUCLEO_KEYS}
+        profile.onboarding_nucleo = {k: v for k, v in nucleo.items() if v}
+
+        profile.save(update_fields=[
+            'bio', 'profession',
+            'onboarding_question', 'onboarding_entry_point',
+            'onboarding_noise_area', 'onboarding_prior_exploration',
+            'onboarding_nucleo',
+        ])
         saved = True
+
+    _PILL_OPTS = [('si', 'Sí'), ('a-veces', 'A veces'), ('no', 'No')]
+    nucleo = profile.onboarding_nucleo or {}
+    nucleo_fields = [
+        ('transcendencia', '¿Crees en algo más grande que tú?',   _PILL_OPTS, nucleo.get('transcendencia', '')),
+        ('cambio',         '¿Crees que puedes cambiar de verdad?', _PILL_OPTS, nucleo.get('cambio', '')),
+        ('merecimiento',   '¿Crees que mereces lo que deseas?',    _PILL_OPTS, nucleo.get('merecimiento', '')),
+        ('perdon',         '¿Te perdonas?',                        _PILL_OPTS, nucleo.get('perdon', '')),
+        ('sentido_dolor',  '¿Tu dolor tiene algún sentido?',       _PILL_OPTS, nucleo.get('sentido_dolor', '')),
+    ]
+    prior_opts = [
+        ('terapia',      'Terapia o psicología'),
+        ('meditacion',   'Meditación o práctica contemplativa'),
+        ('astrologia',   'Astrología u otros sistemas'),
+        ('coaching',     'Coaching o desarrollo personal'),
+        ('primera-vez',  'Primera vez'),
+    ]
 
     return render(request, 'accounts/perfil.html', {
         'profile': profile,
         'saved': saved,
+        'nucleo_fields': nucleo_fields,
+        'prior_opts': prior_opts,
     })
 
 
@@ -291,6 +327,7 @@ def onboarding_viaje_guardar(request):
     allowed = {
         'onboarding_entry_point', 'onboarding_noise_area',
         'onboarding_prior_exploration', 'onboarding_question', 'map_aesthetic',
+        'onboarding_nucleo',
     }
     updated = [f for f in allowed if f in data]
     for field in updated:
