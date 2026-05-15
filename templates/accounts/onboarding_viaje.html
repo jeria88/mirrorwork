@@ -466,10 +466,58 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* ── Pantalla 6 — Núcleo (5 preguntas) ── */
+  .vj-nucleo-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+    max-width: 520px;
+    margin-bottom: 2rem;
+    text-align: left;
+  }
+  .vj-nucleo-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .vj-nucleo-q {
+    font-size: 0.95rem;
+    color: var(--text);
+    font-weight: 400;
+    line-height: 1.4;
+  }
+  .vj-nucleo-pills {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .vj-pill {
+    flex: 1;
+    padding: 0.5rem 0.6rem;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-family: var(--font-ui);
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 0.18s, background 0.18s, color 0.18s;
+    user-select: none;
+  }
+  .vj-pill:hover { border-color: var(--border2); color: var(--text); }
+  .vj-pill.active {
+    border-color: var(--accent);
+    background: rgba(78,205,196,0.1);
+    color: var(--accent);
+    font-weight: 500;
+  }
+
   @media (max-width: 520px) {
     .vj-screen { padding: 4rem 1.25rem 3rem; }
     .vj-options { max-width: 100%; }
     .vj-form { max-width: 100%; }
+    .vj-nucleo-list { max-width: 100%; }
   }
 </style>
 {% endblock %}
@@ -480,7 +528,7 @@
   <!-- Barra progreso -->
   <div class="vj-bar"><div class="vj-bar-fill" id="vjBar"></div></div>
 
-  <!-- Botón volver (fijo fondo centrado, visible en pantallas 2-7 y 11-12) -->
+  <!-- Botón volver (fijo fondo centrado, visible en pantallas 2-8 y 12-13) -->
   <button class="vj-back" id="vjBack" onclick="prevScreen()">
     ← Paso anterior
   </button>
@@ -594,10 +642,69 @@
   </section>
 
   <!-- ══════════════════════════════════════════
-       PANTALLA 6 — TRANSICIÓN / MAPA VACÍO
+       PANTALLA 6 — TU NÚCLEO
   ══════════════════════════════════════════ -->
   <section class="vj-screen" data-screen="6">
-    <div class="vj-step">05 — Tu mapa</div>
+    <div class="vj-step">05 — Tu núcleo</div>
+    <h1 class="vj-heading" style="font-size:clamp(1.6rem,4vw,2.4rem);">Cinco preguntas.<br><em>Responde desde el primer impulso.</em></h1>
+
+    <div class="vj-nucleo-list" id="nucleoList">
+
+      <div class="vj-nucleo-row" data-key="transcendencia">
+        <div class="vj-nucleo-q">¿Crees en algo más grande que tú?</div>
+        <div class="vj-nucleo-pills">
+          <div class="vj-pill" data-val="si"       onclick="selectPill(this)">Sí</div>
+          <div class="vj-pill" data-val="a-veces"  onclick="selectPill(this)">A veces</div>
+          <div class="vj-pill" data-val="no"       onclick="selectPill(this)">No</div>
+        </div>
+      </div>
+
+      <div class="vj-nucleo-row" data-key="cambio">
+        <div class="vj-nucleo-q">¿Crees que puedes cambiar de verdad?</div>
+        <div class="vj-nucleo-pills">
+          <div class="vj-pill" data-val="si"       onclick="selectPill(this)">Sí</div>
+          <div class="vj-pill" data-val="a-veces"  onclick="selectPill(this)">A veces</div>
+          <div class="vj-pill" data-val="no"       onclick="selectPill(this)">No</div>
+        </div>
+      </div>
+
+      <div class="vj-nucleo-row" data-key="merecimiento">
+        <div class="vj-nucleo-q">¿Crees que mereces lo que deseas?</div>
+        <div class="vj-nucleo-pills">
+          <div class="vj-pill" data-val="si"       onclick="selectPill(this)">Sí</div>
+          <div class="vj-pill" data-val="a-veces"  onclick="selectPill(this)">A veces</div>
+          <div class="vj-pill" data-val="no"       onclick="selectPill(this)">No</div>
+        </div>
+      </div>
+
+      <div class="vj-nucleo-row" data-key="perdon">
+        <div class="vj-nucleo-q">¿Te perdonas?</div>
+        <div class="vj-nucleo-pills">
+          <div class="vj-pill" data-val="si"       onclick="selectPill(this)">Sí</div>
+          <div class="vj-pill" data-val="a-veces"  onclick="selectPill(this)">A veces</div>
+          <div class="vj-pill" data-val="no"       onclick="selectPill(this)">No</div>
+        </div>
+      </div>
+
+      <div class="vj-nucleo-row" data-key="sentido_dolor">
+        <div class="vj-nucleo-q">¿Tu dolor tiene algún sentido?</div>
+        <div class="vj-nucleo-pills">
+          <div class="vj-pill" data-val="si"       onclick="selectPill(this)">Sí</div>
+          <div class="vj-pill" data-val="a-veces"  onclick="selectPill(this)">A veces</div>
+          <div class="vj-pill" data-val="no"       onclick="selectPill(this)">No</div>
+        </div>
+      </div>
+
+    </div>
+
+    <button class="vj-btn" id="s6btn" disabled onclick="saveNucleoAndNext()">Continuar →</button>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       PANTALLA 7 — TRANSICIÓN / MAPA VACÍO
+  ══════════════════════════════════════════ -->
+  <section class="vj-screen" data-screen="7">
+    <div class="vj-step">06 — Tu mapa</div>
 
     <!-- Fractal SVG en niebla -->
     <svg class="vj-mapa-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" fill="none">
@@ -625,10 +732,10 @@
   </section>
 
   <!-- ══════════════════════════════════════════
-       PANTALLA 7 — DATOS NATALES
+       PANTALLA 8 — DATOS NATALES
   ══════════════════════════════════════════ -->
-  <section class="vj-screen" data-screen="7">
-    <div class="vj-step">06 — Punto de partida</div>
+  <section class="vj-screen" data-screen="8">
+    <div class="vj-step">07 — Punto de partida</div>
     <h1 class="vj-heading" style="font-size:clamp(1.7rem,4vw,2.5rem);">Tu fecha y lugar de nacimiento</h1>
     <p class="vj-sub">
       Esta información es tu punto de partida, no dónde estás ni a dónde vas,
@@ -659,49 +766,49 @@
     </form>
 
     <div class="vj-birth-error" id="birthError"></div>
-    <button class="vj-btn" id="s7btn" onclick="saveBirth()">Calibrar mi mapa</button>
+    <button class="vj-btn" id="s8btn" onclick="saveBirth()">Calibrar mi mapa</button>
   </section>
 
   <!-- ══════════════════════════════════════════
-       PANTALLA 8 — CAPA ASTRAL
+       PANTALLA 9 — CAPA ASTRAL
   ══════════════════════════════════════════ -->
-  <section class="vj-screen" data-screen="8">
-    <div class="vj-step">07 — Capa astral</div>
+  <section class="vj-screen" data-screen="9">
+    <div class="vj-step">08 — Capa astral</div>
     <div class="vj-layer-icon">
       <span class="vj-layer-glyph">☽</span>
     </div>
     <h1 class="vj-heading" style="font-size:clamp(1.5rem,3.5vw,2.2rem);">Leyendo el movimiento de los planetas<br>en el momento de tu nacimiento</h1>
-    <div class="vj-loading-bar"><div class="vj-loading-fill" id="bar8"></div></div>
-  </section>
-
-  <!-- ══════════════════════════════════════════
-       PANTALLA 9 — DISEÑO HUMANO
-  ══════════════════════════════════════════ -->
-  <section class="vj-screen" data-screen="9">
-    <div class="vj-step">08 — Diseño humano</div>
-    <div class="vj-layer-icon">
-      <span class="vj-layer-glyph">◈</span>
-    </div>
-    <h1 class="vj-heading" style="font-size:clamp(1.5rem,3.5vw,2.2rem);">Calculando tu tipo, autoridad<br>y centros de energía</h1>
     <div class="vj-loading-bar"><div class="vj-loading-fill" id="bar9"></div></div>
   </section>
 
   <!-- ══════════════════════════════════════════
-       PANTALLA 10 — PATRÓN TEMPORAL (SAJU)
+       PANTALLA 10 — DISEÑO HUMANO
   ══════════════════════════════════════════ -->
   <section class="vj-screen" data-screen="10">
-    <div class="vj-step">09 — Patrón temporal</div>
+    <div class="vj-step">09 — Diseño humano</div>
     <div class="vj-layer-icon">
-      <span class="vj-layer-glyph">⧖</span>
+      <span class="vj-layer-glyph">◈</span>
     </div>
-    <h1 class="vj-heading" style="font-size:clamp(1.5rem,3.5vw,2.2rem);">Mapeando los ciclos<br>que estructuran tu tiempo</h1>
+    <h1 class="vj-heading" style="font-size:clamp(1.5rem,3.5vw,2.2rem);">Calculando tu tipo, autoridad<br>y centros de energía</h1>
     <div class="vj-loading-bar"><div class="vj-loading-fill" id="bar10"></div></div>
   </section>
 
   <!-- ══════════════════════════════════════════
-       PANTALLA 11 — SEÑAL ENCONTRADA
+       PANTALLA 11 — PATRÓN TEMPORAL (SAJU)
   ══════════════════════════════════════════ -->
   <section class="vj-screen" data-screen="11">
+    <div class="vj-step">10 — Patrón temporal</div>
+    <div class="vj-layer-icon">
+      <span class="vj-layer-glyph">⧖</span>
+    </div>
+    <h1 class="vj-heading" style="font-size:clamp(1.5rem,3.5vw,2.2rem);">Mapeando los ciclos<br>que estructuran tu tiempo</h1>
+    <div class="vj-loading-bar"><div class="vj-loading-fill" id="bar11"></div></div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       PANTALLA 12 — SEÑAL ENCONTRADA
+  ══════════════════════════════════════════ -->
+  <section class="vj-screen" data-screen="12">
     <div class="vj-signal-center">
       <div class="vj-signal-dot"></div>
     </div>
@@ -713,15 +820,15 @@
   </section>
 
   <!-- ══════════════════════════════════════════
-       PANTALLA 12 — LA PREGUNTA REGRESA
+       PANTALLA 13 — LA PREGUNTA REGRESA
   ══════════════════════════════════════════ -->
-  <section class="vj-screen" data-screen="12">
+  <section class="vj-screen" data-screen="13">
     <div class="vj-step">Tu norte</div>
     <h1 class="vj-heading" style="font-size:clamp(1.4rem,3vw,2rem);margin-bottom:2rem;">
       Esto es lo que querías entender.
     </h1>
     <div class="vj-question-box">
-      <p class="vj-question-text" id="s12question">…</p>
+      <p class="vj-question-text" id="s13question">…</p>
     </div>
     <p class="vj-sub" style="margin-bottom:2.5rem;">
       Ya tienes los primeros instrumentos para acercarte.
@@ -735,8 +842,8 @@
 {% block extra_body %}
 <script>
   let current = 1;
-  const total = 12;
-  const AUTO_ADVANCE = [8, 9, 10]; // pantallas con timer
+  const total = 13;
+  const AUTO_ADVANCE = [9, 10, 11]; // pantallas con timer
   let userQuestion = '';
 
   /* ── Utilidades ── */
@@ -769,8 +876,8 @@
     back.classList.toggle('visible', !hideBack);
 
     // Acciones al entrar en pantalla
-    if (n === 12) {
-      document.getElementById('s12question').textContent = userQuestion || '…';
+    if (n === 13) {
+      document.getElementById('s13question').textContent = userQuestion || '…';
     }
     if (AUTO_ADVANCE.includes(n)) {
       startAutoAdvance(n);
@@ -853,9 +960,31 @@
     nextScreen();
   }
 
-  /* ── Pantalla 7: datos natales ── */
+  /* ── Pantalla 6: núcleo de creencias ── */
+  function selectPill(el) {
+    const row = el.closest('.vj-nucleo-row');
+    row.querySelectorAll('.vj-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    // habilitar botón si todas las 5 filas tienen respuesta
+    const total_rows = document.querySelectorAll('#nucleoList .vj-nucleo-row').length;
+    const answered   = document.querySelectorAll('#nucleoList .vj-pill.active').length;
+    document.getElementById('s6btn').disabled = answered < total_rows;
+  }
+
+  async function saveNucleoAndNext() {
+    const nucleo = {};
+    document.querySelectorAll('#nucleoList .vj-nucleo-row').forEach(row => {
+      const key    = row.dataset.key;
+      const active = row.querySelector('.vj-pill.active');
+      if (key && active) nucleo[key] = active.dataset.val;
+    });
+    await postJson('/onboarding/viaje/guardar/', { onboarding_nucleo: nucleo });
+    nextScreen();
+  }
+
+  /* ── Pantalla 8: datos natales ── */
   async function saveBirth() {
-    const btn = document.getElementById('s7btn');
+    const btn = document.getElementById('s8btn');
     const errEl = document.getElementById('birthError');
     errEl.textContent = '';
 
@@ -897,7 +1026,8 @@
     }
   }
 
-  /* ── Nominatim autocomplete (pantalla 7) ── */
+  /* ── Nominatim autocomplete (pantalla 8) ── */
+
   let acTimer = null;
   const placeInput = document.getElementById('birth_place');
   const placeAC    = document.getElementById('placeAC');
