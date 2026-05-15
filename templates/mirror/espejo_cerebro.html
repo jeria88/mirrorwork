@@ -1,0 +1,337 @@
+{% extends "base.html" %}
+{% block title %}Cerebro del Espejo{% endblock %}
+
+{% block content %}
+<style>
+  .cb-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+  .cb-header {
+    margin-bottom: 2rem;
+  }
+  .cb-header h1 {
+    font-family: var(--font-heading, 'EB Garamond', serif);
+    font-size: 2rem;
+    color: var(--text, #fff);
+    margin: 0 0 0.4rem;
+  }
+  .cb-header p {
+    color: var(--muted, #A1A1AA);
+    font-size: 0.9rem;
+    max-width: 600px;
+    margin: 0;
+  }
+  .cb-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--accent, #4ecdc4);
+    text-decoration: none;
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.85;
+    transition: opacity 0.2s;
+  }
+  .cb-back:hover { opacity: 1; }
+
+  .cb-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 2rem;
+    align-items: start;
+  }
+  @media (max-width: 768px) {
+    .cb-layout { grid-template-columns: 1fr; }
+  }
+
+  /* Left: active brain */
+  .cb-panel {
+    background: var(--surface, rgba(255,255,255,0.03));
+    border: 1px solid var(--border, rgba(255,255,255,0.08));
+    border-radius: 12px;
+    padding: 1.75rem;
+  }
+  .cb-panel-title {
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted, #A1A1AA);
+    margin: 0 0 1.25rem;
+  }
+  .cb-empty {
+    color: var(--muted, #A1A1AA);
+    font-size: 0.9rem;
+    font-style: italic;
+  }
+  .cb-content {
+    color: var(--text, #fff);
+    font-size: 0.92rem;
+    line-height: 1.75;
+  }
+  .cb-content .cb-h3 {
+    font-family: var(--font-heading, 'EB Garamond', serif);
+    font-size: 1.15rem;
+    color: var(--accent, #4ecdc4);
+    margin: 1.4rem 0 0.4rem;
+    border-bottom: 1px solid var(--border, rgba(255,255,255,0.08));
+    padding-bottom: 0.3rem;
+  }
+  .cb-content .cb-h3:first-child { margin-top: 0; }
+  .cb-content .cb-p {
+    margin: 0.6rem 0;
+  }
+  .cb-note {
+    margin-top: 1.5rem;
+    padding: 0.85rem 1rem;
+    background: rgba(255,255,255,0.02);
+    border-left: 3px solid var(--border, rgba(255,255,255,0.08));
+    border-radius: 0 6px 6px 0;
+    color: var(--muted, #A1A1AA);
+    font-size: 0.8rem;
+    line-height: 1.55;
+  }
+
+  /* Right: version timeline */
+  .cb-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .cb-timeline-title {
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted, #A1A1AA);
+    margin-bottom: 0.5rem;
+  }
+  .cb-ver {
+    background: var(--surface, rgba(255,255,255,0.03));
+    border: 1px solid var(--border, rgba(255,255,255,0.08));
+    border-radius: 8px;
+    padding: 0.9rem 1rem;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  .cb-ver.is-active {
+    border-color: var(--accent, #4ecdc4);
+  }
+  .cb-ver-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.4rem;
+  }
+  .cb-ver-num {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text, #fff);
+  }
+  .cb-ver-badge {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 2px 7px;
+    border-radius: 99px;
+    background: rgba(78,205,196,0.15);
+    color: var(--accent, #4ecdc4);
+    border: 1px solid rgba(78,205,196,0.3);
+  }
+  .cb-ver-meta {
+    font-size: 0.75rem;
+    color: var(--muted, #A1A1AA);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .cb-ver-meta span { display: flex; align-items: center; gap: 0.25rem; }
+
+  .cb-fuente {
+    display: inline-block;
+    font-size: 0.68rem;
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-top: 0.35rem;
+  }
+  .cb-fuente-inicial      { background: rgba(124,109,250,0.15); color: #a89cff; }
+  .cb-fuente-sesion       { background: rgba(78,205,196,0.12); color: #4ecdc4; }
+  .cb-fuente-restauracion { background: rgba(244,160,53,0.15); color: #f4a035; }
+
+  .cb-restore-btn {
+    display: block;
+    width: 100%;
+    margin-top: 0.75rem;
+    padding: 0.45rem 0;
+    background: transparent;
+    border: 1px solid var(--border, rgba(255,255,255,0.08));
+    border-radius: 6px;
+    color: var(--muted, #A1A1AA);
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    text-align: center;
+  }
+  .cb-restore-btn:hover {
+    border-color: var(--accent, #4ecdc4);
+    color: var(--accent, #4ecdc4);
+  }
+
+  .cb-confirm {
+    display: none;
+    margin-top: 0.6rem;
+    padding: 0.7rem;
+    background: rgba(255,255,255,0.03);
+    border-radius: 6px;
+    font-size: 0.78rem;
+    color: var(--muted, #A1A1AA);
+    line-height: 1.5;
+  }
+  .cb-confirm p { margin: 0 0 0.6rem; }
+  .cb-confirm-actions { display: flex; gap: 0.5rem; }
+  .cb-confirm-yes {
+    padding: 4px 14px;
+    border-radius: 5px;
+    border: none;
+    background: var(--accent, #4ecdc4);
+    color: #000;
+    font-size: 0.78rem;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .cb-confirm-no {
+    padding: 4px 14px;
+    border-radius: 5px;
+    border: 1px solid var(--border, rgba(255,255,255,0.08));
+    background: transparent;
+    color: var(--muted, #A1A1AA);
+    font-size: 0.78rem;
+    cursor: pointer;
+  }
+
+  .cb-no-versions {
+    color: var(--muted, #A1A1AA);
+    font-size: 0.85rem;
+    font-style: italic;
+  }
+</style>
+
+<div class="cb-wrap">
+  <a href="{% url 'mirror:home' %}" class="cb-back">&#8592; volver al Espejo</a>
+
+  <div class="cb-header">
+    <h1>Cerebro del Espejo</h1>
+    <p>Lo que el Espejo recuerda sobre ti. Se actualiza automáticamente al archivar cada sesión. No puedes editarlo directamente, pero puedes restaurar versiones anteriores.</p>
+  </div>
+
+  <div class="cb-layout">
+
+    <!-- LEFT: active brain content -->
+    <div class="cb-panel">
+      <p class="cb-panel-title">Versión activa{% if activa %} &mdash; v{{ activa.version }}{% endif %}</p>
+      {% if activa %}
+        <div class="cb-content" id="cbActiveContent" data-raw="{{ activa.contenido|escapejs }}"></div>
+        <div class="cb-note">
+          No puedes editar el cerebro directamente. Si el Espejo comenzó a alucinar o a recordar cosas incorrectas, restaura una versión anterior desde la derecha.
+        </div>
+      {% else %}
+        <p class="cb-empty">El Espejo aún no tiene memoria activa. Completa tu onboarding o inicia una sesión para que comience a aprender.</p>
+      {% endif %}
+    </div>
+
+    <!-- RIGHT: version history -->
+    <div>
+      <p class="cb-timeline-title">Historial de versiones</p>
+      {% if versiones %}
+        <div class="cb-timeline">
+          {% for v in versiones %}
+            <div class="cb-ver {% if v.activa %}is-active{% endif %}">
+              <div class="cb-ver-head">
+                <span class="cb-ver-num">v{{ v.version }}</span>
+                {% if v.activa %}<span class="cb-ver-badge">activa</span>{% endif %}
+              </div>
+              <div class="cb-ver-meta">
+                <span>{{ v.created_at|date:"d M Y, H:i" }}</span>
+                <span>{{ v.contenido|wordcount }} palabras</span>
+              </div>
+              <span class="cb-fuente cb-fuente-{{ v.fuente }}">{{ v.get_fuente_display }}</span>
+
+              {% if not v.activa %}
+                <button
+                  class="cb-restore-btn"
+                  onclick="cbToggleConfirm(this)"
+                  type="button"
+                >
+                  Restaurar esta versión
+                </button>
+                <div class="cb-confirm">
+                  <p>¿Restaurar esta versión? El Espejo dejará de recordar lo que aprendió después.</p>
+                  <div class="cb-confirm-actions">
+                    <form method="post" action="{% url 'mirror:cerebro_restaurar' v.pk %}" style="display:inline">
+                      {% csrf_token %}
+                      <button type="submit" class="cb-confirm-yes">Restaurar</button>
+                    </form>
+                    <button type="button" class="cb-confirm-no" onclick="cbToggleConfirm(this.closest('.cb-ver').querySelector('.cb-restore-btn'))">Cancelar</button>
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="cb-no-versions">Sin versiones guardadas todavía.</p>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+<script>
+function renderBrain(text) {
+  let html = text
+    .replace(/^## (.+)$/gm, '\x00CB_H3\x00$1\x00CB_END\x00')
+    .split('\x00CB_H3\x00');
+  let result = '';
+  for (let i = 0; i < html.length; i++) {
+    if (i === 0) {
+      result += formatParagraphs(html[i]);
+    } else {
+      let parts = html[i].split('\x00CB_END\x00');
+      result += '<h3 class="cb-h3">' + parts[0].trim() + '</h3>';
+      if (parts[1]) result += formatParagraphs(parts[1]);
+    }
+  }
+  return result;
+}
+
+function formatParagraphs(text) {
+  let trimmed = text.trim();
+  if (!trimmed) return '';
+  return trimmed
+    .split(/\n\n+/)
+    .map(function(para) {
+      return '<p class="cb-p">' + para.trim().replace(/\n/g, '<br>') + '</p>';
+    })
+    .join('');
+}
+
+function cbToggleConfirm(btn) {
+  let ver = btn.closest('.cb-ver');
+  let confirm = ver.querySelector('.cb-confirm');
+  if (!confirm) return;
+  let visible = confirm.style.display === 'block';
+  confirm.style.display = visible ? 'none' : 'block';
+  btn.style.display = visible ? 'block' : 'none';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var el = document.getElementById('cbActiveContent');
+  if (el) {
+    var raw = el.getAttribute('data-raw');
+    if (raw) {
+      el.innerHTML = renderBrain(raw);
+    }
+  }
+});
+</script>
+{% endblock %}

@@ -1,6 +1,7 @@
 import json
 import math
 import os
+import threading
 import requests
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -213,6 +214,31 @@ ENFOQUE_MARCOS = {
 }
 
 
+SYSTEM_BRAIN_UPDATE = """Eres el sistema de memoria del Espejo Endonauta.
+Tu tarea: actualizar el perfil de conocimiento sobre este usuario, integrando lo que emergió en la sesión reciente.
+
+Devuelve SOLO este JSON (sin texto fuera del JSON):
+{{"cerebro": "texto completo actualizado"}}
+
+El cerebro es un documento en prosa, en español neutro, con EXACTAMENTE estas secciones:
+## Momento actual
+[lo que vive el usuario ahora, actualizado con la sesión]
+
+## Patrones que he notado
+[comportamientos, emociones, creencias recurrentes observados]
+
+## Lo que ha compartido
+[revelaciones concretas que el usuario ha hecho en las sesiones]
+
+## Su pregunta del viaje
+[la pregunta que trajo al comenzar, o la que ha emergido]
+
+## Zonas de cuidado
+[temas o formas de abordar que requieren sensibilidad especial]
+
+Mantén lo relevante del cerebro anterior. Integra lo nuevo de la sesión. No diagnostiques. Máximo 500 palabras total."""
+
+
 # ── Test context helpers ──────────────────────────────────────────────────────
 
 def _get_test_context(user):
@@ -240,9 +266,131 @@ def _get_test_context(user):
     return "\n".join(lines)
 
 
+# ── Brain (cerebro) helpers ───────────────────────────────────────────────────
+
+def _get_brain_context(user):
+    """Returns active brain content as string for system prompt injection."""
+    from mirror.models import EspejoMemoria
+    mem = EspejoMemoria.objects.filter(user=user, activa=True).first()
+    if not mem or not mem.contenido.strip():
+        return ""
+    return f"\nMEMORIA DEL ESPEJO (conocimiento acumulado sobre este usuario — úsalo con naturalidad):\n{mem.contenido}\n"
+
+
+def _nueva_version_cerebro(user, contenido, fuente='sesion', sesion=None):
+    """Deactivates current brain, saves new version."""
+    from mirror.models import EspejoMemoria
+    from django.db import transaction
+    with transaction.atomic():
+        ultima = EspejoMemoria.objects.filter(user=user).order_by('-version').first()
+        nueva_v = (ultima.version + 1) if ultima else 1
+        EspejoMemoria.objects.filter(user=user, activa=True).update(activa=False)
+        EspejoMemoria.objects.create(
+            user=user,
+            version=nueva_v,
+            contenido=contenido,
+            activa=True,
+            fuente=fuente,
+            sesion_origen=sesion,
+        )
+
+
+def _seed_initial_brain(user):
+    """Creates first brain version from onboarding data if user has none."""
+    from mirror.models import EspejoMemoria
+    if EspejoMemoria.objects.filter(user=user).exists():
+        return
+    try:
+        p = user.profile
+    except Exception:
+        return
+    lines = ["## Momento actual"]
+    entry_map = {
+        'cambio': 'atravesando un cambio que no pidió',
+        'ciclos': 'consciente de que repite ciclos que no entiende',
+        'busqueda': 'buscando algo que no sabe nombrar',
+        'algo-mas': 'sintiendo que hay algo más de lo que ve en su vida',
+        'entenderme': 'con ganas de entenderse de verdad',
+    }
+    if p.onboarding_entry_point:
+        lines.append(entry_map.get(p.onboarding_entry_point, p.onboarding_entry_point))
+    noise_map = {
+        'trabajo': 'trabajo o dirección', 'relaciones': 'relaciones',
+        'cuerpo': 'cuerpo o salud', 'identidad': 'quién es',
+        'proposito': 'para qué está aquí', 'todo': 'múltiples áreas simultáneamente',
+    }
+    if p.onboarding_noise_area:
+        lines.append(f"Siente ruido principalmente en: {noise_map.get(p.onboarding_noise_area, p.onboarding_noise_area)}.")
+    lines += ["\n## Patrones que he notado", "(Aún sin sesiones registradas.)",
+              "\n## Lo que ha compartido", "(Sin sesiones aún.)",
+              "\n## Su pregunta del viaje"]
+    lines.append(p.onboarding_question if p.onboarding_question else "(No definida aún.)")
+    lines += ["\n## Zonas de cuidado", "(Sin observaciones aún.)"]
+    contenido = "\n".join(lines)
+    _nueva_version_cerebro(user, contenido, fuente='inicial')
+
+
+def _update_brain_async(session_pk, user_pk):
+    """Thread target: generates updated brain from session transcript."""
+    from django.db import connection
+    connection.close()
+
+    from mirror.models import ConflictSession, EspejoMemoria
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+
+    api_key = os.getenv('DEEPSEEK_API_KEY', '')
+    if not api_key:
+        return
+
+    try:
+        session = ConflictSession.objects.get(pk=session_pk)
+        user = User.objects.get(pk=user_pk)
+    except Exception:
+        return
+
+    current = EspejoMemoria.objects.filter(user=user, activa=True).first()
+    cerebro_actual = current.contenido if current else "(Sin cerebro previo.)"
+
+    messages_raw = session.messages or []
+    if len(messages_raw) < 4:
+        return  # sesión demasiado corta para aprender algo
+
+    transcripcion = "\n".join(
+        f"{m['role'].upper()}: {m['content'][:300]}"
+        for m in messages_raw[-20:]  # last 20 exchanges max
+    )
+
+    payload = {
+        "model": "deepseek-chat",
+        "messages": [
+            {"role": "system", "content": SYSTEM_BRAIN_UPDATE},
+            {"role": "user", "content": f"CEREBRO ACTUAL:\n{cerebro_actual}\n\nSESIÓN RECIENTE:\n{transcripcion}"},
+        ],
+        "temperature": 0.5,
+        "max_tokens": 800,
+        "response_format": {"type": "json_object"},
+    }
+
+    try:
+        resp = requests.post(
+            "https://api.deepseek.com/v1/chat/completions",
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+            json=payload,
+            timeout=45,
+        )
+        resp.raise_for_status()
+        data = json.loads(resp.json()["choices"][0]["message"]["content"])
+        nuevo_contenido = data.get("cerebro", "").strip()
+        if nuevo_contenido and len(nuevo_contenido) > 50:
+            _nueva_version_cerebro(user, nuevo_contenido, fuente='sesion', sesion=session)
+    except Exception:
+        pass
+
+
 # ── DeepSeek call ─────────────────────────────────────────────────────────────
 
-def _call_deepseek_json(messages, kb_context, test_context, mode="open", enfoque=None):
+def _call_deepseek_json(messages, kb_context, test_context, brain_context='', mode="open", enfoque=None):
     """Calls DeepSeek and returns (parsed_dict, error). Always requests JSON."""
     api_key = os.getenv("DEEPSEEK_API_KEY", "")
     if not api_key:
@@ -257,12 +405,12 @@ def _call_deepseek_json(messages, kb_context, test_context, mode="open", enfoque
             enfoque_titulo=enfoque.get("titulo", ""),
             marco_teorico=marco,
             contexto_kb=kb_text,
-            test_context=test_context,
+            test_context=test_context + brain_context,
         )
     else:
         system = SYSTEM_OPEN.format(
             contexto_kb=kb_text,
-            test_context=test_context,
+            test_context=test_context + brain_context,
         )
 
     payload = {
@@ -397,7 +545,7 @@ def espejo_send(request):
         pass
 
     # Llamar a DeepSeek
-    parsed, error = _call_deepseek_json(history, kb_chunks, test_context, mode=mode, enfoque=enfoque)
+    parsed, error = _call_deepseek_json(history, kb_chunks, test_context, brain_context=_get_brain_context(request.user), mode=mode, enfoque=enfoque)
 
     if error:
         return JsonResponse({"error": error}, status=503)
@@ -424,6 +572,11 @@ def espejo_archivar(request, pk):
     sesion = get_object_or_404(ConflictSession, pk=pk, user=request.user)
     sesion.status = "archived"
     sesion.save(update_fields=["status"])
+    threading.Thread(
+        target=_update_brain_async,
+        args=[sesion.pk, request.user.pk],
+        daemon=True,
+    ).start()
     return redirect("/espejo/")
 
 
@@ -487,3 +640,51 @@ def espejo_tarjetas(request):
     pending  = [c for c in cards if c["status"] in ("pending", "processing")]
     revealed = [c for c in cards if c["status"] == "revealed"]
     return JsonResponse({"pending": pending, "revealed": revealed, "total": len(cards)})
+
+
+@login_required
+def espejo_cerebro(request):
+    from mirror.models import EspejoMemoria
+    _seed_initial_brain(request.user)
+    versiones = EspejoMemoria.objects.filter(user=request.user).order_by('-version')
+    activa = versiones.filter(activa=True).first()
+    return render(request, 'mirror/espejo_cerebro.html', {
+        'versiones': versiones,
+        'activa': activa,
+    })
+
+
+@login_required
+@require_POST
+def espejo_cerebro_restaurar(request, pk):
+    from mirror.models import EspejoMemoria
+    from django.db import transaction
+    mem = get_object_or_404(EspejoMemoria, pk=pk, user=request.user)
+    with transaction.atomic():
+        ultima = EspejoMemoria.objects.filter(user=request.user).order_by('-version').first()
+        nueva_v = ultima.version + 1
+        EspejoMemoria.objects.filter(user=request.user, activa=True).update(activa=False)
+        EspejoMemoria.objects.create(
+            user=request.user,
+            version=nueva_v,
+            contenido=mem.contenido,
+            activa=True,
+            fuente='restauracion',
+            sesion_origen=None,
+        )
+    return redirect('mirror:cerebro')
+
+
+@login_required
+@require_POST
+def espejo_cerebro_actualizar(request):
+    sesion_pk = request.POST.get('sesion_pk')
+    if sesion_pk:
+        session = get_object_or_404(ConflictSession, pk=sesion_pk, user=request.user)
+        threading.Thread(
+            target=_update_brain_async,
+            args=[session.pk, request.user.pk],
+            daemon=True,
+        ).start()
+        return JsonResponse({'ok': True, 'mensaje': 'Actualizando memoria…'})
+    return JsonResponse({'error': 'sesion_pk requerido'}, status=400)
