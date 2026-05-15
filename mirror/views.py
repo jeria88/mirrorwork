@@ -1,6 +1,7 @@
 import json
 import math
 import os
+import re
 import threading
 import requests
 from django.contrib.auth.decorators import login_required
@@ -147,7 +148,7 @@ Cuando el usuario mencione síntomas físicos, explóralos desde este marco como
 ═══════════════════════════════════════════════════════════
 """
 
-SYSTEM_OPEN = """Eres el Espejo Endonauta — acompañante de autoconocimiento, no terapeuta ni consejero externo. Tu función es devolver al usuario hacia su propio interior.
+SYSTEM_OPEN = """Eres el Espejo Endonauta — acompañante de autoconocimiento, no terapeuta ni consejero externo. Tu función es acompañar con presencia y honestidad: a veces eso es escuchar y conversar; otras, devolver una imagen interior que el usuario aún no ve.
 
 {marco_endonauta}
 
@@ -171,7 +172,8 @@ CÓMO CONSTRUIR "texto":
 
 2. OBSERVA ANTES DE PREGUNTAR. Primero nombra lo que emerge: la metáfora, la emoción, la tensión que aparece en sus palabras. Luego haz UNA sola pregunta que profundice — nacida de lo que dijo, no genérica.
 
-3. NUNCA digas "es normal que", "deberías", "es importante". No prescribas. Cuando el usuario habla del otro como problema, devuelve suavemente la mirada hacia adentro: ¿qué ocurre en ti ante esto?
+3. NUNCA digas "es normal que", "deberías", "es importante". No prescribas.
+   LEE EL MODO antes de redirigir: si el usuario quiere conversar, desahogarse o explorar algo externo, acompáñalo ahí con genuina presencia — eso también es parte del viaje. Redirige la mirada hacia adentro SOLO cuando detectes que el usuario deposita todo el problema en el otro o en las circunstancias para evitar hacerse cargo de algo propio (proyección, victimismo activo, búsqueda de control externo como huida). La señal no es hablar de otros — es hablar de otros como si ellos fueran el único problema.
 
 4. TONO: cálido, presente, conciso. 2-4 párrafos máximo. Sin listas de consejos. En español.
 
@@ -368,30 +370,85 @@ def _seed_initial_brain(user):
         p = user.profile
     except Exception:
         return
-    lines = ["## Momento actual"]
-    entry_map = {
-        'cambio': 'atravesando un cambio que no pidió',
-        'ciclos': 'consciente de que repite ciclos que no entiende',
-        'busqueda': 'buscando algo que no sabe nombrar',
-        'algo-mas': 'sintiendo que hay algo más de lo que ve en su vida',
-        'entenderme': 'con ganas de entenderse de verdad',
-    }
+    # Delegate to _reseed_brain using the same logic (no existing brain yet, so defaults apply)
+    _reseed_brain(user)
+
+
+_BRAIN_ENTRY_MAP = {
+    'cambio':      'atravesando un cambio que no pidió',
+    'ciclos':      'consciente de que repite ciclos que no entiende',
+    'busqueda':    'buscando algo que no sabe nombrar',
+    'algo-mas':    'sintiendo que hay algo más de lo que ve en su vida',
+    'entenderme':  'con ganas de entenderse de verdad',
+}
+_BRAIN_NOISE_MAP = {
+    'trabajo':    'trabajo o dirección',
+    'relaciones': 'relaciones',
+    'cuerpo':     'cuerpo o salud',
+    'identidad':  'quién es',
+    'proposito':  'para qué está aquí',
+    'todo':       'múltiples áreas simultáneamente',
+}
+_BRAIN_NUCLEO_LABELS = {
+    'transcendencia': '¿Crees en algo más grande que tú?',
+    'cambio':         '¿Crees que puedes cambiar de verdad?',
+    'merecimiento':   '¿Crees que mereces lo que deseas?',
+    'perdon':         '¿Te perdonas?',
+    'sentido_dolor':  '¿Tu dolor tiene algún sentido?',
+}
+_LEARNED_SECTIONS = ['## Patrones que he notado', '## Lo que ha compartido', '## Zonas de cuidado']
+
+
+def _reseed_brain(user):
+    """Rebuilds onboarding sections of the active brain with fresh profile data.
+    Preserves learned sections (patterns, sessions, care zones) from the existing brain."""
+    from mirror.models import EspejoMemoria
+    try:
+        p = user.profile
+    except Exception:
+        return
+
+    # Build fresh base sections
+    momento_lines = ['## Momento actual']
     if p.onboarding_entry_point:
-        lines.append(entry_map.get(p.onboarding_entry_point, p.onboarding_entry_point))
-    noise_map = {
-        'trabajo': 'trabajo o dirección', 'relaciones': 'relaciones',
-        'cuerpo': 'cuerpo o salud', 'identidad': 'quién es',
-        'proposito': 'para qué está aquí', 'todo': 'múltiples áreas simultáneamente',
-    }
+        momento_lines.append(_BRAIN_ENTRY_MAP.get(p.onboarding_entry_point, p.onboarding_entry_point))
     if p.onboarding_noise_area:
-        lines.append(f"Siente ruido principalmente en: {noise_map.get(p.onboarding_noise_area, p.onboarding_noise_area)}.")
-    lines += ["\n## Patrones que he notado", "(Aún sin sesiones registradas.)",
-              "\n## Lo que ha compartido", "(Sin sesiones aún.)",
-              "\n## Su pregunta del viaje"]
-    lines.append(p.onboarding_question if p.onboarding_question else "(No definida aún.)")
-    lines += ["\n## Zonas de cuidado", "(Sin observaciones aún.)"]
-    contenido = "\n".join(lines)
-    _nueva_version_cerebro(user, contenido, fuente='inicial')
+        momento_lines.append(f"Siente ruido principalmente en: {_BRAIN_NOISE_MAP.get(p.onboarding_noise_area, p.onboarding_noise_area)}.")
+
+    nucleo = getattr(p, 'onboarding_nucleo', {}) or {}
+    nucleo_section = ''
+    if nucleo:
+        nucleo_lines = ['## Núcleo de creencias']
+        for key, label in _BRAIN_NUCLEO_LABELS.items():
+            if key in nucleo:
+                nucleo_lines.append(f"- {label}: {nucleo[key]}")
+        nucleo_section = '\n'.join(nucleo_lines)
+
+    pregunta_section = '## Su pregunta del viaje\n' + (p.onboarding_question or '(No definida aún.)')
+
+    # Extract learned sections from active brain (or use defaults)
+    mem = EspejoMemoria.objects.filter(user=user, activa=True).first()
+    learned = {}
+    if mem and mem.contenido.strip():
+        for section in _LEARNED_SECTIONS:
+            m = re.search(re.escape(section) + r'(.*?)(?=\n## |\Z)', mem.contenido, re.DOTALL)
+            learned[section] = (section + m.group(1).rstrip()) if m else section + '\n(Sin observaciones aún.)'
+    else:
+        learned = {
+            '## Patrones que he notado': '## Patrones que he notado\n(Aún sin sesiones registradas.)',
+            '## Lo que ha compartido':   '## Lo que ha compartido\n(Sin sesiones aún.)',
+            '## Zonas de cuidado':       '## Zonas de cuidado\n(Sin observaciones aún.)',
+        }
+
+    parts = ['\n'.join(momento_lines)]
+    if nucleo_section:
+        parts.append(nucleo_section)
+    parts.append(learned['## Patrones que he notado'])
+    parts.append(learned['## Lo que ha compartido'])
+    parts.append(pregunta_section)
+    parts.append(learned['## Zonas de cuidado'])
+
+    _nueva_version_cerebro(user, '\n\n'.join(parts), fuente='perfil')
 
 
 def _update_brain_async(session_pk, user_pk):

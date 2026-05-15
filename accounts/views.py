@@ -173,6 +173,11 @@ def perfil(request):
             'onboarding_noise_area', 'onboarding_prior_exploration',
             'onboarding_nucleo',
         ])
+        try:
+            from mirror.views import _reseed_brain
+            _reseed_brain(request.user)
+        except Exception:
+            pass
         saved = True
 
     _PILL_OPTS = [('si', 'Sí'), ('a-veces', 'A veces'), ('no', 'No')]
