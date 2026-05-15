@@ -27,32 +27,34 @@
     width: 0%;
   }
 
-  /* Botón volver */
+  /* Botón volver — fijo en la parte inferior, centrado */
   .vj-back {
     position: fixed;
-    top: 76px;
-    left: 1.5rem;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 101;
-    background: none;
-    border: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
     color: var(--muted);
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 0.4rem 0.6rem;
-    border-radius: 8px;
-    transition: color 0.2s, background 0.2s;
+    gap: 8px;
+    padding: 0.6rem 1.6rem;
+    border-radius: 100px;
+    transition: color 0.2s, border-color 0.2s, background 0.2s, opacity 0.25s;
     opacity: 0;
     pointer-events: none;
     font-family: var(--font-ui);
+    white-space: nowrap;
   }
   .vj-back.visible {
     opacity: 1;
     pointer-events: auto;
   }
-  .vj-back:hover { color: var(--text); background: var(--surface2); }
+  .vj-back:hover { color: var(--text); border-color: var(--border2); background: var(--surface2); }
 
   /* ── Pantallas ── */
   .vj-screen {
@@ -61,7 +63,7 @@
     align-items: center;
     justify-content: center;
     min-height: calc(100vh - 62px);
-    padding: 5rem 1.5rem 4rem;
+    padding: 5rem 1.5rem 7rem;
     text-align: center;
     animation: vjFadeIn 0.45s cubic-bezier(0.16,1,0.3,1) both;
   }
@@ -478,8 +480,10 @@
   <!-- Barra progreso -->
   <div class="vj-bar"><div class="vj-bar-fill" id="vjBar"></div></div>
 
-  <!-- Botón volver -->
-  <button class="vj-back" id="vjBack" onclick="prevScreen()">← Volver</button>
+  <!-- Botón volver (fijo fondo centrado, visible en pantallas 2-7 y 11-12) -->
+  <button class="vj-back" id="vjBack" onclick="prevScreen()">
+    ← Paso anterior
+  </button>
 
   <!-- ══════════════════════════════════════════
        PANTALLA 1 — PORTAL
