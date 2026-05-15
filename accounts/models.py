@@ -43,6 +43,7 @@ class UserProfile(models.Model):
     onboarding_noise_area = models.CharField(max_length=80, blank=True)
     onboarding_prior_exploration = models.CharField(max_length=300, blank=True)
     onboarding_question = models.TextField(blank=True)
+    onboarding_nucleo = models.JSONField(default=dict, blank=True)
 
     def __str__(self):
         return f'{self.user.email} [{self.plan}]'
