@@ -1,3 +1,4 @@
+import json
 import os
 import threading
 
@@ -73,6 +74,114 @@ Prohibiciones absolutas:
 
 Idioma: español rioplatense/chileno, informal pero profundo.\
 """
+
+
+# ── Diccionarios de descripción para hd_detail ───────────────────────────────
+
+_HD_TYPE_DESCS = {
+    'Generador': 'Eres el motor de la humanidad: energía vital sostenida que, cuando se usa bien, no se agota. Tu sistema está diseñado para responder, no para iniciar. Cuando esperás la señal del entorno antes de comprometerte, la energía fluye sin fricción.',
+    'Generador Manifestante': 'Combinás la energía motriz del Generador con la capacidad iniciadora del Manifestante. Podés iniciar Y responder, pero los demás necesitan saber qué estás haciendo antes de que lo hagas — sin eso, tu movimiento genera resistencia en lugar de apoyo.',
+    'Manifestador': 'Sos el único tipo diseñado para iniciar. Tu energía es un impacto: comienza en vos y se irradia al entorno. Informar a quienes te rodean antes de actuar no es pedir permiso — es reducir la resistencia para que tu impulso llegue completo.',
+    'Proyector': 'Sos un guía de energía, no un generador de ella. Tenés una capacidad inusual para leer a los demás y ver el todo del sistema. Tu diseño funciona con la invitación genuina: cuando alguien te reconoce y te convoca, la energía se alinea. Sin ese reconocimiento previo, el esfuerzo se convierte en agotamiento.',
+    'Reflector': 'Sos el espejo de la comunidad que te rodea — reflejás el estado colectivo del entorno con una claridad extraordinaria. Tu ciclo natural de decisión es el mes lunar: las decisiones tomadas en un día no aprovechan tu sabiduría más profunda. El entorno donde vivís importa más que para cualquier otro tipo.',
+}
+
+_HD_STRATEGY_DESCS = {
+    'Responder (esperar una señal del entorno)': 'No inicies desde el pensamiento. Esperá que algo externo aparezca — una pregunta, una situación, una oportunidad — y observá la respuesta espontánea del cuerpo antes de comprometerte. El sí o el no viene antes que las razones.',
+    'Responder y luego informar antes de actuar': 'Primero escuchá la respuesta del cuerpo ante lo que el entorno trae. Una vez que hay un sí claro, informá a las personas clave de tu entorno antes de iniciar — no para pedir permiso, sino para que tu movimiento no llegue como una sorpresa.',
+    'Informar antes de actuar': 'Antes de iniciar algo, informá a las personas de tu entorno inmediato. No es pedir autorización — es preparar el terreno para que tu impacto no genere resistencia automática.',
+    'Esperar la invitación': 'En las áreas clave de vida — trabajo, amor, lugar donde vivís — esperá que alguien te reconozca y te invite a participar. Sin ese reconocimiento previo, tu energía se dispersa y genera amargura. La calidad de la invitación importa.',
+    'Esperar un ciclo lunar completo (29 días)': 'Para decisiones importantes, esperá un ciclo lunar completo antes de comprometerte. Cada día del ciclo te da una perspectiva diferente sobre la misma pregunta. La claridad no es intelectual — emerge a lo largo del tiempo.',
+}
+
+_HD_AUTHORITY_DESCS = {
+    'Sacral': 'Tu autoridad vive en las tripas: un "uh-huh" espontáneo o un "unh-unh" es tu guía más confiable. No es una decisión razonada — es una respuesta inmediata que viene antes del pensamiento. Si necesitás preguntarte dos veces, el Sacral ya respondió.',
+    'Emocional — Plexo Solar': 'No hay claridad en el momento emocional. La regla es simple: esperar la ola. Ni el punto más alto (euforia) ni el más bajo (depresión) son el momento para decidir. La claridad llega cuando la ola encuentra su meseta — con el tiempo, no con la urgencia.',
+    'Esplénico — Bazo': 'Es la autoridad más antigua y sutil: una voz instintiva, en el momento presente. Habla una sola vez — si necesitás repetirte la señal, ya no viene del Bazo. Requiere confiar en lo que se siente en el instante, antes de que el miedo o la mente intervengan.',
+    'Ego — Corazón': 'Tu autoridad viene del corazón y la voluntad. Escuchás lo que realmente querés vs. lo que sentís que "deberías" querer. Si no hay un "yo quiero" genuino en la respuesta, no es correcto para vos. La voluntad propia no es egoísmo — es tu brújula.',
+    'Identidad — G': 'Tu autoridad es el entorno. La claridad llega cuando encontrás el espacio físico, las personas y las conversaciones correctas. Hablar tu proceso en voz alta con personas que te escuchan sin juzgar — y observar qué emerge — es tu camino de decisión.',
+    'Mental — Externo': 'No hay autoridad interna definida. Las decisiones se clarifican verbalizando: hablar con distintas personas de confianza no para que te aconsejen, sino para escucharte hablar y notar qué resuena en tu cuerpo. El entorno exterior es tu espejo de claridad.',
+    'Lunar — 29 días': 'Tu autoridad es el ciclo lunar completo. Ninguna decisión importante se toma antes de haber observado cómo te sentís al respecto durante un mes entero. Consultás con personas distintas en distintos momentos del ciclo para recibir perspectivas variadas.',
+}
+
+_HD_PROFILE_LINE_DESCS = {
+    '1': 'La Línea 1 necesita base. Investigás, estudiás, te preparás antes de sentirte seguro/a para actuar. La inseguridad surge cuando no tenés suficiente fundamento — y esa inseguridad es real, no exagerada. Es una señal de que falta investigación.',
+    '2': 'La Línea 2 tiene dones naturales que a menudo no ve en sí misma. Necesita tiempo a solas para integrar lo que sabe. Generalmente es llamada por otros antes de sentirse "lista" — y esa llamada desde afuera puede ser la señal de que es momento de salir.',
+    '3': 'La Línea 3 aprende a través del ensayo y el error. Los "fracasos" son parte del diseño, no señales de estar equivocado/a. Cada experiencia que no funciona deja una sabiduría práctica que ningún libro puede enseñar. La vida como laboratorio.',
+    '4': 'La Línea 4 construye a través de relaciones y redes. Las oportunidades más importantes llegan a través de personas ya conocidas, no de desconocidos. La fundación de la vida es la calidad de los vínculos cercanos.',
+    '5': 'La Línea 5 es proyectada por los demás como el "salvador práctico" — alguien que tiene soluciones para lo que otros no pueden resolver. Las expectativas externas pueden ser una trampa: aprender a discernir cuándo responder al llamado y cuándo no es el trabajo central.',
+    '6': 'La Línea 6 tiene tres etapas de vida claramente distintas: los primeros 30 años son de aprendizaje intenso (a menudo doloroso); los siguientes 20 de retiro y observación; después de los 50, emerge como modelo de rol genuino — alguien que vivió lo que enseña.',
+}
+
+_HD_DEFINITION_DESCS = {
+    'Indefinido': 'Sin centros definidos, toda tu energía viene del entorno. Sos altamente sensible a las personas y lugares que te rodean — y podés amplificar y reflejar la energía de quienes están cerca con una claridad extraordinaria. El entorno donde vivís y trabajás importa profundamente.',
+    'Definición Simple': 'Toda tu energía está conectada en un solo circuito interno. Sos consistente, predecible y relativamente independiente del entorno para funcionar. La sombra: puede ser difícil absorber nuevas perspectivas que no encajan fácilmente con la estructura ya definida.',
+    'Definición Partida': 'Tenés dos circuitos de energía separados que no se conectan internamente. La brecha entre ellos es un punto de búsqueda inconsciente: tendés a encontrar personas o situaciones que "completen" esa conexión — lo cual puede llevar a dependencias o relaciones de completitud en lugar de elección.',
+    'Definición Partida Triple': 'Tres circuitos separados que operan de manera independiente. Sos adaptable y versátil — podés conectar con tipos muy distintos de personas y sistemas. La consistencia interna es menor, pero la capacidad de tender puentes entre mundos diferentes es mayor.',
+    'Definición Cuádruple': 'Cuatro circuitos completamente separados. La adaptabilidad es máxima — cada circuito puede resonar con personas y contextos muy distintos. La experiencia interna puede sentirse fragmentada, pero es en realidad una flexibilidad extraordinaria que pocos comprenden.',
+}
+
+_HD_NOT_SELF_DESCS = {
+    'Frustración': 'La frustración es la señal de que estás operando fuera de tu diseño — iniciando en lugar de esperar a responder, o comprometiendo energía donde no hay un sí genuino del cuerpo. No es algo a eliminar: es información sobre dónde la estrategia está siendo ignorada.',
+    'Frustración / Ira': 'La frustración señala que estás iniciando sin responder primero. La ira indica que estás actuando sin informar. Ambas son avisos del cuerpo — no emociones a suprimir, sino señales de que el diseño no está siendo escuchado.',
+    'Ira': 'La ira aparece cuando actuás sin informar a tu entorno. No es que hiciste algo malo — es que el impacto de tu movimiento llegó sin preparación al campo de los demás, y eso genera resistencia automática. La ira es la señal de que faltó el paso de informar.',
+    'Amargura': 'La amargura surge cuando actuás sin invitación, cuando te esforzás sin que nadie te haya reconocido genuinamente, o cuando esperás más de lo que el entorno puede darte. Es la señal de que la estrategia de esperar el reconocimiento está siendo evitada.',
+    'Decepción': 'La decepción es la señal del Reflector de que está en un entorno que no lo nutre, o tomando decisiones sin haber esperado el ciclo lunar completo. Es la brújula que indica que algo en el campo externo o en el ritmo interno está fuera de alineación.',
+}
+
+_HD_SIGNATURE_DESCS = {
+    'Satisfacción': 'La satisfacción no siempre es euforia — puede ser el simple placer de un trabajo que vale la pena, la sensación de que la energía fue bien usada. Es la confirmación interior de que el cuerpo respondió sí, y el compromiso honró esa respuesta.',
+    'Paz y satisfacción': 'La paz llega cuando el movimiento fue claro e informado. La satisfacción cuando la energía fue bien respondida y usada. Juntas, señalan que el diseño está siendo vivido — no la tranquilidad de no hacer nada, sino la de actuar desde el lugar correcto.',
+    'Paz': 'La paz no es resignación — es la quietud de quien actúa desde el momento correcto y sin imponer. Es la señal de que el impacto fue honrado y que el informar creó espacio en lugar de resistencia.',
+    'Éxito': 'El éxito del Proyector no es acumulación — es el reconocimiento genuino de que tu guía fue escuchada y que aportaste claridad donde otros no podían verla. No el éxito como validación social, sino como evidencia de que fuiste invitado/a e hiciste lo que mejor sabés hacer.',
+    'Sorpresa': 'El deleite del Reflector es la rareza de encontrarse completamente sorprendido/a — sin expectativas cristalizadas, abierto/a a lo imprevisto como modo de vida. Es la señal de que el entorno es correcto y de que el ciclo de la luna está siendo respetado.',
+}
+
+
+# ── Configuraciones de secciones para lectura.html ───────────────────────────
+
+_SECTION_CONFIGS = {
+    'astral': [
+        {'icon': '☉', 'label': 'El Sol y la Identidad', 'color': '#f0c040'},
+        {'icon': '☽', 'label': 'La Luna y las Emociones', 'color': '#7c6dfa'},
+        {'icon': '⬡', 'label': 'El Ascendente y los Vínculos', 'color': '#4ecdc4'},
+        {'icon': '◉', 'label': 'El Patrón y la Sombra', 'color': '#e05050'},
+        {'icon': '✦', 'label': 'La Invitación Actual', 'color': '#f4a035'},
+    ],
+    'hd': [
+        {'icon': '◈', 'label': 'Tipo y Estrategia en la Vida', 'color': '#4ecdc4'},
+        {'icon': '○', 'label': 'La Autoridad Interior', 'color': '#7c6dfa'},
+        {'icon': '◇', 'label': 'El Perfil y el Rol de Vida', 'color': '#f4a035'},
+        {'icon': '☯', 'label': 'Las Puertas del Sol', 'color': '#f0c040'},
+        {'icon': '⬤', 'label': 'Centros y el Tema No-Yo', 'color': '#e05050'},
+    ],
+    'saju': [
+        {'icon': '◎', 'label': 'El Maestro del Día', 'color': '#f4a035'},
+        {'icon': '⬡', 'label': 'El Balance Elemental', 'color': '#4ecdc4'},
+        {'icon': '◈', 'label': 'El Animal del Año', 'color': '#7c6dfa'},
+        {'icon': '◉', 'label': 'Las Tensiones Internas', 'color': '#e05050'},
+        {'icon': '✦', 'label': 'El Ciclo Vital Actual', 'color': '#f0c040'},
+    ],
+}
+
+
+def _parse_lectura_sections(text, configs):
+    if not text or text == 'processing':
+        return []
+    paras = [p.strip() for p in text.split('\n\n') if p.strip()]
+    result = []
+    for i, cfg in enumerate(configs):
+        if i < len(paras):
+            result.append({**cfg, 'text': paras[i]})
+    for extra in paras[len(configs):]:
+        result.append({
+            'icon': '◎',
+            'label': 'Pregunta de exploración',
+            'color': '#7c6dfa',
+            'text': extra,
+            'is_question': True,
+        })
+    return result
 
 
 def _kb_context(keywords):
@@ -409,9 +518,21 @@ def hd_detail(request, pk):
         bp = request.user.birth_profile
     except BirthProfile.DoesNotExist:
         bp = None
+    chart = report.chart_data or {}
+    profile_line = (chart.get('profile') or '')[0] if chart.get('profile') else ''
+    hd_descs = {
+        'type':       _HD_TYPE_DESCS.get(chart.get('type', ''), ''),
+        'strategy':   _HD_STRATEGY_DESCS.get(chart.get('strategy', ''), ''),
+        'authority':  _HD_AUTHORITY_DESCS.get(chart.get('authority', ''), ''),
+        'profile':    _HD_PROFILE_LINE_DESCS.get(profile_line, ''),
+        'definition': _HD_DEFINITION_DESCS.get(chart.get('definition', ''), ''),
+        'not_self':   _HD_NOT_SELF_DESCS.get(chart.get('not_self_theme', ''), ''),
+        'signature':  _HD_SIGNATURE_DESCS.get(chart.get('signature', ''), ''),
+    }
     return render(request, 'birth/hd_detail.html', {
         'report': report, 'bp': bp,
         'poll_url': f'/nacimiento/reporte/{report.pk}/estado/',
+        'hd_descs': hd_descs,
     })
 
 
@@ -564,6 +685,12 @@ _BIRTH_LECTURA_NAMES = {
     BirthReport.TYPE_SAJU:   'saju_lectura',
 }
 
+_REPORT_TYPE_KEYS = {
+    BirthReport.TYPE_ASTRAL: 'astral',
+    BirthReport.TYPE_HD:     'hd',
+    BirthReport.TYPE_SAJU:   'saju',
+}
+
 
 def _birth_lectura_view(request, pk, report_type):
     from django.urls import reverse
@@ -576,14 +703,19 @@ def _birth_lectura_view(request, pk, report_type):
         BirthReport.TYPE_SAJU:   'birth:saju_detail',
     }
     back_view = _detail_names.get(report_type, 'birth:profile')
+    type_key  = _REPORT_TYPE_KEYS.get(report_type, 'astral')
+    sec_cfg   = _SECTION_CONFIGS.get(type_key, [])
+    sections  = _parse_lectura_sections(report.interpretation, sec_cfg) if is_revealed else []
     return render(request, 'birth/lectura.html', {
-        'report':        report,
-        'label':         _BIRTH_TYPE_LABELS.get(report_type, ''),
-        'is_processing': is_processing,
-        'is_revealed':   is_revealed,
-        'poll_url':      f'/nacimiento/reporte/{report.pk}/lectura-estado/',
-        'reveal_url':    f'/nacimiento/reporte/{report.pk}/revelar/',
-        'back_url':      reverse(back_view, args=[report.pk]),
+        'report':               report,
+        'label':                _BIRTH_TYPE_LABELS.get(report_type, ''),
+        'is_processing':        is_processing,
+        'is_revealed':          is_revealed,
+        'poll_url':             f'/nacimiento/reporte/{report.pk}/lectura-estado/',
+        'reveal_url':           f'/nacimiento/reporte/{report.pk}/revelar/',
+        'back_url':             reverse(back_view, args=[report.pk]),
+        'sections':             sections,
+        'sections_config_json': json.dumps(sec_cfg, ensure_ascii=False),
     })
 
 

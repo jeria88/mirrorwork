@@ -112,6 +112,46 @@
   .no-tokens-note a { color: var(--accent); }
   .back-link { display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 3rem; font-size: 0.8rem; color: var(--muted); text-decoration: none; transition: color 0.15s; }
   .back-link:hover { color: var(--accent); }
+
+  /* Meanings panel */
+  .meanings-panel {
+    margin-bottom: 2.5rem;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .meanings-panel-title {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--muted);
+    padding: 0.85rem 1.5rem; border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+  }
+  .meaning-item {
+    padding: 1.1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 1rem;
+    align-items: start;
+  }
+  .meaning-item:last-child { border-bottom: none; }
+  .meaning-key {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--accent2);
+    padding-top: 0.1rem;
+    line-height: 1.4;
+  }
+  .meaning-text {
+    font-size: 0.84rem;
+    color: var(--muted);
+    line-height: 1.72;
+    margin: 0;
+  }
+  @media (max-width: 560px) {
+    .meaning-item { grid-template-columns: 1fr; gap: 0.35rem; }
+  }
   .disclaimer { font-size: 0.75rem; color: var(--dim); line-height: 1.6; padding: 0.75rem 1rem; background: rgba(255,255,255,0.02); border-radius: 8px; margin-bottom: 2rem; }
 
   @media (max-width: 560px) {
@@ -251,6 +291,55 @@
       </div>
     </div>
   </div>
+
+  <!-- Panel de significados -->
+  {% if hd_descs %}
+  <div class="meanings-panel reveal">
+    <div class="meanings-panel-title">Lo que significa para vos</div>
+    {% if hd_descs.type %}
+    <div class="meaning-item">
+      <span class="meaning-key">{{ chart.type }}</span>
+      <p class="meaning-text">{{ hd_descs.type }}</p>
+    </div>
+    {% endif %}
+    {% if hd_descs.strategy %}
+    <div class="meaning-item">
+      <span class="meaning-key">Estrategia: {{ chart.strategy }}</span>
+      <p class="meaning-text">{{ hd_descs.strategy }}</p>
+    </div>
+    {% endif %}
+    {% if hd_descs.authority %}
+    <div class="meaning-item">
+      <span class="meaning-key">Autoridad {{ chart.authority }}</span>
+      <p class="meaning-text">{{ hd_descs.authority }}</p>
+    </div>
+    {% endif %}
+    {% if hd_descs.profile %}
+    <div class="meaning-item">
+      <span class="meaning-key">Perfil {{ chart.profile }}</span>
+      <p class="meaning-text">{{ hd_descs.profile }}</p>
+    </div>
+    {% endif %}
+    {% if hd_descs.definition %}
+    <div class="meaning-item">
+      <span class="meaning-key">{{ chart.definition }}</span>
+      <p class="meaning-text">{{ hd_descs.definition }}</p>
+    </div>
+    {% endif %}
+    {% if hd_descs.not_self %}
+    <div class="meaning-item">
+      <span class="meaning-key">Tema No-Yo: {{ chart.not_self_theme }}</span>
+      <p class="meaning-text">{{ hd_descs.not_self }}</p>
+    </div>
+    {% endif %}
+    {% if hd_descs.signature %}
+    <div class="meaning-item">
+      <span class="meaning-key">Firma: {{ chart.signature }}</span>
+      <p class="meaning-text">{{ hd_descs.signature }}</p>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
 
   <!-- Cruz de encarnación — las 4 puertas -->
   {% if chart.cross_gates %}
