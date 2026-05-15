@@ -177,6 +177,89 @@ _HD_CHANNEL_DESCS = {
     '32-54': 'Transformación: ambición que se mueve hacia la trascendencia del colectivo. Tu impulso de ascender no es para vos solo — está al servicio de la evolución del grupo.',
 }
 
+_HD_GATE_DESCS = {
+     1: 'El impulso de crear algo único y propio como contribución genuina al mundo.',
+     2: 'Una brújula interna que sabe hacia dónde ir, aunque no siempre puedas explicarlo racionalmente.',
+     3: 'La energía del caos necesario para que algo nuevo emerja del orden existente.',
+     4: 'La necesidad de formular respuestas lógicas a preguntas concretas — la duda como motor.',
+     5: 'La vida funciona mejor siguiendo tus propios ritmos y ciclos naturales.',
+     6: 'El punto donde la intimidad con el otro es posible o imposible — regulás quién entra.',
+     7: 'Orientación natural hacia el liderazgo cuando el grupo te elige — no impuesto.',
+     8: 'Contribuir siendo auténtico/a — tu presencia genuina ya es en sí misma el aporte.',
+     9: 'Concentrar energía en los detalles correctos puede transformar lo pequeño en algo significativo.',
+    10: 'El amor por uno mismo como base de toda conducta — sin necesidad de aprobación externa.',
+    11: 'Generás ideas constantemente para compartirlas — no necesariamente para implementarlas todas.',
+    12: 'Expresión selectiva y con timing — cuando hablás desde este lugar, tus palabras tienen peso.',
+    13: 'La capacidad de sostener los secretos y la historia de otros como repositorio del colectivo.',
+    14: 'El poder de acumular recursos y habilidades cuando trabajás alineado/a con tu propósito.',
+    15: 'La tolerancia por la diversidad de ritmos y estilos — representás la amplitud de lo humano.',
+    16: 'El entusiasmo como motor de la maestría — cuando algo te apasiona, la práctica fluye.',
+    17: 'Opiniones sistemáticas que aportan estructura cuando las compartís con humildad.',
+    18: 'El impulso de perfeccionar — ver qué puede mejorar en los sistemas para generar salud.',
+    19: 'Sensibilidad profunda hacia las necesidades fundamentales — tuyas y de los que te rodean.',
+    20: 'La capacidad de estar completamente en el ahora y expresar lo que es en este instante.',
+    21: 'El impulso de tener control sobre los propios recursos y el territorio personal.',
+    22: 'Una sensibilidad emocional que, en el momento correcto, puede generar gracia y apertura.',
+    23: 'Insights únicos que buscan su lenguaje — a veces sabés algo antes de poder articularlo.',
+    24: 'La mente procesa en bucle hasta encontrar sentido en lo confuso — dale tiempo.',
+    25: 'Amor universal y pureza de intención — actuar sin agenda personal cuando el espíritu llama.',
+    26: 'La habilidad de persuadir para que algo con valor genuino sea adoptado por otros.',
+    27: 'El impulso de nutrir y cuidar — sabés qué necesitan los demás, aunque te olvides de vos.',
+    28: 'La búsqueda de sentido a través del riesgo — comprometerse solo con lo que vale la pena.',
+    29: 'El compromiso total del "sí" — el desafío es asegurarte de comprometerte con lo correcto.',
+    30: 'El fuego del deseo y los anhelos que impulsan hacia las experiencias que querés vivir.',
+    31: 'Liderazgo natural reconocido por otros — tu influencia surge cuando te eligen.',
+    32: 'La intuición sobre qué puede sobrevivir y qué no en el largo plazo.',
+    33: 'La necesidad de retirarse para procesar la experiencia vivida y luego transmitirla.',
+    34: 'Motor de energía pura — sostenés trabajo intenso cuando genuinamente responde a vos.',
+    35: 'El deseo de experiencia variada — una amplitud de vivencias que muy pocos logran.',
+    36: 'Las crisis como fuente de sabiduría profunda que luego podés transmitir a otros.',
+    37: 'La habilidad de crear vínculos de confianza y pertenencia — los pactos son tu lenguaje.',
+    38: 'La determinación de luchar solo por lo que tiene sentido — tu "no" es tan poderoso como tu "sí".',
+    39: 'La provocación como herramienta para despertar el espíritu dormido en otros.',
+    40: 'La necesidad de tiempo propio como condición para poder dar genuinamente.',
+    41: 'El inicio de todos los ciclos — imaginás posibilidades antes de que se materialicen.',
+    42: 'Llevar las cosas hasta su conclusión — tu satisfacción viene de cerrar ciclos completos.',
+    43: 'Comprensiones únicas que llegan desde adentro sin saber cómo — el desafío es articularlas.',
+    44: 'Memoria instintiva sobre patrones del pasado — reconocés qué comportamientos llevan a qué.',
+    45: 'La voz que lidera comunidades — sabés distribuir recursos y enfocar al grupo.',
+    46: 'El amor por el cuerpo y el placer de estar encarnado — la sincronicidad se activa desde aquí.',
+    47: 'La reflexión que transforma confusión en sabiduría — el proceso toma tiempo.',
+    48: 'Acceso a una profundidad y sabiduría que otros no ven hasta que decidís mostrarla.',
+    49: 'La capacidad de revolucionar desde los principios cuando los valores fundamentales no se respetan.',
+    50: 'La sensibilidad hacia los valores y las leyes que sostienen el bienestar colectivo.',
+    51: 'La resiliencia ante el shock — atravesar lo imprevisto y volver al centro puede inspirar a otros.',
+    52: 'La quietud como base de la concentración — cuando te detenés, tu enfoque es extraordinario.',
+    53: 'El impulso de comenzar cosas nuevas — el desafío es discernir cuáles valen el compromiso.',
+    54: 'El deseo de ascender y mejorar — la ambición transformadora conectada a un propósito.',
+    55: 'La abundancia emocional que fluctúa con el humor — seguir el feeling genuino es el camino.',
+    56: 'La habilidad de narrar historias que inspiran y estimulan imágenes vívidas en los demás.',
+    57: 'Claridad intuitiva del momento presente — llega rápido y se va igual, hay que confiar en ella.',
+    58: 'El amor por la vida y el impulso de mejorar lo que existe — traés vitalidad que eleva a otros.',
+    59: 'La energía para atravesar barreras y crear intimidad, vida y conexión profunda.',
+    60: 'La aceptación de los límites como condición para la transformación real.',
+    61: 'El conocimiento interior que no puede ser explicado racionalmente — pero es verdadero.',
+    62: 'El dominio a través de los detalles y los hechos — tu mente necesita datos concretos.',
+    63: 'La duda lógica que impulsa la verificación — la certeza completa es rara, y eso está bien.',
+    64: 'La confusión como estado previo a la comprensión — procesás hasta que emerge el insight.',
+}
+
+_HD_PLANET_DESCS = {
+    'Sol':        'La esencia más característica de tu ser — la energía que otros reconocen en vos y vos mismo/a sentís como más auténtica.',
+    'Tierra':     'El fundamento que balancea al Sol — lo que necesitás cultivar para anclar tu expresión y no desequilibrarte.',
+    'Luna':       'Los ciclos emocionales y el ritmo del cuerpo — cómo fluctuás y qué necesitás para sentirte en casa.',
+    'Nodo Norte': 'La dirección hacia donde va tu vida — el potencial que estás desplegando y todavía aprendiendo en esta encarnación.',
+    'Nodo Sur':   'El patrón familiar, lo que ya sabés hacer bien — el punto de partida conocido desde donde operás.',
+    'Mercurio':   'Cómo procesás y comunicás información — el estilo natural de tu pensamiento y expresión.',
+    'Venus':      'Lo que valorás y lo que te atrae — tus afinidades naturales, sentido estético y vínculo con la abundancia.',
+    'Marte':      'Tu impulso de acción — dónde ponés tu energía y cómo respondés ante la resistencia o el desafío.',
+    'Júpiter':    'El área de expansión y sentido — dónde tendés a encontrar oportunidades genuinas de crecimiento.',
+    'Saturno':    'La lección estructural de tu vida — qué área requiere consistencia para lograr solidez y maestría.',
+    'Urano':      'Cómo tu presencia genera disrupción o innovación en el colectivo, muchas veces sin intentarlo.',
+    'Neptuno':    'La conexión con lo sutil y colectivo — dónde podés disolverte en algo más grande.',
+    'Plutón':     'Las fuerzas de transformación profunda — dónde la regeneración radical puede ocurrir en tu vida.',
+}
+
 
 def _channel_key(gates_str):
     try:
@@ -692,12 +775,23 @@ def hd_detail(request, pk):
         {'name': c, 'desc': _HD_CENTER_DEFINED_DESCS.get(c, '')}
         for c in chart.get('defined_centers', [])
     ]
+    annotated_planets_hd = []
+    for pair in chart.get('planets_paired', []):
+        p = dict(pair['p'])
+        d = dict(pair['d'])
+        p['gate_desc'] = _HD_GATE_DESCS.get(p.get('gate'), '')
+        d['gate_desc'] = _HD_GATE_DESCS.get(d.get('gate'), '')
+        annotated_planets_hd.append({
+            'p': p, 'd': d,
+            'planet_desc': _HD_PLANET_DESCS.get(p.get('label', ''), ''),
+        })
     return render(request, 'birth/hd_detail.html', {
         'report': report, 'bp': bp,
         'poll_url': f'/nacimiento/reporte/{report.pk}/estado/',
-        'hd_descs':            hd_descs,
-        'channels_with_descs': channels_with_descs,
-        'centers_with_descs':  centers_with_descs,
+        'hd_descs':              hd_descs,
+        'channels_with_descs':   channels_with_descs,
+        'centers_with_descs':    centers_with_descs,
+        'annotated_planets_hd':  annotated_planets_hd,
     })
 
 

@@ -49,23 +49,48 @@
     margin-top: 0.2rem;
   }
 
-  /* Planets table */
-  .planets-wrap { margin-bottom: 2.5rem; overflow-x: auto; }
-  .planets-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
-  .planets-table th {
-    text-align: left; padding: 0.4rem 0.75rem;
-    font-size: 0.65rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
-    color: var(--dim); border-bottom: 1px solid var(--border);
+  /* Planet cards (HD) */
+  .hd-planets-list { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 2.5rem; }
+  .hd-planet-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
   }
-  .planets-table th.col-design { color: var(--accent2); }
-  .planets-table th.col-pers   { color: var(--luz-intensa); }
-  .planets-table td { padding: 0.45rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.04); color: var(--text); }
-  .planets-table td.planet-sym { color: var(--muted); width: 2rem; }
-  .planets-table td.planet-name { color: var(--muted); }
-  .gate-num-sm { font-family: var(--font-heading); font-size: 1rem; color: var(--accent2); }
-  .gate-line-sm { font-size: 0.72rem; color: var(--dim); }
-  .gate-name-sm { font-size: 0.78rem; color: var(--text); }
-  .col-sep { width: 1.5rem; }
+  .hd-planet-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.9rem 1.25rem 0.85rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .hd-planet-sym {
+    font-size: 1.1rem; color: var(--muted); line-height: 1.2; flex-shrink: 0; padding-top: 0.05rem;
+  }
+  .hd-planet-name-wrap { flex: 1; min-width: 0; }
+  .hd-planet-label { font-size: 0.82rem; font-weight: 500; color: var(--text); line-height: 1.3; }
+  .hd-planet-meaning { font-size: 0.76rem; color: var(--muted); line-height: 1.55; margin-top: 0.18rem; }
+  .hd-planet-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .hd-planet-side {
+    padding: 0.85rem 1.25rem;
+  }
+  .hd-planet-side:first-child { border-right: 1px solid var(--border); }
+  .hd-side-label {
+    font-size: 0.58rem; font-weight: 600; letter-spacing: 0.18em;
+    text-transform: uppercase; margin-bottom: 0.5rem;
+  }
+  .hd-gate-row { display: flex; align-items: baseline; gap: 0.35rem; margin-bottom: 0.2rem; }
+  .hd-gate-big { font-family: var(--font-heading); font-size: 1.4rem; line-height: 1; }
+  .hd-gate-line { font-size: 0.7rem; color: var(--muted); }
+  .hd-gate-name { font-size: 0.8rem; color: var(--text); line-height: 1.35; margin-bottom: 0.3rem; }
+  .hd-gate-desc { font-size: 0.74rem; color: var(--muted); line-height: 1.6; }
+  @media (max-width: 480px) {
+    .hd-planet-body { grid-template-columns: 1fr; }
+    .hd-planet-side:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+  }
 
   /* Defined channels — expanded cards */
   .channels-grid { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 2.5rem; }
@@ -397,36 +422,72 @@
   </div>
   {% endif %}
 
-  <!-- Tabla planetaria completa -->
+  <!-- Activaciones planetarias — tarjetas -->
   <div class="section-title reveal">Activaciones planetarias</div>
   <p class="planets-context reveal">
-    Cada planeta activa una <strong>puerta</strong> del I Ching (1–64) y una <strong>línea</strong> (1–6) dentro de ella.
-    La columna <strong>Personalidad</strong> son aspectos que reconocés en vos mismo/a — tu configuración consciente.
-    La columna <strong>Diseño</strong> son energías que otros suelen percibir en vos antes de que vos las reconozcas — tu configuración inconsciente, heredada de ~88 días antes de tu nacimiento.
+    Cada planeta activa una <strong>puerta</strong> del I Ching (1–64) y una <strong>línea</strong> (1–6).
+    <strong>Personalidad</strong> es tu configuración consciente — lo que reconocés en vos.
+    <strong>Diseño</strong> es inconsciente — energías que otros suelen ver antes que vos, heredadas de ~88 días antes de tu nacimiento.
   </p>
-  <div class="planets-wrap reveal">
-    <table class="planets-table">
-      <thead>
-        <tr>
-          <th>Planeta</th>
-          <th class="col-pers" colspan="2" style="color:var(--luz-intensa)">Personalidad (consciente)</th>
-          <th class="col-sep"></th>
-          <th class="col-design" colspan="2">Diseño (inconsciente)</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for pair in chart.planets_paired %}
-        <tr>
-          <td class="planet-name">{{ pair.p.symbol }} {{ pair.p.label }}</td>
-          <td><span class="gate-num-sm" style="color:var(--luz-intensa)">{{ pair.p.gate }}</span> <span class="gate-line-sm">·{{ pair.p.line }}</span></td>
-          <td class="gate-name-sm">{{ pair.p.name }}</td>
-          <td class="col-sep"></td>
-          <td><span class="gate-num-sm">{{ pair.d.gate }}</span> <span class="gate-line-sm">·{{ pair.d.line }}</span></td>
-          <td class="gate-name-sm">{{ pair.d.name }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  <div class="hd-planets-list reveal">
+    {% for pair in annotated_planets_hd %}
+    <div class="hd-planet-card">
+      <div class="hd-planet-head">
+        <span class="hd-planet-sym">{{ pair.p.symbol }}</span>
+        <div class="hd-planet-name-wrap">
+          <div class="hd-planet-label">{{ pair.p.label }}</div>
+          {% if pair.planet_desc %}<div class="hd-planet-meaning">{{ pair.planet_desc }}</div>{% endif %}
+        </div>
+      </div>
+      <div class="hd-planet-body">
+        <div class="hd-planet-side">
+          <div class="hd-side-label" style="color:var(--luz-intensa)">Personalidad</div>
+          <div class="hd-gate-row">
+            <span class="hd-gate-big" style="color:var(--luz-intensa)">{{ pair.p.gate }}</span>
+            <span class="hd-gate-line">línea {{ pair.p.line }}</span>
+          </div>
+          <div class="hd-gate-name">{{ pair.p.name }}</div>
+          {% if pair.p.gate_desc %}<div class="hd-gate-desc">{{ pair.p.gate_desc }}</div>{% endif %}
+        </div>
+        <div class="hd-planet-side">
+          <div class="hd-side-label" style="color:var(--accent2)">Diseño</div>
+          <div class="hd-gate-row">
+            <span class="hd-gate-big" style="color:var(--accent2)">{{ pair.d.gate }}</span>
+            <span class="hd-gate-line">línea {{ pair.d.line }}</span>
+          </div>
+          <div class="hd-gate-name">{{ pair.d.name }}</div>
+          {% if pair.d.gate_desc %}<div class="hd-gate-desc">{{ pair.d.gate_desc }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    {% for pair in chart.planets_paired %}
+    <div class="hd-planet-card">
+      <div class="hd-planet-head">
+        <span class="hd-planet-sym">{{ pair.p.symbol }}</span>
+        <div class="hd-planet-name-wrap"><div class="hd-planet-label">{{ pair.p.label }}</div></div>
+      </div>
+      <div class="hd-planet-body">
+        <div class="hd-planet-side">
+          <div class="hd-side-label" style="color:var(--luz-intensa)">Personalidad</div>
+          <div class="hd-gate-row">
+            <span class="hd-gate-big" style="color:var(--luz-intensa)">{{ pair.p.gate }}</span>
+            <span class="hd-gate-line">línea {{ pair.p.line }}</span>
+          </div>
+          <div class="hd-gate-name">{{ pair.p.name }}</div>
+        </div>
+        <div class="hd-planet-side">
+          <div class="hd-side-label" style="color:var(--accent2)">Diseño</div>
+          <div class="hd-gate-row">
+            <span class="hd-gate-big" style="color:var(--accent2)">{{ pair.d.gate }}</span>
+            <span class="hd-gate-line">línea {{ pair.d.line }}</span>
+          </div>
+          <div class="hd-gate-name">{{ pair.d.name }}</div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    {% endfor %}
   </div>
 
   <!-- Canales definidos -->
