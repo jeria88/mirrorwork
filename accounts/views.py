@@ -133,52 +133,6 @@ def onboarding_mapa(request):
     return render(request, 'accounts/onboarding_mapa.html')
 
 
-@login_required
-def perfil_debug(request):
-    """Temporary diagnostic view — shows exactly what's failing in /perfil/."""
-    import traceback
-    from django.http import HttpResponse
-    lines = []
-    try:
-        profile = request.user.profile
-        lines.append(f"OK: profile id={profile.pk}")
-    except Exception:
-        lines.append(f"ERR fetching profile: {traceback.format_exc()}")
-        try:
-            from .models import UserProfile
-            profile = UserProfile.objects.create(user=request.user)
-            lines.append(f"OK: created profile id={profile.pk}")
-        except Exception:
-            lines.append(f"ERR creating profile: {traceback.format_exc()}")
-            return HttpResponse('<pre>' + '\n'.join(lines) + '</pre>', status=500)
-    try:
-        raw = profile.onboarding_nucleo
-        lines.append(f"OK: onboarding_nucleo type={type(raw).__name__} value={raw!r}")
-    except Exception:
-        lines.append(f"ERR onboarding_nucleo: {traceback.format_exc()}")
-    try:
-        prior = profile.onboarding_prior_exploration
-        lines.append(f"OK: prior_exploration={prior!r}")
-    except Exception:
-        lines.append(f"ERR prior_exploration: {traceback.format_exc()}")
-    try:
-        from django.template.loader import render_to_string
-        _PILL_OPTS = [('si', 'Sí'), ('a-veces', 'A veces'), ('no', 'No')]
-        nucleo = raw if isinstance(raw, dict) else {}
-        nucleo_fields = [
-            ('transcendencia', '¿Crees en algo?', _PILL_OPTS, nucleo.get('transcendencia', '')),
-        ]
-        html = render_to_string('accounts/perfil.html', {
-            'profile': profile, 'saved': False,
-            'nucleo_fields': nucleo_fields, 'prior_opts': [],
-            'request': request, 'user': request.user,
-        }, request=request)
-        lines.append(f"OK: template rendered ({len(html)} bytes)")
-    except Exception:
-        lines.append(f"ERR template render: {traceback.format_exc()}")
-    return HttpResponse('<pre>' + '\n'.join(lines) + '</pre>')
-
-
 def bienvenido(request):
     return render(request, 'bienvenido.html')
 
