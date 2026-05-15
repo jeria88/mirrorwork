@@ -1,0 +1,947 @@
+{% extends "base.html" %}
+{% block title %}Tu viaje interior — MirrorWork{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* ── Contenedor global ── */
+  .vj-wrap {
+    min-height: calc(100vh - 60px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Barra de progreso superior */
+  .vj-bar {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: rgba(255,255,255,0.06);
+    z-index: 100;
+  }
+  .vj-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.6s cubic-bezier(0.16,1,0.3,1);
+    width: 0%;
+  }
+
+  /* Botón volver */
+  .vj-back {
+    position: fixed;
+    top: 76px;
+    left: 1.5rem;
+    z-index: 101;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.4rem 0.6rem;
+    border-radius: 8px;
+    transition: color 0.2s, background 0.2s;
+    opacity: 0;
+    pointer-events: none;
+    font-family: var(--font-ui);
+  }
+  .vj-back.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .vj-back:hover { color: var(--text); background: var(--surface2); }
+
+  /* ── Pantallas ── */
+  .vj-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 62px);
+    padding: 5rem 1.5rem 4rem;
+    text-align: center;
+    animation: vjFadeIn 0.45s cubic-bezier(0.16,1,0.3,1) both;
+  }
+  .vj-screen.active { display: flex; }
+
+  @keyframes vjFadeIn {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Tipografía compartida ── */
+  .vj-step {
+    font-size: 10px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 2rem;
+    font-weight: 500;
+  }
+
+  .vj-heading {
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 400;
+    line-height: 1.18;
+    margin-bottom: 1rem;
+    max-width: 640px;
+  }
+
+  .vj-sub {
+    font-size: 0.92rem;
+    color: var(--muted);
+    line-height: 1.75;
+    max-width: 440px;
+    margin-bottom: 3rem;
+    font-weight: 300;
+  }
+
+  /* ── Opciones pill ── */
+  .vj-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    width: 100%;
+    max-width: 480px;
+    margin-bottom: 2.5rem;
+  }
+
+  .vj-opt {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.9rem 1.4rem;
+    text-align: left;
+    font-size: 0.9rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, color 0.2s;
+    user-select: none;
+    font-family: var(--font-ui);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .vj-opt:hover {
+    border-color: var(--border2);
+    color: var(--text);
+    background: var(--surface2);
+  }
+  .vj-opt.selected {
+    border-color: var(--accent);
+    background: rgba(78,205,196,0.07);
+    color: var(--text);
+  }
+  .vj-opt-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border2);
+    flex-shrink: 0;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .vj-opt.selected .vj-opt-dot {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* Multi-select (pantalla 4) */
+  .vj-opt-check {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 1.5px solid var(--border2);
+    flex-shrink: 0;
+    transition: background 0.2s, border-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    color: #000;
+    font-weight: 700;
+  }
+  .vj-opt.selected .vj-opt-check {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* ── Botón CTA principal ── */
+  .vj-btn {
+    padding: 0.9rem 2.8rem;
+    border-radius: 100px;
+    background: var(--accent);
+    color: #000;
+    font-family: var(--font-ui);
+    font-size: 0.88rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .vj-btn:hover { opacity: 0.88; transform: scale(1.02); }
+  .vj-btn:disabled { opacity: 0.28; pointer-events: none; }
+
+  .vj-btn-ghost {
+    background: none;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 0.75rem 2rem;
+    border-radius: 100px;
+    font-family: var(--font-ui);
+    font-size: 0.82rem;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .vj-btn-ghost:hover { color: var(--text); border-color: var(--border2); }
+
+  /* ── Pantalla 1 (Portal) ── */
+  .vj-portal-line {
+    font-family: var(--font-heading);
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    font-weight: 400;
+    line-height: 1.15;
+    max-width: 640px;
+    margin-bottom: 3.5rem;
+  }
+  .vj-portal-line em { font-style: italic; color: var(--muted); }
+
+  /* ── Pantalla 5 (La pregunta) ── */
+  .vj-textarea {
+    width: 100%;
+    max-width: 520px;
+    min-height: 120px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    color: var(--text);
+    font-size: 1rem;
+    font-family: var(--font-heading);
+    font-weight: 400;
+    line-height: 1.6;
+    resize: none;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 1.5rem;
+  }
+  .vj-textarea:focus { border-color: var(--border2); }
+  .vj-textarea::placeholder { color: var(--dim); font-style: italic; }
+
+  .vj-note {
+    font-size: 0.72rem;
+    color: var(--dim);
+    margin-top: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* ── Pantalla 6 (Transición mapa) ── */
+  .vj-mapa-svg {
+    width: 200px;
+    height: 200px;
+    margin-bottom: 2.5rem;
+    opacity: 0.55;
+  }
+
+  /* ── Pantalla 7 (Datos natales) ── */
+  .vj-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+    max-width: 420px;
+    margin-bottom: 2rem;
+    text-align: left;
+  }
+  .vj-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .vj-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .vj-input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.8rem 1rem;
+    color: var(--text);
+    font-size: 0.92rem;
+    font-family: var(--font-ui);
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .vj-input:focus { border-color: var(--border2); }
+  .vj-input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.6); }
+
+  /* Autocomplete lugar */
+  .vj-place-wrap { position: relative; }
+  .vj-place-confirm {
+    font-size: 0.72rem;
+    color: var(--accent);
+    margin-top: 0.25rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .vj-place-confirm.visible { opacity: 1; }
+  .vj-autocomplete {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: #1a1a26;
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    overflow: hidden;
+    z-index: 200;
+    display: none;
+  }
+  .vj-autocomplete.open { display: block; }
+  .vj-ac-item {
+    padding: 0.7rem 1rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .vj-ac-item:hover { background: var(--surface2); color: var(--text); }
+
+  .vj-birth-error {
+    font-size: 0.8rem;
+    color: #e05050;
+    text-align: center;
+    min-height: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* ── Pantallas 8-10 (Activación de capas) ── */
+  .vj-layer-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2.5rem;
+    position: relative;
+    overflow: visible;
+  }
+  .vj-layer-icon::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    border: 1px solid rgba(78,205,196,0.15);
+    animation: vjPulse 2s ease-in-out infinite;
+  }
+  .vj-layer-icon::after {
+    content: '';
+    position: absolute;
+    inset: -20px;
+    border-radius: 50%;
+    border: 1px solid rgba(78,205,196,0.07);
+    animation: vjPulse 2s ease-in-out infinite 0.4s;
+  }
+  @keyframes vjPulse {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50%       { opacity: 1;   transform: scale(1.08); }
+  }
+
+  .vj-layer-glyph {
+    font-size: 2rem;
+    opacity: 0.7;
+  }
+
+  .vj-loading-bar {
+    width: 240px;
+    height: 2px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 2rem;
+    overflow: hidden;
+  }
+  .vj-loading-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 2.4s linear;
+  }
+
+  /* ── Pantalla 11 (Señal encontrada) ── */
+  .vj-signal-center {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(78,205,196,0.25) 0%, transparent 70%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2.5rem;
+    position: relative;
+  }
+  .vj-signal-center::before {
+    content: '';
+    position: absolute;
+    inset: -16px;
+    border-radius: 50%;
+    border: 1px solid rgba(78,205,196,0.2);
+    animation: vjPulse 2.5s ease-in-out infinite;
+  }
+  .vj-signal-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 24px var(--accent);
+  }
+
+  .vj-signal-copy {
+    font-family: var(--font-heading);
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 400;
+    line-height: 1.35;
+    max-width: 540px;
+    margin-bottom: 3rem;
+  }
+
+  /* ── Pantalla 12 (La pregunta regresa) ── */
+  .vj-question-box {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.75rem 2rem;
+    max-width: 480px;
+    width: 100%;
+    margin-bottom: 2.5rem;
+    background: var(--surface);
+    position: relative;
+  }
+  .vj-question-box::before {
+    content: '"';
+    position: absolute;
+    top: -0.5rem;
+    left: 1.5rem;
+    font-family: var(--font-heading);
+    font-size: 3rem;
+    color: var(--accent);
+    line-height: 1;
+    opacity: 0.5;
+  }
+  .vj-question-text {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--text);
+    font-style: italic;
+  }
+
+  /* Spinner en botón */
+  .vj-spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(0,0,0,0.3);
+    border-top-color: #000;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 520px) {
+    .vj-screen { padding: 4rem 1.25rem 3rem; }
+    .vj-options { max-width: 100%; }
+    .vj-form { max-width: 100%; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="vj-wrap">
+
+  <!-- Barra progreso -->
+  <div class="vj-bar"><div class="vj-bar-fill" id="vjBar"></div></div>
+
+  <!-- Botón volver -->
+  <button class="vj-back" id="vjBack" onclick="prevScreen()">← Volver</button>
+
+  <!-- ══════════════════════════════════════════
+       PANTALLA 1 — PORTAL
+  ══════════════════════════════════════════ -->
+  <section class="vj-screen active" data-screen="1">
+    <p class="vj-portal-line">
+      Tu vida tiene un patrón.<br>
+      <em>Todavía no lo ves completo.</em>
+    </p>
+    <button class="vj-btn" onclick="nextScreen()">Entrar</button>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       PANTALLA 2 — ¿DESDE DÓNDE LLEGAS?
+  ══════════════════════════════════════════ -->
+  <section class="vj-screen" data-screen="2">
+    <div class="vj-step">01 — El momento</div>
+    <h1 class="vj-heading">¿Cómo llegas aquí?</h1>
+    <div class="vj-options" id="s2opts">
+      <div class="vj-opt" data-value="cambio" onclick="selectOpt(this,'s2opts')">
+        <span class="vj-opt-dot"></span>En medio de un cambio que no pedí
+      </div>
+      <div class="vj-opt" data-value="ciclos" onclick="selectOpt(this,'s2opts')">
+        <span class="vj-opt-dot"></span>Repitiendo ciclos que no entiendo
+      </div>
+      <div class="vj-opt" data-value="busqueda" onclick="selectOpt(this,'s2opts')">
+        <span class="vj-opt-dot"></span>Buscando algo que no sé nombrar
+      </div>
+      <div class="vj-opt" data-value="algo-mas" onclick="selectOpt(this,'s2opts')">
+        <span class="vj-opt-dot"></span>Sintiendo que hay algo más de lo que veo
+      </div>
+      <div class="vj-opt" data-value="entenderme" onclick="selectOpt(this,'s2opts')">
+        <span class="vj-opt-dot"></span>Queriendo entenderme de verdad
+      </div>
+    </div>
+    <button class="vj-btn" id="s2btn" disabled onclick="saveAndNext('onboarding_entry_point','s2opts')">Continuar →</button>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       PANTALLA 3 — EL RUIDO
+  ══════════════════════════════════════════ -->
+  <section class="vj-screen" data-screen="3">
+    <div class="vj-step">02 — El ruido</div>
+    <h1 class="vj-heading">¿Dónde sientes más el ruido ahora?</h1>
+    <div class="vj-options" id="s3opts">
+      <div class="vj-opt" data-value="trabajo" onclick="selectOpt(this,'s3opts')">
+        <span class="vj-opt-dot"></span>Trabajo o dirección
+      </div>
+      <div class="vj-opt" data-value="relaciones" onclick="selectOpt(this,'s3opts')">
+        <span class="vj-opt-dot"></span>Relaciones
+      </div>
+      <div class="vj-opt" data-value="cuerpo" onclick="selectOpt(this,'s3opts')">
+        <span class="vj-opt-dot"></span>Cuerpo o salud
+      </div>
+      <div class="vj-opt" data-value="identidad" onclick="selectOpt(this,'s3opts')">
+        <span class="vj-opt-dot"></span>Quién soy
+      </div>
+      <div class="vj-opt" data-value="proposito" onclick="selectOpt(this,'s3opts')">
+        <span class="vj-opt-dot"></span>Para qué estoy aquí
+      </div>
+      <div class="vj-opt" data-value="todo" onclick="selectOpt(this,'s3opts')">
+        <span class="vj-opt-dot"></span>En todo al mismo tiempo
+      </div>
+    </div>
+    <button class="vj-btn" id="s3btn" disabled onclick="saveAndNext('onboarding_noise_area','s3opts')">Continuar →</button>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       PANTALLA 4 — LO QUE YA RECORRISTE
+  ══════════════════════════════════════════ -->
+  <section class="vj-screen" data-screen="4">
+    <div class="vj-step">03 — El camino recorrido</div>
+    <h1 class="vj-heading">¿Has recorrido algo de este camino antes?</h1>
+    <p class="vj-sub">Puedes elegir varias.</p>
+    <div class="vj-options" id="s4opts">
+      <div class="vj-opt" data-value="terapia" onclick="toggleOpt(this)">
+        <span class="vj-opt-check"></span>Terapia o psicología
+      </div>
+      <div class="vj-opt" data-value="meditacion" onclick="toggleOpt(this)">
+        <span class="vj-opt-check"></span>Meditación o práctica contemplativa
+      </div>
+      <div class="vj-opt" data-value="astrologia" onclick="toggleOpt(this)">
+        <span class="vj-opt-check"></span>Astrología u otros sistemas
+      </div>
+      <div class="vj-opt" data-value="coaching" onclick="toggleOpt(this)">
+        <span class="vj-opt-check"></span>Coaching o desarrollo personal
+      </div>
+      <div class="vj-opt" data-value="primera-vez" onclick="toggleOpt(this)">
+        <span class="vj-opt-check"></span>Es mi primera vez
+      </div>
+    </div>
+    <button class="vj-btn" onclick="saveMultiAndNext('onboarding_prior_exploration','s4opts')">Continuar →</button>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       PANTALLA 5 — LA PREGUNTA
+  ══════════════════════════════════════════ -->
+  <section class="vj-screen" data-screen="5">
+    <div class="vj-step">04 — La pregunta del viaje</div>
+    <h1 class="vj-heading" style="font-size:clamp(1.6rem,4vw,2.4rem);max-width:520px;">
+      Si pudieras hacerle una pregunta a la versión más lúcida de ti mismo, ¿cuál sería?
+    </h1>
+    <textarea class="vj-textarea" id="s5question"
+      placeholder="Escríbela aquí…" rows="4"
+      oninput="onQuestionInput()"></textarea>
+    <button class="vj-btn" id="s5btn" disabled onclick="saveQuestionAndNext()">Continuar →</button>
+    <p class="vj-note">Esta pregunta guiará todo tu viaje.</p>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       PANTALLA 6 — TRANSICIÓN / MAPA VACÍO
+  ══════════════════════════════════════════ -->
+  <section class="vj-screen" data-screen="6">
+    <div class="vj-step">05 — Tu mapa</div>
+
+    <!-- Fractal SVG en niebla -->
+    <svg class="vj-mapa-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" fill="none">
+      <circle cx="100" cy="100" r="90" stroke="white" stroke-width="0.4" opacity="0.06"/>
+      <circle cx="100" cy="100" r="68" stroke="white" stroke-width="0.4" opacity="0.08"/>
+      <circle cx="100" cy="100" r="46" stroke="white" stroke-width="0.4" opacity="0.1"/>
+      <circle cx="100" cy="100" r="24" stroke="white" stroke-width="0.4" opacity="0.12"/>
+      <circle cx="100" cy="100" r="5" fill="white" opacity="0.18"/>
+      <!-- radiales -->
+      <line x1="100" y1="10" x2="100" y2="190" stroke="white" stroke-width="0.3" opacity="0.05"/>
+      <line x1="10" y1="100" x2="190" y2="100" stroke="white" stroke-width="0.3" opacity="0.05"/>
+      <line x1="26" y1="26" x2="174" y2="174" stroke="white" stroke-width="0.3" opacity="0.04"/>
+      <line x1="174" y1="26" x2="26" y2="174" stroke="white" stroke-width="0.3" opacity="0.04"/>
+      <!-- nodos en niebla -->
+      <circle cx="100" cy="32" r="3" fill="white" opacity="0.12"/>
+      <circle cx="155" cy="55" r="2" fill="white" opacity="0.1"/>
+      <circle cx="168" cy="100" r="3" fill="white" opacity="0.12"/>
+      <circle cx="45" cy="145" r="2" fill="white" opacity="0.1"/>
+      <circle cx="100" cy="168" r="3" fill="white" opacity="0.12"/>
+    </svg>
+
+    <h1 class="vj-heading">Para acercarte a esa respuesta,<br>necesitamos construir tu mapa.</h1>
+    <p class="vj-sub">No son tests. Son capas de tu patrón.</p>
+    <button class="vj-btn" onclick="nextScreen()">Empezar a calibrar</button>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       PANTALLA 7 — DATOS NATALES
+  ══════════════════════════════════════════ -->
+  <section class="vj-screen" data-screen="7">
+    <div class="vj-step">06 — Punto de partida</div>
+    <h1 class="vj-heading" style="font-size:clamp(1.7rem,4vw,2.5rem);">Tu fecha y lugar de nacimiento</h1>
+    <p class="vj-sub">
+      Esta información es tu punto de partida, no dónde estás ni a dónde vas,
+      eso lo decide tu nivel de conciencia.
+    </p>
+
+    <form class="vj-form" id="birthForm" onsubmit="return false;">
+      {% csrf_token %}
+      <div class="vj-field">
+        <label class="vj-label">Fecha de nacimiento</label>
+        <input type="date" name="birth_date" id="birth_date" class="vj-input" required>
+      </div>
+      <div class="vj-field">
+        <label class="vj-label">Hora de nacimiento <span style="color:var(--dim)">(opcional)</span></label>
+        <input type="time" name="birth_time" id="birth_time" class="vj-input">
+      </div>
+      <div class="vj-field">
+        <label class="vj-label">Ciudad de nacimiento</label>
+        <div class="vj-place-wrap">
+          <input type="text" name="birth_place" id="birth_place" class="vj-input"
+            placeholder="Escribe tu ciudad…" autocomplete="off" required>
+          <input type="hidden" id="birth_lat" name="latitude">
+          <input type="hidden" id="birth_lng" name="longitude">
+          <div class="vj-place-confirm" id="placeConfirm">Ubicación confirmada</div>
+          <div class="vj-autocomplete" id="placeAC"></div>
+        </div>
+      </div>
+    </form>
+
+    <div class="vj-birth-error" id="birthError"></div>
+    <button class="vj-btn" id="s7btn" onclick="saveBirth()">Calibrar mi mapa</button>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       PANTALLA 8 — CAPA ASTRAL
+  ══════════════════════════════════════════ -->
+  <section class="vj-screen" data-screen="8">
+    <div class="vj-step">07 — Capa astral</div>
+    <div class="vj-layer-icon">
+      <span class="vj-layer-glyph">☽</span>
+    </div>
+    <h1 class="vj-heading" style="font-size:clamp(1.5rem,3.5vw,2.2rem);">Leyendo el movimiento de los planetas<br>en el momento de tu nacimiento</h1>
+    <div class="vj-loading-bar"><div class="vj-loading-fill" id="bar8"></div></div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       PANTALLA 9 — DISEÑO HUMANO
+  ══════════════════════════════════════════ -->
+  <section class="vj-screen" data-screen="9">
+    <div class="vj-step">08 — Diseño humano</div>
+    <div class="vj-layer-icon">
+      <span class="vj-layer-glyph">◈</span>
+    </div>
+    <h1 class="vj-heading" style="font-size:clamp(1.5rem,3.5vw,2.2rem);">Calculando tu tipo, autoridad<br>y centros de energía</h1>
+    <div class="vj-loading-bar"><div class="vj-loading-fill" id="bar9"></div></div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       PANTALLA 10 — PATRÓN TEMPORAL (SAJU)
+  ══════════════════════════════════════════ -->
+  <section class="vj-screen" data-screen="10">
+    <div class="vj-step">09 — Patrón temporal</div>
+    <div class="vj-layer-icon">
+      <span class="vj-layer-glyph">⧖</span>
+    </div>
+    <h1 class="vj-heading" style="font-size:clamp(1.5rem,3.5vw,2.2rem);">Mapeando los ciclos<br>que estructuran tu tiempo</h1>
+    <div class="vj-loading-bar"><div class="vj-loading-fill" id="bar10"></div></div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       PANTALLA 11 — SEÑAL ENCONTRADA
+  ══════════════════════════════════════════ -->
+  <section class="vj-screen" data-screen="11">
+    <div class="vj-signal-center">
+      <div class="vj-signal-dot"></div>
+    </div>
+    <p class="vj-signal-copy">
+      Señal encontrada, la brújula está lista,<br>
+      tu espejo limpio, puedes avanzar endonauta.
+    </p>
+    <button class="vj-btn" onclick="nextScreen()">Continuar</button>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       PANTALLA 12 — LA PREGUNTA REGRESA
+  ══════════════════════════════════════════ -->
+  <section class="vj-screen" data-screen="12">
+    <div class="vj-step">Tu norte</div>
+    <h1 class="vj-heading" style="font-size:clamp(1.4rem,3vw,2rem);margin-bottom:2rem;">
+      Esto es lo que querías entender.
+    </h1>
+    <div class="vj-question-box">
+      <p class="vj-question-text" id="s12question">…</p>
+    </div>
+    <p class="vj-sub" style="margin-bottom:2.5rem;">
+      Ya tienes los primeros instrumentos para acercarte.
+    </p>
+    <a href="{% url 'dashboard' %}" class="vj-btn" style="text-decoration:none;">Abrir el Espejo</a>
+  </section>
+
+</div>
+{% endblock %}
+
+{% block extra_body %}
+<script>
+  let current = 1;
+  const total = 12;
+  const AUTO_ADVANCE = [8, 9, 10]; // pantallas con timer
+  let userQuestion = '';
+
+  /* ── Utilidades ── */
+  function getCsrf() {
+    const m = document.cookie.match('(^|;) ?csrftoken=([^;]*)(;|$)');
+    return m ? m[2] : '';
+  }
+
+  async function postJson(url, data) {
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+      body: JSON.stringify(data),
+    });
+  }
+
+  /* ── Navegación ── */
+  function showScreen(n) {
+    document.querySelectorAll('.vj-screen').forEach(s => s.classList.remove('active'));
+    const next = document.querySelector(`[data-screen="${n}"]`);
+    if (next) next.classList.add('active');
+    current = n;
+
+    // Barra de progreso
+    document.getElementById('vjBar').style.width = ((n - 1) / (total - 1) * 100) + '%';
+
+    // Botón volver
+    const back = document.getElementById('vjBack');
+    const hideBack = n === 1 || AUTO_ADVANCE.includes(n);
+    back.classList.toggle('visible', !hideBack);
+
+    // Acciones al entrar en pantalla
+    if (n === 12) {
+      document.getElementById('s12question').textContent = userQuestion || '…';
+    }
+    if (AUTO_ADVANCE.includes(n)) {
+      startAutoAdvance(n);
+    }
+  }
+
+  function nextScreen() {
+    if (current < total) showScreen(current + 1);
+  }
+
+  function prevScreen() {
+    if (current > 1 && !AUTO_ADVANCE.includes(current)) showScreen(current - 1);
+  }
+
+  /* ── Auto-avance con barra de carga ── */
+  function startAutoAdvance(n) {
+    const fill = document.getElementById(`bar${n}`);
+    if (!fill) return;
+    // reset
+    fill.style.transition = 'none';
+    fill.style.width = '0%';
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        fill.style.transition = 'width 2.4s linear';
+        fill.style.width = '100%';
+      });
+    });
+    setTimeout(() => nextScreen(), 2600);
+  }
+
+  /* ── Selección single ── */
+  function selectOpt(el, groupId) {
+    document.querySelectorAll(`#${groupId} .vj-opt`).forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    // habilitar botón del grupo
+    const btnMap = { s2opts: 's2btn', s3opts: 's3btn' };
+    const btnId = btnMap[groupId];
+    if (btnId) document.getElementById(btnId).disabled = false;
+  }
+
+  /* ── Selección multi ── */
+  function toggleOpt(el) {
+    el.classList.toggle('selected');
+    // actualizar checkmark text
+    const ck = el.querySelector('.vj-opt-check');
+    if (ck) ck.textContent = el.classList.contains('selected') ? '✓' : '';
+  }
+
+  /* ── Guardar single y avanzar ── */
+  async function saveAndNext(field, groupId) {
+    const sel = document.querySelector(`#${groupId} .vj-opt.selected`);
+    if (!sel) return;
+    await postJson('/onboarding/viaje/guardar/', { [field]: sel.dataset.value });
+    nextScreen();
+  }
+
+  /* ── Guardar multi y avanzar ── */
+  async function saveMultiAndNext(field, groupId) {
+    const vals = [...document.querySelectorAll(`#${groupId} .vj-opt.selected`)]
+                   .map(o => o.dataset.value)
+                   .join(',');
+    await postJson('/onboarding/viaje/guardar/', { [field]: vals || 'ninguno' });
+    nextScreen();
+  }
+
+  /* ── Pantalla 5: pregunta ── */
+  function onQuestionInput() {
+    const val = document.getElementById('s5question').value.trim();
+    document.getElementById('s5btn').disabled = val.length < 5;
+  }
+
+  async function saveQuestionAndNext() {
+    userQuestion = document.getElementById('s5question').value.trim();
+    if (userQuestion.length < 5) return;
+    // guarda pregunta + default aesthetic
+    await postJson('/onboarding/viaje/guardar/', {
+      onboarding_question: userQuestion,
+      map_aesthetic: 'cosmos',
+    });
+    nextScreen();
+  }
+
+  /* ── Pantalla 7: datos natales ── */
+  async function saveBirth() {
+    const btn = document.getElementById('s7btn');
+    const errEl = document.getElementById('birthError');
+    errEl.textContent = '';
+
+    const birth_date  = document.getElementById('birth_date').value;
+    const birth_time  = document.getElementById('birth_time').value;
+    const birth_place = document.getElementById('birth_place').value.trim();
+    const latitude    = document.getElementById('birth_lat').value;
+    const longitude   = document.getElementById('birth_lng').value;
+
+    if (!birth_date || !birth_place) {
+      errEl.textContent = 'La fecha y la ciudad son obligatorias.';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="vj-spinner"></span>Calibrando…';
+
+    const fd = new FormData();
+    fd.append('csrfmiddlewaretoken', getCsrf());
+    fd.append('birth_date', birth_date);
+    fd.append('birth_time', birth_time);
+    fd.append('birth_place', birth_place);
+    fd.append('latitude', latitude);
+    fd.append('longitude', longitude);
+
+    try {
+      const res = await fetch('/onboarding/viaje/nacimiento/', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (data.ok) {
+        nextScreen();
+      } else {
+        errEl.textContent = data.error || 'Error al guardar. Intenta de nuevo.';
+      }
+    } catch {
+      errEl.textContent = 'Error de conexión. Intenta de nuevo.';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Calibrar mi mapa';
+    }
+  }
+
+  /* ── Nominatim autocomplete (pantalla 7) ── */
+  let acTimer = null;
+  const placeInput = document.getElementById('birth_place');
+  const placeAC    = document.getElementById('placeAC');
+  const placeCfm   = document.getElementById('placeConfirm');
+  const latField   = document.getElementById('birth_lat');
+  const lngField   = document.getElementById('birth_lng');
+
+  if (placeInput) {
+    placeInput.addEventListener('input', () => {
+      latField.value = '';
+      lngField.value = '';
+      placeCfm.classList.remove('visible');
+      clearTimeout(acTimer);
+      const q = placeInput.value.trim();
+      if (q.length < 3) { placeAC.classList.remove('open'); placeAC.innerHTML = ''; return; }
+      acTimer = setTimeout(() => searchPlace(q), 380);
+    });
+
+    document.addEventListener('click', e => {
+      if (!placeInput.contains(e.target) && !placeAC.contains(e.target)) {
+        placeAC.classList.remove('open');
+      }
+    });
+  }
+
+  async function searchPlace(q) {
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=5&addressdetails=1&accept-language=es`;
+      const res = await fetch(url, { headers: { 'Accept-Language': 'es' } });
+      const results = await res.json();
+      placeAC.innerHTML = '';
+      if (!results.length) { placeAC.classList.remove('open'); return; }
+      results.forEach(r => {
+        const item = document.createElement('div');
+        item.className = 'vj-ac-item';
+        item.textContent = r.display_name;
+        item.addEventListener('click', () => {
+          placeInput.value = r.display_name;
+          latField.value   = r.lat;
+          lngField.value   = r.lon;
+          placeCfm.classList.add('visible');
+          placeAC.classList.remove('open');
+          placeAC.innerHTML = '';
+        });
+        placeAC.appendChild(item);
+      });
+      placeAC.classList.add('open');
+    } catch {}
+  }
+</script>
+{% endblock %}

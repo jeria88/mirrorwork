@@ -1,6 +1,8 @@
+import json
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from django import forms
 from .models import User
 
@@ -50,7 +52,7 @@ def register_view(request):
             password=form.cleaned_data['password'],
         )
         login(request, user)
-        return redirect('onboarding_mapa')
+        return redirect('onboarding_viaje')
     return render(request, 'accounts/register.html', {'form': form})
 
 
@@ -252,3 +254,98 @@ def onboarding_tests(request):
         'completed': len(completed_slugs),
         'total': len(_ONBOARDING_SLUGS),
     })
+
+
+@login_required
+def onboarding_viaje(request):
+    try:
+        profile = request.user.profile
+    except Exception:
+        from .models import UserProfile
+        profile = UserProfile.objects.create(user=request.user)
+
+    if profile.onboarding_question and profile.map_aesthetic:
+        return redirect('dashboard')
+
+    return render(request, 'accounts/onboarding_viaje.html', {
+        'user_name': request.user.first_name,
+    })
+
+
+@login_required
+def onboarding_viaje_guardar(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'method not allowed'}, status=405)
+
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'error': 'invalid json'}, status=400)
+
+    try:
+        profile = request.user.profile
+    except Exception:
+        from .models import UserProfile
+        profile = UserProfile.objects.create(user=request.user)
+
+    allowed = {
+        'onboarding_entry_point', 'onboarding_noise_area',
+        'onboarding_prior_exploration', 'onboarding_question', 'map_aesthetic',
+    }
+    updated = [f for f in allowed if f in data]
+    for field in updated:
+        setattr(profile, field, data[field])
+    if updated:
+        profile.save(update_fields=updated)
+
+    return JsonResponse({'ok': True})
+
+
+@login_required
+def onboarding_viaje_nacimiento(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'method not allowed'}, status=405)
+
+    from birth.models import BirthProfile
+    from birth.views import _geocode, _get_timezone
+
+    birth_date = request.POST.get('birth_date', '').strip()
+    birth_time = request.POST.get('birth_time', '').strip() or None
+    birth_place = request.POST.get('birth_place', '').strip()
+
+    if not birth_date or not birth_place:
+        return JsonResponse({'error': 'La fecha y el lugar son obligatorios.'}, status=400)
+
+    lat_raw = request.POST.get('latitude', '').strip()
+    lng_raw = request.POST.get('longitude', '').strip()
+    if lat_raw and lng_raw:
+        try:
+            lat, lng = float(lat_raw), float(lng_raw)
+        except ValueError:
+            lat, lng = None, None
+    else:
+        lat, lng = _geocode(birth_place)
+
+    tz_str = _get_timezone(lat, lng) if lat else 'UTC'
+
+    try:
+        bp = request.user.birth_profile
+        bp.birth_date = birth_date
+        bp.birth_time = birth_time
+        bp.birth_place = birth_place
+        bp.latitude = lat
+        bp.longitude = lng
+        bp.timezone_str = tz_str
+        bp.save()
+    except Exception:
+        BirthProfile.objects.create(
+            user=request.user,
+            birth_date=birth_date,
+            birth_time=birth_time,
+            birth_place=birth_place,
+            latitude=lat,
+            longitude=lng,
+            timezone_str=tz_str,
+        )
+
+    return JsonResponse({'ok': True})

@@ -39,6 +39,11 @@ class UserProfile(models.Model):
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    onboarding_entry_point = models.CharField(max_length=80, blank=True)
+    onboarding_noise_area = models.CharField(max_length=80, blank=True)
+    onboarding_prior_exploration = models.CharField(max_length=300, blank=True)
+    onboarding_question = models.TextField(blank=True)
+
     def __str__(self):
         return f'{self.user.email} [{self.plan}]'
 
