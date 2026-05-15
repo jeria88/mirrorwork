@@ -67,22 +67,60 @@
   .gate-name-sm { font-size: 0.78rem; color: var(--text); }
   .col-sep { width: 1.5rem; }
 
-  /* Defined channels */
-  .channels-wrap { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2.5rem; }
-  .channel-chip {
-    font-size: 0.75rem; padding: 0.3rem 0.75rem; border-radius: 100px;
-    border: 1px solid rgba(124,109,250,0.25); color: var(--accent2);
-    background: rgba(124,109,250,0.06); line-height: 1.4;
+  /* Defined channels — expanded cards */
+  .channels-grid { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 2.5rem; }
+  .channel-card {
+    padding: 0.85rem 1.1rem;
+    background: rgba(124,109,250,0.04);
+    border: 1px solid rgba(124,109,250,0.18);
+    border-radius: 10px;
+    display: grid;
+    grid-template-columns: 70px 1fr;
+    gap: 0.65rem 1rem;
+    align-items: start;
   }
-  .channel-chip span { color: var(--dim); font-size: 0.68rem; }
+  .channel-card-gates {
+    font-family: var(--font-heading); font-size: 1rem; color: var(--accent2);
+    line-height: 1; padding-top: 0.1rem;
+  }
+  .channel-card-body { min-width: 0; }
+  .channel-card-name { font-size: 0.78rem; color: var(--text); font-weight: 400; margin-bottom: 0.25rem; line-height: 1.35; }
+  .channel-card-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.6; }
+  @media (max-width: 560px) {
+    .channel-card { grid-template-columns: 1fr; }
+  }
 
-  /* Centers */
-  .centers-wrap { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2.5rem; }
-  .center-badge {
-    font-size: 0.75rem; padding: 0.3rem 0.75rem; border-radius: 100px;
-    border: 1px solid rgba(124,109,250,0.3); color: var(--accent2);
-    background: rgba(124,109,250,0.08);
+  /* Centers — expanded items */
+  .centers-grid { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 2.5rem; }
+  .center-item {
+    padding: 0.85rem 1.1rem;
+    background: rgba(124,109,250,0.04);
+    border: 1px solid rgba(124,109,250,0.18);
+    border-radius: 10px;
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 0.5rem 1rem;
+    align-items: start;
   }
+  .center-item-name {
+    font-size: 0.78rem; font-weight: 600; color: var(--accent2);
+    padding-top: 0.1rem; line-height: 1.3;
+  }
+  .center-item-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.6; }
+  @media (max-width: 560px) {
+    .center-item { grid-template-columns: 1fr; }
+  }
+
+  /* Planets context note */
+  .planets-context {
+    font-size: 0.8rem; color: var(--muted); line-height: 1.65;
+    padding: 0.75rem 1rem;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+  }
+  .planets-context strong { color: var(--text); font-weight: 500; }
 
   /* Cross gates */
   .cross-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2.5rem; align-items: center; }
@@ -361,6 +399,11 @@
 
   <!-- Tabla planetaria completa -->
   <div class="section-title reveal">Activaciones planetarias</div>
+  <p class="planets-context reveal">
+    Cada planeta activa una <strong>puerta</strong> del I Ching (1–64) y una <strong>línea</strong> (1–6) dentro de ella.
+    La columna <strong>Personalidad</strong> son aspectos que reconocés en vos mismo/a — tu configuración consciente.
+    La columna <strong>Diseño</strong> son energías que otros suelen percibir en vos antes de que vos las reconozcas — tu configuración inconsciente, heredada de ~88 días antes de tu nacimiento.
+  </p>
   <div class="planets-wrap reveal">
     <table class="planets-table">
       <thead>
@@ -387,23 +430,47 @@
   </div>
 
   <!-- Canales definidos -->
-  {% if chart.defined_channels %}
+  {% if channels_with_descs %}
   <div class="section-title reveal">Canales definidos</div>
-  <div class="channels-wrap reveal">
+  <div class="channels-grid reveal">
+    {% for ch in channels_with_descs %}
+    <div class="channel-card">
+      <div class="channel-card-gates">{{ ch.gates }}</div>
+      <div class="channel-card-body">
+        <div class="channel-card-name">{{ ch.name }}</div>
+        {% if ch.desc %}<div class="channel-card-desc">{{ ch.desc }}</div>{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% elif chart.defined_channels %}
+  <div class="section-title reveal">Canales definidos</div>
+  <div class="channels-grid reveal">
     {% for ch in chart.defined_channels %}
-    <div class="channel-chip">
-      {{ ch.gates }}<br><span>{{ ch.name }}</span>
+    <div class="channel-card">
+      <div class="channel-card-gates">{{ ch.gates }}</div>
+      <div class="channel-card-body"><div class="channel-card-name">{{ ch.name }}</div></div>
     </div>
     {% endfor %}
   </div>
   {% endif %}
 
   <!-- Centros definidos -->
-  {% if chart.defined_centers %}
+  {% if centers_with_descs %}
   <div class="section-title reveal">Centros con energía definida</div>
-  <div class="centers-wrap reveal">
+  <div class="centers-grid reveal">
+    {% for c in centers_with_descs %}
+    <div class="center-item">
+      <div class="center-item-name">{{ c.name }}</div>
+      {% if c.desc %}<div class="center-item-desc">{{ c.desc }}</div>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% elif chart.defined_centers %}
+  <div class="section-title reveal">Centros con energía definida</div>
+  <div class="centers-grid reveal">
     {% for center in chart.defined_centers %}
-    <span class="center-badge">{{ center }}</span>
+    <div class="center-item"><div class="center-item-name">{{ center }}</div></div>
     {% endfor %}
   </div>
   {% endif %}

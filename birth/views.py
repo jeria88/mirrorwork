@@ -129,6 +129,64 @@ _HD_NOT_SELF_DESCS = {
     'Decepción': 'La decepción es la señal del Reflector de que está en un entorno que no lo nutre, o tomando decisiones sin haber esperado el ciclo lunar completo. Es la brújula que indica que algo en el campo externo o en el ritmo interno está fuera de alineación.',
 }
 
+_HD_CENTER_DEFINED_DESCS = {
+    'Cabeza':      'Centro de presión mental. Cuando está definido generás preguntas e inspiración de manera constante — no para resolverlas vos, sino para activar el pensamiento en quienes te rodean. Esa presión es real y confiable, pero no toda pregunta necesita respuesta.',
+    'Ajna':        'Centro conceptual. Tu forma de procesar y organizar información es consistente — tenés perspectivas propias que no cambian fácilmente. Podés ser una fuente confiable de conceptos y análisis para los demás, aunque a veces eso se vuelve rigidez.',
+    'Garganta':    'Centro de manifestación y comunicación. Tenés voz propia y capacidad de hacer cosas en el mundo de manera constante. Lo que decís tiene peso natural — no necesitás forzar para ser escuchado/a.',
+    'Identidad':   'Centro del yo y la dirección. Tenés un sentido de quién sos relativamente estable, independiente del entorno. Tu dirección en la vida no depende de encontrar a alguien que te "complete" — viene de adentro.',
+    'Corazón':     'Centro de la voluntad y el ego. Tu fuerza de voluntad es consistente — cuando decís que vas a hacer algo y realmente querés hacerlo, tenés la energía para sostenerlo. La clave es comprometerte solo con lo que genuinamente deseás.',
+    'Plexo Solar': 'Centro emocional activo. Tenés un rango emocional amplio y consistente. La claridad no llega en el pico ni en el valle — emerge en la meseta, con el tiempo. Aprender a esperar la ola antes de decidir es el trabajo central.',
+    'Sacral':      'Motor de energía vital. Tu energía para el trabajo y la vida es sostenida y renovable — cuando la usás en lo que realmente responde, no se agota. La señal del cuerpo (el sí o el no espontáneo) es tu brújula más confiable.',
+    'Bazo':        'Centro del sistema inmune e intuitivo. Tenés señales espontáneas y consistentes sobre lo que es saludable, seguro y correcto en el momento presente. Esa voz habla una sola vez — si la ignorás habitualmente, el cuerpo eventualmente lo muestra.',
+    'Raíz':        'Centro de presión adrenal. Tenés un motor constante de urgencia e impulso para actuar. Esa presión no desaparece — se trata de aprender a usarla conscientemente en lugar de dejar que te lleve.',
+}
+
+_HD_CHANNEL_DESCS = {
+    '47-64': 'Abstracción: la mente procesa experiencia pasada hasta que la confusión se convierte en comprensión. El ciclo lleva tiempo — la claridad no se puede forzar.',
+    '24-61': 'Conocimiento: inspiración interior que busca convertirse en saber articulado. Podés recibir "saber que sabés" algo antes de poder explicarlo.',
+    '4-63':  'Lógica: la duda como motor. Encontrás soluciones verificables a preguntas concretas — pero la certeza completa nunca llega, y eso es lo que mantiene la búsqueda.',
+    '17-62': 'Aceptación: opiniones bien formadas que necesitan ser probadas antes de compartidas. Tu pensamiento es sistemático — cuando lo expresás, aportás estructura.',
+    '23-43': 'Estructuración: percepción propia que busca el lenguaje correcto para ser transmitida. Podés tener insights genuinos que solo se entienden cuando encontrás las palabras exactas.',
+    '11-56': 'Curiosidad: ideas que necesitan convertirse en historias para generar estimulación en otros. Tu mente conecta conceptos de formas que otros no ven.',
+    '7-31':  'Alfa: liderazgo por reconocimiento del grupo. Tu influencia hacia la dirección colectiva es genuina — pero funciona cuando te eligen, no cuando te imponés.',
+    '1-8':   'Inspiración: contribución creativa que hace una diferencia siendo auténtico/a. No necesitás un método — tu expresión natural ya es el aporte.',
+    '13-33': 'Testigo: memoria del colectivo. Tenés la capacidad de retirarte, procesar la experiencia vivida, y luego transmitirla de manera que resuene para muchos.',
+    '10-20': 'Despertador: tu comportamiento en sí mismo enseña. La coherencia entre lo que valorás y lo que hacés tiene un impacto que no requiere palabras.',
+    '20-34': 'Carisma: energía motriz conectada directamente a la acción y la voz. Podés estar completamente presente y actuar con una potencia que otros perciben como magnetismo.',
+    '21-45': 'Dinero: gestión de recursos y dirección de la comunidad. Tenés capacidad natural para saber qué hacer con lo material y cómo sostener a un grupo.',
+    '16-48': 'Longitud de onda: talento que emerge con práctica profunda y sostenida. La destreza genuina lleva tiempo — el proceso de aprendizaje es parte del don.',
+    '12-22': 'Comunicador abierto: expresión emocional selectiva y con timing. Sabés elegir cuándo y cómo hablar — y cuando lo hacés desde ese lugar, tiene gracia y resonancia.',
+    '35-36': 'Transitoridad: búsqueda de experiencia como forma de aprendizaje. La crisis y el cambio son catalizadores — el aburrimiento en la rutina es real y tiene un propósito.',
+    '2-14':  'Dirección del yo: cuando el camino está alineado con tu propósito, la abundancia fluye naturalmente. La clave es confiar en la dirección que emerge desde adentro.',
+    '5-15':  'Ritmo: amor por los patrones naturales y los ciclos de la vida. Tenés la capacidad de adaptarte y fluir con los ritmos del entorno de una forma que otros encuentran armónica.',
+    '29-46': 'Descubrimiento: el compromiso total con la experiencia del cuerpo lleva a encuentros significativos. El sí genuino del cuerpo abre puertas que el pensamiento no puede anticipar.',
+    '25-51': 'Iniciador: espíritu que emerge del shock y la conmoción. La valentía no es la ausencia de miedo — es seguir adelante a través del impacto porque hay algo que vale la pena.',
+    '26-44': 'Transmitor: memoria instintiva del pasado para anticipar lo que viene. Tenés una capacidad magnética para transmitir recursos, mensajes y valor de maneras que la gente recuerda.',
+    '37-40': 'Comunidad: el trato y el acuerdo mutuo. Ofrecés sostén emocional genuino a cambio de recursos y trabajo — cuando el intercambio es claro, la comunidad funciona.',
+    '6-59':  'Intimidad: apertura a la fusión y la profundidad relacional. Tu energía puede disolver barreras entre personas — en lo positivo, crea intimidad real; en lo inconsciente, puede crear dependencia.',
+    '19-49': 'Síntesis: sensibilidad extrema a las necesidades no satisfechas. Cuando los principios son violados o las necesidades ignoradas, podés impulsar cambios radicales.',
+    '30-41': 'Reconocimiento: deseo ardiente de experiencia nueva. Tenés una tensión viva entre el sueño de lo que podría ser y la realidad de lo que es — y esa tensión crea momentum.',
+    '39-55': 'Fluctuación emocional: espíritu que provoca para despertar profundidad en el otro. La melancolía y la búsqueda de significado son parte del diseño, no algo a eliminar.',
+    '27-50': 'Preservador: cuidado de los demás y de los valores que sostienen la vida colectiva. Tu energía se orienta naturalmente hacia proteger lo que tiene valor para el grupo.',
+    '34-57': 'Potencia: intuición corporal en tiempo real que mueve hacia la acción inmediata. Cuando confiás en esa señal espontánea del cuerpo, tu efectividad es extraordinaria.',
+    '3-60':  'Mutación: el cambio emerge desde adentro, de manera inesperada, transformando el statu quo. No podés forzarlo — pero cuando llega, es genuino y profundo.',
+    '9-52':  'Concentración: enfoque sostenido en el detalle y la paciencia para esperar el momento correcto. Tu capacidad de mantener la atención en algo específico es un recurso real.',
+    '42-53': 'Madurar: energía para iniciar ciclos que se desarrollan y completan. Necesitás cierres — los proyectos que quedan abiertos indefinidamente drenan tu energía de maneras invisibles.',
+    '18-58': 'Juicio: entusiasmo por identificar lo que puede mejorarse. No es crítica vacía — es la alegría genuina de ver el potencial que hay en perfeccionar algo que vale la pena.',
+    '28-38': 'Lucha: sentido de la vida que emerge cuando hay algo que vale la pena defender. La lucha no es el problema — es la señal de que encontraste algo con significado real.',
+    '32-54': 'Transformación: ambición que se mueve hacia la trascendencia del colectivo. Tu impulso de ascender no es para vos solo — está al servicio de la evolución del grupo.',
+}
+
+
+def _channel_key(gates_str):
+    try:
+        parts = gates_str.replace('–', '-').split('-')
+        nums = [int(p.strip()) for p in parts]
+        return f'{min(nums)}-{max(nums)}'
+    except Exception:
+        return gates_str
+
+
 _HD_SIGNATURE_DESCS = {
     'Satisfacción': 'La satisfacción no siempre es euforia — puede ser el simple placer de un trabajo que vale la pena, la sensación de que la energía fue bien usada. Es la confirmación interior de que el cuerpo respondió sí, y el compromiso honró esa respuesta.',
     'Paz y satisfacción': 'La paz llega cuando el movimiento fue claro e informado. La satisfacción cuando la energía fue bien respondida y usada. Juntas, señalan que el diseño está siendo vivido — no la tranquilidad de no hacer nada, sino la de actuar desde el lugar correcto.',
@@ -529,10 +587,20 @@ def hd_detail(request, pk):
         'not_self':   _HD_NOT_SELF_DESCS.get(chart.get('not_self_theme', ''), ''),
         'signature':  _HD_SIGNATURE_DESCS.get(chart.get('signature', ''), ''),
     }
+    channels_with_descs = [
+        {**ch, 'desc': _HD_CHANNEL_DESCS.get(_channel_key(ch.get('gates', '')), '')}
+        for ch in chart.get('defined_channels', [])
+    ]
+    centers_with_descs = [
+        {'name': c, 'desc': _HD_CENTER_DEFINED_DESCS.get(c, '')}
+        for c in chart.get('defined_centers', [])
+    ]
     return render(request, 'birth/hd_detail.html', {
         'report': report, 'bp': bp,
         'poll_url': f'/nacimiento/reporte/{report.pk}/estado/',
-        'hd_descs': hd_descs,
+        'hd_descs':            hd_descs,
+        'channels_with_descs': channels_with_descs,
+        'centers_with_descs':  centers_with_descs,
     })
 
 
