@@ -723,7 +723,7 @@ def _generate_hd_async(report_pk, birth_place):
     try:
         report = BirthReport.objects.get(pk=report_pk)
         prompt = _build_hd_prompt(report.chart_data, birth_place)
-        text = _deepseek_call(api_key, _SYSTEM_ESPEJO, prompt)
+        text = _deepseek_call(api_key, _SYSTEM_ESPEJO, prompt, max_tokens=2500)
         report.interpretation = text
         report.status = BirthReport.STATUS_COMPLETE
         report.save(update_fields=['interpretation', 'status', 'updated_at'])

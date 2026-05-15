@@ -57,7 +57,7 @@
       background: var(--bg);
       color: var(--text);
       font-family: var(--font-ui);
-      font-weight: 300;
+      font-weight: 400;
       line-height: 1.6;
       min-height: 100vh;
       overflow-x: hidden;
@@ -144,18 +144,19 @@
     /* ── UTILIDADES GLASS ───────────────────────────────────────────── */
     .glass {
       background: var(--surface);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
       border: 1px solid var(--border);
       border-radius: 16px;
-      transition: background 0.25s, border-color 0.25s, transform 0.35s cubic-bezier(0.16,1,0.3,1);
+      transition: background 0.3s, border-color 0.3s, transform 0.4s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s;
     }
     .glass:hover {
       background: var(--surface2);
       border-color: var(--border2);
     }
     .glass-lift:hover {
-      transform: translateY(-3px);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.45);
     }
 
     /* ── TIPOGRAFÍA ─────────────────────────────────────────────────── */
@@ -226,13 +227,17 @@
 
     /* ── CARD (glass) ────────────────────────────────────────────────── */
     .card {
-      background: var(--surface);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 1.5rem;
-      transition: background 0.2s, border-color 0.2s;
+      transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
+    }
+    .card:hover {
+      background: var(--surface2);
+      border-color: var(--border2);
     }
 
     /* ── CONTENEDOR ──────────────────────────────────────────────────── */
@@ -297,7 +302,7 @@
       border-radius: 10px;
       font-size: 0.9rem;
       font-family: var(--font-ui);
-      font-weight: 300;
+      font-weight: 400;
       outline: none;
       transition: border-color 0.2s;
     }
@@ -328,9 +333,9 @@
     /* ── SCROLL REVEAL ───────────────────────────────────────────────── */
     .reveal {
       opacity: 0;
-      transform: translateY(24px);
-      transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1),
-                  transform 0.8s cubic-bezier(0.16,1,0.3,1);
+      transform: translateY(32px);
+      transition: opacity 1.4s cubic-bezier(0.16,1,0.3,1),
+                  transform 1.4s cubic-bezier(0.16,1,0.3,1);
     }
     .reveal.visible { opacity: 1; transform: none; }
 
@@ -571,27 +576,57 @@
     canvas.style.display = 'none'; return;
   }
   const ctx = canvas.getContext('2d', { alpha: false });
-  let w, h, paused = false;
-  const stars = Array.from({length: 480}, () => ({
-    x: Math.random(), y: Math.random(),
-    s: Math.random() < 0.88 ? 1 : 1.5,
-    baseAlpha: 0.07 + Math.random() * 0.42,
+  let w, h, paused = false, last = 0;
+  let rotAngle = 0;
+  let mx = 0.5, my = 0.5, tmx = 0.5, tmy = 0.5;
+
+  // Stars stored in normalized space [-1.1, 1.1]; rotation applied each frame
+  const stars = Array.from({length: 440}, () => ({
+    nx: (Math.random() - 0.5) * 2.2,
+    ny: (Math.random() - 0.5) * 2.2,
+    z: 0.05 + Math.random() * 0.95,
+    size: Math.random() < 0.88 ? 1 : 1.5,
+    baseAlpha: 0.07 + Math.random() * 0.44,
     phase: Math.random() * Math.PI * 2,
-    speed: 0.0003 + Math.random() * 0.0007
+    twinkle: 0.0003 + Math.random() * 0.0007,
   }));
-  function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
+
+  function resize() { w = canvas.width = innerWidth; h = canvas.height = innerHeight; }
   window.addEventListener('resize', resize); resize();
-  document.addEventListener('visibilitychange', () => { paused = document.hidden; if (!paused) loop(performance.now()); });
+
+  window.addEventListener('mousemove', e => { tmx = e.clientX / innerWidth; tmy = e.clientY / innerHeight; });
+  document.addEventListener('visibilitychange', () => {
+    paused = document.hidden;
+    if (!paused) { last = performance.now(); loop(performance.now()); }
+  });
+
   function loop(now) {
     if (paused) return;
     requestAnimationFrame(loop);
-    ctx.fillStyle = '#000000'; ctx.fillRect(0, 0, w, h);
-    for (const star of stars) {
-      const a = star.baseAlpha + Math.sin(now * star.speed + star.phase) * 0.22;
-      if (a > 0.04) {
-        ctx.fillStyle = `rgba(255,255,255,${Math.min(1, Math.max(0, a))})`;
-        ctx.fillRect(star.x * w, star.y * h, star.s, star.s);
-      }
+    const dt = Math.min(now - last, 50); last = now;
+
+    mx += (tmx - mx) * 0.05;
+    my += (tmy - my) * 0.05;
+    rotAngle += dt * 0.0000025;  // ~8.6°/min — gentle sky drift
+
+    const hw = w * 0.5, hh = h * 0.5;
+    const cosR = Math.cos(rotAngle), sinR = Math.sin(rotAngle);
+    const pdx = (mx - 0.5) * 70;
+    const pdy = (my - 0.5) * 70;
+
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, w, h);
+
+    for (const s of stars) {
+      const rx = s.nx * cosR - s.ny * sinR;
+      const ry = s.nx * sinR + s.ny * cosR;
+      const px = hw + rx * hw + pdx * (1 - s.z);
+      const py = hh + ry * hh + pdy * (1 - s.z);
+      if (px < -1 || px > w + 1 || py < -1 || py > h + 1) continue;
+      const a = Math.min(1, s.baseAlpha + Math.sin(now * s.twinkle + s.phase) * 0.2);
+      if (a < 0.04) continue;
+      ctx.fillStyle = `rgba(255,255,255,${a})`;
+      ctx.fillRect(px, py, s.size, s.size);
     }
   }
   loop(performance.now());

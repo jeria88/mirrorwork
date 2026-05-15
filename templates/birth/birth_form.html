@@ -175,6 +175,12 @@
   .badge-ok { background: rgba(78,205,196,0.12); color: var(--accent); }
   .badge-working { background: rgba(244,160,53,0.12); color: var(--transicion); }
   .badge-soon { background: rgba(255,255,255,0.05); color: var(--dim); }
+  .rc-locked-msg {
+    font-size: 0.72rem;
+    color: var(--dim);
+    margin-top: 0.5rem;
+    line-height: 1.4;
+  }
 
   .edit-toggle {
     display: inline-block;
@@ -268,166 +274,10 @@
       <p>{{ bp.birth_place }} <small>lugar</small></p>
     </div>
 
-    <!-- Reportes -->
-    <div class="reports-section reveal">
-      <div class="section-title">Reportes disponibles</div>
-      <div class="report-cards">
-
-        <div class="report-card">
-          <div class="rc-icon">✦</div>
-          <div class="rc-name">Carta Astral</div>
-          <div class="rc-desc">Posiciones planetarias al momento de tu nacimiento.</div>
-          <div class="rc-action">
-            {% if astral_report %}
-              {% if astral_report.status == 'complete' %}
-                <span class="badge badge-ok">Generado</span>
-                <div style="margin-top:0.6rem;display:flex;gap:0.5rem">
-                  <a href="{% url 'birth:astral_detail' astral_report.pk %}" class="btn-gen" style="text-decoration:none;text-align:center">Ver →</a>
-                </div>
-                <form method="post" action="{% url 'birth:astral_generate' %}" style="margin-top:0.5rem">
-                  {% csrf_token %}
-                  <button type="submit" class="btn-gen-outline">Regenerar</button>
-                </form>
-              {% elif astral_report.status == 'processing' %}
-                <span class="badge badge-working">Procesando…</span>
-                <div style="margin-top:0.6rem">
-                  <a href="{% url 'birth:astral_detail' astral_report.pk %}" style="font-size:0.78rem;color:var(--accent)">Ver progreso →</a>
-                </div>
-              {% else %}
-                <form method="post" action="{% url 'birth:astral_generate' %}">
-                  {% csrf_token %}
-                  <button type="submit" class="btn-gen">Generar</button>
-                </form>
-              {% endif %}
-            {% else %}
-              <form method="post" action="{% url 'birth:astral_generate' %}">
-                {% csrf_token %}
-                <button type="submit" class="btn-gen">Generar</button>
-              </form>
-            {% endif %}
-          </div>
-        </div>
-
-        <div class="report-card">
-          <div class="rc-icon">⊕</div>
-          <div class="rc-name">Saju</div>
-          <div class="rc-desc">Los cuatro pilares del destino según la astrología oriental.</div>
-          <div class="rc-action">
-            {% if saju_report %}
-              {% if saju_report.status == 'complete' %}
-                <span class="badge badge-ok">Generado</span>
-                <div style="margin-top:0.6rem;display:flex;gap:0.5rem">
-                  <a href="{% url 'birth:saju_detail' saju_report.pk %}" class="btn-gen" style="text-decoration:none;text-align:center">Ver →</a>
-                </div>
-                <form method="post" action="{% url 'birth:saju_generate' %}" style="margin-top:0.5rem">
-                  {% csrf_token %}
-                  <button type="submit" class="btn-gen-outline">Regenerar</button>
-                </form>
-              {% elif saju_report.status == 'processing' %}
-                <span class="badge badge-working">Procesando…</span>
-                <div style="margin-top:0.6rem">
-                  <a href="{% url 'birth:saju_detail' saju_report.pk %}" style="font-size:0.78rem;color:var(--accent)">Ver progreso →</a>
-                </div>
-              {% else %}
-                <form method="post" action="{% url 'birth:saju_generate' %}">
-                  {% csrf_token %}
-                  <button type="submit" class="btn-gen">Generar</button>
-                </form>
-              {% endif %}
-            {% else %}
-              <form method="post" action="{% url 'birth:saju_generate' %}">
-                {% csrf_token %}
-                <button type="submit" class="btn-gen">Generar</button>
-              </form>
-            {% endif %}
-          </div>
-        </div>
-
-        <div class="report-card">
-          <div class="rc-icon">◈</div>
-          <div class="rc-name">Diseño Humano</div>
-          <div class="rc-desc">Tu tipo, estrategia y autoridad. Cómo tomas decisiones correctas.</div>
-          <div class="rc-action">
-            {% if hd_report %}
-              {% if hd_report.status == 'complete' %}
-                <span class="badge badge-ok">Generado</span>
-                <div style="margin-top:0.6rem;display:flex;gap:0.5rem">
-                  <a href="{% url 'birth:hd_detail' hd_report.pk %}" class="btn-gen" style="text-decoration:none;text-align:center">Ver →</a>
-                </div>
-                <form method="post" action="{% url 'birth:hd_generate' %}" style="margin-top:0.5rem">
-                  {% csrf_token %}
-                  <button type="submit" class="btn-gen-outline">Regenerar</button>
-                </form>
-              {% elif hd_report.status == 'processing' %}
-                <span class="badge badge-working">Procesando…</span>
-                <div style="margin-top:0.6rem">
-                  <a href="{% url 'birth:hd_detail' hd_report.pk %}" style="font-size:0.78rem;color:var(--accent)">Ver progreso →</a>
-                </div>
-              {% else %}
-                <form method="post" action="{% url 'birth:hd_generate' %}">
-                  {% csrf_token %}
-                  <button type="submit" class="btn-gen">Generar</button>
-                </form>
-              {% endif %}
-            {% else %}
-              <form method="post" action="{% url 'birth:hd_generate' %}">
-                {% csrf_token %}
-                <button type="submit" class="btn-gen">Generar</button>
-              </form>
-            {% endif %}
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- Editar datos -->
-    <details style="margin-top:2.5rem">
-      <summary class="edit-toggle">Actualizar datos de nacimiento</summary>
-      <div class="edit-form">
-        <form method="post" class="birth-form">
-          {% csrf_token %}
-          <input type="hidden" name="latitude" class="f-lat" value="{{ bp.latitude|default:'' }}">
-          <input type="hidden" name="longitude" class="f-lng" value="{{ bp.longitude|default:'' }}">
-          <div class="field-group">
-            <div class="field">
-              <label>Lugar de nacimiento</label>
-              <div class="place-wrap">
-                <input type="text" name="birth_place" class="f-place" value="{{ bp.birth_place }}" placeholder="Escribe tu ciudad…" autocomplete="off" required>
-                <div class="place-dropdown"></div>
-              </div>
-              <span class="place-confirmed {% if bp.latitude %}visible{% endif %}">
-                ✓ Ubicación confirmada{% if bp.latitude %} ({{ bp.latitude|floatformat:2 }}°, {{ bp.longitude|floatformat:2 }}°){% endif %}
-              </span>
-            </div>
-            <div class="row-2">
-              <div class="field">
-                <label>Fecha</label>
-                <input type="date" name="birth_date" value="{{ bp.birth_date|date:'Y-m-d' }}" required>
-              </div>
-              <div class="field">
-                <label>Hora</label>
-                <input type="time" name="birth_time" value="{% if bp.birth_time %}{{ bp.birth_time|time:'H:i' }}{% endif %}">
-                <span class="note">Opcional</span>
-              </div>
-            </div>
-            <div class="field">
-              <label>Género asignado al nacer</label>
-              <div class="gender-row">
-                <label class="gender-opt"><input type="radio" name="gender" value="M" {% if bp.gender == 'M' %}checked{% endif %}> Masculino</label>
-                <label class="gender-opt"><input type="radio" name="gender" value="F" {% if bp.gender == 'F' %}checked{% endif %}> Femenino</label>
-              </div>
-            </div>
-          </div>
-          <button type="submit" class="btn-save">Actualizar</button>
-        </form>
-      </div>
-    </details>
-
   {% else %}
 
     <!-- Primer ingreso -->
-    <form method="post" class="birth-form">
+    <form method="post" class="birth-form reveal">
       {% csrf_token %}
       <input type="hidden" name="latitude" class="f-lat" value="">
       <input type="hidden" name="longitude" class="f-lng" value="">
@@ -463,6 +313,173 @@
       <button type="submit" class="btn-save">Guardar y continuar</button>
     </form>
 
+  {% endif %}
+
+  <!-- Lecturas — siempre visibles -->
+  <div class="reports-section reveal">
+    <div class="section-title">Lecturas disponibles</div>
+    <div class="report-cards">
+
+      <div class="report-card">
+        <div class="rc-icon">✦</div>
+        <div class="rc-name">Carta Astral</div>
+        <div class="rc-desc">Posiciones planetarias al momento de tu nacimiento.</div>
+        <div class="rc-action">
+          {% if not bp %}
+            <span class="badge badge-soon">Sin explorar</span>
+            <p class="rc-locked-msg">Ingresa tus datos para activar este módulo</p>
+          {% elif astral_report %}
+            {% if astral_report.status == 'complete' %}
+              <span class="badge badge-ok">Generado</span>
+              <div style="margin-top:0.6rem;display:flex;gap:0.5rem">
+                <a href="{% url 'birth:astral_detail' astral_report.pk %}" class="btn-gen" style="text-decoration:none;text-align:center">Ver →</a>
+              </div>
+              <form method="post" action="{% url 'birth:astral_generate' %}" style="margin-top:0.5rem">
+                {% csrf_token %}
+                <button type="submit" class="btn-gen-outline">Regenerar</button>
+              </form>
+            {% elif astral_report.status == 'processing' %}
+              <span class="badge badge-working">Procesando…</span>
+              <div style="margin-top:0.6rem">
+                <a href="{% url 'birth:astral_detail' astral_report.pk %}" style="font-size:0.78rem;color:var(--accent)">Ver progreso →</a>
+              </div>
+            {% else %}
+              <form method="post" action="{% url 'birth:astral_generate' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn-gen">Generar</button>
+              </form>
+            {% endif %}
+          {% else %}
+            <form method="post" action="{% url 'birth:astral_generate' %}">
+              {% csrf_token %}
+              <button type="submit" class="btn-gen">Generar</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="report-card">
+        <div class="rc-icon">⊕</div>
+        <div class="rc-name">Saju</div>
+        <div class="rc-desc">Los cuatro pilares del destino según la astrología oriental.</div>
+        <div class="rc-action">
+          {% if not bp %}
+            <span class="badge badge-soon">Sin explorar</span>
+            <p class="rc-locked-msg">Ingresa tus datos para activar este módulo</p>
+          {% elif saju_report %}
+            {% if saju_report.status == 'complete' %}
+              <span class="badge badge-ok">Generado</span>
+              <div style="margin-top:0.6rem;display:flex;gap:0.5rem">
+                <a href="{% url 'birth:saju_detail' saju_report.pk %}" class="btn-gen" style="text-decoration:none;text-align:center">Ver →</a>
+              </div>
+              <form method="post" action="{% url 'birth:saju_generate' %}" style="margin-top:0.5rem">
+                {% csrf_token %}
+                <button type="submit" class="btn-gen-outline">Regenerar</button>
+              </form>
+            {% elif saju_report.status == 'processing' %}
+              <span class="badge badge-working">Procesando…</span>
+              <div style="margin-top:0.6rem">
+                <a href="{% url 'birth:saju_detail' saju_report.pk %}" style="font-size:0.78rem;color:var(--accent)">Ver progreso →</a>
+              </div>
+            {% else %}
+              <form method="post" action="{% url 'birth:saju_generate' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn-gen">Generar</button>
+              </form>
+            {% endif %}
+          {% else %}
+            <form method="post" action="{% url 'birth:saju_generate' %}">
+              {% csrf_token %}
+              <button type="submit" class="btn-gen">Generar</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="report-card">
+        <div class="rc-icon">◈</div>
+        <div class="rc-name">Diseño Humano</div>
+        <div class="rc-desc">Tu tipo, estrategia y autoridad. Cómo tomas decisiones correctas.</div>
+        <div class="rc-action">
+          {% if not bp %}
+            <span class="badge badge-soon">Sin explorar</span>
+            <p class="rc-locked-msg">Ingresa tus datos para activar este módulo</p>
+          {% elif hd_report %}
+            {% if hd_report.status == 'complete' %}
+              <span class="badge badge-ok">Generado</span>
+              <div style="margin-top:0.6rem;display:flex;gap:0.5rem">
+                <a href="{% url 'birth:hd_detail' hd_report.pk %}" class="btn-gen" style="text-decoration:none;text-align:center">Ver →</a>
+              </div>
+              <form method="post" action="{% url 'birth:hd_generate' %}" style="margin-top:0.5rem">
+                {% csrf_token %}
+                <button type="submit" class="btn-gen-outline">Regenerar</button>
+              </form>
+            {% elif hd_report.status == 'processing' %}
+              <span class="badge badge-working">Procesando…</span>
+              <div style="margin-top:0.6rem">
+                <a href="{% url 'birth:hd_detail' hd_report.pk %}" style="font-size:0.78rem;color:var(--accent)">Ver progreso →</a>
+              </div>
+            {% else %}
+              <form method="post" action="{% url 'birth:hd_generate' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn-gen">Generar</button>
+              </form>
+            {% endif %}
+          {% else %}
+            <form method="post" action="{% url 'birth:hd_generate' %}">
+              {% csrf_token %}
+              <button type="submit" class="btn-gen">Generar</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Editar datos (solo si ya hay datos) -->
+  {% if bp %}
+  <details style="margin-top:2.5rem">
+    <summary class="edit-toggle">Actualizar datos de nacimiento</summary>
+    <div class="edit-form">
+      <form method="post" class="birth-form">
+        {% csrf_token %}
+        <input type="hidden" name="latitude" class="f-lat" value="{{ bp.latitude|default:'' }}">
+        <input type="hidden" name="longitude" class="f-lng" value="{{ bp.longitude|default:'' }}">
+        <div class="field-group">
+          <div class="field">
+            <label>Lugar de nacimiento</label>
+            <div class="place-wrap">
+              <input type="text" name="birth_place" class="f-place" value="{{ bp.birth_place }}" placeholder="Escribe tu ciudad…" autocomplete="off" required>
+              <div class="place-dropdown"></div>
+            </div>
+            <span class="place-confirmed {% if bp.latitude %}visible{% endif %}">
+              ✓ Ubicación confirmada{% if bp.latitude %} ({{ bp.latitude|floatformat:2 }}°, {{ bp.longitude|floatformat:2 }}°){% endif %}
+            </span>
+          </div>
+          <div class="row-2">
+            <div class="field">
+              <label>Fecha</label>
+              <input type="date" name="birth_date" value="{{ bp.birth_date|date:'Y-m-d' }}" required>
+            </div>
+            <div class="field">
+              <label>Hora</label>
+              <input type="time" name="birth_time" value="{% if bp.birth_time %}{{ bp.birth_time|time:'H:i' }}{% endif %}">
+              <span class="note">Opcional</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Género asignado al nacer</label>
+            <div class="gender-row">
+              <label class="gender-opt"><input type="radio" name="gender" value="M" {% if bp.gender == 'M' %}checked{% endif %}> Masculino</label>
+              <label class="gender-opt"><input type="radio" name="gender" value="F" {% if bp.gender == 'F' %}checked{% endif %}> Femenino</label>
+            </div>
+          </div>
+        </div>
+        <button type="submit" class="btn-save">Actualizar</button>
+      </form>
+    </div>
+  </details>
   {% endif %}
 
 </div>
