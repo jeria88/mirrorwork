@@ -17,13 +17,13 @@
       --bg:       #000000;
 
       /* Surfaces: glassmorphism sobre el fondo negro */
-      --surface:  rgba(255,255,255,0.03);
-      --surface2: rgba(255,255,255,0.06);
-      --surface3: rgba(255,255,255,0.10);
+      --surface:  rgba(255,255,255,0.055);
+      --surface2: rgba(255,255,255,0.10);
+      --surface3: rgba(255,255,255,0.15);
 
       /* Bordes */
-      --border:   rgba(255,255,255,0.08);
-      --border2:  rgba(255,255,255,0.15);
+      --border:   rgba(255,255,255,0.13);
+      --border2:  rgba(255,255,255,0.24);
 
       /* Texto */
       --text:     #FFFFFF;
@@ -143,20 +143,21 @@
 
     /* ── UTILIDADES GLASS ───────────────────────────────────────────── */
     .glass {
-      background: var(--surface);
+      background: linear-gradient(160deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.03) 100%);
       backdrop-filter: blur(28px);
       -webkit-backdrop-filter: blur(28px);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      transition: background 0.3s, border-color 0.3s, transform 0.4s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s;
+      border-radius: 20px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 4px 24px rgba(0,0,0,0.28);
+      transition: background 0.35s, border-color 0.35s, transform 0.45s cubic-bezier(0.16,1,0.3,1), box-shadow 0.45s cubic-bezier(0.16,1,0.3,1);
     }
     .glass:hover {
-      background: var(--surface2);
+      background: linear-gradient(160deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.05) 100%);
       border-color: var(--border2);
     }
     .glass-lift:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+      transform: translateY(-5px);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 24px 60px rgba(0,0,0,0.5), 0 0 40px rgba(0,0,0,0.25);
     }
 
     /* ── TIPOGRAFÍA ─────────────────────────────────────────────────── */
@@ -225,19 +226,25 @@
     }
     .btn-accent:hover { opacity: 0.85; }
 
-    /* ── CARD (glass) ────────────────────────────────────────────────── */
+    /* ── CARD (glass luxury) ─────────────────────────────────────────── */
     .card {
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      background: linear-gradient(160deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.025) 100%);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 20px;
       padding: 1.5rem;
-      transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 6px 28px rgba(0,0,0,0.28);
+      transition: transform 0.45s cubic-bezier(0.16,1,0.3,1),
+                  box-shadow 0.45s cubic-bezier(0.16,1,0.3,1),
+                  border-color 0.3s;
     }
     .card:hover {
-      background: var(--surface2);
+      transform: translateY(-4px);
       border-color: var(--border2);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.2),
+                  0 24px 60px rgba(0,0,0,0.45),
+                  0 0 0 1px rgba(255,255,255,0.06);
     }
 
     /* ── CONTENEDOR ──────────────────────────────────────────────────── */
@@ -333,11 +340,18 @@
     /* ── SCROLL REVEAL ───────────────────────────────────────────────── */
     .reveal {
       opacity: 0;
-      transform: translateY(32px);
-      transition: opacity 1.4s cubic-bezier(0.16,1,0.3,1),
-                  transform 1.4s cubic-bezier(0.16,1,0.3,1);
+      transform: translateY(36px);
+      transition: opacity 1.9s cubic-bezier(0.16,1,0.3,1),
+                  transform 1.9s cubic-bezier(0.16,1,0.3,1);
     }
-    .reveal.visible { opacity: 1; transform: none; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-fast {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 1.2s cubic-bezier(0.16,1,0.3,1),
+                  transform 1.2s cubic-bezier(0.16,1,0.3,1);
+    }
+    .reveal-fast.visible { opacity: 1; transform: translateY(0); }
 
     /* ── RESPONSIVE ──────────────────────────────────────────────────── */
     @media (max-width: 640px) {
@@ -633,14 +647,31 @@
 })();
 
 // ── SCROLL REVEAL ────────────────────────────────────────────────────
-if ('IntersectionObserver' in window) {
-  const obs = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
-  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
-  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
-} else {
-  document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
-}
+(function() {
+  const SEL = '.reveal, .reveal-fast';
+  const els = document.querySelectorAll(SEL);
+
+  // Stagger siblings dentro del mismo padre (respeta delays inline ya definidos)
+  els.forEach(el => {
+    if (el.style.transitionDelay) return;
+    const parent = el.parentElement;
+    if (!parent) return;
+    const sibs = [...parent.querySelectorAll(':scope > .reveal, :scope > .reveal-fast')];
+    const i = sibs.indexOf(el);
+    if (i > 0) el.style.transitionDelay = `${Math.min(i * 0.1, 0.4)}s`;
+  });
+
+  if ('IntersectionObserver' in window) {
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+    els.forEach(el => obs.observe(el));
+  } else {
+    els.forEach(el => el.classList.add('visible'));
+  }
+})();
 
 // ── THEME SWITCHER ───────────────────────────────────────────────────
 const THEMES = {
