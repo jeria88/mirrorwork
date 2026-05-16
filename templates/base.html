@@ -94,10 +94,19 @@
       pointer-events: none;
     }
 
+    /* ── OVERLAY CUARZO — entre canvas y contenido ───────────────────── */
+    #cuarzo-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: rgba(0,0,0,0.38);
+    }
+
     /* ── CONTENIDO SOBRE EL CANVAS ──────────────────────────────────── */
     #page-content {
       position: relative;
-      z-index: 1;
+      z-index: 2;
       transition: opacity 0.25s ease;
     }
 
@@ -111,10 +120,8 @@
       justify-content: space-between;
       padding: 0 2rem;
       height: 60px;
-      background: rgba(0,0,0,0.65);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
+      background: rgba(0,0,0,0.90);
+      border-bottom: 1px solid rgba(255,255,255,0.14);
     }
     .nav-logo {
       font-family: var(--font-heading);
@@ -141,27 +148,30 @@
     .nav-links a:hover,
     .nav-links a.nav-active { color: var(--text); }
 
-    /* ── GLASS ──────────────────────────────────────────────────────── */
+    /* ── GLASS (Cuarzo) ─────────────────────────────────────────────── */
     .glass {
-      background: linear-gradient(160deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.03) 100%);
-      backdrop-filter: blur(28px);
-      -webkit-backdrop-filter: blur(28px);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 4px 24px rgba(0,0,0,0.28);
-      transition: background 0.35s, border-color 0.35s, transform 0.45s cubic-bezier(0.16,1,0.3,1), box-shadow 0.45s cubic-bezier(0.16,1,0.3,1);
+      background: rgba(0,0,0,0.82);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 16px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px rgba(255,255,255,0.04);
+      transition: border-color 0.3s, transform 0.45s cubic-bezier(0.16,1,0.3,1), box-shadow 0.45s cubic-bezier(0.16,1,0.3,1);
     }
     .glass:hover {
-      background: linear-gradient(160deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.05) 100%);
-      border-color: var(--border2);
+      border-color: rgba(255,255,255,0.28);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 0 0 1px rgba(255,255,255,0.07), 0 0 20px rgba(255,255,255,0.04);
     }
     .glass-lift:hover {
       transform: translateY(-5px);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 24px 60px rgba(0,0,0,0.5), 0 0 40px rgba(0,0,0,0.25);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 0 0 1px rgba(255,255,255,0.08), 0 24px 60px rgba(0,0,0,0.55);
     }
 
     /* ── TIPOGRAFÍA ─────────────────────────────────────────────────── */
-    .heading { font-family: var(--font-heading); font-weight: 400; line-height: 1.15; }
+    .heading {
+      font-family: var(--font-heading);
+      font-weight: 400;
+      line-height: 1.15;
+      text-align: center;
+    }
     .tag-label {
       font-size: 11px;
       font-weight: 500;
@@ -170,9 +180,10 @@
       color: var(--muted);
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 12px;
     }
-    .tag-label::before {
+    .tag-label::before, .tag-label::after {
       content: '';
       display: block;
       width: 20px;
@@ -205,25 +216,24 @@
     .btn-accent { background: var(--accent); color: #000; }
     .btn-accent:hover { opacity: 0.85; }
 
-    /* ── CARD ───────────────────────────────────────────────────────── */
+    /* ── CARD (Cuarzo) ──────────────────────────────────────────────── */
     .card {
-      background: linear-gradient(160deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.025) 100%);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid var(--border);
-      border-radius: 20px;
+      background: rgba(0,0,0,0.88);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 16px;
       padding: 1.5rem;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 6px 28px rgba(0,0,0,0.28);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.07), 0 0 0 1px rgba(255,255,255,0.04);
       transition: transform 0.45s cubic-bezier(0.16,1,0.3,1),
                   box-shadow 0.45s cubic-bezier(0.16,1,0.3,1),
                   border-color 0.3s;
     }
     .card:hover {
       transform: translateY(-4px);
-      border-color: var(--border2);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.2),
-                  0 24px 60px rgba(0,0,0,0.45),
-                  0 0 0 1px rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.30);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.12),
+                  0 0 0 1px rgba(255,255,255,0.07),
+                  0 0 28px rgba(255,255,255,0.05),
+                  0 24px 60px rgba(0,0,0,0.55);
     }
 
     /* ── CONTENEDOR ──────────────────────────────────────────────────── */
@@ -375,11 +385,14 @@
 </head>
 <body>
 
-<!-- FONDO ESPACIAL (auroras CSS + canvas estrellas en mobile) ──────── -->
+<!-- FONDO ESPACIAL (auroras CSS — fallback si WebGL falla) ─────────── -->
 <div id="space-bg" aria-hidden="true">
   <div class="aurora aurora-1"></div>
   <div class="aurora aurora-2"></div>
 </div>
+
+<!-- OVERLAY CUARZO — polariza el canvas, mejora legibilidad ────────── -->
+<div id="cuarzo-overlay" aria-hidden="true"></div>
 
 <!-- NAV ────────────────────────────────────────────────────────────── -->
 <nav>
