@@ -383,7 +383,7 @@
   </style>
   {% block extra_head %}{% endblock %}
 </head>
-<body>
+<body data-aesthetic="{{ map_aesthetic|default:'cosmos' }}">
 
 <!-- FONDO ESPACIAL (auroras CSS — fallback si WebGL falla) ─────────── -->
 <div id="space-bg" aria-hidden="true">
@@ -510,6 +510,10 @@
 <!-- FONDO — Three.js agujero negro (solo desktop, persistente, no recarga) -->
 <script type="module">
 (async () => {
+// Solo cargar el fondo cósmico si el aesthetic del usuario es 'cosmos'
+const AESTHETIC = document.body.dataset.aesthetic || 'cosmos';
+if (AESTHETIC !== 'cosmos') return;
+
 const THREE               = await import('three');
 const { EffectComposer }  = await import('three/addons/postprocessing/EffectComposer.js');
 const { RenderPass }      = await import('three/addons/postprocessing/RenderPass.js');

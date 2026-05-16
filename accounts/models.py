@@ -27,7 +27,7 @@ class UserProfile(models.Model):
     hotmart_subscriber_code = models.CharField(max_length=120, blank=True)
     tokens_last_renewed = models.DateField(null=True, blank=True)
     MAP_AESTHETIC_CHOICES = [
-        ('cosmos',       'Cosmos'),
+        ('cosmos',       'Cósmico'),
         ('mandala',      'Mandala'),
         ('archipielago', 'Archipiélago'),
         ('arbol',        'Árbol'),
