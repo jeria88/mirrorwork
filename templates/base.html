@@ -17,9 +17,9 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link data-global href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-  <style>
+  <style data-global>
     /* ── TOKENS ──────────────────────────────────────────────────────── */
     :root {
       --bg:       #000000;
@@ -433,7 +433,7 @@
 
 <!-- BURBUJA ESPEJO ──────────────────────────────────────────────────── -->
 {% if user.is_authenticated %}
-<style>
+<style data-global>
   #mirror-bubble { position:fixed; bottom:1.5rem; left:1.5rem; z-index:9998; }
   #mirror-bubble a {
     display:flex; align-items:center; justify-content:center;
@@ -461,7 +461,7 @@
 {% endif %}
 
 <!-- SELECTOR DE PALETA ──────────────────────────────────────────────── -->
-<style>
+<style data-global>
   #ts-fab { position:fixed; bottom:1.5rem; right:1.5rem; z-index:9999; }
   #ts-toggle {
     width:44px; height:44px; border-radius:50%; cursor:pointer;
@@ -817,6 +817,16 @@ function spaGo(url) {
       const doc  = new DOMParser().parseFromString(html, 'text/html');
       const newPC = doc.getElementById('page-content');
       if (!newPC) { location.href = url; return; }
+
+      // Swap page-specific styles ({% block extra_head %})
+      document.head.querySelectorAll('[data-page-style]').forEach(el => el.remove());
+      doc.head.querySelectorAll('style, link[rel="stylesheet"]').forEach(el => {
+        if (!el.hasAttribute('data-global')) {
+          const clone = el.cloneNode(true);
+          clone.setAttribute('data-page-style', '');
+          document.head.appendChild(clone);
+        }
+      });
 
       pc.innerHTML = newPC.innerHTML;
       document.title = doc.title;
