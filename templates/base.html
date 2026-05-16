@@ -94,6 +94,15 @@
       pointer-events: none;
     }
 
+    /* ── CANVAS Mandala 2D ─────────────────────────────────────────── */
+    #mandala-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
     /* ── OVERLAY CUARZO — entre canvas y contenido ───────────────────── */
     #cuarzo-overlay {
       position: fixed;
@@ -394,6 +403,9 @@
 <!-- OVERLAY CUARZO — polariza el canvas, mejora legibilidad ────────── -->
 <div id="cuarzo-overlay" aria-hidden="true"></div>
 
+<!-- CANVAS Mandala 2D (solo aesthetic=mandala) ──────────────────────── -->
+<canvas id="mandala-bg" aria-hidden="true" style="display:none"></canvas>
+
 <!-- NAV ────────────────────────────────────────────────────────────── -->
 <nav>
   <a class="nav-logo" href="{% url 'home' %}">Mirror<em>Work</em></a>
@@ -514,7 +526,7 @@
 const AESTHETIC = document.body.dataset.aesthetic || 'cosmos';
 // Fondos alternativos implementados — cuando mandala/arbol tengan su módulo,
 // agregarlos aquí para que cosmos ceda el paso.
-const AESTHETIC_HAS_OWN_BG = { /* mandala: true, arbol: true */ };
+const AESTHETIC_HAS_OWN_BG = { mandala: true /*, arbol: true, archipielago: true */ };
 if (AESTHETIC_HAS_OWN_BG[AESTHETIC]) return;
 
 const THREE               = await import('three');
@@ -718,6 +730,247 @@ function animate() {
 }
 
 animate();
+})();
+</script>
+
+<!-- FONDO — Mandala Canvas 2D (aesthetic=mandala) ───────────────────── -->
+<script>
+(function () {
+  if (document.body.dataset.aesthetic !== 'mandala') return;
+
+  const TAU = Math.PI * 2;
+  const canvas = document.getElementById('mandala-bg');
+  canvas.style.display = 'block';
+  const ctx    = canvas.getContext('2d', { alpha: false });
+  let W, H;
+
+  // ── Presets por sección (capturados desde el configurador) ──────────
+  const PRESETS = {
+    tests:      { zoom:1.84, symmetry:6, layers:5, speed:1.20, alpha:40, detail:4, tilt:0, palette:'arcano' },
+    birth:      { zoom:1.84, symmetry:3, layers:4, speed:0.45, alpha:70, detail:4, tilt:0, palette:'blanco' },
+    onboarding: { zoom:1.84, symmetry:3, layers:4, speed:0.45, alpha:70, detail:4, tilt:0, palette:'blanco' },
+    espejo:     { zoom:1.84, symmetry:4, layers:4, speed:0.95, alpha:40, detail:3, tilt:0, palette:'blanco' },
+    general:    { zoom:1.84, symmetry:6, layers:5, speed:1.20, alpha:40, detail:4, tilt:0, palette:'arcano' },
+  };
+
+  function presetForPath(path) {
+    if (/\/(onboarding|register|login|bienvenido)/.test(path)) return 'onboarding';
+    if (/\/(birth|nacimiento)/.test(path))                     return 'birth';
+    if (/\/(espejo|mirror)/.test(path))                        return 'espejo';
+    if (/\/(test|psychometrics)/.test(path))                   return 'tests';
+    return 'general';
+  }
+
+  // P mutable — se actualiza al navegar entre secciones via SPA
+  const P = Object.assign({ R: 260 }, PRESETS[presetForPath(location.pathname)]);
+
+  // Escucha el mismo evento bg:preset que usa el cosmos
+  document.addEventListener('bg:preset', function (e) {
+    var key = e.detail;
+    var src = PRESETS[key] || PRESETS.general;
+    Object.assign(P, src);
+  });
+
+  // ── Paletas ──────────────────────────────────────────────────────────
+  const PALS = {
+    arcano: [{h:35,s:100,l:55},{h:15,s:100,l:50},{h:50,s:100,l:60}],
+    blanco: [{h:210,s:20,l:90},{h:240,s:10,l:95},{h:220,s:15,l:88}],
+    nebula: [{h:280,s:80,l:65},{h:320,s:90,l:60},{h:200,s:90,l:60}],
+    caos:   [{h:350,s:100,l:50},{h:10,s:100,l:45},{h:330,s:100,l:60}],
+    tiempo: [{h:140,s:100,l:45},{h:160,s:100,l:55},{h:120,s:90,l:50}],
+    aurora: [{h:45,s:100,l:60},{h:175,s:90,l:55},{h:270,s:90,l:65}],
+  };
+  function palCol(li, total, t) {
+    const pal = PALS[P.palette];
+    const f   = total > 1 ? li / (total - 1) : 0;
+    const ci  = f * (pal.length - 1);
+    const i1  = Math.floor(ci), i2 = Math.min(i1 + 1, pal.length - 1);
+    const b   = ci - i1;
+    const c1  = pal[i1], c2 = pal[i2];
+    return {
+      h: ((c1.h + (c2.h - c1.h) * b) + t * 16) % 360,
+      s: c1.s + (c2.s - c1.s) * b,
+      l: c1.l + (c2.l - c1.l) * b
+    };
+  }
+
+  // ── Multi-pass (halo + cuerpo + núcleo) — sin shadowBlur ────────────
+  function magic(fn, col, am, dashed, dash) {
+    am     = am     === undefined ? 1     : am;
+    dashed = dashed === undefined ? false : dashed;
+    dash   = dash   === undefined ? []    : dash;
+    const a = (P.alpha / 100) * am;
+    ctx.setLineDash(dashed ? dash : []);
+    ctx.beginPath(); fn();
+    ctx.strokeStyle = 'hsla(' + col.h + ',' + col.s + '%,' + col.l + '%,' + (a * .12) + ')';
+    ctx.lineWidth = 14; ctx.stroke();
+    ctx.beginPath(); fn();
+    ctx.strokeStyle = 'hsla(' + col.h + ',' + col.s + '%,' + col.l + '%,' + (a * .36) + ')';
+    ctx.lineWidth = 4;  ctx.stroke();
+    ctx.beginPath(); fn();
+    ctx.strokeStyle = 'hsla(' + col.h + ',' + Math.max(col.s - 40, 0) + '%,92%,' + (a * .85) + ')';
+    ctx.lineWidth = 1.2; ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // ── Primitivas ───────────────────────────────────────────────────────
+  function poly(r, n, rot) {
+    return function () {
+      ctx.moveTo(r * Math.cos(rot), r * Math.sin(rot));
+      for (var i = 1; i <= n; i++) {
+        var a = rot + TAU * i / n;
+        ctx.lineTo(r * Math.cos(a), r * Math.sin(a));
+      }
+      ctx.closePath();
+    };
+  }
+  function circ(r) { return function () { ctx.arc(0, 0, r, 0, TAU); }; }
+  function star(r, n, rot, skip) {
+    return function () {
+      for (var i = 0; i < n; i++) {
+        var a1 = rot + TAU * i / n, a2 = rot + TAU * ((i + skip) % n) / n;
+        ctx.moveTo(r * Math.cos(a1), r * Math.sin(a1));
+        ctx.lineTo(r * Math.cos(a2), r * Math.sin(a2));
+      }
+    };
+  }
+  function petals(r, n, rot) {
+    return function () {
+      for (var i = 0; i < n; i++) {
+        var a1 = rot + TAU * i / n, a2 = rot + TAU * (i + 1) / n;
+        var x1 = r * Math.cos(a1), y1 = r * Math.sin(a1);
+        var x2 = r * Math.cos(a2), y2 = r * Math.sin(a2);
+        var mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+        var dl = Math.hypot(mx, my) || 1;
+        var cp = Math.hypot(x2 - x1, y2 - y1) * .35;
+        ctx.moveTo(x1, y1);
+        ctx.quadraticCurveTo(mx + mx / dl * cp, my + my / dl * cp, x2, y2);
+        ctx.moveTo(x1, y1);
+        ctx.quadraticCurveTo(mx - mx / dl * cp, my - my / dl * cp, x2, y2);
+      }
+    };
+  }
+  function vesica(r, n, rot) {
+    return function () {
+      for (var i = 0; i < n; i++) {
+        var a1 = rot + TAU * i / n, a2 = rot + TAU * (i + 1) / n;
+        var x1 = r * Math.cos(a1), y1 = r * Math.sin(a1);
+        var x2 = r * Math.cos(a2), y2 = r * Math.sin(a2);
+        var d  = Math.hypot(x2 - x1, y2 - y1);
+        if (d < 2) continue;
+        var mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+        var nx = -(y2 - y1) / d, ny = (x2 - x1) / d;
+        var h  = d * Math.sqrt(3) / 2;
+        var i1x = mx + nx * h, i1y = my + ny * h;
+        var i2x = mx - nx * h, i2y = my - ny * h;
+        ctx.moveTo(i1x, i1y);
+        ctx.arc(x1, y1, d, Math.atan2(i1y - y1, i1x - x1), Math.atan2(i2y - y1, i2x - x1), false);
+        ctx.moveTo(i1x, i1y);
+        ctx.arc(x2, y2, d, Math.atan2(i1y - y2, i1x - x2), Math.atan2(i2y - y2, i2x - x2), true);
+      }
+    };
+  }
+  function vCircles(r, n, rot, vr) {
+    return function () {
+      for (var i = 0; i < n; i++) {
+        var a = rot + TAU * i / n;
+        var vx = r * Math.cos(a), vy = r * Math.sin(a);
+        ctx.moveTo(vx + vr, vy); ctx.arc(vx, vy, vr, 0, TAU);
+      }
+    };
+  }
+  function seedOfLife(r) {
+    return function () {
+      ctx.arc(0, 0, r, 0, TAU);
+      for (var i = 0; i < 6; i++) {
+        var a = TAU * i / 6;
+        ctx.moveTo(r * Math.cos(a) + r, r * Math.sin(a));
+        ctx.arc(r * Math.cos(a), r * Math.sin(a), r, 0, TAU);
+      }
+    };
+  }
+
+  // ── Capa ─────────────────────────────────────────────────────────────
+  function drawLayer(r, n, rot, detail, col) {
+    var ds = (r * TAU) / (n * 3);
+    magic(circ(r * 1.05), col, .28, true, [ds, ds * 1.7]);
+    magic(poly(r, n, rot), col, 1.0);
+    if (detail >= 2) magic(poly(r, n, rot + Math.PI / n), col, .55);
+    if (detail >= 3) magic(vesica(r, n, rot), col, .3);
+    if (detail >= 3) magic(petals(r, n, rot), col, .25);
+    if (detail >= 4) magic(vCircles(r, n, rot, r * .09), col, .5);
+    if (detail >= 5) magic(star(r, n, rot, Math.max(2, Math.floor(n / 2))), col, .22);
+  }
+
+  // ── Núcleo ───────────────────────────────────────────────────────────
+  function drawNucleus(t, col) {
+    var sr = P.R * .085 * (1 + .06 * Math.sin(t * 3.5));
+    magic(seedOfLife(sr * .45), col, .2);
+    magic(poly(sr * 1.65, P.symmetry, t * P.speed * 2.2), col, .85);
+    magic(poly(sr * 1.65, P.symmetry, t * P.speed * 2.2 + Math.PI / P.symmetry), col, .45);
+    if (P.detail >= 3) magic(petals(sr * 1.1, P.symmetry, t * P.speed * 1.8), col, .38);
+    var da = (sr * 1.9 * TAU) / (P.symmetry * 3.5);
+    magic(circ(sr * 1.9), col, .65, true, [da, da * 1.3]);
+  }
+
+  // ── Glow central ─────────────────────────────────────────────────────
+  function drawGlow(t, col) {
+    var ar  = P.R * .5 * (1 + .06 * Math.sin(t * 2.0));
+    var grd = ctx.createRadialGradient(0, 0, 0, 0, 0, ar);
+    grd.addColorStop(0,   'hsla(' + col.h + ',' + col.s + '%,' + col.l + '%,.06)');
+    grd.addColorStop(.5,  'hsla(' + col.h + ',' + col.s + '%,' + col.l + '%,.02)');
+    grd.addColorStop(1,   'transparent');
+    ctx.fillStyle = grd;
+    ctx.beginPath(); ctx.arc(0, 0, ar, 0, TAU); ctx.fill();
+  }
+
+  // ── Resize ───────────────────────────────────────────────────────────
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // ── Loop ─────────────────────────────────────────────────────────────
+  function render(ts) {
+    var t = ts * .001;
+
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = '#050508';
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.save();
+    ctx.translate(W / 2, H / 2);
+    ctx.scale(P.zoom, P.zoom);
+
+    var breathe = 1 + .022 * Math.sin(t * 1.3);
+    var tiltY   = Math.cos(P.tilt * Math.PI / 180);
+    ctx.scale(breathe, breathe * tiltY);
+    ctx.rotate(Math.sin(t * .18) * .07);
+
+    drawGlow(t, palCol(0, 1, t));
+
+    for (var L = P.layers; L >= 1; L--) {
+      var frac      = L / P.layers;
+      var r         = P.R * (.15 + .85 * Math.pow(frac, 1.25));
+      var dir       = L % 2 === 0 ? 1 : -1;
+      var speedFrac = (P.layers - L) / Math.max(1, P.layers - 1);
+      var rot       = t * P.speed * dir * (.08 + .52 * speedFrac);
+      var col       = palCol(L - 1, P.layers, t);
+      drawLayer(r, P.symmetry, rot, P.detail, col);
+    }
+
+    drawNucleus(t, palCol(0, 1, t));
+
+    ctx.restore();
+    ctx.globalCompositeOperation = 'source-over';
+
+    requestAnimationFrame(render);
+  }
+
+  requestAnimationFrame(render);
 })();
 </script>
 
