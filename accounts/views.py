@@ -158,8 +158,14 @@ def perfil(request):
 
         # Onboarding editable
         profile.onboarding_question = request.POST.get('onboarding_question', '').strip()
-        profile.onboarding_entry_point = request.POST.get('onboarding_entry_point', '').strip()
-        profile.onboarding_noise_area = request.POST.get('onboarding_noise_area', '').strip()
+        entry_point = request.POST.get('onboarding_entry_point', '').strip()
+        if entry_point == 'otro':
+            entry_point = request.POST.get('onboarding_entry_point_texto', '').strip()
+        profile.onboarding_entry_point = entry_point
+        noise_area = request.POST.get('onboarding_noise_area', '').strip()
+        if noise_area == 'otro':
+            noise_area = request.POST.get('onboarding_noise_area_texto', '').strip()
+        profile.onboarding_noise_area = noise_area
         prior = request.POST.getlist('onboarding_prior_exploration')
         profile.onboarding_prior_exploration = ','.join(prior) if prior else ''
 
@@ -180,6 +186,8 @@ def perfil(request):
             pass
         saved = True
 
+    _KNOWN_ENTRY_POINTS = {'cambio', 'ciclos', 'busqueda', 'algo-mas', 'entenderme'}
+    _KNOWN_NOISE_AREAS  = {'trabajo', 'relaciones', 'cuerpo', 'identidad', 'proposito', 'todo'}
     _PILL_OPTS = [('si', 'Sí'), ('a-veces', 'A veces'), ('no', 'No')]
     raw_nucleo = profile.onboarding_nucleo
     nucleo = raw_nucleo if isinstance(raw_nucleo, dict) else {}
@@ -198,11 +206,15 @@ def perfil(request):
         ('primera-vez',  'Primera vez'),
     ]
 
+    entry_is_custom = bool(profile.onboarding_entry_point and profile.onboarding_entry_point not in _KNOWN_ENTRY_POINTS)
+    noise_is_custom = bool(profile.onboarding_noise_area  and profile.onboarding_noise_area  not in _KNOWN_NOISE_AREAS)
     return render(request, 'accounts/perfil.html', {
         'profile': profile,
         'saved': saved,
         'nucleo_fields': nucleo_fields,
         'prior_opts': prior_opts,
+        'entry_is_custom': entry_is_custom,
+        'noise_is_custom': noise_is_custom,
     })
 
 

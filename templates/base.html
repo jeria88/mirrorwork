@@ -5,7 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}MirrorWork{% endblock %}</title>
 
-  <!-- Fonts: EB Garamond (headings) + Inter (UI) — mismos que endonautas.cl -->
+  <!-- Three.js importmap — debe ir antes de cualquier type="module" -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three":          "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/":  "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -13,48 +22,33 @@
   <style>
     /* ── TOKENS ──────────────────────────────────────────────────────── */
     :root {
-      /* Background siempre negro — el color viene de las auroras */
       --bg:       #000000;
-
-      /* Surfaces: glassmorphism sobre el fondo negro */
       --surface:  rgba(255,255,255,0.055);
       --surface2: rgba(255,255,255,0.10);
       --surface3: rgba(255,255,255,0.15);
-
-      /* Bordes */
       --border:   rgba(255,255,255,0.13);
       --border2:  rgba(255,255,255,0.24);
-
-      /* Texto */
       --text:     #FFFFFF;
       --muted:    #A1A1AA;
       --dim:      #52525B;
-
-      /* Acento — cambia con el tema */
       --accent:   #4ecdc4;
       --accent2:  #7c6dfa;
-
-      /* Colores aurora — cambian con el tema */
       --aurora1:  #0C3535;
       --aurora2:  #180A42;
-
-      /* Polaridad sombra/luz */
       --luz-intensa:  #f0c040;
       --luz:          #4ecdc4;
       --transicion:   #f4a035;
       --sombra:       #7c6dfa;
       --sombra-dom:   #e05050;
-
-      /* Tipografía */
       --font-heading: 'EB Garamond', Georgia, serif;
       --font-ui:      'Inter', system-ui, -apple-system, sans-serif;
     }
 
     /* ── RESET ───────────────────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { font-size: 16px; scroll-behavior: smooth; }
+    html { font-size: 16px; scroll-behavior: smooth; background: #000; }
     body {
-      background: var(--bg);
+      background: transparent;       /* el canvas Three.js es el fondo real */
       color: var(--text);
       font-family: var(--font-ui);
       font-weight: 400;
@@ -67,7 +61,7 @@
     a { color: var(--accent); text-decoration: none; transition: opacity 0.2s; }
     a:hover { opacity: 0.8; }
 
-    /* ── FONDO ESPACIAL (fijo, bajo todo) ───────────────────────────── */
+    /* ── FONDO ESPACIAL — auroras CSS (siempre presentes, visibles en mobile) ── */
     #space-bg {
       position: fixed;
       inset: 0;
@@ -83,21 +77,28 @@
       opacity: 0.3;
       animation: floatAurora 28s infinite alternate ease-in-out;
     }
-    .aurora-1 {
-      top: -15%; right: -10%;
-      width: 700px; height: 700px;
-      background: var(--aurora1);
-    }
-    .aurora-2 {
-      bottom: -20%; left: -15%;
-      width: 900px; height: 900px;
-      background: var(--aurora2);
-      animation-delay: -9s;
-      opacity: 0.22;
-    }
+    .aurora-1 { top: -15%; right: -10%; width: 700px; height: 700px; background: var(--aurora1); }
+    .aurora-2 { bottom: -20%; left: -15%; width: 900px; height: 900px; background: var(--aurora2); animation-delay: -9s; opacity: 0.22; }
     @keyframes floatAurora {
       0%   { transform: translate(0,0) scale(1); }
-      100% { transform: translate(-40px, 55px) scale(1.12); }
+      100% { transform: translate(-40px,55px) scale(1.12); }
+    }
+    #space-canvas { position: absolute; inset: 0; }
+
+    /* ── CANVAS Three.js — solo desktop (z:0 tapa las auroras) ─────── */
+    #bh-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ── CONTENIDO SOBRE EL CANVAS ──────────────────────────────────── */
+    #page-content {
+      position: relative;
+      z-index: 1;
+      transition: opacity 0.25s ease;
     }
 
     /* ── NAVEGACIÓN ─────────────────────────────────────────────────── */
@@ -115,7 +116,6 @@
       -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
     }
-
     .nav-logo {
       font-family: var(--font-heading);
       font-size: 1.3rem;
@@ -125,7 +125,6 @@
       text-decoration: none;
     }
     .nav-logo em { font-style: italic; color: var(--muted); }
-
     .nav-links {
       display: flex;
       align-items: center;
@@ -139,9 +138,10 @@
       transition: color 0.2s;
       opacity: 1;
     }
-    .nav-links a:hover { color: var(--text); }
+    .nav-links a:hover,
+    .nav-links a.nav-active { color: var(--text); }
 
-    /* ── UTILIDADES GLASS ───────────────────────────────────────────── */
+    /* ── GLASS ──────────────────────────────────────────────────────── */
     .glass {
       background: linear-gradient(160deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.03) 100%);
       backdrop-filter: blur(28px);
@@ -161,11 +161,7 @@
     }
 
     /* ── TIPOGRAFÍA ─────────────────────────────────────────────────── */
-    .heading {
-      font-family: var(--font-heading);
-      font-weight: 400;
-      line-height: 1.15;
-    }
+    .heading { font-family: var(--font-heading); font-weight: 400; line-height: 1.15; }
     .tag-label {
       font-size: 11px;
       font-weight: 500;
@@ -202,31 +198,14 @@
       transition: all 0.2s ease;
     }
     .btn:hover { opacity: 1; }
-    .btn-primary {
-      background: #FFFFFF;
-      color: #000000;
-      border-color: transparent;
-    }
-    .btn-primary:hover {
-      background: #E4E4E7;
-      transform: scale(1.02);
-    }
-    .btn-ghost {
-      background: transparent;
-      color: var(--text);
-      border-color: var(--border);
-    }
-    .btn-ghost:hover {
-      background: var(--surface2);
-      border-color: var(--border2);
-    }
-    .btn-accent {
-      background: var(--accent);
-      color: #000;
-    }
+    .btn-primary { background: #FFFFFF; color: #000000; border-color: transparent; }
+    .btn-primary:hover { background: #E4E4E7; transform: scale(1.02); }
+    .btn-ghost { background: transparent; color: var(--text); border-color: var(--border); }
+    .btn-ghost:hover { background: var(--surface2); border-color: var(--border2); }
+    .btn-accent { background: var(--accent); color: #000; }
     .btn-accent:hover { opacity: 0.85; }
 
-    /* ── CARD (glass luxury) ─────────────────────────────────────────── */
+    /* ── CARD ───────────────────────────────────────────────────────── */
     .card {
       background: linear-gradient(160deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.025) 100%);
       backdrop-filter: blur(24px);
@@ -248,11 +227,7 @@
     }
 
     /* ── CONTENEDOR ──────────────────────────────────────────────────── */
-    .container {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 2rem 1.5rem;
-    }
+    .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
 
     /* ── BADGES ─────────────────────────────────────────────────────── */
     .badge {
@@ -274,12 +249,7 @@
     .badge-endonauta { background: rgba(124,109,250,0.12); color: var(--sombra); }
 
     /* ── BARRAS DE POLARIDAD ─────────────────────────────────────────── */
-    .progress-bar-wrap {
-      background: rgba(255,255,255,0.06);
-      border-radius: 4px;
-      height: 5px;
-      overflow: hidden;
-    }
+    .progress-bar-wrap { background: rgba(255,255,255,0.06); border-radius: 4px; height: 5px; overflow: hidden; }
     .progress-bar { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
     .bar-luz-intensa      { background: var(--luz-intensa); }
     .bar-luz              { background: var(--luz); }
@@ -318,13 +288,7 @@
     .form-group select:focus { border-color: var(--accent); }
     .form-group input::placeholder,
     .form-group textarea::placeholder { color: var(--dim); }
-
-    .errorlist {
-      list-style: none;
-      color: var(--sombra-dom);
-      font-size: 0.78rem;
-      margin-top: 0.3rem;
-    }
+    .errorlist { list-style: none; color: var(--sombra-dom); font-size: 0.78rem; margin-top: 0.3rem; }
 
     /* ── MENSAJES DJANGO ─────────────────────────────────────────────── */
     .messages-list { list-style: none; margin-bottom: 1rem; }
@@ -370,54 +334,25 @@
       font-family: var(--font-ui); transition: all 0.2s;
     }
     .print-btn:hover { border-color: var(--border2); color: var(--text); }
-
-    /* ── PRINT HEADER / FOOTER (screen: hidden) ───────────────────────── */
     .print-header, .print-footer { display: none; }
 
-    /* ── GLOBAL PRINT STYLES ──────────────────────────────────────────── */
     @media print {
-      @page {
-        size: Letter portrait;
-        margin: 2.2cm 1.8cm 2cm;
-      }
-
-      /* Hide web-only chrome */
-      nav, #space-bg, #mirror-bubble, #ts-fab,
+      @page { size: Letter portrait; margin: 2.2cm 1.8cm 2cm; }
+      nav, #bh-canvas, #mirror-bubble, #ts-fab,
       .print-btn, .back-link, .spin-ring,
       .interp-spinner, .no-tokens-note { display: none !important; }
-
-      /* Reset dark theme → white */
       :root {
-        --bg: #ffffff;
-        --surface: #ffffff;
-        --surface2: #f8f8fb;
-        --border: #d4d4e0;
-        --text: #1a1a2e;
-        --muted: #4a4a6a;
-        --dim: #8888aa;
-        --accent: #3a8c86;
-        --accent2: #5a4dc4;
-        --luz-intensa: #c49a10;
-        --luz: #3a8c86;
+        --bg: #ffffff; --surface: #ffffff; --surface2: #f8f8fb;
+        --border: #d4d4e0; --text: #1a1a2e; --muted: #4a4a6a;
+        --dim: #8888aa; --accent: #3a8c86; --accent2: #5a4dc4;
+        --luz-intensa: #c49a10; --luz: #3a8c86;
       }
-      body {
-        background: #ffffff !important;
-        color: #1a1a2e !important;
-        font-size: 10pt;
-        line-height: 1.55;
-      }
+      body { background: #ffffff !important; color: #1a1a2e !important; font-size: 10pt; line-height: 1.55; }
       * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-
       .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
-
-      /* Print header */
       .print-header {
-        display: flex !important;
-        justify-content: space-between;
-        align-items: flex-end;
-        border-bottom: 1.5pt solid #1a1a2e;
-        padding-bottom: 6pt;
-        margin-bottom: 18pt;
+        display: flex !important; justify-content: space-between; align-items: flex-end;
+        border-bottom: 1.5pt solid #1a1a2e; padding-bottom: 6pt; margin-bottom: 18pt;
       }
       .ph-brand-name { font-family: var(--font-heading); font-size: 16pt; font-weight: 400; color: #1a1a2e; line-height: 1; }
       .ph-brand-url { font-size: 7pt; letter-spacing: 0.12em; color: #8888aa; text-transform: uppercase; margin-top: 2pt; }
@@ -425,48 +360,25 @@
       .ph-report-type { font-size: 8pt; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: #1a1a2e; }
       .ph-report-user { font-size: 8.5pt; color: #4a4a6a; margin-top: 2pt; }
       .ph-report-date { font-size: 7.5pt; color: #8888aa; }
-
-      /* Print footer */
       .print-footer {
-        display: flex !important;
-        position: fixed;
-        bottom: 0; left: 0; right: 0;
-        border-top: 0.75pt solid #d4d4e0;
-        padding-top: 5pt;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 7pt;
-        color: #8888aa;
-        letter-spacing: 0.05em;
+        display: flex !important; position: fixed; bottom: 0; left: 0; right: 0;
+        border-top: 0.75pt solid #d4d4e0; padding-top: 5pt;
+        justify-content: space-between; align-items: center;
+        font-size: 7pt; color: #8888aa; letter-spacing: 0.05em;
       }
-
-      .section-title {
-        color: #4a4a6a !important;
-        border-bottom-color: #d4d4e0 !important;
-        margin-bottom: 8pt !important;
-      }
-      .interp-text {
-        font-size: 9.5pt !important;
-        line-height: 1.65 !important;
-        color: #1a1a2e !important;
-      }
-      .disclaimer {
-        background: #f5f5fa !important;
-        border-color: #d4d4e0 !important;
-        color: #6a6a8a !important;
-        font-size: 7.5pt !important;
-      }
+      .section-title { color: #4a4a6a !important; border-bottom-color: #d4d4e0 !important; margin-bottom: 8pt !important; }
+      .interp-text { font-size: 9.5pt !important; line-height: 1.65 !important; color: #1a1a2e !important; }
+      .disclaimer { background: #f5f5fa !important; border-color: #d4d4e0 !important; color: #6a6a8a !important; font-size: 7.5pt !important; }
     }
   </style>
   {% block extra_head %}{% endblock %}
 </head>
 <body>
 
-<!-- FONDO ESPACIAL ─────────────────────────────────────────────────── -->
+<!-- FONDO ESPACIAL (auroras CSS + canvas estrellas en mobile) ──────── -->
 <div id="space-bg" aria-hidden="true">
   <div class="aurora aurora-1"></div>
   <div class="aurora aurora-2"></div>
-  <canvas id="space-canvas"></canvas>
 </div>
 
 <!-- NAV ────────────────────────────────────────────────────────────── -->
@@ -484,7 +396,7 @@
         {% with tb=request.user.token_balance %}{{ tb.balance|default:0 }}{% endwith %}&thinsp;tkn
       </a>
       <a href="{% url 'perfil' %}">Perfil</a>
-      <a href="{% url 'accounts:logout' %}">Salir</a>
+      <a href="{% url 'accounts:logout' %}" data-no-spa>Salir</a>
     {% else %}
       <a href="{% url 'accounts:login' %}">Entrar</a>
       <a href="{% url 'accounts:register' %}" class="btn btn-primary" style="padding:7px 20px;">Comenzar</a>
@@ -493,14 +405,18 @@
 </nav>
 
 {% if messages %}
-  <div class="container" style="padding-bottom:0">
+  <div class="container" style="padding-bottom:0; position:relative; z-index:1;">
     <ul class="messages-list">
       {% for msg in messages %}<li>{{ msg }}</li>{% endfor %}
     </ul>
   </div>
 {% endif %}
 
-{% block content %}{% endblock %}
+<!-- CONTENIDO — se intercambia en navegación AJAX ───────────────────── -->
+<div id="page-content">
+  {% block content %}{% endblock %}
+  {% block extra_body %}{% endblock %}
+</div>
 
 <!-- BURBUJA ESPEJO ──────────────────────────────────────────────────── -->
 {% if user.is_authenticated %}
@@ -518,8 +434,8 @@
   #mirror-bubble .bubble-tip {
     position:absolute; left:56px; bottom:50%; transform:translateY(50%);
     background:rgba(0,0,0,0.85); backdrop-filter:blur(12px);
-    border:1px solid var(--border);
-    color:var(--text); font-size:0.72rem; padding:0.3rem 0.7rem;
+    border:1px solid var(--border); color:var(--text);
+    font-size:0.72rem; padding:0.3rem 0.7rem;
     border-radius:6px; white-space:nowrap; opacity:0; pointer-events:none;
     transition:opacity 0.15s;
   }
@@ -539,16 +455,14 @@
     background:rgba(255,255,255,0.06); border:1px solid var(--border);
     backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
     font-size:1rem; display:flex; align-items:center; justify-content:center;
-    box-shadow:0 4px 20px rgba(0,0,0,0.5); color:var(--muted);
-    transition:background 0.2s;
+    box-shadow:0 4px 20px rgba(0,0,0,0.5); color:var(--muted); transition:background 0.2s;
   }
   #ts-toggle:hover { background:rgba(255,255,255,0.1); }
   #ts-panel {
     display:none; position:absolute; bottom:58px; right:0;
     background:rgba(0,0,0,0.82); backdrop-filter:blur(28px); -webkit-backdrop-filter:blur(28px);
     border:1px solid var(--border); border-radius:16px;
-    padding:1.2rem; width:220px;
-    box-shadow:0 12px 48px rgba(0,0,0,0.75);
+    padding:1.2rem; width:220px; box-shadow:0 12px 48px rgba(0,0,0,0.75);
   }
   #ts-panel.open { display:block; }
   .ts-label { color:var(--muted); font-size:0.66rem; text-transform:uppercase; letter-spacing:.14em; margin:0.8rem 0 0.45rem; }
@@ -580,78 +494,220 @@
   <button id="ts-toggle" onclick="document.getElementById('ts-panel').classList.toggle('open')" title="Cambiar paleta">◑</button>
 </div>
 
+<!-- FONDO — Three.js agujero negro (solo desktop, persistente, no recarga) -->
+<script type="module">
+(async () => {
+const THREE               = await import('three');
+const { EffectComposer }  = await import('three/addons/postprocessing/EffectComposer.js');
+const { RenderPass }      = await import('three/addons/postprocessing/RenderPass.js');
+const { UnrealBloomPass } = await import('three/addons/postprocessing/UnrealBloomPass.js');
+
+// ── Presets por sección (desktop / mobile) ────────────────────────────
+const IS_MOBILE = window.innerWidth <= 768;
+
+const PRESETS = {
+  desktop: {
+    onboarding: { bhr:4.0,  density:0.32, sizeMult:0.90, bloom:6.0, speedInner:3.05, speedOuter:0.05, camZ:149, camAng:4  },
+    general:    { bhr:4.0,  density:0.32, sizeMult:1.80, bloom:6.0, speedInner:3.05, speedOuter:0.05, camZ:149, camAng:16 },
+    espejo:     { bhr:4.0,  density:0.32, sizeMult:2.40, bloom:6.0, speedInner:3.05, speedOuter:0.05, camZ:149, camAng:85 },
+  },
+  mobile: {
+    onboarding: { bhr:12.4, density:0.67, sizeMult:1.40, bloom:6.0, speedInner:1.95, speedOuter:0.00, camZ:200, camAng:11 },
+    general:    { bhr:12.4, density:1.00, sizeMult:2.15, bloom:6.0, speedInner:1.95, speedOuter:0.00, camZ:116, camAng:22 },
+    espejo:     { bhr:12.4, density:0.62, sizeMult:2.60, bloom:4.0, speedInner:1.95, speedOuter:0.00, camZ:200, camAng:85 },
+  },
+};
+
+function getPreset(name) {
+  const set = IS_MOBILE ? PRESETS.mobile : PRESETS.desktop;
+  return set[name] || set.general;
+}
+
+function presetForPath(path) {
+  if (/\/(onboarding|register|login|bienvenido)/.test(path)) return 'onboarding';
+  if (/\/(espejo|mirror)/.test(path))                        return 'espejo';
+  return 'general';
+}
+
+// ── Escena ────────────────────────────────────────────────────────────
+const scene    = new THREE.Scene();
+const camera   = new THREE.PerspectiveCamera(52, innerWidth / innerHeight, 0.1, 3000);
+camera.position.set(0, 20, 149);
+
+const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+renderer.setSize(innerWidth, innerHeight);
+renderer.domElement.id = 'bh-canvas';
+document.body.appendChild(renderer.domElement);
+
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 6.0, 0.70, 0.04);
+composer.addPass(bloom);
+
+// ── Partículas (campo kepleriano unificado) ───────────────────────────
+const BH_R  = 8, N = 190000, R_MIN = BH_R * 1.15, R_MAX = 130;
+const geo = new THREE.BufferGeometry();
+const pos = new Float32Array(N * 3), col = new Float32Array(N * 3);
+const ang = new Float32Array(N),     rad = new Float32Array(N);
+const spd = new Float32Array(N),     sz  = new Float32Array(N);
+const rnd = new Float32Array(N);
+
+for (let i = 0; i < N; i++) {
+  let r = Math.random() < 0.72
+    ? R_MIN + Math.pow(Math.random(), 2.0) * 52
+    : 52 + Math.random() * (R_MAX - 52);
+
+  const a    = Math.random() * Math.PI * 2;
+  const norm = (r - R_MIN) / (R_MAX - R_MIN);
+  const y    = (Math.random() - 0.5) * r * (0.04 + norm * 0.55);
+
+  pos[i*3]   = Math.cos(a) * r;
+  pos[i*3+1] = y;
+  pos[i*3+2] = Math.sin(a) * r;
+
+  const b = Math.max(0.18, 1.0 - norm * 0.82);
+  col[i*3] = col[i*3+1] = col[i*3+2] = b;
+
+  ang[i] = a;
+  rad[i] = r;
+  spd[i] = (1.0 / Math.sqrt(r)) * 2.4 * (0.85 + Math.random() * 0.30);
+  sz[i]  = 0.10 + norm * norm * 2.80 + Math.random() * (0.20 + norm * 1.0);
+  rnd[i] = Math.random();
+}
+
+geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+geo.setAttribute('color',    new THREE.BufferAttribute(col, 3));
+geo.setAttribute('aAngle',   new THREE.BufferAttribute(ang, 1));
+geo.setAttribute('aRadius',  new THREE.BufferAttribute(rad, 1));
+geo.setAttribute('aSpeed',   new THREE.BufferAttribute(spd, 1));
+geo.setAttribute('aSize',    new THREE.BufferAttribute(sz,  1));
+geo.setAttribute('aRand',    new THREE.BufferAttribute(rnd, 1));
+
+const mat = new THREE.ShaderMaterial({
+  uniforms: {
+    uTime:       { value: 0 },
+    uBHR:        { value: getPreset('general').bhr        },
+    uSpeedInner: { value: getPreset('general').speedInner },
+    uSpeedOuter: { value: getPreset('general').speedOuter },
+    uSizeMult:   { value: getPreset('general').sizeMult   },
+    uDensity:    { value: getPreset('general').density    },
+  },
+  vertexShader: `
+    uniform float uTime, uBHR, uSpeedInner, uSpeedOuter, uSizeMult, uDensity;
+    attribute float aAngle, aRadius, aSpeed, aSize, aRand;
+    varying vec3 vColor;
+    void main() {
+      if (aRand > uDensity || aRadius < uBHR) {
+        gl_Position = vec4(2.0,2.0,2.0,1.0); gl_PointSize = 0.0; return;
+      }
+      vColor = color;
+      float norm      = clamp((aRadius - 9.2) / (130.0 - 9.2), 0.0, 1.0);
+      float speedMult = mix(uSpeedInner, uSpeedOuter, norm);
+      float a         = aAngle - uTime * aSpeed * speedMult;
+      vec3 p = position;
+      p.x = cos(a) * aRadius;
+      p.z = sin(a) * aRadius;
+      p.y += sin(a * 3.0 + aRadius * 0.10) * (aRadius * 0.006);
+      vec4 mv = modelViewMatrix * vec4(p, 1.0);
+      gl_PointSize = aSize * uSizeMult * (120.0 / -mv.z);
+      gl_Position  = projectionMatrix * mv;
+    }
+  `,
+  fragmentShader: `
+    varying vec3 vColor;
+    void main() {
+      vec2 uv = gl_PointCoord - 0.5;
+      float d = length(uv);
+      if (d > 0.5) discard;
+      gl_FragColor = vec4(vColor, smoothstep(0.5, 0.04, d) * 0.92);
+    }
+  `,
+  transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, vertexColors: true,
+});
+
+const field = new THREE.Points(geo, mat);
+field.rotation.x = 0.10;
+field.rotation.z = -0.03;
+scene.add(field);
+
+// ── Estado de lerp ────────────────────────────────────────────────────
+const initial = getPreset(presetForPath(location.pathname));
+let cur = { ...initial }, tgt = { ...initial };
+
+function setPreset(name) {
+  Object.assign(tgt, getPreset(name));
+}
+
+// Escucha cambios de preset desde la navegación AJAX
+document.addEventListener('bg:preset', e => setPreset(e.detail));
+
+// ── Mouse ─────────────────────────────────────────────────────────────
+let mx = 0, my = 0, tx = 0, ty = 0;
+document.addEventListener('mousemove', e => {
+  mx = (e.clientX / innerWidth  - 0.5) * 2;
+  my = (e.clientY / innerHeight - 0.5) * 2;
+});
+
+// ── Resize ────────────────────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+  composer.setSize(innerWidth, innerHeight);
+});
+
+// ── Loop ──────────────────────────────────────────────────────────────
+const clock = new THREE.Clock();
+const L = 0.018; // lerp lento = transición cinematográfica (~5s)
+
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+function animate() {
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+
+  tx += (mx - tx) * 0.038;
+  ty += (my - ty) * 0.038;
+
+  // Lerp suave hacia el preset objetivo
+  cur.bhr        = lerp(cur.bhr,        tgt.bhr,        L);
+  cur.density    = lerp(cur.density,    tgt.density,    L);
+  cur.sizeMult   = lerp(cur.sizeMult,   tgt.sizeMult,   L);
+  cur.bloom      = lerp(cur.bloom,      tgt.bloom,      L);
+  cur.speedInner = lerp(cur.speedInner, tgt.speedInner, L);
+  cur.speedOuter = lerp(cur.speedOuter, tgt.speedOuter, L);
+  cur.camZ       = lerp(cur.camZ,       tgt.camZ,       L);
+  cur.camAng     = lerp(cur.camAng,     tgt.camAng,     L);
+
+  mat.uniforms.uBHR.value        = cur.bhr;
+  mat.uniforms.uDensity.value    = cur.density;
+  mat.uniforms.uSizeMult.value   = cur.sizeMult;
+  mat.uniforms.uSpeedInner.value = cur.speedInner;
+  mat.uniforms.uSpeedOuter.value = cur.speedOuter;
+  bloom.strength                 = cur.bloom;
+
+  const angRad = cur.camAng * Math.PI / 180;
+  camera.position.x = Math.sin(t * 0.036) * 3.0 + tx * 4.5;
+  camera.position.y = cur.camZ * Math.sin(angRad) + Math.sin(t * 0.022) * 1.5 - ty * 2.5;
+  camera.position.z = cur.camZ * Math.cos(angRad);
+  camera.lookAt(0, 0, 0);
+
+  mat.uniforms.uTime.value = t;
+  composer.render();
+}
+
+animate();
+})();
+</script>
+
 <!-- SCRIPTS GLOBALES ────────────────────────────────────────────────── -->
 <script>
-// ── STARS CANVAS ─────────────────────────────────────────────────────
-(function() {
-  const canvas = document.getElementById('space-canvas');
-  if (!canvas) return;
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    canvas.style.display = 'none'; return;
-  }
-  const ctx = canvas.getContext('2d', { alpha: false });
-  let w, h, paused = false, last = 0;
-  let rotAngle = 0;
-  let mx = 0.5, my = 0.5, tmx = 0.5, tmy = 0.5;
-
-  // Stars stored in normalized space [-1.1, 1.1]; rotation applied each frame
-  const stars = Array.from({length: 440}, () => ({
-    nx: (Math.random() - 0.5) * 2.2,
-    ny: (Math.random() - 0.5) * 2.2,
-    z: 0.05 + Math.random() * 0.95,
-    size: Math.random() < 0.88 ? 1 : 1.5,
-    baseAlpha: 0.07 + Math.random() * 0.44,
-    phase: Math.random() * Math.PI * 2,
-    twinkle: 0.0003 + Math.random() * 0.0007,
-  }));
-
-  function resize() { w = canvas.width = innerWidth; h = canvas.height = innerHeight; }
-  window.addEventListener('resize', resize); resize();
-
-  window.addEventListener('mousemove', e => { tmx = e.clientX / innerWidth; tmy = e.clientY / innerHeight; });
-  document.addEventListener('visibilitychange', () => {
-    paused = document.hidden;
-    if (!paused) { last = performance.now(); loop(performance.now()); }
-  });
-
-  function loop(now) {
-    if (paused) return;
-    requestAnimationFrame(loop);
-    const dt = Math.min(now - last, 50); last = now;
-
-    mx += (tmx - mx) * 0.05;
-    my += (tmy - my) * 0.05;
-    rotAngle += dt * 0.0000025;  // ~8.6°/min — gentle sky drift
-
-    const hw = w * 0.5, hh = h * 0.5;
-    const cosR = Math.cos(rotAngle), sinR = Math.sin(rotAngle);
-    const pdx = (mx - 0.5) * 70;
-    const pdy = (my - 0.5) * 70;
-
-    ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, w, h);
-
-    for (const s of stars) {
-      const rx = s.nx * cosR - s.ny * sinR;
-      const ry = s.nx * sinR + s.ny * cosR;
-      const px = hw + rx * hw + pdx * (1 - s.z);
-      const py = hh + ry * hh + pdy * (1 - s.z);
-      if (px < -1 || px > w + 1 || py < -1 || py > h + 1) continue;
-      const a = Math.min(1, s.baseAlpha + Math.sin(now * s.twinkle + s.phase) * 0.2);
-      if (a < 0.04) continue;
-      ctx.fillStyle = `rgba(255,255,255,${a})`;
-      ctx.fillRect(px, py, s.size, s.size);
-    }
-  }
-  loop(performance.now());
-})();
-
 // ── SCROLL REVEAL ────────────────────────────────────────────────────
-(function() {
-  const SEL = '.reveal, .reveal-fast';
-  const els = document.querySelectorAll(SEL);
-
-  // Stagger siblings dentro del mismo padre (respeta delays inline ya definidos)
+let _revealObs;
+function initReveal(root) {
+  root = root || document;
+  const els = [...root.querySelectorAll('.reveal, .reveal-fast')];
   els.forEach(el => {
     if (el.style.transitionDelay) return;
     const parent = el.parentElement;
@@ -660,50 +716,30 @@
     const i = sibs.indexOf(el);
     if (i > 0) el.style.transitionDelay = `${Math.min(i * 0.1, 0.4)}s`;
   });
-
-  if ('IntersectionObserver' in window) {
-    const obs = new IntersectionObserver(entries => {
+  if (!_revealObs && 'IntersectionObserver' in window) {
+    _revealObs = new IntersectionObserver(entries => {
       entries.forEach(e => {
-        if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+        if (e.isIntersecting) { e.target.classList.add('visible'); _revealObs.unobserve(e.target); }
       });
     }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
-    els.forEach(el => obs.observe(el));
-  } else {
-    els.forEach(el => el.classList.add('visible'));
   }
-})();
+  els.forEach(el => {
+    if (_revealObs) _revealObs.observe(el);
+    else el.classList.add('visible');
+  });
+}
+initReveal();
 
 // ── THEME SWITCHER ───────────────────────────────────────────────────
 const THEMES = {
-  espejo: {
-    '--accent':'#4ecdc4','--accent2':'#7c6dfa',
-    '--aurora1':'#0C3535','--aurora2':'#180A42',
-    '--luz':'#4ecdc4','--luz-intensa':'#f0c040','--transicion':'#f4a035',
-    '--sombra':'#7c6dfa','--sombra-dom':'#e05050'
-  },
-  endonautas: {
-    '--accent':'#d4b040','--accent2':'#9e6b3a',
-    '--aurora1':'#251600','--aurora2':'#180A42',
-    '--luz':'#d4b040','--luz-intensa':'#f0c050','--transicion':'#c47a35',
-    '--sombra':'#9e6b3a','--sombra-dom':'#a84030'
-  },
-  abismo: {
-    '--accent':'#4488ee','--accent2':'#9966ff',
-    '--aurora1':'#061530','--aurora2':'#180A42',
-    '--luz':'#44aaff','--luz-intensa':'#88ddff','--transicion':'#ff9944',
-    '--sombra':'#8866ff','--sombra-dom':'#ff4455'
-  },
-  crepusculo: {
-    '--accent':'#d46fa0','--accent2':'#7c50d8',
-    '--aurora1':'#280630','--aurora2':'#180A42',
-    '--luz':'#d46fa0','--luz-intensa':'#f0c860','--transicion':'#e08040',
-    '--sombra':'#7c50d8','--sombra-dom':'#e03050'
-  }
+  espejo:     { '--accent':'#4ecdc4','--accent2':'#7c6dfa','--aurora1':'#0C3535','--aurora2':'#180A42','--luz':'#4ecdc4','--luz-intensa':'#f0c040','--transicion':'#f4a035','--sombra':'#7c6dfa','--sombra-dom':'#e05050' },
+  endonautas: { '--accent':'#d4b040','--accent2':'#9e6b3a','--aurora1':'#251600','--aurora2':'#180A42','--luz':'#d4b040','--luz-intensa':'#f0c050','--transicion':'#c47a35','--sombra':'#9e6b3a','--sombra-dom':'#a84030' },
+  abismo:     { '--accent':'#4488ee','--accent2':'#9966ff','--aurora1':'#061530','--aurora2':'#180A42','--luz':'#44aaff','--luz-intensa':'#88ddff','--transicion':'#ff9944','--sombra':'#8866ff','--sombra-dom':'#ff4455' },
+  crepusculo: { '--accent':'#d46fa0','--accent2':'#7c50d8','--aurora1':'#280630','--aurora2':'#180A42','--luz':'#d46fa0','--luz-intensa':'#f0c860','--transicion':'#e08040','--sombra':'#7c50d8','--sombra-dom':'#e03050' },
 };
-
 function applyTheme(name) {
   const t = THEMES[name]; if (!t) return;
-  Object.entries(t).forEach(([k, v]) => document.documentElement.style.setProperty(k, v));
+  Object.entries(t).forEach(([k,v]) => document.documentElement.style.setProperty(k, v));
 }
 function setTheme(btn) {
   document.querySelectorAll('[data-theme]').forEach(b => b.classList.remove('active'));
@@ -717,8 +753,108 @@ function setTheme(btn) {
   const btn = document.querySelector(`[data-theme="${saved}"]`);
   if (btn) { document.querySelectorAll('[data-theme]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
 })();
+
+// ── NAVEGACIÓN SPA ───────────────────────────────────────────────────
+function presetForPath(path) {
+  if (/\/(onboarding|register|login|bienvenido)/.test(path)) return 'onboarding';
+  if (/\/(espejo|mirror)/.test(path))                        return 'espejo';
+  return 'general';
+}
+
+function reRunScripts(container) {
+  [...container.querySelectorAll('script')].forEach(old => {
+    const s = document.createElement('script');
+    [...old.attributes].forEach(a => s.setAttribute(a.name, a.value));
+    s.textContent = old.textContent;
+    old.replaceWith(s);
+  });
+}
+
+function updateNavActive(path) {
+  document.querySelectorAll('.nav-links a').forEach(a => {
+    try {
+      const url = new URL(a.href);
+      a.classList.toggle('nav-active', url.pathname !== '/' && path.startsWith(url.pathname));
+    } catch {}
+  });
+}
+
+let _spaLoading = false;
+
+function spaGo(url) {
+  if (_spaLoading) return;
+  _spaLoading = true;
+
+  const pc = document.getElementById('page-content');
+  pc.style.opacity = '0';
+
+  const reqPath = new URL(url, location.origin).pathname;
+
+  fetch(url, { credentials: 'same-origin', headers: { 'X-Requested-With': 'SPA' } })
+    .then(r => {
+      // Si hubo redirección (ej. auth), hacer carga completa
+      const finalPath = new URL(r.url).pathname;
+      if (!r.ok || finalPath !== reqPath) {
+        location.href = url; return null;
+      }
+      return r.text();
+    })
+    .then(html => {
+      if (!html) return;
+      const doc  = new DOMParser().parseFromString(html, 'text/html');
+      const newPC = doc.getElementById('page-content');
+      if (!newPC) { location.href = url; return; }
+
+      pc.innerHTML = newPC.innerHTML;
+      document.title = doc.title;
+      history.pushState({ spa: true }, '', url);
+      window.scrollTo(0, 0);
+
+      // Transición de preset del fondo
+      document.dispatchEvent(new CustomEvent('bg:preset', { detail: presetForPath(reqPath) }));
+
+      // Re-ejecutar scripts de la nueva página
+      reRunScripts(pc);
+
+      // Re-inicializar scroll reveal para los nuevos elementos
+      initReveal(pc);
+
+      // Marcar nav activo
+      updateNavActive(reqPath);
+
+      requestAnimationFrame(() => {
+        pc.style.opacity = '1';
+        _spaLoading = false;
+      });
+    })
+    .catch(() => { location.href = url; _spaLoading = false; });
+}
+
+// Interceptar clicks en links internos
+document.addEventListener('click', e => {
+  const link = e.target.closest('a[href]');
+  if (!link) return;
+  if (link.target && link.target !== '_self') return;
+  if (link.hasAttribute('download') || link.hasAttribute('data-no-spa')) return;
+  const href = link.getAttribute('href');
+  if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+  try {
+    const url = new URL(href, location.origin);
+    if (url.origin !== location.origin) return;
+    e.preventDefault();
+    if (url.pathname + url.search === location.pathname + location.search) return;
+    spaGo(url.href);
+  } catch {}
+});
+
+// Botón atrás / adelante del navegador
+window.addEventListener('popstate', () => {
+  spaGo(location.href);
+});
+
+// Marcar nav activo en carga inicial
+updateNavActive(location.pathname);
 </script>
 
-{% block extra_body %}{% endblock %}
 </body>
 </html>

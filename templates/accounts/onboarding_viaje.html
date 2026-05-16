@@ -566,7 +566,14 @@
       <div class="vj-opt" data-value="entenderme" onclick="selectOpt(this,'s2opts')">
         <span class="vj-opt-dot"></span>Queriendo entenderme de verdad
       </div>
+      <div class="vj-opt" data-value="otro" onclick="selectOpt(this,'s2opts')">
+        <span class="vj-opt-dot"></span>Ninguna de estas — escríbelo tú
+      </div>
     </div>
+    <textarea class="vj-textarea" id="s2otro"
+      placeholder="Describe cómo llegas aquí…"
+      rows="2" style="display:none;margin-bottom:1rem;min-height:72px;"
+      oninput="onOtroInput('s2btn','s2otro')"></textarea>
     <button class="vj-btn" id="s2btn" disabled onclick="saveAndNext('onboarding_entry_point','s2opts')">Continuar →</button>
   </section>
 
@@ -595,7 +602,14 @@
       <div class="vj-opt" data-value="todo" onclick="selectOpt(this,'s3opts')">
         <span class="vj-opt-dot"></span>En todo al mismo tiempo
       </div>
+      <div class="vj-opt" data-value="otro" onclick="selectOpt(this,'s3opts')">
+        <span class="vj-opt-dot"></span>Ninguna de estas — escríbelo tú
+      </div>
     </div>
+    <textarea class="vj-textarea" id="s3otro"
+      placeholder="Describe dónde sientes el ruido…"
+      rows="2" style="display:none;margin-bottom:1rem;min-height:72px;"
+      oninput="onOtroInput('s3btn','s3otro')"></textarea>
     <button class="vj-btn" id="s3btn" disabled onclick="saveAndNext('onboarding_noise_area','s3opts')">Continuar →</button>
   </section>
 
@@ -767,6 +781,7 @@
 
     <div class="vj-birth-error" id="birthError"></div>
     <button class="vj-btn" id="s8btn" onclick="saveBirth()">Calibrar mi mapa</button>
+    <button class="vj-btn-ghost" onclick="skipBirth()">Omitir por ahora →</button>
   </section>
 
   <!-- ══════════════════════════════════════════
@@ -912,10 +927,32 @@
   function selectOpt(el, groupId) {
     document.querySelectorAll(`#${groupId} .vj-opt`).forEach(o => o.classList.remove('selected'));
     el.classList.add('selected');
-    // habilitar botón del grupo
-    const btnMap = { s2opts: 's2btn', s3opts: 's3btn' };
-    const btnId = btnMap[groupId];
-    if (btnId) document.getElementById(btnId).disabled = false;
+
+    const otroMap = { s2opts: 's2otro', s3opts: 's3otro' };
+    const btnMap  = { s2opts: 's2btn',  s3opts: 's3btn'  };
+    const otroId  = otroMap[groupId];
+    const btnId   = btnMap[groupId];
+    const isOtro  = el.dataset.value === 'otro';
+
+    if (otroId) {
+      const otroEl = document.getElementById(otroId);
+      otroEl.style.display = isOtro ? 'block' : 'none';
+      if (isOtro) otroEl.focus();
+    }
+    if (btnId) {
+      const btn = document.getElementById(btnId);
+      if (isOtro) {
+        const txt = otroId ? (document.getElementById(otroId)?.value || '').trim() : '';
+        btn.disabled = txt.length < 3;
+      } else {
+        btn.disabled = false;
+      }
+    }
+  }
+
+  function onOtroInput(btnId, inputId) {
+    const val = document.getElementById(inputId).value.trim();
+    document.getElementById(btnId).disabled = val.length < 3;
   }
 
   /* ── Selección multi ── */
@@ -930,8 +967,20 @@
   async function saveAndNext(field, groupId) {
     const sel = document.querySelector(`#${groupId} .vj-opt.selected`);
     if (!sel) return;
-    await postJson('/onboarding/viaje/guardar/', { [field]: sel.dataset.value });
+    let value = sel.dataset.value;
+    if (value === 'otro') {
+      const otroMap = { s2opts: 's2otro', s3opts: 's3otro' };
+      const txt = (document.getElementById(otroMap[groupId])?.value || '').trim();
+      if (!txt) return;
+      value = txt;
+    }
+    await postJson('/onboarding/viaje/guardar/', { [field]: value });
     nextScreen();
+  }
+
+  /* ── Omitir datos natales ── */
+  function skipBirth() {
+    showScreen(12);
   }
 
   /* ── Guardar multi y avanzar ── */

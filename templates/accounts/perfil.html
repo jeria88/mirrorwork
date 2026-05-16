@@ -190,6 +190,21 @@
   }
   .viaje-select:focus { border-color: var(--accent); }
   .viaje-select option { background: #1a1a26; color: var(--text); }
+  .viaje-otro-input {
+    margin-top: 0.5rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+    font-size: 0.9rem;
+    color: var(--text);
+    font-family: var(--font-ui);
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+  }
+  .viaje-otro-input:focus { border-color: var(--accent); }
 
   .viaje-checks {
     display: flex;
@@ -308,19 +323,25 @@
 
         <div class="field">
           <label>¿Cómo llegaste aquí?</label>
-          <select name="onboarding_entry_point" class="viaje-select">
+          <select name="onboarding_entry_point" id="selectEntry" class="viaje-select" onchange="onSelectChange('selectEntry','entryOtro')">
             <option value="">— Sin responder —</option>
             <option value="cambio"      {% if profile.onboarding_entry_point == 'cambio' %}selected{% endif %}>En medio de un cambio que no pedí</option>
             <option value="ciclos"      {% if profile.onboarding_entry_point == 'ciclos' %}selected{% endif %}>Repitiendo ciclos que no entiendo</option>
             <option value="busqueda"    {% if profile.onboarding_entry_point == 'busqueda' %}selected{% endif %}>Buscando algo que no sé nombrar</option>
             <option value="algo-mas"    {% if profile.onboarding_entry_point == 'algo-mas' %}selected{% endif %}>Sintiendo que hay algo más de lo que veo</option>
             <option value="entenderme"  {% if profile.onboarding_entry_point == 'entenderme' %}selected{% endif %}>Queriendo entenderme de verdad</option>
+            <option value="otro" {% if entry_is_custom %}selected{% endif %}>Otra respuesta (escribirla)</option>
           </select>
+          <input type="text" name="onboarding_entry_point_texto" id="entryOtro"
+            class="viaje-otro-input"
+            placeholder="Describe cómo llegaste aquí…"
+            value="{% if entry_is_custom %}{{ profile.onboarding_entry_point }}{% endif %}"
+            style="display:{% if entry_is_custom %}block{% else %}none{% endif %};">
         </div>
 
         <div class="field">
           <label>¿Dónde sientes más el ruido?</label>
-          <select name="onboarding_noise_area" class="viaje-select">
+          <select name="onboarding_noise_area" id="selectNoise" class="viaje-select" onchange="onSelectChange('selectNoise','noiseOtro')">
             <option value="">— Sin responder —</option>
             <option value="trabajo"    {% if profile.onboarding_noise_area == 'trabajo' %}selected{% endif %}>Trabajo o dirección</option>
             <option value="relaciones" {% if profile.onboarding_noise_area == 'relaciones' %}selected{% endif %}>Relaciones</option>
@@ -328,7 +349,13 @@
             <option value="identidad"  {% if profile.onboarding_noise_area == 'identidad' %}selected{% endif %}>Quién soy</option>
             <option value="proposito"  {% if profile.onboarding_noise_area == 'proposito' %}selected{% endif %}>Para qué estoy aquí</option>
             <option value="todo"       {% if profile.onboarding_noise_area == 'todo' %}selected{% endif %}>En todo al mismo tiempo</option>
+            <option value="otro" {% if noise_is_custom %}selected{% endif %}>Otra respuesta (escribirla)</option>
           </select>
+          <input type="text" name="onboarding_noise_area_texto" id="noiseOtro"
+            class="viaje-otro-input"
+            placeholder="Describe dónde sientes el ruido…"
+            value="{% if noise_is_custom %}{{ profile.onboarding_noise_area }}{% endif %}"
+            style="display:{% if noise_is_custom %}block{% else %}none{% endif %};">
         </div>
 
         <div class="field">
@@ -389,4 +416,15 @@
   </div>
 
 </div>
+{% endblock %}
+
+{% block extra_body %}
+<script>
+  function onSelectChange(selectId, inputId) {
+    const sel = document.getElementById(selectId);
+    const inp = document.getElementById(inputId);
+    inp.style.display = sel.value === 'otro' ? 'block' : 'none';
+    if (sel.value === 'otro') inp.focus();
+  }
+</script>
 {% endblock %}

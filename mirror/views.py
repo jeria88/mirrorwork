@@ -425,9 +425,23 @@ def _reseed_brain(user):
     # Build fresh base sections
     momento_lines = ['## Momento actual']
     if p.onboarding_entry_point:
-        momento_lines.append(_BRAIN_ENTRY_MAP.get(p.onboarding_entry_point, p.onboarding_entry_point))
+        entry_mapped = _BRAIN_ENTRY_MAP.get(p.onboarding_entry_point)
+        if entry_mapped:
+            momento_lines.append(f"Llegó aquí {entry_mapped}.")
+        else:
+            momento_lines.append(
+                f'Cuando se le preguntó "¿Cómo llegas aquí?", respondió con sus propias palabras: '
+                f'"{p.onboarding_entry_point}".'
+            )
     if p.onboarding_noise_area:
-        momento_lines.append(f"Siente ruido principalmente en: {_BRAIN_NOISE_MAP.get(p.onboarding_noise_area, p.onboarding_noise_area)}.")
+        noise_mapped = _BRAIN_NOISE_MAP.get(p.onboarding_noise_area)
+        if noise_mapped:
+            momento_lines.append(f"Siente ruido principalmente en: {noise_mapped}.")
+        else:
+            momento_lines.append(
+                f'Cuando se le preguntó "¿Dónde sientes más el ruido?", respondió con sus propias palabras: '
+                f'"{p.onboarding_noise_area}".'
+            )
 
     nucleo = getattr(p, 'onboarding_nucleo', {}) or {}
     nucleo_section = ''
