@@ -117,35 +117,56 @@ PASSWORD_RESET_TIMEOUT = 3600  # 1 hora
 DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY', '')
 
 # ── Hotmart ────────────────────────────────────────────────────────────────────
-# Set these in Railway / .env after creating the products in Hotmart.
-# HOTMART_WEBHOOK_TOKEN  → "Seguridad del webhook" en Hotmart > Herramientas > Webhook
-# HOTMART_PRODUCT_ID_*  → ID numérico del producto en Hotmart
+# Variables de entorno a configurar en Railway / .env:
+#   HOTMART_WEBHOOK_TOKEN       → "Seguridad del webhook" en Hotmart > Herramientas
+#   HOTMART_OFFER_BASIC         → offer code del plan Navegante
+#   HOTMART_OFFER_SEED          → offer code del plan Practicante
+#   HOTMART_PACK_200/600/2000   → offer codes de los packs de fractones
 HOTMART_WEBHOOK_TOKEN = os.getenv('HOTMART_WEBHOOK_TOKEN', '')
-# Offer codes (off=xxxx en la URL de checkout) → plan interno
+
+# Suscripciones: offer_code → plan interno
 HOTMART_OFFER_PLAN_MAP = {
     os.getenv('HOTMART_OFFER_BASIC', ''):  'navegante',
-    os.getenv('HOTMART_OFFER_SEED', ''): 'practicante',
+    os.getenv('HOTMART_OFFER_SEED',  ''):  'practicante',
 }
-# Checkout URLs
+
+# Packs de fractones (pago único): offer_code → cantidad de fractones
+HOTMART_PACK_MAP = {
+    os.getenv('HOTMART_PACK_200',  ''): 200,
+    os.getenv('HOTMART_PACK_600',  ''): 600,
+    os.getenv('HOTMART_PACK_2000', ''): 2000,
+}
+
+# URLs de checkout
 HOTMART_CHECKOUT_URLS = {
-    'navegante':   os.getenv('HOTMART_CHECKOUT_BASIC', '#'),
-    'practicante': os.getenv('HOTMART_CHECKOUT_SEED', '#'),
+    'navegante':   os.getenv('HOTMART_CHECKOUT_BASIC',    '#'),
+    'practicante': os.getenv('HOTMART_CHECKOUT_SEED',     '#'),
+    'pack_200':    os.getenv('HOTMART_CHECKOUT_PACK_200',  '#'),
+    'pack_600':    os.getenv('HOTMART_CHECKOUT_PACK_600',  '#'),
+    'pack_2000':   os.getenv('HOTMART_CHECKOUT_PACK_2000', '#'),
 }
+
 DEEPSEEK_BASE_URL = 'https://api.deepseek.com'
-DEEPSEEK_MODEL = 'deepseek-chat'
+DEEPSEEK_MODEL    = 'deepseek-chat'
 
+# Fractones mensuales por plan (se reemplazan cada ciclo, expiran)
 TOKEN_PLANS = {
-    'free':        {'monthly_tokens': 50,  'client_profiles': 0,  'tokens_per_client': 0},
-    'navegante':   {'monthly_tokens': 400, 'client_profiles': 0,  'tokens_per_client': 0},
-    'practicante': {'monthly_tokens': 600, 'client_profiles': 10, 'tokens_per_client': 150},
-    'empresa':     {'monthly_tokens': 9999,'client_profiles': 999,'tokens_per_client': 300},
+    'free':        {'monthly_fractones': 100,  'client_profiles': 0},
+    'navegante':   {'monthly_fractones': 600,  'client_profiles': 0},
+    'practicante': {'monthly_fractones': 3000, 'client_profiles': 10},
+    'empresa':     {'monthly_fractones': 9999, 'client_profiles': 999},
 }
 
+# Costo en fractones por acción (0 = gratuito)
 TOKEN_COSTS = {
-    'psychometric_test': 0,
-    'ai_analysis':       5,
-    'mirror_session':    10,
-    'journey_session':   15,
-    'cnv_roleplay':      8,
-    'report_generate':   3,
+    'espejo_exchange': 4,   # 1 mensaje + respuesta con Espejo
+    'ai_insight':      20,  # insight IA tras completar test
+    'report':          30,  # reporte agregado
+}
+
+# Fractones ganados por evento (se acumulan, nunca expiran)
+FRACTON_REWARDS = {
+    'test_completed':      8,
+    'dimension_completed': 25,
+    'streak_weekly':       15,
 }
