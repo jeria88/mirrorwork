@@ -512,7 +512,10 @@
 (async () => {
 // Solo cargar el fondo cósmico si el aesthetic del usuario es 'cosmos'
 const AESTHETIC = document.body.dataset.aesthetic || 'cosmos';
-if (AESTHETIC !== 'cosmos') return;
+// Fondos alternativos implementados — cuando mandala/arbol tengan su módulo,
+// agregarlos aquí para que cosmos ceda el paso.
+const AESTHETIC_HAS_OWN_BG = { /* mandala: true, arbol: true */ };
+if (AESTHETIC_HAS_OWN_BG[AESTHETIC]) return;
 
 const THREE               = await import('three');
 const { EffectComposer }  = await import('three/addons/postprocessing/EffectComposer.js');
