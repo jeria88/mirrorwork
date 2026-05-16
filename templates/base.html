@@ -818,7 +818,7 @@ function spaGo(url) {
       const newPC = doc.getElementById('page-content');
       if (!newPC) { location.href = url; return; }
 
-      // Swap page-specific styles ({% block extra_head %})
+      // Swap page-specific styles (extra_head block)
       document.head.querySelectorAll('[data-page-style]').forEach(el => el.remove());
       doc.head.querySelectorAll('style, link[rel="stylesheet"]').forEach(el => {
         if (!el.hasAttribute('data-global')) {
