@@ -1,9 +1,19 @@
 {% extends "base.html" %}
 {% block title %}Mi progreso — MirrorWork{% endblock %}
 
-{% block content %}
-<style>
+{% block extra_head %}
+<style data-page-style>
+  .progress-wrap {
+    background: rgba(0,0,0,0.88);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 20px;
+    padding: 2rem 2rem 2.5rem;
+    max-width: 800px;
+    margin: 2rem auto;
+  }
+
   .reports-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 2rem; }
+
   .stats-row {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -11,9 +21,9 @@
     margin-bottom: 2.5rem;
   }
   .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 12px;
     padding: 1.25rem 1.5rem;
   }
   .stat-number { font-size: 2.5rem; font-weight: 800; color: var(--accent); line-height: 1; }
@@ -23,13 +33,10 @@
 
   .dim-rows { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 2.5rem; }
   .dim-row {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 0.7rem 1rem;
+    display: flex; align-items: center; gap: 1rem;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px; padding: 0.7rem 1rem;
   }
   .dim-row-name { flex: 1; font-size: 0.88rem; color: var(--text); }
   .dim-row-count { font-size: 0.82rem; color: var(--muted); white-space: nowrap; }
@@ -37,21 +44,19 @@
 
   .recent-list { display: flex; flex-direction: column; gap: 0.6rem; }
   .recent-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    display: flex; align-items: center; justify-content: space-between;
     gap: 1rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 0.7rem 1rem;
-    flex-wrap: wrap;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px; padding: 0.7rem 1rem; flex-wrap: wrap;
   }
   .recent-name { font-size: 0.88rem; font-weight: 600; }
   .recent-dim { font-size: 0.75rem; color: var(--muted); }
 </style>
+{% endblock %}
 
-<div class="container" style="max-width:800px">
+{% block content %}
+<div class="progress-wrap">
   <div class="reports-title">Mi progreso</div>
 
   <div class="stats-row">
@@ -101,5 +106,5 @@
     <a href="{% url 'psychometrics:test_list' %}" class="btn btn-primary" style="margin-top:1rem">Explorar tests</a>
   </div>
   {% endif %}
-</div>
+</div>{# progress-wrap #}
 {% endblock %}
