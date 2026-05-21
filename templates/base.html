@@ -1509,64 +1509,73 @@ function updateNavActive(path) {
 }
 
 let _spaLoading = false;
+let _lastClick = { x: 0, y: 0 };
 
 function spaGo(url) {
   if (_spaLoading) return;
   _spaLoading = true;
 
   const pc = document.getElementById('page-content');
-  pc.style.opacity = '0';
-
   const reqPath = new URL(url, location.origin).pathname;
 
-  fetch(url, { credentials: 'same-origin', headers: { 'X-Requested-With': 'SPA' } })
+  // Iris close — pinch at click origin
+  const ox = ((_lastClick.x || innerWidth / 2) / innerWidth * 100).toFixed(1);
+  const oy = ((_lastClick.y || innerHeight / 2) / innerHeight * 100).toFixed(1);
+  const origin = ox + '% ' + oy + '%';
+  pc.style.transition = 'clip-path 280ms cubic-bezier(0.55,0,1,0.45)';
+  pc.style.clipPath = 'circle(0% at ' + origin + ')';
+
+  const minDelay = new Promise(r => setTimeout(r, 290));
+  const fetchP = fetch(url, { credentials: 'same-origin', headers: { 'X-Requested-With': 'SPA' } })
     .then(r => {
-      // Si hubo redirección (ej. auth), hacer carga completa
       const finalPath = new URL(r.url).pathname;
-      if (!r.ok || finalPath !== reqPath) {
-        location.href = url; return null;
-      }
+      if (!r.ok || finalPath !== reqPath) { location.href = url; return null; }
       return r.text();
-    })
-    .then(html => {
-      if (!html) return;
-      const doc  = new DOMParser().parseFromString(html, 'text/html');
-      const newPC = doc.getElementById('page-content');
-      if (!newPC) { location.href = url; return; }
+    });
 
-      // Swap page-specific styles (extra_head block)
-      document.head.querySelectorAll('[data-page-style]').forEach(el => el.remove());
-      doc.head.querySelectorAll('style, link[rel="stylesheet"]').forEach(el => {
-        if (!el.hasAttribute('data-global')) {
-          const clone = el.cloneNode(true);
-          clone.setAttribute('data-page-style', '');
-          document.head.appendChild(clone);
-        }
-      });
+  Promise.all([fetchP, minDelay]).then(([html]) => {
+    if (html === null) return;
+    if (!html) { location.href = url; _spaLoading = false; return; }
 
-      pc.innerHTML = newPC.innerHTML;
-      document.title = doc.title;
-      history.pushState({ spa: true }, '', url);
-      window.scrollTo(0, 0);
+    const doc   = new DOMParser().parseFromString(html, 'text/html');
+    const newPC = doc.getElementById('page-content');
+    if (!newPC) { location.href = url; _spaLoading = false; return; }
 
-      // Transición de preset del fondo
-      document.dispatchEvent(new CustomEvent('bg:preset', { detail: presetForPath(reqPath) }));
+    // Swap page-specific styles (extra_head block)
+    document.head.querySelectorAll('[data-page-style]').forEach(el => el.remove());
+    doc.head.querySelectorAll('style, link[rel="stylesheet"]').forEach(el => {
+      if (!el.hasAttribute('data-global')) {
+        const clone = el.cloneNode(true);
+        clone.setAttribute('data-page-style', '');
+        document.head.appendChild(clone);
+      }
+    });
 
-      // Re-ejecutar scripts de la nueva página
-      reRunScripts(pc);
+    pc.innerHTML = newPC.innerHTML;
+    document.title = doc.title;
+    history.pushState({ spa: true }, '', url);
+    window.scrollTo(0, 0);
 
-      // Re-inicializar scroll reveal para los nuevos elementos
-      initReveal(pc);
+    document.dispatchEvent(new CustomEvent('bg:preset', { detail: presetForPath(reqPath) }));
+    reRunScripts(pc);
+    initReveal(pc);
+    updateNavActive(reqPath);
 
-      // Marcar nav activo
-      updateNavActive(reqPath);
-
+    // Iris open — expand from same origin
+    pc.style.transition = 'none';
+    pc.style.clipPath = 'circle(0% at ' + origin + ')';
+    requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        pc.style.opacity = '1';
-        _spaLoading = false;
+        pc.style.transition = 'clip-path 380ms cubic-bezier(0,0.55,0.45,1)';
+        pc.style.clipPath = 'circle(150% at ' + origin + ')';
+        setTimeout(() => {
+          pc.style.clipPath = '';
+          pc.style.transition = '';
+          _spaLoading = false;
+        }, 400);
       });
-    })
-    .catch(() => { location.href = url; _spaLoading = false; });
+    });
+  }).catch(() => { location.href = url; _spaLoading = false; });
 }
 
 // Interceptar clicks en links internos
@@ -1582,6 +1591,7 @@ document.addEventListener('click', e => {
     if (url.origin !== location.origin) return;
     e.preventDefault();
     if (url.pathname + url.search === location.pathname + location.search) return;
+    _lastClick = { x: e.clientX, y: e.clientY };
     spaGo(url.href);
   } catch {}
 });
