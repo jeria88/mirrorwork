@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>MirrorWork VR</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#000; overflow:hidden; font-family:system-ui,sans-serif; }
+
+    /* ── Overlay entrada ── */
+    #overlay {
+      position:fixed; inset:0; z-index:200;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      background:#000; color:#fff; text-align:center; padding:2rem;
+    }
+    .ov-tag   { font-size:.7rem; letter-spacing:.35em; text-transform:uppercase; color:#4ecdc4; margin-bottom:.5rem; }
+    .ov-name  { font-size:2rem; font-weight:300; margin-bottom:1.5rem; }
+    .ov-hint  { font-size:.78rem; color:#7070a0; line-height:2; margin-bottom:2rem; }
+    #btn-vr   {
+      padding:.9rem 2.5rem; border:1px solid #4ecdc4; border-radius:100px;
+      background:transparent; color:#4ecdc4; font-size:.95rem; letter-spacing:.08em;
+      cursor:pointer; touch-action:manipulation; transition:background .2s;
+    }
+    #btn-vr:active { background:rgba(78,205,196,.15); }
+
+    /* ── UI en escena ── */
+    #hud { position:fixed; inset:0; pointer-events:none; z-index:50; display:none; }
+
+    /* Botón volver — siempre clicable */
+    #btn-back {
+      position:fixed; top:1rem; left:1rem; z-index:100; display:none;
+      font-size:.7rem; letter-spacing:.12em; text-transform:uppercase;
+      color:rgba(255,255,255,.45); text-decoration:none; padding:.4rem .8rem;
+      border:1px solid rgba(255,255,255,.12); border-radius:100px;
+      pointer-events:auto; transition:color .2s;
+    }
+    #btn-back:hover { color:#4ecdc4; border-color:#4ecdc4; }
+
+    /* Selector de escena */
+    #scene-ui {
+      position:fixed; bottom:1.2rem; width:100%; display:none;
+      justify-content:center; gap:.8rem; z-index:100;
+    }
+    .s-dot {
+      width:9px; height:9px; border-radius:50%;
+      background:rgba(255,255,255,.2); border:none; cursor:pointer;
+      touch-action:manipulation; pointer-events:auto; transition:background .2s;
+    }
+    .s-dot.active { background:#4ecdc4; }
+
+    /* Miras VR */
+    #crosshairs { position:fixed; inset:0; pointer-events:none; z-index:50; display:none; }
+    .ch { position:absolute; top:50%; width:16px; height:16px; transform:translate(-50%,-50%); }
+    .ch::before,.ch::after { content:''; position:absolute; background:rgba(255,255,255,.5); }
+    .ch::before { width:1px; height:100%; left:50%; }
+    .ch::after  { height:1px; width:100%; top:50%; }
+    #ch-l { left:25%; } #ch-r { left:75%; }
+
+    /* Label escena */
+    #scene-label {
+      position:fixed; top:1rem; left:50%; transform:translateX(-50%);
+      font-size:.65rem; letter-spacing:.3em; text-transform:uppercase;
+      color:#4ecdc4; z-index:100; opacity:0; transition:opacity .4s;
+      pointer-events:none; white-space:nowrap; display:none;
+    }
+
+    /* Hint escritorio */
+    .desk-hint {
+      font-size:.65rem; color:#3a3a5a; margin-top:1.5rem;
+      letter-spacing:.06em;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Overlay ── -->
+<div id="overlay">
+  <p class="ov-tag">MirrorWork VR</p>
+  <h1 class="ov-name">Hola, {{ user_name }}</h1>
+  <p class="ov-hint">
+    Coloca el teléfono en el visor.<br>
+    El giroscopio te permite mirar<br>en todas direcciones.
+  </p>
+  <button id="btn-vr">✦ Entrar al túnel</button>
+  <p class="desk-hint">Escritorio: arrastra · Espacio: cambiar escena</p>
+</div>
+
+<a href="{% url 'dashboard' %}" id="btn-back">← Salir de VR</a>
+
+<div id="crosshairs" aria-hidden="true">
+  <div class="ch" id="ch-l"></div>
+  <div class="ch" id="ch-r"></div>
+</div>
+<div id="scene-ui">
+  <button class="s-dot active" data-i="0" title="Corriente"></button>
+  <button class="s-dot"        data-i="1" title="Obsidiana"></button>
+  <button class="s-dot"        data-i="2" title="Hexagonal"></button>
+  <button class="s-dot"        data-i="3" title="Fibonacci"></button>
+</div>
+<div id="scene-label"></div>
+
+<!-- Datos de Django → JS -->
+<script>
+const VR = {
+  userName:    "{{ user_name|escapejs }}",
+  aesthetic:   "{{ map_aesthetic }}",
+  mapPct:      {{ map_pct }},
+  tokens:      {{ token_balance }},
+  completed:   {{ completed_tests }},
+  total:       {{ total_tests }},
+  question:    "{{ onboarding_question|escapejs|truncatechars:80 }}",
+  initScene:   {{ initial_scene }},
+};
+</script>
+
+<script type="importmap">{"imports":{
+  "three":"https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"
+}}</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { StereoEffect } from 'three/addons/effects/StereoEffect.js';
+
+// ── Irracionales chamánicos ───────────────────────────────────────────────
+const PHI = 1.61803398875, PI = Math.PI, E = Math.E, SQ7 = Math.sqrt(7);
+
+// ── Renderer ──────────────────────────────────────────────────────────────
+const renderer = new THREE.WebGLRenderer({ antialias:false, powerPreference:'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+renderer.setSize(innerWidth, innerHeight);
+document.body.appendChild(renderer.domElement);
+
+const effect = new StereoEffect(renderer);
+effect.eyeSeparation = 0.064;
+effect.setSize(innerWidth, innerHeight);
+
+const scene  = new THREE.Scene();
+scene.background = new THREE.Color(0x000000);
+const camera = new THREE.PerspectiveCamera(90, innerWidth/innerHeight, 0.1, 600);
+
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  effect.setSize(innerWidth, innerHeight);
+});
+
+// ── Vertex compartido ─────────────────────────────────────────────────────
+const VERT = `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`;
+
+// ── Shaders del túnel ─────────────────────────────────────────────────────
+const TUNNEL_FRAGS = [
+
+  /* 0 — Corriente */`
+  uniform float uT; uniform float uFade; varying vec2 vUv;
+  const float PI=3.14159265,PHI=1.61803398875,SQ3=1.73205080;
+  vec3 hsl(float h,float s,float l){
+    float h6=fract(h)*6.,x=1.-abs(mod(h6,2.)-1.);
+    vec3 r=h6<1.?vec3(1,x,0):h6<2.?vec3(x,1,0):h6<3.?vec3(0,1,x):h6<4.?vec3(0,x,1):h6<5.?vec3(x,0,1):vec3(1,0,x);
+    return r*s*(.5+l*.5)+(1.-s)*l;
+  }
+  void main(){
+    float a=vUv.x*PI*2.,d=vUv.y*10.-uT*1.4;
+    float w=(sin(a*3.+d*1.1+uT*.5)+sin(a*5.*PHI-d*.9+uT*.7)+sin((a+d*.7)*2.5+uT*SQ3*.4))/3.;
+    gl_FragColor=vec4(hsl(.50+w*.13,0.85,0.55)*max(0.,0.35+w*.65)*uFade,1.);
+  }`,
+
+  /* 1 — Obsidiana */`
+  uniform float uT; uniform float uFade; varying vec2 vUv;
+  const float PI=3.14159265,SQ2=1.41421356,SQ3=1.73205080;
+  void main(){
+    float a=vUv.x*PI*2.,d=vUv.y*12.-uT*2.5;
+    float freq=3.5+sin(uT*SQ3*.3)*2.2, rot=uT*SQ2*.15;
+    float li=pow(max(0.,sin(freq*(cos(rot)*a+sin(rot)*d)-uT*2.5)),5.);
+    vec3 col=li<.5?mix(vec3(.03,0.,.06),vec3(.35,0.,.55),li*2.):mix(vec3(.35,0.,.55),vec3(1.,.92,1.),(li-.5)*2.);
+    gl_FragColor=vec4(col*uFade,1.);
+  }`,
+
+  /* 2 — Hexagonal */`
+  uniform float uT; uniform float uFade; varying vec2 vUv;
+  const float PI=3.14159265,PHI=1.61803398875,SQ7=2.64575131;
+  vec3 hsl(float h,float s,float l){
+    float h6=fract(h)*6.,x=1.-abs(mod(h6,2.)-1.);
+    vec3 r=h6<1.?vec3(1,x,0):h6<2.?vec3(x,1,0):h6<3.?vec3(0,1,x):h6<4.?vec3(0,x,1):h6<5.?vec3(x,0,1):vec3(1,0,x);
+    return r*s*(.5+l*.5)+(1.-s)*l;
+  }
+  void main(){
+    float a=vUv.x*PI*2.,d=vUv.y*10.-uT*1.8;
+    float A=uT*PHI*.2,freq=4.+sin(uT*SQ7*.5)*3.;
+    float act=(cos(freq*(cos(A)*a+sin(A)*d)+uT*1.5)+cos(freq*(cos(A+PI/3.)*a+sin(A+PI/3.)*d)-uT*1.5)+cos(freq*(cos(A-PI/3.)*a+sin(A-PI/3.)*d)+uT*.75))/3.;
+    gl_FragColor=vec4(hsl(fract(act*.5+uT*.04+vUv.x*.15),.9,.55)*(max(0.,act)*.85+.08)*uFade,1.);
+  }`,
+
+  /* 3 — Fibonacci */`
+  uniform float uT; uniform float uFade; varying vec2 vUv;
+  const float PI=3.14159265,PHI=1.61803398875,LOGPHI=0.48121182506;
+  vec3 hsl(float h,float s,float l){
+    float h6=fract(h)*6.,x=1.-abs(mod(h6,2.)-1.);
+    vec3 r=h6<1.?vec3(1,x,0):h6<2.?vec3(x,1,0):h6<3.?vec3(0,1,x):h6<4.?vec3(0,x,1):h6<5.?vec3(x,0,1):vec3(1,0,x);
+    return r*s*(.5+l*.5)+(1.-s)*l;
+  }
+  void main(){
+    float a=vUv.x*PI*2.,d=vUv.y*8.-uT*2.2;
+    float sN=log(max(.001,abs(d)*.25+.1))/LOGPHI;
+    float fib=(sin(a*8.-sN*2.+uT*1.3)*sin(a*13.+d*1.5-uT*.9)+sin((a+sN*.618)*5.+uT*PHI*.4))/2.;
+    gl_FragColor=vec4(hsl(fract(fib*.4+a/(PI*2.)*.25+uT*.03),.85,.6)*(pow(max(0.,fib*.5+.5),1.4)*.9+.05)*uFade,1.);
+  }`
+];
+
+const SCENE_SPEEDS = [1.0, 2.2, 1.5, 1.9];
+const SCENE_NAMES  = ['Corriente', 'Obsidiana', 'Hexagonal', 'Fibonacci'];
+
+const tunnelUnis = { uT:{ value:0 }, uFade:{ value:1 } };
+const tunnelMats = TUNNEL_FRAGS.map(f => new THREE.ShaderMaterial({
+  uniforms: tunnelUnis, vertexShader: VERT, fragmentShader: f, side: THREE.BackSide
+}));
+
+const tunnelGeo = new THREE.CylinderGeometry(14, 14, 500, 72, 48, true);
+tunnelGeo.rotateX(PI/2);
+let curScene = VR.initScene;
+const tunnel = new THREE.Mesh(tunnelGeo, tunnelMats[curScene]);
+scene.add(tunnel);
+
+// Estrellas interiores
+const sGeo = new THREE.BufferGeometry();
+const sPos = new Float32Array(2000*3);
+for (let i=0;i<2000;i++){
+  const a=Math.random()*PI*2, r=2+Math.random()*10;
+  sPos[i*3]=Math.cos(a)*r; sPos[i*3+1]=Math.sin(a)*r; sPos[i*3+2]=(Math.random()-.5)*500;
+}
+sGeo.setAttribute('position', new THREE.BufferAttribute(sPos,3));
+scene.add(new THREE.Points(sGeo, new THREE.PointsMaterial({
+  size:.1, color:0xffffff, transparent:true, opacity:.45,
+  blending:THREE.AdditiveBlending, depthWrite:false
+})));
+
+// ── Panel de perfil — CanvasTexture + shader de revelación ────────────────
+const PW = 1024, PH = 512;
+const panelCanvas = document.createElement('canvas');
+panelCanvas.width = PW; panelCanvas.height = PH;
+
+function drawPanel() {
+  const c = panelCanvas.getContext('2d');
+  c.clearRect(0,0,PW,PH);
+
+  // Fondo cuarzo
+  c.fillStyle = 'rgba(0,0,0,0.88)';
+  _rr(c,0,0,PW,PH,32); c.fill();
+
+  // Borde teal
+  c.strokeStyle = 'rgba(78,205,196,0.35)';
+  c.lineWidth = 2;
+  _rr(c,1,1,PW-2,PH-2,31); c.stroke();
+
+  // Línea superior decorativa
+  c.fillStyle = 'rgba(78,205,196,0.2)';
+  c.fillRect(40, 58, PW-80, 1);
+
+  // Tag
+  c.fillStyle = '#4ecdc4';
+  c.font = '500 24px system-ui';
+  c.fillText('✦  MIRRORWORK  VR', 44, 46);
+
+  // Nombre
+  c.fillStyle = '#e2e2f0';
+  c.font = '300 72px system-ui';
+  c.fillText(`Hola, ${VR.userName}`, 44, 138);
+
+  // Barra mapa interior
+  const barX=44, barY=175, barW=PW-88, barH=18, pct=VR.mapPct/100;
+  c.fillStyle = 'rgba(255,255,255,0.07)';
+  _rr(c,barX,barY,barW,barH,9); c.fill();
+  if (pct>0){
+    c.fillStyle = '#4ecdc4';
+    _rr(c,barX,barY,barW*pct,barH,9); c.fill();
+  }
+  c.fillStyle = '#7070a0';
+  c.font = '400 22px system-ui';
+  c.fillText('Mapa interior', barX, barY-8);
+  c.fillStyle = '#4ecdc4';
+  c.font = '500 22px system-ui';
+  c.fillText(`${VR.mapPct}%`, barX+barW-50, barY-8);
+
+  // Stats row
+  const sy = 230;
+  c.fillStyle = '#7070a0';
+  c.font = '400 22px system-ui';
+
+  // Tests
+  c.fillText('Tests completados', barX, sy);
+  c.fillStyle = '#e2e2f0';
+  c.font = '500 28px system-ui';
+  c.fillText(`${VR.completed} / ${VR.total}`, barX, sy+32);
+
+  // Fractones
+  c.fillStyle = '#7070a0';
+  c.font = '400 22px system-ui';
+  c.fillText('Fractones', barX+340, sy);
+  c.fillStyle = '#f0c040';
+  c.font = '500 28px system-ui';
+  c.fillText(`◈  ${VR.tokens}`, barX+340, sy+32);
+
+  // Aesthetic
+  const aeLabels = {cosmos:'Cosmos',mandala:'Geometría Sagrada',psychedelic:'Psicodélico',arbol:'Árbol',archipielago:'Archipiélago'};
+  c.fillStyle = '#7070a0';
+  c.font = '400 22px system-ui';
+  c.fillText('Estética', barX+640, sy);
+  c.fillStyle = '#7c6dfa';
+  c.font = '500 28px system-ui';
+  c.fillText(aeLabels[VR.aesthetic]||VR.aesthetic, barX+640, sy+32);
+
+  // Pregunta guía
+  if (VR.question) {
+    c.fillStyle = 'rgba(255,255,255,0.12)';
+    c.fillRect(44, PH-100, PW-88, 1);
+    c.fillStyle = '#7070a0';
+    c.font = 'italic 300 22px system-ui';
+    c.fillText(`"${VR.question}"`, 44, PH-60);
+  }
+}
+
+function _rr(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();
+}
+
+drawPanel();
+const panelTex = new THREE.CanvasTexture(panelCanvas);
+
+// Shader de revelación chamánica (espiral Fibonacci desde el centro)
+const PANEL_FRAG = `
+  uniform sampler2D uTex;
+  uniform float uReveal;  // 0 = negro, 1 = completo
+  uniform float uT;
+  varying vec2 vUv;
+  const float PI=3.14159265, PHI=1.61803398875, LOGPHI=0.48121182506;
+
+  void main(){
+    vec2 c = vUv - 0.5;
+    float r = length(c);
+    float ang = atan(c.y, c.x);
+
+    // Pulso chamánico en la velocidad de revelación
+    float pulse = 0.38*sin(uT*PI*0.3731) + 0.26*sin(uT*PHI*0.6247)
+                + 0.19*sin(uT*2.71828*0.4153);
+
+    // Variación espiral Fibonacci en el borde de revelación
+    float spiralN  = log(max(0.001, r*5.0)) / LOGPHI;
+    float fibVar   = 0.12 * sin(spiralN*3.0 - ang*2.0);
+
+    float revR = uReveal + pulse*0.07*uReveal*(1.0-uReveal) + fibVar*uReveal*(1.0-uReveal);
+
+    float mask = smoothstep(revR+0.04, revR-0.02, r*1.2);
+    float edge = smoothstep(revR-0.10, revR, r*1.2) * smoothstep(revR+0.04, revR, r*1.2);
+
+    vec4 tex = texture2D(uTex, vUv);
+    vec3 glow = vec3(0.30, 0.85, 0.78);
+
+    vec3 col = tex.rgb * mask + glow * edge * (0.7 + pulse*0.3);
+    float alpha = (max(mask*tex.a, edge*0.9)) * min(1.0, uReveal*3.0);
+    gl_FragColor = vec4(col, alpha);
+  }
+`;
+
+const panelUnis = {
+  uTex:    { value: panelTex },
+  uReveal: { value: 0.0 },
+  uT:      { value: 0.0 },
+};
+const panelMat = new THREE.ShaderMaterial({
+  uniforms: panelUnis, vertexShader: VERT, fragmentShader: PANEL_FRAG,
+  transparent: true, side: THREE.DoubleSide,
+});
+
+// El panel ocupa 4.8 × 2.4 unidades (ratio 2:1)
+const panelMesh = new THREE.Mesh(new THREE.PlaneGeometry(4.8, 2.4), panelMat);
+
+// Rig: el panel sigue suavemente la orientación de cámara
+const panelRig = new THREE.Object3D();
+scene.add(panelRig);
+panelRig.add(panelMesh);
+panelMesh.position.set(0, -0.3, -3.2); // ligeramente bajo y a 3.2u de distancia
+
+// ── Tiempo chamánico ──────────────────────────────────────────────────────
+let T = 0, lastTs = 0;
+function tickTime(ts) {
+  const dt = Math.min((ts - lastTs)/1000, 0.05); lastTs = ts;
+  const pulse = Math.max(0.3, 1
+    + 0.40*Math.sin(T*PI*0.3731) + 0.25*Math.sin(T*PHI*0.6247)
+    + 0.18*Math.sin(T*E*0.4153)  + 0.10*Math.sin(T*SQ7*0.5289));
+  T += dt * SCENE_SPEEDS[curScene] * pulse;
+  return dt;
+}
+
+// ── Transición de escena (fade + swap) ───────────────────────────────────
+let fadeDoing = false;
+function triggerFade(to) {
+  if (fadeDoing || to === curScene) return;
+  fadeDoing = true;
+  let f = 1.0;
+  const out = () => {
+    f -= 0.07; tunnelUnis.uFade.value = Math.max(0,f);
+    if (f > 0) { requestAnimationFrame(out); return; }
+    curScene = to; tunnel.material = tunnelMats[curScene];
+    updateDots(); showLabel(SCENE_NAMES[curScene]);
+    const inn = () => {
+      f += 0.05; tunnelUnis.uFade.value = Math.min(1,f);
+      if (f < 1) { requestAnimationFrame(inn); return; }
+      fadeDoing = false;
+    };
+    requestAnimationFrame(inn);
+  };
+  requestAnimationFrame(out);
+}
+
+function updateDots() {
+  document.querySelectorAll('.s-dot').forEach((d,i) => d.classList.toggle('active', i===curScene));
+}
+function showLabel(name) {
+  const el = document.getElementById('scene-label');
+  el.textContent = name; el.style.opacity='1';
+  setTimeout(()=>{ el.style.opacity='0'; }, 2200);
+}
+
+// Auto-ciclo ~45s reales
+let realTimer = 0;
+const SCENE_DUR = 45;
+
+document.querySelectorAll('.s-dot').forEach(btn => {
+  btn.addEventListener('pointerdown', e => { e.preventDefault(); triggerFade(parseInt(btn.dataset.i)); });
+});
+document.addEventListener('keydown', e => {
+  if (e.code==='Space') { e.preventDefault(); triggerFade((curScene+1)%4); }
+});
+
+// ── Reveal del panel (chamánico) ──────────────────────────────────────────
+let revealProgress = 0;
+let revealActive   = false;
+
+function startReveal() {
+  revealActive = true;
+}
+
+// ── Device Orientation ────────────────────────────────────────────────────
+let devA=0, devB=90, devG=0, gyroOK=false;
+const Q_SCR  = new THREE.Quaternion(-Math.sqrt(0.5),0,0,Math.sqrt(0.5));
+const _euler = new THREE.Euler();
+const _qOri  = new THREE.Quaternion();
+
+window.addEventListener('deviceorientation', e => {
+  if (e.alpha==null) return;
+  gyroOK=true; devA=e.alpha||0; devB=e.beta||90; devG=e.gamma||0;
+}, true);
+
+function applyGyro() {
+  const orient = Number(window.screen?.orientation?.angle ?? window.orientation ?? 0);
+  _euler.set(THREE.MathUtils.degToRad(devB), THREE.MathUtils.degToRad(devA), THREE.MathUtils.degToRad(-devG), 'YXZ');
+  camera.quaternion.setFromEuler(_euler);
+  camera.quaternion.multiply(Q_SCR);
+  _qOri.setFromAxisAngle(new THREE.Vector3(0,0,1), -THREE.MathUtils.degToRad(orient));
+  camera.quaternion.multiply(_qOri);
+}
+
+// ── Mouse/touch drag (desktop fallback) ──────────────────────────────────
+let drag=false, px=0, py=0, yaw=0, pitch=0;
+renderer.domElement.addEventListener('pointerdown', e=>{ drag=true; px=e.clientX; py=e.clientY; });
+window.addEventListener('pointerup', ()=>drag=false);
+window.addEventListener('pointermove', e=>{
+  if (!drag||gyroOK) return;
+  yaw   -= (e.clientX-px)*0.003; pitch -= (e.clientY-py)*0.003;
+  pitch  = Math.max(-PI/2, Math.min(PI/2, pitch));
+  px=e.clientX; py=e.clientY;
+});
+
+// ── Botón de entrada ──────────────────────────────────────────────────────
+document.getElementById('btn-vr').addEventListener('click', async () => {
+  if (typeof DeviceOrientationEvent?.requestPermission === 'function') {
+    try {
+      const r = await DeviceOrientationEvent.requestPermission();
+      if (r !== 'granted') { alert('Permiso de giroscopio denegado.'); return; }
+    } catch(e) {}
+  }
+  document.getElementById('overlay').style.display    = 'none';
+  document.getElementById('btn-back').style.display   = 'block';
+  document.getElementById('scene-ui').style.display   = 'flex';
+  document.getElementById('crosshairs').style.display = 'block';
+  document.getElementById('scene-label').style.display = 'block';
+
+  updateDots();
+  showLabel(SCENE_NAMES[curScene]);
+  startReveal();
+  requestAnimationFrame(loop);
+});
+
+// ── Loop ──────────────────────────────────────────────────────────────────
+const _rigTarget = new THREE.Quaternion();
+
+function loop(ts) {
+  requestAnimationFrame(loop);
+  const dt = tickTime(ts);
+
+  // Auto-ciclo
+  realTimer += dt;
+  if (realTimer >= SCENE_DUR) { realTimer = 0; triggerFade((curScene+1)%4); }
+
+  // Tiempo en shaders
+  tunnelUnis.uT.value = T;
+  panelUnis.uT.value  = T;
+
+  // Reveal chamánico del panel (velocidad irracional)
+  if (revealActive && revealProgress < 1) {
+    const pulse = 0.38*Math.sin(T*PI*0.3731) + 0.26*Math.sin(T*PHI*0.6247);
+    revealProgress = Math.min(1, revealProgress + dt * (0.28 + Math.abs(pulse)*0.18));
+    panelUnis.uReveal.value = revealProgress;
+  }
+
+  // Cámara
+  if (gyroOK) {
+    applyGyro();
+  } else {
+    _euler.set(pitch, yaw, 0, 'YXZ');
+    camera.quaternion.setFromEuler(_euler);
+  }
+
+  // Panel sigue suavemente la orientación de cámara (lerp 3%)
+  _rigTarget.copy(camera.quaternion);
+  panelRig.quaternion.slerp(_rigTarget, 0.03);
+
+  effect.render(scene, camera);
+}
+</script>
+</body>
+</html>

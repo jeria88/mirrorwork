@@ -12,4 +12,5 @@ urlpatterns = [
     path('onboarding/viaje/nacimiento/', views.onboarding_viaje_nacimiento, name='onboarding_viaje_nacimiento'),
     path('mapa/', views.mapa_interior, name='mapa_interior'),
     path('perfil/', views.perfil, name='perfil'),
+    path('vr/', views.vr_home, name='vr_home'),
 ]

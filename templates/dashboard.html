@@ -52,6 +52,25 @@
   }
 
   /* ── Mapa hero ── */
+  /* ── Botón VR ── */
+  .vr-entry {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.85rem 1.4rem;
+    background: rgba(124,109,250,0.07);
+    border: 1px solid rgba(124,109,250,0.25);
+    border-radius: 14px;
+    margin-bottom: 1rem;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .vr-entry:hover { border-color: #7c6dfa; background: rgba(124,109,250,0.12); }
+  .vr-icon  { font-size: 1.4rem; color: #7c6dfa; line-height: 1; }
+  .vr-label { font-size: 0.88rem; font-weight: 500; color: var(--text); }
+  .vr-sub   { font-size: 0.72rem; color: var(--muted); margin-left: auto; letter-spacing: 0.05em; }
+
   .mapa-hero {
     display: flex;
     align-items: stretch;
@@ -329,6 +348,13 @@
       {% endif %}
     </p>
   </div>
+
+  <!-- Acceso VR -->
+  <a href="{% url 'vr_home' %}" class="vr-entry reveal" title="Modo inmersivo Google Cardboard">
+    <span class="vr-icon">⬡</span>
+    <span class="vr-label">Entrar en VR</span>
+    <span class="vr-sub">Modo inmersivo 3D</span>
+  </a>
 
   <!-- Mapa Interior hero card -->
   <a href="{% url 'mapa_interior' %}" class="mapa-hero reveal">

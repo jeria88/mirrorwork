@@ -409,3 +409,38 @@ def onboarding_viaje_nacimiento(request):
         )
 
     return JsonResponse({'ok': True})
+
+
+# ── Escena inicial según aesthetic ───────────────────────────────────────
+_AESTHETIC_SCENE = {'cosmos': 0, 'mandala': 2, 'psychedelic': 1, 'arbol': 3, 'archipielago': 0}
+
+@login_required
+def vr_home(request):
+    try:
+        profile = request.user.profile
+    except Exception:
+        return redirect('onboarding_mapa')
+    if not profile.map_aesthetic:
+        return redirect('onboarding_mapa')
+
+    from psychometrics.models import Test, TestResult
+    total_tests = Test.objects.filter(active=True).count()
+    completed_tests = (
+        TestResult.objects.filter(user=request.user).values('test').distinct().count()
+    )
+    map_pct = round(completed_tests / total_tests * 100) if total_tests else 0
+    try:
+        token_balance = request.user.token_balance.balance
+    except Exception:
+        token_balance = 0
+
+    return render(request, 'vr/index.html', {
+        'user_name': request.user.first_name or request.user.email.split('@')[0],
+        'map_aesthetic': profile.map_aesthetic,
+        'map_pct': map_pct,
+        'token_balance': token_balance,
+        'completed_tests': completed_tests,
+        'total_tests': total_tests,
+        'initial_scene': _AESTHETIC_SCENE.get(profile.map_aesthetic, 0),
+        'onboarding_question': profile.onboarding_question or '',
+    })
