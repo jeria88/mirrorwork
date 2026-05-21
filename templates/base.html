@@ -521,11 +521,9 @@
 
 <!-- FONDO — Three.js agujero negro (solo desktop, persistente, no recarga) -->
 <script type="module">
-(async () => {
-const AESTHETIC = document.body.dataset.aesthetic || 'cosmos';
-const AESTHETIC_HAS_OWN_BG = { mandala: true, psychedelic: true };
-if (AESTHETIC_HAS_OWN_BG[AESTHETIC]) return;
+const _BH_AESTHETIC = document.body.dataset.aesthetic || 'cosmos';
 
+async function _startThreeJS() {
 const THREE               = await import('three');
 const { EffectComposer }  = await import('three/addons/postprocessing/EffectComposer.js');
 const { RenderPass }      = await import('three/addons/postprocessing/RenderPass.js');
@@ -568,7 +566,6 @@ renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
 renderer.setSize(innerWidth, innerHeight);
 renderer.domElement.id = 'bh-canvas';
 document.body.appendChild(renderer.domElement);
-if (AESTHETIC !== 'cosmos') renderer.domElement.style.display = 'none';
 window.__cosmosCanvas = renderer.domElement;
 
 const composer = new EffectComposer(renderer);
@@ -729,8 +726,14 @@ function animate() {
   composer.render();
 }
 
-animate();
-})();
+  animate();
+} // end _startThreeJS
+
+if (!{ mandala: true, psychedelic: true }[_BH_AESTHETIC]) {
+  _startThreeJS();
+} else {
+  window.__initCosmos = _startThreeJS; // lazy para preview en perfil
+}
 </script>
 
 <!-- CANVAS Psicodélico 2D (solo aesthetic=psychedelic) ──────────────── -->
@@ -1235,9 +1238,23 @@ window.__switchAesthetic = function (name) {
   if (mandalaC) mandalaC.style.display = 'none';
   if (psychC)   psychC.style.display   = 'none';
   if (bhC)      bhC.style.display      = 'none';
-  if (name === 'mandala'     && mandalaC) mandalaC.style.display = 'block';
-  else if (name === 'psychedelic' && psychC) psychC.style.display = 'block';
-  else if (bhC) bhC.style.display = 'block'; // cosmos + cualquier otro
+  if (name === 'mandala' && mandalaC) {
+    mandalaC.style.display = 'block';
+  } else if (name === 'psychedelic' && psychC) {
+    psychC.style.display = 'block';
+  } else if (name === 'cosmos') {
+    if (bhC) {
+      bhC.style.display = 'block';
+    } else if (window.__initCosmos) {
+      // Lazy-load Three.js la primera vez que se pide cosmos preview
+      var _init = window.__initCosmos;
+      window.__initCosmos = null;
+      _init().then(function () {
+        var c = window.__cosmosCanvas;
+        if (c && document.body.dataset.aesthetic === 'cosmos') c.style.display = 'block';
+      });
+    }
+  }
 };
 </script>
 
