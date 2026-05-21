@@ -444,3 +444,41 @@ def vr_home(request):
         'initial_scene': _AESTHETIC_SCENE.get(profile.map_aesthetic, 0),
         'onboarding_question': profile.onboarding_question or '',
     })
+
+
+_SCALE_OPTIONS = {
+    'likert5':  [('1','Nunca'), ('2','Pocas veces'), ('3','A veces'), ('4','Frecuentemente'), ('5','Siempre')],
+    'likert5a': [('1','Muy en\ndesacuerdo'), ('2','En\ndesacuerdo'), ('3','Neutral'), ('4','De\nacuerdo'), ('5','Muy de\nacuerdo')],
+    'likert4':  [('0','Nunca'), ('1','Rara vez'), ('2','A veces'), ('3','Siempre')],
+    'likert3':  [('0','No'), ('1','A veces'), ('2','Sí')],
+    'likert7':  [('1','1'), ('2','2'), ('3','3'), ('4','4'), ('5','5'), ('6','6'), ('7','7')],
+    'binary':   [('0','No'), ('1','Sí')],
+}
+
+@login_required
+def vr_test(request, slug):
+    from psychometrics.models import Test
+    from django.shortcuts import get_object_or_404
+    test = get_object_or_404(Test, slug=slug, active=True)
+    questions = list(test.questions.all().order_by('order', 'id'))
+
+    qs_data = []
+    for q in questions:
+        opts = _SCALE_OPTIONS.get(q.scale, _SCALE_OPTIONS['likert5'])
+        qs_data.append({
+            'id': q.id,
+            'text': q.text,
+            'options': [{'value': v, 'label': l} for v, l in opts],
+        })
+
+    try:
+        aesthetic = request.user.profile.map_aesthetic or 'cosmos'
+    except Exception:
+        aesthetic = 'cosmos'
+
+    return render(request, 'vr/test.html', {
+        'test': test,
+        'questions_json': json.dumps(qs_data, ensure_ascii=False),
+        'question_count': len(qs_data),
+        'initial_scene': _AESTHETIC_SCENE.get(aesthetic, 0),
+    })

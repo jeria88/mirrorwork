@@ -252,8 +252,9 @@
 {% block content %}
 <div class="take-wrap">
 
-  <div class="take-breadcrumb">
+  <div class="take-breadcrumb" style="display:flex;justify-content:space-between;align-items:center;">
     <a href="{% url 'psychometrics:test_list' %}">← Tests</a>
+    <a href="{% url 'vr_test' test.slug %}" style="font-size:.72rem;color:var(--accent2);text-decoration:none;border:1px solid rgba(124,109,250,.35);border-radius:100px;padding:.28rem .75rem;letter-spacing:.06em;">⬡ Modo VR</a>
   </div>
 
   <h1 class="take-title">{{ test.name }}</h1>

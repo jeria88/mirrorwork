@@ -13,4 +13,5 @@ urlpatterns = [
     path('mapa/', views.mapa_interior, name='mapa_interior'),
     path('perfil/', views.perfil, name='perfil'),
     path('vr/', views.vr_home, name='vr_home'),
+    path('vr/test/<slug:slug>/', views.vr_test, name='vr_test'),
 ]
