@@ -479,5 +479,13 @@
     inp.style.display = sel.value === 'otro' ? 'block' : 'none';
     if (sel.value === 'otro') inp.focus();
   }
+
+  document.querySelectorAll('.aesthetic-card input[type=radio]').forEach(function (radio) {
+    radio.addEventListener('change', function () {
+      if (typeof window.__switchAesthetic === 'function') {
+        window.__switchAesthetic(this.value);
+      }
+    });
+  });
 </script>
 {% endblock %}

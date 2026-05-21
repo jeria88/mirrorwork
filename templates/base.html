@@ -571,6 +571,7 @@ renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
 renderer.setSize(innerWidth, innerHeight);
 renderer.domElement.id = 'bh-canvas';
 document.body.appendChild(renderer.domElement);
+window.__cosmosCanvas = renderer.domElement;
 
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
@@ -739,11 +740,10 @@ animate();
 <!-- FONDO — Mandala Canvas 2D (aesthetic=mandala) ───────────────────── -->
 <script>
 (function () {
-  if (document.body.dataset.aesthetic !== 'mandala') return;
-
   const TAU = Math.PI * 2;
   const canvas = document.getElementById('mandala-bg');
-  canvas.style.display = 'block';
+  if (document.body.dataset.aesthetic === 'mandala') canvas.style.display = 'block';
+  window.__mandalaCanvas = canvas;
   const ctx    = canvas.getContext('2d', { alpha: false });
   let W, H;
 
@@ -980,10 +980,9 @@ animate();
 <!-- FONDO — Psicodélico Canvas 2D (aesthetic=psychedelic) ──────────── -->
 <script>
 (function () {
-  if (document.body.dataset.aesthetic !== 'psychedelic') return;
-
   const canvas = document.getElementById('psych-bg');
-  canvas.style.display = 'block';
+  if (document.body.dataset.aesthetic === 'psychedelic') canvas.style.display = 'block';
+  window.__psychCanvas = canvas;
   const ctx = canvas.getContext('2d');
   let W, H;
   function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
@@ -1196,7 +1195,7 @@ animate();
 
       // Escena actual
       ctx.globalCompositeOperation = BLEND_MODES[currentScene];
-      DRAW_FNS[currentScene](T, cx, cy, scl);
+      DRAW_FNS[currentScene](T, 0, 0, scl);
 
       // Portal negro creciente desde el punto de fuga
       ctx.globalCompositeOperation = 'source-over';
@@ -1206,7 +1205,7 @@ animate();
       ctx.save();
       ctx.beginPath(); ctx.arc(0,0,curR,0,2*PI); ctx.clip();
       ctx.globalCompositeOperation = BLEND_MODES[portalTarget];
-      DRAW_FNS[portalTarget](T, cx, cy, scl);
+      DRAW_FNS[portalTarget](T, 0, 0, scl);
       ctx.restore();
 
       if (fp >= 1) { currentScene = portalTarget; portalTarget = -1; }
@@ -1214,7 +1213,7 @@ animate();
     } else {
       // ── Estado estable ─────────────────────────────────────────────────
       ctx.globalCompositeOperation = BLEND_MODES[currentScene];
-      DRAW_FNS[currentScene](T, cx, cy, scl);
+      DRAW_FNS[currentScene](T, 0, 0, scl);
     }
 
     ctx.restore();
@@ -1223,6 +1222,22 @@ animate();
 
   requestAnimationFrame(loop);
 })();
+</script>
+
+<!-- SWITCH de aesthetic en tiempo real (usado en perfil para preview) ── -->
+<script>
+window.__switchAesthetic = function (name) {
+  document.body.dataset.aesthetic = name;
+  var mandalaC = window.__mandalaCanvas  || document.getElementById('mandala-bg');
+  var psychC   = window.__psychCanvas    || document.getElementById('psych-bg');
+  var bhC      = window.__cosmosCanvas   || document.getElementById('bh-canvas');
+  if (mandalaC) mandalaC.style.display = 'none';
+  if (psychC)   psychC.style.display   = 'none';
+  if (bhC)      bhC.style.display      = 'none';
+  if (name === 'mandala'     && mandalaC) mandalaC.style.display = 'block';
+  else if (name === 'psychedelic' && psychC) psychC.style.display = 'block';
+  else if (bhC) bhC.style.display = 'block'; // cosmos + cualquier otro
+};
 </script>
 
 <!-- SCRIPTS GLOBALES ────────────────────────────────────────────────── -->
