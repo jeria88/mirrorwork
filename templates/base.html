@@ -526,7 +526,7 @@
 const AESTHETIC = document.body.dataset.aesthetic || 'cosmos';
 // Fondos alternativos implementados — cuando mandala/arbol tengan su módulo,
 // agregarlos aquí para que cosmos ceda el paso.
-const AESTHETIC_HAS_OWN_BG = { mandala: true /*, arbol: true, archipielago: true */ };
+const AESTHETIC_HAS_OWN_BG = { mandala: true, psychedelic: true /*, arbol: true, archipielago: true */ };
 if (AESTHETIC_HAS_OWN_BG[AESTHETIC]) return;
 
 const THREE               = await import('three');
@@ -732,6 +732,9 @@ function animate() {
 animate();
 })();
 </script>
+
+<!-- CANVAS Psicodélico 2D (solo aesthetic=psychedelic) ──────────────── -->
+<canvas id="psych-bg" aria-hidden="true" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1"></canvas>
 
 <!-- FONDO — Mandala Canvas 2D (aesthetic=mandala) ───────────────────── -->
 <script>
@@ -971,6 +974,254 @@ animate();
   }
 
   requestAnimationFrame(render);
+})();
+</script>
+
+<!-- FONDO — Psicodélico Canvas 2D (aesthetic=psychedelic) ──────────── -->
+<script>
+(function () {
+  if (document.body.dataset.aesthetic !== 'psychedelic') return;
+
+  const canvas = document.getElementById('psych-bg');
+  canvas.style.display = 'block';
+  const ctx = canvas.getContext('2d');
+  let W, H;
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  window.addEventListener('resize', resize); resize();
+
+  // ── Constantes irracionales ──────────────────────────────────────────
+  const PHI = 1.61803398875, PI = Math.PI, E = Math.E;
+  const SQ2 = Math.sqrt(2), SQ3 = Math.sqrt(3), SQ7 = Math.sqrt(7), SQ11 = Math.sqrt(11);
+
+  function chaos(t, s) {
+    return s * (0.38*Math.sin(t*PI*0.3731) + 0.26*Math.sin(t*PHI*0.6247)
+              + 0.19*Math.sin(t*E*0.4153)  + 0.11*Math.sin(t*SQ7*0.5289)
+              + 0.06*Math.sin(t*SQ11*0.7013));
+  }
+
+  // ── Tiempo chamánico — T avanza con velocidad irracional ────────────
+  let T = 0, lastTs = 0;
+  function tickTime(ts) {
+    const dt = Math.min((ts - lastTs) / 1000, 0.05); lastTs = ts;
+    const pulse = Math.max(0.2, 1 + 0.45*Math.sin(T*PI*0.3731) + 0.30*Math.sin(T*PHI*0.6247)
+                                   + 0.20*Math.sin(T*E*0.4153)  + 0.12*chaos(T*SQ3, 1));
+    T += dt * P.speed * pulse;
+  }
+
+  // ── Parámetros óptimos por escena (calibrados) ──────────────────────
+  const SCENE_PRESETS = [
+    { speed: 0.2, curve: 0.01, bank: 0.26 },  // 0 corriente
+    { speed: 3.6, curve: 0.01, bank: 0.03 },  // 1 obsidiana
+    { speed: 1.3, curve: 0.02, bank: 0.0  },  // 2 hexagonal
+    { speed: 3.0, curve: 0.01, bank: 0.0  },  // 3 fibonacci
+  ];
+  const P = { speed: 0.2, curve: 0.01, bank: 0.26 }; // inicia en corriente
+
+  // ── Sección Mirrorwork → escena psicodélica ──────────────────────────
+  const SECTION_SCENE = {
+    onboarding: 0,   // corriente  — entrada fluida
+    general:    0,   // corriente  — default
+    tests:      2,   // hexagonal  — grid estructurado / análisis
+    birth:      3,   // fibonacci  — espiral áurea / geometría natal
+    espejo:     1,   // obsidiana  — oscuro / introspectivo
+  };
+
+  // ── Escena actual y cola de transición ──────────────────────────────
+  let currentScene = 0;
+  let portalTarget = -1;    // -1 = sin transición activa
+  let portalStart  = 0;
+  const PORTAL_DUR = 2200;  // ms
+
+  function setSection(sectionName) {
+    const target = SECTION_SCENE[sectionName] ?? 0;
+    if (target === currentScene && portalTarget < 0) return;
+    if (target === currentScene) return;
+    // Iniciar portal
+    Object.assign(P, SCENE_PRESETS[target]);
+    portalTarget = target;
+    portalStart  = performance.now();
+  }
+
+  // Escucha el mismo evento bg:preset que usan cosmos y mandala
+  document.addEventListener('bg:preset', function (e) { setSection(e.detail); });
+
+  // Preset inicial según la URL actual
+  (function () {
+    const path = location.pathname;
+    let sec = 'general';
+    if (/\/(onboarding|register|login|bienvenido)/.test(path)) sec = 'onboarding';
+    else if (/\/(birth|nacimiento)/.test(path))                sec = 'birth';
+    else if (/\/(espejo|mirror)/.test(path))                   sec = 'espejo';
+    else if (/\/(test|psychometrics)/.test(path))              sec = 'tests';
+    currentScene = SECTION_SCENE[sec] ?? 0;
+    Object.assign(P, SCENE_PRESETS[currentScene]);
+  })();
+
+  // ── Escena 0: Corriente Acuática ─────────────────────────────────────
+  var liquidGrid = [];
+  for (var li=0; li<=50; li++) {
+    var row = [];
+    for (var lj=0; lj<=40; lj++) row.push({ u:(li/50)*6*PI-4.0, v:(lj/40)*2*PI });
+    liquidGrid.push(row);
+  }
+  function drawLiquid(t, cx, cy, scl) {
+    const twist   = Math.sin(t*PHI*0.5)*2.5 + chaos(t*0.3, 0.8);
+    const density = 3 + Math.sin(t*SQ3*0.3)*1.5;
+    const s = scl * 0.8;
+    ctx.lineWidth = 1.0;
+    for (var i=0; i<50; i++) for (var j=0; j<40; j++) {
+      if (!liquidGrid[i+1]?.[j+1]) continue;
+      const p   = liquidGrid[i][j];
+      const act = Math.sin((p.u - t*3.0)*density)*Math.cos(p.v*density + t*3.0*twist*0.2);
+      if (act < -0.3) continue;
+      const quad = [liquidGrid[i][j],liquidGrid[i+1][j],liquidGrid[i+1][j+1],liquidGrid[i][j+1]].map(pt=>{
+        const mV = pt.v + Math.sin(pt.u - t*1.5)*0.2;
+        const r  = Math.exp(pt.u*0.35)*s;
+        return { x: cx+r*Math.cos(mV), y: cy+r*Math.sin(mV), r };
+      });
+      if (quad[0].r < 1.5) continue;
+      const hue = (190 + act*50 - p.u*15 + t*60) % 360;
+      ctx.fillStyle   = `hsla(${hue},80%,${50+act*30}%,${0.35+act*0.5})`;
+      ctx.strokeStyle = `rgba(255,255,255,${0.05+act*0.18})`;
+      ctx.beginPath();
+      ctx.moveTo(quad[0].x,quad[0].y); ctx.lineTo(quad[1].x,quad[1].y);
+      ctx.lineTo(quad[2].x,quad[2].y); ctx.lineTo(quad[3].x,quad[3].y);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
+  }
+
+  // ── Escena 1: Obsidiana ───────────────────────────────────────────────
+  var obsGeo = [];
+  for (var oi=0; oi<40; oi++) for (var oj=0; oj<32; oj++)
+    obsGeo.push({ u:(oi/40)*4*PI, v:(oj/32)*2*PI });
+  function drawObsidian(t, cx, cy, scl) {
+    const freq  = 3.5 + Math.sin(t*SQ3*0.3)*2.2;
+    const angle = t*SQ2*0.15 + chaos(t*0.1, 0.4);
+    ctx.lineWidth = 1.5;
+    for (var k=0; k<obsGeo.length; k++) {
+      const p    = obsGeo[k];
+      const infU = (p.u + t*0.6) % (4*PI);
+      const r    = Math.exp(infU*0.35)*scl*0.65;
+      if (r < 2.0) continue;
+      const light = Math.pow((Math.cos(freq*(Math.cos(angle)*infU+Math.sin(angle)*p.v)-t*2.5)+1)/2, 5);
+      const arc   = (2*PI)/32, a1=p.v-arc*0.52, a2=p.v+arc*0.52, rOut=r+r*0.45;
+      const fog   = Math.min(1, r/(W*0.25));
+      ctx.beginPath();
+      ctx.moveTo(cx+r*Math.cos(a1),cy+r*Math.sin(a1)); ctx.lineTo(cx+r*Math.cos(a2),cy+r*Math.sin(a2));
+      ctx.lineTo(cx+rOut*Math.cos(a2),cy+rOut*Math.sin(a2)); ctx.lineTo(cx+rOut*Math.cos(a1),cy+rOut*Math.sin(a1));
+      ctx.closePath();
+      ctx.fillStyle   = `hsla(275,${light>0.8?0:light*40}%,${(4+light*90)*fog}%,1)`;
+      ctx.strokeStyle = `rgba(0,0,0,${0.8*fog})`;
+      ctx.fill(); ctx.stroke();
+      if (light > 0.9) { ctx.strokeStyle=`rgba(255,255,255,${fog})`; ctx.stroke(); }
+    }
+  }
+
+  // ── Escena 2: Hexagonal ───────────────────────────────────────────────
+  var hexPts = [];
+  for (var hi=0; hi<60; hi++) for (var hj=0; hj<60; hj++)
+    hexPts.push({ u:(hi/60)*4*PI, v:(hj/60)*2*PI });
+  function drawHex(t, cx, cy, scl) {
+    const A=t*PHI*0.2, a2=A+PI/3, a3=A-PI/3;
+    const freq=4+Math.sin(t*SQ7*0.5)*3.2+chaos(t*0.2,1.0);
+    for (var k=0; k<hexPts.length; k++) {
+      const p=hexPts[k], r=Math.exp(p.u*0.3)*scl;
+      if (r<2.0) continue;
+      const w1=Math.cos(freq*(Math.cos(A)*p.u+Math.sin(A)*p.v)+t*1.5);
+      const w2=Math.cos(freq*(Math.cos(a2)*p.u+Math.sin(a2)*p.v)-t*1.5);
+      const w3=Math.cos(freq*(Math.cos(a3)*p.u+Math.sin(a3)*p.v)+t*0.75);
+      const act=(w1+w2+w3)/3; if (act<0) continue;
+      const x=cx+r*Math.cos(p.v), y=cy+r*Math.sin(p.v);
+      const size=(r/scl)*1.5*(act+0.2);
+      ctx.fillStyle=`hsla(${(act*360+t*80)%360},90%,${40+act*30}%,0.9)`;
+      ctx.beginPath();
+      for (var m=0; m<6; m++) {
+        const ang=m*(PI/3)+p.v;
+        m===0 ? ctx.moveTo(x+size*Math.cos(ang),y+size*Math.sin(ang))
+              : ctx.lineTo(x+size*Math.cos(ang),y+size*Math.sin(ang));
+      }
+      ctx.closePath(); ctx.fill();
+    }
+  }
+
+  // ── Escena 3: Fibonacci ───────────────────────────────────────────────
+  var fiboPts = (function(){
+    var pts=[]; var N=1500;
+    for (var i=1; i<=N; i++) pts.push({ angle:i*137.5*(PI/180), z:(i/N)*100, hueOffset:i*0.5 });
+    return pts;
+  })();
+  function drawFibo(t, cx, cy) {
+    const R=800, rot=t*0.8;
+    for (var k=0; k<fiboPts.length; k++) {
+      const p=fiboPts[k];
+      p.z -= 0.52; if (p.z<=0) p.z+=100;
+      const persp=10/p.z; if (persp<0||persp>15) continue;
+      const ang=p.angle+rot, x=cx+R*persp*Math.cos(ang), y=cy+R*persp*Math.sin(ang);
+      const size=Math.max(0.5,40*persp), fog=Math.min(1,persp*0.5);
+      const hue=(p.hueOffset+t*80)%360;
+      ctx.fillStyle=`hsla(${hue},80%,60%,${fog})`;
+      ctx.beginPath(); ctx.arc(x,y,size,0,2*PI); ctx.fill();
+      const xO=cx+R*persp*0.92*Math.cos(ang-0.04), yO=cy+R*persp*0.92*Math.sin(ang-0.04);
+      ctx.strokeStyle=`hsla(${hue},80%,60%,${fog*0.6})`; ctx.lineWidth=size*0.8;
+      ctx.beginPath(); ctx.moveTo(xO,yO); ctx.lineTo(x,y); ctx.stroke();
+    }
+  }
+
+  const DRAW_FNS  = [drawLiquid, drawObsidian, drawHex, drawFibo];
+  const BLEND_MODES = ['lighter','source-over','lighter','lighter'];
+
+  // ── Render ────────────────────────────────────────────────────────────
+  function loop(ts) {
+    tickTime(ts);
+
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = 'rgba(0,0,0,0.28)';
+    ctx.fillRect(0,0,W,H);
+
+    const amp = P.curve;
+    const cx  = W/2 + Math.sin(T*PI*0.2273)*W*amp + Math.sin(T*PHI*0.1431)*W*amp*1.55;
+    const cy  = H/2 + Math.cos(T*PHI*0.2917)*H*amp + Math.cos(T*E*0.1697)*H*amp*1.55;
+    const bank = chaos(T*0.18, P.bank);
+    const scl  = Math.min(W,H)*0.05;
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(bank);
+
+    if (portalTarget >= 0) {
+      // ── Transición portal ──────────────────────────────────────────────
+      const fp   = Math.min(1, (ts - portalStart) / PORTAL_DUR);
+      const maxR = Math.sqrt(W*W+H*H);
+      const curR = maxR * Math.pow(fp, 2.8);
+
+      // Escena actual
+      ctx.globalCompositeOperation = BLEND_MODES[currentScene];
+      DRAW_FNS[currentScene](T, cx, cy, scl);
+
+      // Portal negro creciente desde el punto de fuga
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.beginPath(); ctx.arc(0,0,curR,0,2*PI); ctx.fillStyle='#000'; ctx.fill();
+
+      // Nueva escena solo dentro del portal
+      ctx.save();
+      ctx.beginPath(); ctx.arc(0,0,curR,0,2*PI); ctx.clip();
+      ctx.globalCompositeOperation = BLEND_MODES[portalTarget];
+      DRAW_FNS[portalTarget](T, cx, cy, scl);
+      ctx.restore();
+
+      if (fp >= 1) { currentScene = portalTarget; portalTarget = -1; }
+
+    } else {
+      // ── Estado estable ─────────────────────────────────────────────────
+      ctx.globalCompositeOperation = BLEND_MODES[currentScene];
+      DRAW_FNS[currentScene](T, cx, cy, scl);
+    }
+
+    ctx.restore();
+    requestAnimationFrame(loop);
+  }
+
+  requestAnimationFrame(loop);
 })();
 </script>
 

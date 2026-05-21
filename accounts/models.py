@@ -28,7 +28,8 @@ class UserProfile(models.Model):
     tokens_last_renewed = models.DateField(null=True, blank=True)
     MAP_AESTHETIC_CHOICES = [
         ('cosmos',       'Cósmico'),
-        ('mandala',      'Mandala'),
+        ('mandala',      'Geometría Sagrada'),
+        ('psychedelic',  'Psicodélico'),
         ('archipielago', 'Archipiélago'),
         ('arbol',        'Árbol'),
     ]

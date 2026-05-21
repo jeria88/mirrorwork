@@ -173,8 +173,13 @@ def perfil(request):
         nucleo = {k: request.POST.get(f'nucleo_{k}', '') for k in _NUCLEO_KEYS}
         profile.onboarding_nucleo = {k: v for k, v in nucleo.items() if v}
 
+        aesthetic = request.POST.get('map_aesthetic', '').strip()
+        valid_aesthetics = [c[0] for c in profile.MAP_AESTHETIC_CHOICES]
+        if aesthetic in valid_aesthetics:
+            profile.map_aesthetic = aesthetic
+
         profile.save(update_fields=[
-            'bio', 'profession',
+            'bio', 'profession', 'map_aesthetic',
             'onboarding_question', 'onboarding_entry_point',
             'onboarding_noise_area', 'onboarding_prior_exploration',
             'onboarding_nucleo',
