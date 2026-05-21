@@ -523,6 +523,8 @@
 <script type="module">
 (async () => {
 const AESTHETIC = document.body.dataset.aesthetic || 'cosmos';
+const AESTHETIC_HAS_OWN_BG = { mandala: true, psychedelic: true };
+if (AESTHETIC_HAS_OWN_BG[AESTHETIC]) return;
 
 const THREE               = await import('three');
 const { EffectComposer }  = await import('three/addons/postprocessing/EffectComposer.js');
@@ -934,6 +936,7 @@ animate();
 
   // ── Loop ─────────────────────────────────────────────────────────────
   function render(ts) {
+    if (canvas.style.display === 'none') { requestAnimationFrame(render); return; }
     var t = ts * .001;
 
     ctx.globalCompositeOperation = 'source-over';
@@ -1168,6 +1171,7 @@ animate();
 
   // ── Render ────────────────────────────────────────────────────────────
   function loop(ts) {
+    if (canvas.style.display === 'none') { requestAnimationFrame(loop); return; }
     tickTime(ts);
 
     ctx.globalCompositeOperation = 'source-over';
