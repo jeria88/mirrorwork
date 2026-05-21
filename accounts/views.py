@@ -446,6 +446,27 @@ def vr_home(request):
     })
 
 
+@login_required
+def set_aesthetic(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'method not allowed'}, status=405)
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'error': 'invalid json'}, status=400)
+    aesthetic = data.get('aesthetic', '').strip()
+    if aesthetic not in _VALID_AESTHETICS:
+        return JsonResponse({'error': 'invalid'}, status=400)
+    try:
+        profile = request.user.profile
+    except Exception:
+        from .models import UserProfile
+        profile = UserProfile.objects.create(user=request.user)
+    profile.map_aesthetic = aesthetic
+    profile.save(update_fields=['map_aesthetic'])
+    return JsonResponse({'ok': True})
+
+
 _SCALE_OPTIONS = {
     'likert5':  [('1','Nunca'), ('2','Pocas veces'), ('3','A veces'), ('4','Frecuentemente'), ('5','Siempre')],
     'likert5a': [('1','Muy en\ndesacuerdo'), ('2','En\ndesacuerdo'), ('3','Neutral'), ('4','De\nacuerdo'), ('5','Muy de\nacuerdo')],

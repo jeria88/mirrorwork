@@ -336,6 +336,57 @@
     }
     .reveal-fast.visible { opacity: 1; transform: translateY(0); }
 
+    /* ── DOCK ───────────────────────────────────────────────────────── */
+    #dock {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 150;
+      background: rgba(0,0,0,0.80);
+      backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
+      border-top: 1px solid rgba(255,255,255,0.07);
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+    #dock-terrains {
+      display: flex; justify-content: center; gap: 0.2rem;
+      padding: 0.48rem 1rem 0.35rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .dt-btn {
+      display: flex; align-items: center; gap: 0.28rem;
+      padding: 0.18rem 0.7rem; border-radius: 100px;
+      border: 1px solid rgba(255,255,255,0.09);
+      background: none; cursor: pointer;
+      color: rgba(255,255,255,0.25);
+      font-size: 0.58rem; letter-spacing: 0.15em; text-transform: uppercase;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+      touch-action: manipulation; font-family: var(--font-ui);
+    }
+    .dt-btn[data-t="cosmos"]      { --dt-c: #4ecdc4; }
+    .dt-btn[data-t="mandala"]     { --dt-c: #f0c040; }
+    .dt-btn[data-t="psychedelic"] { --dt-c: #a878ff; }
+    .dt-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: currentColor; flex-shrink: 0; transition: box-shadow 0.2s;
+    }
+    .dt-btn.active { color: var(--dt-c); border-color: rgba(255,255,255,0.16); background: rgba(255,255,255,0.04); }
+    .dt-btn.active .dt-dot { box-shadow: 0 0 6px var(--dt-c); }
+
+    #dock-nav {
+      display: flex; justify-content: space-around; align-items: center;
+      padding: 0.32rem 0.25rem 0.42rem;
+    }
+    .dn-item {
+      display: flex; flex-direction: column; align-items: center; gap: 0.16rem;
+      padding: 0.22rem 0.3rem; text-decoration: none;
+      color: rgba(255,255,255,0.30); transition: color 0.2s;
+      touch-action: manipulation; min-width: 44px;
+    }
+    .dn-icon { font-size: 1rem; line-height: 1; }
+    .dn-label { font-size: 0.48rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; white-space: nowrap; }
+    .dn-item:hover, .dn-item.active { color: var(--accent); opacity: 1; }
+    .dn-item.active .dn-icon { filter: drop-shadow(0 0 6px var(--accent)); }
+
+    /* page-content padding para el dock */
+    #page-content { padding-bottom: 96px; }
+
     /* ── RESPONSIVE ──────────────────────────────────────────────────── */
     @media (max-width: 640px) {
       nav { padding: 0 1rem; }
@@ -357,7 +408,7 @@
 
     @media print {
       @page { size: Letter portrait; margin: 2.2cm 1.8cm 2cm; }
-      nav, #bh-canvas, #mirror-bubble, #ts-fab,
+      nav, #bh-canvas, #dock,
       .print-btn, .back-link, .spin-ring,
       .interp-spinner, .no-tokens-note { display: none !important; }
       :root {
@@ -408,23 +459,13 @@
 
 <!-- NAV ────────────────────────────────────────────────────────────── -->
 <nav>
-  <a class="nav-logo" href="{% url 'home' %}">Mirror<em>Work</em></a>
+  <a class="nav-logo" href="{% if user.is_authenticated %}{% url 'mapa_interior' %}{% else %}{% url 'home' %}{% endif %}">Mirror<em>Work</em></a>
   <div class="nav-links">
-    {% if user.is_authenticated %}
-      <a href="{% url 'psychometrics:test_list' %}">Tests</a>
-      <a href="{% url 'psychometrics:my_results' %}">Resultados</a>
-      <a href="{% url 'mirror:home' %}">Espejo</a>
-      <a href="{% url 'birth:profile' %}">Nacimiento</a>
-      <a href="{% url 'reports:dashboard' %}">Progreso</a>
-      {% if user.profile.is_practicante %}<a href="{% url 'practitioners:lista' %}">Clientes</a>{% endif %}
-      <a href="{% url 'tokens:balance' %}" title="Mis tokens" style="color:var(--accent)">
-        {% with tb=request.user.token_balance %}{{ tb.balance|default:0 }}{% endwith %}&thinsp;tkn
-      </a>
-      <a href="{% url 'perfil' %}">Perfil</a>
-      <a href="{% url 'accounts:logout' %}" data-no-spa>Salir</a>
-    {% else %}
+    {% if not user.is_authenticated %}
       <a href="{% url 'accounts:login' %}">Entrar</a>
       <a href="{% url 'accounts:register' %}" class="btn btn-primary" style="padding:7px 20px;">Comenzar</a>
+    {% else %}
+      <a href="{% url 'accounts:logout' %}" data-no-spa style="font-size:.72rem;color:var(--dim)">Salir</a>
     {% endif %}
   </div>
 </nav>
@@ -443,81 +484,46 @@
   {% block extra_body %}{% endblock %}
 </div>
 
-<!-- BURBUJA ESPEJO ──────────────────────────────────────────────────── -->
+
+<!-- DOCK ────────────────────────────────────────────────────────────── -->
 {% if user.is_authenticated %}
-<style data-global>
-  #mirror-bubble { position:fixed; bottom:1.5rem; left:1.5rem; z-index:9998; }
-  #mirror-bubble a {
-    display:flex; align-items:center; justify-content:center;
-    width:48px; height:48px; border-radius:50%;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    box-shadow:0 4px 20px rgba(0,0,0,0.5);
-    font-size:1.25rem; transition:transform 0.2s, box-shadow 0.2s;
-    text-decoration:none;
-  }
-  #mirror-bubble a:hover { transform:scale(1.08); box-shadow:0 6px 28px rgba(0,0,0,0.6); opacity:1; }
-  #mirror-bubble .bubble-tip {
-    position:absolute; left:56px; bottom:50%; transform:translateY(50%);
-    background:rgba(0,0,0,0.85); backdrop-filter:blur(12px);
-    border:1px solid var(--border); color:var(--text);
-    font-size:0.72rem; padding:0.3rem 0.7rem;
-    border-radius:6px; white-space:nowrap; opacity:0; pointer-events:none;
-    transition:opacity 0.15s;
-  }
-  #mirror-bubble:hover .bubble-tip { opacity:1; }
-</style>
-<div id="mirror-bubble">
-  <a href="{% url 'mirror:home' %}" title="Espejo de Conflictos">◎</a>
-  <span class="bubble-tip">Espejo de Conflictos</span>
+<div id="dock">
+  <div id="dock-terrains">
+    <button class="dt-btn {% if map_aesthetic == 'cosmos' %}active{% endif %}" data-t="cosmos" type="button">
+      <span class="dt-dot"></span><span>Cosmos</span>
+    </button>
+    <button class="dt-btn {% if map_aesthetic == 'mandala' %}active{% endif %}" data-t="mandala" type="button">
+      <span class="dt-dot"></span><span>Mandala</span>
+    </button>
+    <button class="dt-btn {% if map_aesthetic == 'psychedelic' %}active{% endif %}" data-t="psychedelic" type="button">
+      <span class="dt-dot"></span><span>Psych</span>
+    </button>
+  </div>
+  <div id="dock-nav">
+    <a class="dn-item" href="{% url 'mapa_interior' %}">
+      <span class="dn-icon">◉</span><span class="dn-label">Mapa</span>
+    </a>
+    <a class="dn-item" href="{% url 'mirror:home' %}">
+      <span class="dn-icon">◎</span><span class="dn-label">Espejo</span>
+    </a>
+    <a class="dn-item" href="{% url 'psychometrics:test_list' %}">
+      <span class="dn-icon">◈</span><span class="dn-label">Tests</span>
+    </a>
+    <a class="dn-item" href="{% url 'birth:profile' %}">
+      <span class="dn-icon">✦</span><span class="dn-label">Nacimiento</span>
+    </a>
+    <a class="dn-item" href="{% url 'sensorial:home' %}">
+      <span class="dn-icon">◌</span><span class="dn-label">Regulación</span>
+    </a>
+    <a class="dn-item" href="{% url 'vr_home' %}" data-no-spa>
+      <span class="dn-icon">⬡</span><span class="dn-label">VR</span>
+    </a>
+    <a class="dn-item" href="{% url 'perfil' %}">
+      <span class="dn-icon">⚙</span><span class="dn-label">Perfil</span>
+    </a>
+  </div>
 </div>
 {% endif %}
-
-<!-- SELECTOR DE PALETA ──────────────────────────────────────────────── -->
-<style data-global>
-  #ts-fab { position:fixed; bottom:1.5rem; right:1.5rem; z-index:9999; }
-  #ts-toggle {
-    width:44px; height:44px; border-radius:50%; cursor:pointer;
-    background:rgba(255,255,255,0.06); border:1px solid var(--border);
-    backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
-    font-size:1rem; display:flex; align-items:center; justify-content:center;
-    box-shadow:0 4px 20px rgba(0,0,0,0.5); color:var(--muted); transition:background 0.2s;
-  }
-  #ts-toggle:hover { background:rgba(255,255,255,0.1); }
-  #ts-panel {
-    display:none; position:absolute; bottom:58px; right:0;
-    background:rgba(0,0,0,0.82); backdrop-filter:blur(28px); -webkit-backdrop-filter:blur(28px);
-    border:1px solid var(--border); border-radius:16px;
-    padding:1.2rem; width:220px; box-shadow:0 12px 48px rgba(0,0,0,0.75);
-  }
-  #ts-panel.open { display:block; }
-  .ts-label { color:var(--muted); font-size:0.66rem; text-transform:uppercase; letter-spacing:.14em; margin:0.8rem 0 0.45rem; }
-  .ts-label:first-child { margin-top:0; }
-  .ts-row { display:flex; flex-wrap:wrap; gap:0.35rem; }
-  .ts-btn {
-    padding:0.28rem 0.7rem; border-radius:100px;
-    border:1px solid var(--border); background:rgba(255,255,255,0.04);
-    color:var(--muted); cursor:pointer; font-size:0.7rem;
-    transition:all 0.15s; letter-spacing:0.03em;
-    display:flex; align-items:center; gap:5px;
-  }
-  .ts-btn:hover { border-color:var(--accent); color:var(--text); }
-  .ts-btn.active { background:var(--accent); border-color:var(--accent); color:#000; font-weight:500; }
-  .ts-swatch { width:7px; height:7px; border-radius:50%; display:inline-block; }
-  .ts-divider { margin-top:0.8rem; padding-top:0.75rem; border-top:1px solid var(--border); color:var(--dim); font-size:0.63rem; line-height:1.5; }
-</style>
-<div id="ts-fab">
-  <div id="ts-panel">
-    <div class="ts-label">Paleta de color</div>
-    <div class="ts-row">
-      <button class="ts-btn active" data-theme="espejo"     onclick="setTheme(this)"><span class="ts-swatch" style="background:#4ecdc4"></span>Espejo</button>
-      <button class="ts-btn"        data-theme="endonautas" onclick="setTheme(this)"><span class="ts-swatch" style="background:#d4b040"></span>Dorado</button>
-      <button class="ts-btn"        data-theme="abismo"     onclick="setTheme(this)"><span class="ts-swatch" style="background:#4488ee"></span>Abismo</button>
-      <button class="ts-btn"        data-theme="crepusculo" onclick="setTheme(this)"><span class="ts-swatch" style="background:#d46fa0"></span>Crepúsculo</button>
-    </div>
-    <div class="ts-divider">MirrorWork · Personalización</div>
-  </div>
-  <button id="ts-toggle" onclick="document.getElementById('ts-panel').classList.toggle('open')" title="Cambiar paleta">◑</button>
-</div>
 
 <!-- FONDO — Three.js agujero negro (solo desktop, persistente, no recarga) -->
 <script type="module">
@@ -1334,6 +1340,12 @@ function updateNavActive(path) {
       a.classList.toggle('nav-active', url.pathname !== '/' && path.startsWith(url.pathname));
     } catch {}
   });
+  document.querySelectorAll('.dn-item').forEach(a => {
+    try {
+      const url = new URL(a.href, location.origin);
+      a.classList.toggle('active', url.pathname !== '/' && path.startsWith(url.pathname));
+    } catch {}
+  });
 }
 
 let _spaLoading = false;
@@ -1421,6 +1433,24 @@ window.addEventListener('popstate', () => {
 
 // Marcar nav activo en carga inicial
 updateNavActive(location.pathname);
+
+// ── Dock: terrain switching ───────────────────────────────────────────
+document.querySelectorAll('.dt-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const t = btn.dataset.t;
+    // Visual inmediato
+    if (window.__switchAesthetic) window.__switchAesthetic(t);
+    document.body.dataset.aesthetic = t;
+    // Actualizar estado activo en dock
+    document.querySelectorAll('.dt-btn').forEach(b => b.classList.toggle('active', b.dataset.t === t));
+    // Guardar en servidor (fire-and-forget)
+    fetch('/perfil/aesthetic/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+      body: JSON.stringify({ aesthetic: t }),
+    }).catch(() => {});
+  });
+});
 </script>
 
 </body>

@@ -14,4 +14,5 @@ urlpatterns = [
     path('perfil/', views.perfil, name='perfil'),
     path('vr/', views.vr_home, name='vr_home'),
     path('vr/test/<slug:slug>/', views.vr_test, name='vr_test'),
+    path('perfil/aesthetic/', views.set_aesthetic, name='set_aesthetic'),
 ]
