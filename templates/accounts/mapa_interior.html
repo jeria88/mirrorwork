@@ -115,73 +115,6 @@
   .map-node:hover .n-base { opacity: 0.9 !important; }
   .map-node:hover .n-glow { opacity: 0.45 !important; }
 
-  /* ── Tooltip ── */
-  .map-tooltip {
-    position: fixed;
-    bottom: calc(2rem + 96px);
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: rgba(10,10,20,0.92);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 16px;
-    padding: 1.25rem 1.5rem;
-    min-width: 220px;
-    max-width: 320px;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.16,1,0.3,1);
-    z-index: 200;
-  }
-  .map-tooltip.visible {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateX(-50%) translateY(0);
-  }
-  .tt-dim {
-    font-family: var(--font-heading);
-    font-size: 1.15rem;
-    font-weight: 400;
-    color: var(--text);
-    margin-bottom: 0.25rem;
-  }
-  .tt-pct {
-    font-size: 2rem;
-    font-family: var(--font-heading);
-    color: var(--accent);
-    font-weight: 400;
-    line-height: 1;
-    margin-bottom: 0.5rem;
-  }
-  .tt-detail {
-    font-size: 0.75rem;
-    color: var(--muted);
-    font-weight: 300;
-    margin-bottom: 1rem;
-  }
-  .tt-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .tt-link {
-    font-size: 0.78rem;
-    color: var(--accent);
-    text-decoration: none;
-  }
-  .tt-link:hover { text-decoration: underline; }
-  .tt-close {
-    background: none;
-    border: none;
-    color: var(--muted);
-    cursor: pointer;
-    font-size: 0.8rem;
-    padding: 0.25rem;
-    transition: color 0.15s;
-  }
-  .tt-close:hover { color: var(--text); }
-
   /* ── Dimension legend grid ── */
   .dim-legend {
     display: grid;
@@ -249,6 +182,97 @@
   @media (max-width: 400px) {
     .dim-legend { grid-template-columns: 1fr 1fr; }
   }
+
+  /* ── Panel deslizable ── */
+  #dim-panel-scrim {
+    position: fixed; inset: 0; z-index: 210;
+    background: rgba(0,0,0,0.45);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.28s;
+  }
+  #dim-panel-scrim.open { opacity: 1; pointer-events: auto; }
+
+  #dim-panel {
+    position: fixed; top: 0; right: 0; bottom: 0;
+    width: min(400px, 92vw);
+    z-index: 220;
+    background: rgba(6,4,18,0.97);
+    backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+    border-left: 1px solid rgba(255,255,255,0.1);
+    display: flex; flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.32s cubic-bezier(0.16,1,0.3,1);
+    overflow: hidden;
+  }
+  #dim-panel.open { transform: translateX(0); }
+
+  #dim-panel-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    padding: 1.6rem 1.4rem 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    flex-shrink: 0;
+  }
+  #dp-tag {
+    font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--accent); font-weight: 500; margin-bottom: 0.35rem;
+  }
+  #dp-title {
+    font-family: var(--font-heading);
+    font-size: 1.55rem; font-weight: 400; color: var(--text); line-height: 1.2;
+  }
+  #dp-close {
+    background: none; border: none; color: var(--muted); cursor: pointer;
+    font-size: 0.85rem; padding: 0.3rem; margin-top: 0.1rem;
+    transition: color 0.15s; flex-shrink: 0;
+  }
+  #dp-close:hover { color: var(--text); }
+
+  #dp-progress {
+    padding: 0.9rem 1.4rem;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    flex-shrink: 0;
+  }
+  #dp-bar-wrap { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem; }
+  #dp-bar-track { flex: 1; height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+  #dp-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; width: 0%; transition: width 0.6s cubic-bezier(0.16,1,0.3,1); }
+  #dp-pct { font-size: 0.72rem; color: var(--accent); font-weight: 500; white-space: nowrap; }
+  #dp-count { font-size: 0.7rem; color: var(--muted); font-weight: 300; }
+
+  #dp-tests {
+    flex: 1; overflow-y: auto; padding: 0.8rem 1rem 2rem;
+    display: flex; flex-direction: column; gap: 0.5rem;
+  }
+  #dp-tests::-webkit-scrollbar { width: 4px; }
+  #dp-tests::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 2px; }
+
+  .dp-test-item {
+    display: flex; align-items: center; gap: 0.85rem;
+    padding: 0.85rem 1rem;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .dp-test-item.done { border-color: rgba(78,205,196,0.25); }
+  .dp-test-done-icon {
+    font-size: 0.85rem; color: var(--accent); flex-shrink: 0; width: 16px; text-align: center;
+  }
+  .dp-test-info { flex: 1; min-width: 0; }
+  .dp-test-name { font-size: 0.82rem; font-weight: 400; color: var(--text); margin-bottom: 0.15rem; line-height: 1.3; }
+  .dp-test-meta { font-size: 0.65rem; color: var(--muted); font-weight: 300; }
+  .dp-test-actions { display: flex; gap: 0.35rem; flex-shrink: 0; }
+  .dp-btn {
+    padding: 0.28rem 0.6rem; border-radius: 100px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04);
+    color: var(--muted); font-size: 0.62rem;
+    letter-spacing: 0.06em; cursor: pointer;
+    text-decoration: none; transition: border-color 0.2s, color 0.2s;
+    white-space: nowrap;
+  }
+  .dp-btn:hover { border-color: var(--accent); color: var(--accent); opacity: 1; }
+  .dp-btn-vr { border-color: rgba(124,109,250,0.3); color: rgba(124,109,250,0.7); }
+  .dp-btn-vr:hover { border-color: #7c6dfa; color: #7c6dfa; }
 </style>
 {% endblock %}
 
@@ -745,23 +769,33 @@
 
 </div><!-- /mapa-page -->
 
-<!-- ── Tooltip ── -->
-<div class="map-tooltip" id="map-tooltip">
-  <div class="tt-dim" id="tt-dim">Dimensión</div>
-  <div class="tt-pct" id="tt-pct">0%</div>
-  <div class="tt-detail" id="tt-detail">0 de 0 tests explorados</div>
-  <div class="tt-footer">
-    <a class="tt-link" id="tt-link" href="{% url 'psychometrics:test_list' %}">Explorar esta dimensión →</a>
-    <button class="tt-close" onclick="closeTooltip()">✕</button>
+<!-- ── Panel deslizable de dimensión ── -->
+<div id="dim-panel">
+  <div id="dim-panel-header">
+    <div>
+      <div id="dp-tag">Dimensión</div>
+      <div id="dp-title">Cargando…</div>
+    </div>
+    <button id="dp-close" onclick="closeDimPanel()" aria-label="Cerrar">✕</button>
   </div>
+  <div id="dp-progress">
+    <div id="dp-bar-wrap">
+      <div id="dp-bar-track"><div id="dp-bar-fill"></div></div>
+      <span id="dp-pct">0%</span>
+    </div>
+    <span id="dp-count">0 de 0 tests</span>
+  </div>
+  <div id="dp-tests"></div>
 </div>
+<div id="dim-panel-scrim" onclick="closeDimPanel()"></div>
 {% endblock %}
 
 {% block extra_body %}
 <script>
 const DIM_DATA = {{ dim_data_json|safe }};
-const TEST_LIST_URL = "{% url 'psychometrics:test_list' %}";
 const TOTAL_PCT = {{ total_pct }};
+const TEST_TAKE_URL_TMPL = "{% url 'psychometrics:test_take' '__slug__' %}";
+const VR_TEST_URL_TMPL   = "{% url 'vr_test' '__slug__' %}";
 let activeNode = null;
 
 function updateMap() {
@@ -770,17 +804,14 @@ function updateMap() {
     const data = DIM_DATA[dim];
     if (!data) return;
     const t = data.pct / 100;
-
     const glow   = g.querySelector('.n-glow');
     const base   = g.querySelector('.n-base');
     const accent = g.querySelector('.n-accent');
-
     if (glow)   glow.style.opacity   = (t * 0.38).toFixed(3);
     if (base)   base.style.opacity   = (0.16 + t * 0.65).toFixed(3);
     if (accent) accent.style.opacity = t.toFixed(3);
-
-    if (t > 0)   g.classList.add('explored');
-    if (t >= 1)  g.classList.add('complete');
+    if (t > 0)  g.classList.add('explored');
+    if (t >= 1) g.classList.add('complete');
   });
 }
 
@@ -801,30 +832,54 @@ function selectNode(dim) {
   const data = DIM_DATA[dim];
   if (!data) return;
 
-  // Highlight legend pill
   document.querySelectorAll('.dim-pill').forEach(p => p.classList.remove('active'));
   const pill = document.querySelector(`.dim-pill[data-dim="${dim}"]`);
   if (pill) { pill.classList.add('active'); pill.scrollIntoView({behavior:'smooth', block:'nearest'}); }
 
-  // Highlight SVG node
   document.querySelectorAll('.map-node').forEach(n => n.style.filter = '');
   document.querySelectorAll(`.map-node[data-dim="${dim}"]`).forEach(n => {
     n.style.filter = 'drop-shadow(0 0 8px var(--accent))';
   });
   activeNode = dim;
 
-  // Update tooltip
-  document.getElementById('tt-dim').textContent   = data.label;
-  document.getElementById('tt-pct').textContent   = data.pct + '%';
-  document.getElementById('tt-detail').textContent = data.completed + ' de ' + data.total + ' tests explorados';
-  document.getElementById('tt-link').href = TEST_LIST_URL + '#dim-' + dim;
-
-  const tt = document.getElementById('map-tooltip');
-  tt.classList.add('visible');
+  openDimPanel(dim);
 }
 
-function closeTooltip() {
-  document.getElementById('map-tooltip').classList.remove('visible');
+function openDimPanel(dim) {
+  const data = DIM_DATA[dim];
+  document.getElementById('dp-title').textContent = data.label;
+  document.getElementById('dp-pct').textContent   = data.pct + '%';
+  document.getElementById('dp-count').textContent = data.completed + ' de ' + data.total + ' tests';
+  document.getElementById('dp-bar-fill').style.width = data.pct + '%';
+
+  const list = document.getElementById('dp-tests');
+  list.innerHTML = '';
+  (data.tests || []).forEach(test => {
+    const item = document.createElement('div');
+    item.className = 'dp-test-item' + (test.done ? ' done' : '');
+    const takeUrl = TEST_TAKE_URL_TMPL.replace('__slug__', test.slug);
+    const vrUrl   = VR_TEST_URL_TMPL.replace('__slug__', test.slug);
+    const meta    = test.estimated_minutes ? test.estimated_minutes + ' min' : '';
+    item.innerHTML =
+      '<div class="dp-test-done-icon">' + (test.done ? '✓' : '○') + '</div>' +
+      '<div class="dp-test-info">' +
+        '<div class="dp-test-name">' + test.name + '</div>' +
+        (meta ? '<div class="dp-test-meta">' + meta + '</div>' : '') +
+      '</div>' +
+      '<div class="dp-test-actions">' +
+        '<a href="' + takeUrl + '" class="dp-btn">' + (test.done ? 'Ver' : 'Hacer') + '</a>' +
+        '<a href="' + vrUrl + '" class="dp-btn dp-btn-vr" data-no-spa>⬡ VR</a>' +
+      '</div>';
+    list.appendChild(item);
+  });
+
+  document.getElementById('dim-panel').classList.add('open');
+  document.getElementById('dim-panel-scrim').classList.add('open');
+}
+
+function closeDimPanel() {
+  document.getElementById('dim-panel').classList.remove('open');
+  document.getElementById('dim-panel-scrim').classList.remove('open');
   document.querySelectorAll('.map-node').forEach(n => n.style.filter = '');
   document.querySelectorAll('.dim-pill').forEach(p => p.classList.remove('active'));
   activeNode = null;
@@ -834,13 +889,6 @@ document.addEventListener('DOMContentLoaded', () => {
   updateMap();
   updateGlobalBar();
   updateLegendBars();
-});
-
-// Close tooltip on outside click
-document.addEventListener('click', e => {
-  if (!e.target.closest('.map-node') && !e.target.closest('.dim-pill') && !e.target.closest('.map-tooltip')) {
-    closeTooltip();
-  }
 });
 </script>
 {% endblock %}
