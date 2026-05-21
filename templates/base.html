@@ -522,12 +522,7 @@
 <!-- FONDO — Three.js agujero negro (solo desktop, persistente, no recarga) -->
 <script type="module">
 (async () => {
-// Solo cargar el fondo cósmico si el aesthetic del usuario es 'cosmos'
 const AESTHETIC = document.body.dataset.aesthetic || 'cosmos';
-// Fondos alternativos implementados — cuando mandala/arbol tengan su módulo,
-// agregarlos aquí para que cosmos ceda el paso.
-const AESTHETIC_HAS_OWN_BG = { mandala: true, psychedelic: true /*, arbol: true, archipielago: true */ };
-if (AESTHETIC_HAS_OWN_BG[AESTHETIC]) return;
 
 const THREE               = await import('three');
 const { EffectComposer }  = await import('three/addons/postprocessing/EffectComposer.js');
@@ -571,6 +566,7 @@ renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
 renderer.setSize(innerWidth, innerHeight);
 renderer.domElement.id = 'bh-canvas';
 document.body.appendChild(renderer.domElement);
+if (AESTHETIC !== 'cosmos') renderer.domElement.style.display = 'none';
 window.__cosmosCanvas = renderer.domElement;
 
 const composer = new EffectComposer(renderer);
@@ -698,6 +694,7 @@ function lerp(a, b, t) { return a + (b - a) * t; }
 
 function animate() {
   requestAnimationFrame(animate);
+  if (renderer.domElement.style.display === 'none') return;
   const t = clock.getElapsedTime();
 
   tx += (mx - tx) * 0.038;
