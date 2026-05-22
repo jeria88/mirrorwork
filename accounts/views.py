@@ -551,5 +551,6 @@ def vr_test(request, slug):
         'test': test,
         'questions_json': json.dumps(qs_data, ensure_ascii=False),
         'question_count': len(qs_data),
+        'aesthetic': aesthetic,
         'initial_scene': _AESTHETIC_SCENE.get(aesthetic, 0),
     })
