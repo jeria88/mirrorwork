@@ -190,22 +190,41 @@ let _psychMats = null, _psychSpeeds = null, _psychNames = null;
 let curScene = VR.initScene;
 
 if (VR.aesthetic === 'cosmos') {
-  // Partículas keplerianas (sin bloom — incompatible con StereoEffect)
-  const BH_R = 8, N = 90000, R_MIN = 2, R_MAX = 130;
+  // ── VR Cosmos — partículas keplerianas con glow simulado ──────────────
+  // Sin bloom (incompatible StereoEffect) — glow via multi-ring fragment + AdditiveBlending
+  const BH_R = 7, N = 110000, R_MIN = 1.5, R_MAX = 140;
   const pGeo = new THREE.BufferGeometry();
   const pPos = new Float32Array(N*3), pCol = new Float32Array(N*3);
   const pAng = new Float32Array(N),   pRad = new Float32Array(N);
   const pSpd = new Float32Array(N),   pSz  = new Float32Array(N);
+
   for (let i = 0; i < N; i++) {
-    const r = Math.random() < 0.72 ? R_MIN + Math.pow(Math.random(),2.0)*50 : 50 + Math.random()*(R_MAX-50);
-    const a = Math.random()*PI*2, norm = r/R_MAX;
-    const y = (Math.random()-.5)*r*(0.06+norm*0.6);
+    // Distribución: 65% disco interior, 20% anillo medio, 15% halo exterior
+    let r;
+    const roll = Math.random();
+    if      (roll < 0.65) r = R_MIN + Math.pow(Math.random(), 1.8) * 38;
+    else if (roll < 0.85) r = 38 + Math.random() * 42;
+    else                  r = 80 + Math.random() * (R_MAX - 80);
+
+    const a = Math.random() * PI * 2;
+    const norm = r / R_MAX;
+    const diskThick = r < 40 ? 0.04 + norm * 0.3 : 0.3 + norm * 0.7;
+    const y = (Math.random() - 0.5) * r * diskThick;
     pPos[i*3] = Math.cos(a)*r; pPos[i*3+1] = y; pPos[i*3+2] = Math.sin(a)*r;
-    const b = Math.max(0.2, 1.0-norm*0.7);
-    pCol[i*3] = 0.55+Math.random()*0.45; pCol[i*3+1] = 0.65+Math.random()*0.35; pCol[i*3+2] = b;
+
+    // Colores: interior blanco-dorado, medio teal, exterior azul frío
+    if (r < 20) {
+      pCol[i*3] = 0.95+Math.random()*0.05; pCol[i*3+1] = 0.88+Math.random()*0.12; pCol[i*3+2] = 0.70+Math.random()*0.25;
+    } else if (r < 55) {
+      pCol[i*3] = 0.30+Math.random()*0.50; pCol[i*3+1] = 0.75+Math.random()*0.25; pCol[i*3+2] = 0.80+Math.random()*0.20;
+    } else {
+      pCol[i*3] = 0.20+Math.random()*0.30; pCol[i*3+1] = 0.40+Math.random()*0.30; pCol[i*3+2] = 0.75+Math.random()*0.25;
+    }
+
     pAng[i] = a; pRad[i] = r;
-    pSpd[i] = (1.0/Math.sqrt(r))*2.4*(0.85+Math.random()*0.30);
-    pSz[i]  = 0.3+norm*norm*3.5+Math.random()*0.5;
+    pSpd[i] = (1.0 / Math.sqrt(r)) * 2.8 * (0.80 + Math.random() * 0.40);
+    // Partículas interiores más grandes (simulan concentración de brillo)
+    pSz[i]  = r < 20 ? 1.2 + Math.random()*1.8 : 0.4 + norm*norm*3.0 + Math.random()*0.6;
   }
   pGeo.setAttribute('position', new THREE.BufferAttribute(pPos,3));
   pGeo.setAttribute('color',    new THREE.BufferAttribute(pCol,3));
@@ -213,36 +232,65 @@ if (VR.aesthetic === 'cosmos') {
   pGeo.setAttribute('aRadius',  new THREE.BufferAttribute(pRad,1));
   pGeo.setAttribute('aSpeed',   new THREE.BufferAttribute(pSpd,1));
   pGeo.setAttribute('aSize',    new THREE.BufferAttribute(pSz, 1));
+
   const cosmosMat = new THREE.ShaderMaterial({
-    uniforms: { uT:{value:0}, uFade:{value:1}, uSpeedInner:{value:2.5}, uSpeedOuter:{value:0.05}, uSizeMult:{value:2.2} },
+    uniforms: { uT:{value:0}, uFade:{value:1}, uSpeedInner:{value:2.5}, uSpeedOuter:{value:0.05}, uSizeMult:{value:3.5} },
     vertexShader:`
       uniform float uT,uSpeedInner,uSpeedOuter,uSizeMult;
       attribute float aAngle,aRadius,aSpeed,aSize;
-      varying vec3 vCol;
+      varying vec3 vCol; varying float vNorm;
       void main(){
-        float spd=mix(uSpeedInner,uSpeedOuter,aRadius/130.0)*aSpeed;
+        float spd=mix(uSpeedInner,uSpeedOuter,aRadius/140.0)*aSpeed;
         float ang=aAngle+uT*spd;
         vec3 pos=vec3(cos(ang)*aRadius,position.y,sin(ang)*aRadius);
-        vCol=color;
+        vCol=color; vNorm=aRadius/140.0;
         vec4 mv=modelViewMatrix*vec4(pos,1.0);
         gl_Position=projectionMatrix*mv;
-        gl_PointSize=clamp(aSize*uSizeMult*(100.0/-mv.z),0.5,14.0);
+        gl_PointSize=clamp(aSize*uSizeMult*(110.0/-mv.z),0.5,28.0);
       }`,
     fragmentShader:`
-      varying vec3 vCol;
+      varying vec3 vCol; varying float vNorm;
+      uniform float uFade;
       void main(){
         vec2 c=gl_PointCoord-.5; float d=length(c);
         if(d>.5)discard;
-        float a=smoothstep(.5,.05,d);
-        gl_FragColor=vec4(vCol,a);
+        // Multi-ring glow: núcleo brillante + halo suave (simula bloom)
+        float core  = smoothstep(0.50, 0.00, d);
+        float halo  = smoothstep(0.50, 0.18, d) * 0.55;
+        float ring  = smoothstep(0.28, 0.12, d) * smoothstep(0.04, 0.12, d) * 0.35;
+        float alpha = (core + halo + ring) * uFade;
+        gl_FragColor = vec4(vCol * (1.0 + (1.0-vNorm)*0.8), alpha);
       }`,
     transparent:true, vertexColors:true,
     blending:THREE.AdditiveBlending, depthWrite:false,
   });
   bgUnis = cosmosMat.uniforms;
   scene.add(new THREE.Points(pGeo, cosmosMat));
+
+  // Disco de acreción — comparte uT con cosmosMat (bgUnis.uT se actualiza en el loop principal)
+  const ringMat = new THREE.ShaderMaterial({
+    uniforms: { uT: bgUnis.uT },  // mismo objeto → se actualiza automáticamente
+    vertexShader:`varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+    fragmentShader:`
+      varying vec2 vUv; uniform float uT;
+      void main(){
+        float ang=atan(vUv.y-.5,vUv.x-.5);
+        float r=length(vUv-.5)*2.0;
+        if(r<0.35||r>1.0)discard;
+        float pulse=0.6+0.4*sin(ang*3.0+uT*1.8);
+        float fade=smoothstep(1.0,0.55,r)*smoothstep(0.35,0.50,r);
+        vec3 col=mix(vec3(1.0,0.6,0.2),vec3(0.3,0.9,1.0),(r-0.35)*2.0);
+        gl_FragColor=vec4(col*pulse,fade*0.7);
+      }`,
+    transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, side:THREE.DoubleSide,
+  });
+  const ring = new THREE.Mesh(new THREE.PlaneGeometry(18,18,1,1), ringMat);
+  ring.rotation.x = -Math.PI * 0.5;
+  scene.add(ring);
+
+  // Agujero negro central
   scene.add(new THREE.Mesh(new THREE.SphereGeometry(BH_R,32,32), new THREE.MeshBasicMaterial({color:0x000000})));
-  camera.position.set(0, 35, 120);
+  camera.position.set(0, 22, 95);
 
 } else if (VR.aesthetic === 'mandala') {
   // Canvas 2D mandala → CanvasTexture → SphereGeometry

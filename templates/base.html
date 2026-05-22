@@ -844,6 +844,7 @@ window.__cosmosTgt = tgt;
 
 function setPreset(name) {
   Object.assign(tgt, getPreset(name));
+  _lerpBoost = 1; // dispara transición rápida
 }
 
 // Escucha cambios de preset desde la navegación AJAX
@@ -866,7 +867,9 @@ window.addEventListener('resize', () => {
 
 // ── Loop ──────────────────────────────────────────────────────────────
 const clock = new THREE.Clock();
-const L = 0.018; // lerp lento = transición cinematográfica (~5s)
+const L_BASE  = 0.018; // lerp suave base (~5s)
+const L_BOOST = 0.12;  // lerp rápido al cambiar preset (~0.8s)
+let _lerpBoost = 0;    // decae a 0 con cada frame
 
 function lerp(a, b, t) { return a + (b - a) * t; }
 
@@ -877,6 +880,10 @@ function animate() {
 
   tx += (mx - tx) * 0.038;
   ty += (my - ty) * 0.038;
+
+  // Lerp — boost transitorio al cambiar de preset
+  _lerpBoost = Math.max(0, _lerpBoost - 0.008);
+  const L = L_BASE + (L_BOOST - L_BASE) * _lerpBoost;
 
   // Lerp suave hacia el preset objetivo
   cur.bhr        = lerp(cur.bhr,        tgt.bhr,        L);
