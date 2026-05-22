@@ -109,7 +109,7 @@ def dashboard(request):
     })
 
 
-_VALID_AESTHETICS = {'cosmos', 'mandala', 'archipielago', 'arbol'}
+_VALID_AESTHETICS = {'cosmos', 'mandala', 'psychedelic', 'archipielago', 'arbol'}
 
 @login_required
 def onboarding_mapa(request):
@@ -251,15 +251,28 @@ def mapa_interior(request):
 
     from psychometrics.models import Test, TestResult
 
+    done_slugs = set(
+        TestResult.objects.filter(user=request.user)
+        .values_list('test__slug', flat=True).distinct()
+    )
+
     dim_data = {}
     for dim, label in _DIMENSION_LABELS.items():
-        total = Test.objects.filter(dimension=dim, active=True).count()
-        completed = (
-            TestResult.objects.filter(user=request.user, test__dimension=dim)
-            .values('test').distinct().count()
+        tests_qs = list(
+            Test.objects.filter(dimension=dim, active=True)
+            .order_by('order', 'id')
+            .values('slug', 'name', 'estimated_minutes')
         )
+        for t in tests_qs:
+            t['done'] = t['slug'] in done_slugs
+        total = len(tests_qs)
+        completed = sum(1 for t in tests_qs if t['done'])
         pct = round(completed / total * 100) if total else 0
-        dim_data[dim] = {'label': label, 'total': total, 'completed': completed, 'pct': pct}
+        dim_data[dim] = {
+            'label': label, 'total': total,
+            'completed': completed, 'pct': pct,
+            'tests': tests_qs,
+        }
 
     total_tests = sum(d['total'] for d in dim_data.values())
     completed_tests = sum(d['completed'] for d in dim_data.values())
@@ -267,7 +280,7 @@ def mapa_interior(request):
 
     return render(request, 'accounts/mapa_interior.html', {
         'dim_data': dim_data,
-        'dim_data_json': json.dumps(dim_data),
+        'dim_data_json': json.dumps(dim_data, ensure_ascii=False),
         'aesthetic': profile.map_aesthetic,
         'total_pct': total_pct,
         'completed_tests': completed_tests,
