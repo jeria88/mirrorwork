@@ -212,6 +212,27 @@ Polarity bars: `bar-luz-intensa` · `bar-luz` · `bar-transicion` · `bar-sombra
 - `templates/psychometrics/test_result.html` — resultados con barras de polaridad
 - `templates/psychometrics/test_list.html` — grid de tests por dimensión
 
+## Sistema visual — Mapa Interior Mandala ✅
+
+### Fondo mandala (aesthetic=mandala)
+- Canvas 2D `#mandala-bg` en base.html — se muestra solo cuando `map_aesthetic='mandala'`
+- Three.js cosmos cede el paso via `AESTHETIC_HAS_OWN_BG = { mandala: true }`
+- Presets por sección (igual que cosmos), cambian automáticamente con SPA via evento `bg:preset`:
+
+| Sección | Simetría | Paleta | Velocidad | Alpha |
+|---------|----------|--------|-----------|-------|
+| tests / psychometrics | 6 | arcano (dorado) | 1.20 | 40% |
+| birth / nacimiento | 3 | blanco | 0.45 | 70% |
+| onboarding / login | 3 | blanco | 0.45 | 70% |
+| espejo / mirror | 4 | blanco | 0.95 | 40% |
+| general (resto) | 6 | arcano | 1.20 | 40% |
+
+- Zoom global: 1.84. Sin controles UI — configuración hardcodeada.
+- Configurador standalone en `/home/nikka/Proyectos/mandala.html` — tiene botón "Copiar Configuración" que pega JSON con todos los parámetros.
+
+### Cuarzo aplicado (paneles rgba(0,0,0,0.88))
+Todos los templates tienen cuarzo: auth, dashboard, test_take/list/result, my_results, perfil, mapa_interior, birth/*, reports/dashboard.
+
 ## Pendientes (en orden de prioridad)
 
 ### Conectar fractones en features existentes
@@ -223,7 +244,7 @@ Polarity bars: `bar-luz-intensa` · `bar-luz` · `bar-transicion` · `bar-sombra
 4. Views AJAX, template conversación, burbuja flotante en base.html
 
 ### UI / Visual
-5. **Mapa Interior — otras vistas** — Mandala, Árbol, Archipiélago (cada una con su propio fondo)
+5. **Mapa Interior — fondos árbol y archipiélago** — pendientes (mandala ✅ ya implementado)
 6. **Eliminar theme switcher temporal** de `base.html` y hardcodear paleta definitiva
 
 ### Hotmart packs
