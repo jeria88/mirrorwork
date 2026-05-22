@@ -208,28 +208,28 @@ float stk(float d,float w){return exp(-d*d/(w*w));}
 void main(){
   vec4 qi=vec4(-uCamQ.xyz,uCamQ.w);
   vec3 d=rotQ(qi,vPos);
-  float bf=smoothstep(-0.05,0.22,-d.z);
-  if(bf<.003)discard;
+  // bf suave: 1.0 al frente, 0.3 en los lados, 0.08 atrás — visible en toda la esfera
+  float bf=max(0.08,0.5-d.z*.5);
   vec2 p=d.xy;
   float r=length(p),phi=atan(p.y,p.x);
   float rot=uT*uSpeed,sym=max(uSym,3.);
   float total=0.;
-  total+=stk(pgon(p,sym,.11, rot),.012)*.50;
-  total+=stk(pgon(p,sym,.23,-rot),.012)*.58;
-  total+=stk(pgon(p,sym,.39, rot),.012)*.66;
-  total+=stk(pgon(p,sym,.57,-rot),.012)*.74;
-  total+=stk(pgon(p,sym,.75, rot),.012)*.82;
-  total+=stk(starD(p,sym,.88,.42,-rot*.65),.014)*.72;
-  total+=stk(starD(p,sym,.58,.50, rot*.44+PI/sym),.011)*.58;
-  total+=stk(starD(p,sym*2.,.37,.55,-rot*.82),.009)*.42;
+  total+=stk(pgon(p,sym,.11, rot),.026)*.55;
+  total+=stk(pgon(p,sym,.23,-rot),.026)*.63;
+  total+=stk(pgon(p,sym,.39, rot),.026)*.71;
+  total+=stk(pgon(p,sym,.57,-rot),.026)*.79;
+  total+=stk(pgon(p,sym,.75, rot),.026)*.87;
+  total+=stk(starD(p,sym,.88,.42,-rot*.65),.032)*.78;
+  total+=stk(starD(p,sym,.58,.50, rot*.44+PI/sym),.028)*.64;
+  total+=stk(starD(p,sym*2.,.37,.55,-rot*.82),.022)*.48;
   float nuc=exp(-r*22.)*(0.85+.15*sin(uT*2.8));
-  total+=nuc*2.8; total*=bf;
-  if(total<.004)discard;
+  total+=nuc*3.2; total*=bf;
+  if(total<.003)discard;
   float tc=r+uT*.015,fa=mod(phi+rot,TAU/sym);
   vec3 col=mix(uC1,uC2,sin(tc*PHI)*.5+.5);
   col=mix(col,uC3,sin(fa*sym*2.+uT*.3)*.5+.5);
-  col=mix(col,vec3(1.),nuc*.7);
-  gl_FragColor=vec4(col*total*2.6,total*.96);
+  col=mix(col,vec3(1.),nuc*.75);
+  gl_FragColor=vec4(col*total*3.2,total*.98);
 }
 `;
 

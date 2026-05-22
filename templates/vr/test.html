@@ -19,6 +19,7 @@
     .ov-name { font-size:1.6rem; font-weight:300; margin-bottom:.5rem; }
     .ov-sub  { font-size:.85rem; color:#7070a0; margin-bottom:1.5rem; line-height:1.8; }
     #btn-vr  { padding:.9rem 2.5rem; border:1px solid #4ecdc4; border-radius:100px; background:transparent; color:#4ecdc4; font-size:.95rem; letter-spacing:.08em; cursor:pointer; touch-action:manipulation; }
+    #btn-preview { margin-top:.8rem; padding:.5rem 1.4rem; border:1px solid rgba(255,255,255,.2); border-radius:100px; background:transparent; color:rgba(255,255,255,.4); font-size:.75rem; letter-spacing:.08em; cursor:pointer; touch-action:manipulation; }
 
     #btn-back {
       position:fixed; top:1rem; left:1rem; z-index:100; display:none;
@@ -53,7 +54,8 @@
     {{ question_count }} preguntas · {{ test.estimated_minutes }} min estimados<br>
     <span style="font-size:.75rem;color:#4a4a7a">Mira una opción 1.2 s para responder</span>
   </p>
-  <button id="btn-vr">✦ Comenzar</button>
+  <button id="btn-vr">✦ Comenzar en VR</button>
+  <button id="btn-preview">Vista plana (desktop)</button>
 </div>
 
 <a href="{% url 'vr_home' %}" id="btn-back">← Volver</a>
@@ -136,28 +138,27 @@ float stk(float d,float w){return exp(-d*d/(w*w));}
 void main(){
   vec4 qi=vec4(-uCamQ.xyz,uCamQ.w);
   vec3 d=rotQ(qi,vPos);
-  float bf=smoothstep(-0.05,0.22,-d.z);
-  if(bf<.003)discard;
+  float bf=max(0.08,0.5-d.z*.5);
   vec2 p=d.xy;
   float r=length(p),phi=atan(p.y,p.x);
   float rot=uT*uSpeed,sym=max(uSym,3.);
   float total=0.;
-  total+=stk(pgon(p,sym,.11, rot),.012)*.50;
-  total+=stk(pgon(p,sym,.23,-rot),.012)*.58;
-  total+=stk(pgon(p,sym,.39, rot),.012)*.66;
-  total+=stk(pgon(p,sym,.57,-rot),.012)*.74;
-  total+=stk(pgon(p,sym,.75, rot),.012)*.82;
-  total+=stk(starD(p,sym,.88,.42,-rot*.65),.014)*.72;
-  total+=stk(starD(p,sym,.58,.50, rot*.44+PI/sym),.011)*.58;
-  total+=stk(starD(p,sym*2.,.37,.55,-rot*.82),.009)*.42;
+  total+=stk(pgon(p,sym,.11, rot),.026)*.55;
+  total+=stk(pgon(p,sym,.23,-rot),.026)*.63;
+  total+=stk(pgon(p,sym,.39, rot),.026)*.71;
+  total+=stk(pgon(p,sym,.57,-rot),.026)*.79;
+  total+=stk(pgon(p,sym,.75, rot),.026)*.87;
+  total+=stk(starD(p,sym,.88,.42,-rot*.65),.032)*.78;
+  total+=stk(starD(p,sym,.58,.50, rot*.44+PI/sym),.028)*.64;
+  total+=stk(starD(p,sym*2.,.37,.55,-rot*.82),.022)*.48;
   float nuc=exp(-r*22.)*(0.85+.15*sin(uT*2.8));
-  total+=nuc*2.8; total*=bf;
-  if(total<.004)discard;
+  total+=nuc*3.2; total*=bf;
+  if(total<.003)discard;
   float tc=r+uT*.015,fa=mod(phi+rot,TAU/sym);
   vec3 col=mix(uC1,uC2,sin(tc*PHI)*.5+.5);
   col=mix(col,uC3,sin(fa*sym*2.+uT*.3)*.5+.5);
-  col=mix(col,vec3(1.),nuc*.7);
-  gl_FragColor=vec4(col*total*2.6,total*.96);
+  col=mix(col,vec3(1.),nuc*.75);
+  gl_FragColor=vec4(col*total*3.2,total*.98);
 }`;
 function lerp(a,b,t){return a+(b-a)*t;}
 
@@ -295,7 +296,7 @@ const panelTex=new THREE.CanvasTexture(panelCanvas);
 const PANEL_FRAG=`uniform sampler2D uTex;uniform float uReveal,uT;varying vec2 vUv;const float PI=3.14159265,PHI=1.61803398875,LOGPHI=0.48121182506;void main(){vec2 c=vUv-.5;float r=length(c),ang=atan(c.y,c.x);float pulse=.38*sin(uT*PI*.3731)+.26*sin(uT*PHI*.6247)+.19*sin(uT*2.71828*.4153);float fibVar=.12*sin(log(max(.001,r*5.))/LOGPHI*3.-ang*2.);float revR=uReveal+pulse*.07*uReveal*(1.-uReveal)+fibVar*uReveal*(1.-uReveal);float mask=smoothstep(revR+.04,revR-.02,r*1.2);float edge=smoothstep(revR-.10,revR,r*1.2)*smoothstep(revR+.04,revR,r*1.2);vec4 tex=texture2D(uTex,vUv);vec3 glow=vec3(.30,.85,.78);vec3 col=tex.rgb*mask+glow*edge*(.7+pulse*.3);gl_FragColor=vec4(col,max(mask*tex.a,edge*.9)*min(1.,uReveal*3.));}`;
 const panelUnis={uTex:{value:panelTex},uReveal:{value:0.0},uT:{value:0.0}};
 const panelMat=new THREE.ShaderMaterial({uniforms:panelUnis,vertexShader:VERT,fragmentShader:PANEL_FRAG,transparent:true,side:THREE.DoubleSide});
-const panelMesh=new THREE.Mesh(new THREE.PlaneGeometry(4.8,2.4),panelMat);
+const panelMesh=new THREE.Mesh(new THREE.PlaneGeometry(3.8,1.9),panelMat);
 const panelRig=new THREE.Object3D();
 scene.add(panelRig); panelRig.add(panelMesh);
 panelMesh.position.set(0,0.1,-3.0);
@@ -553,9 +554,24 @@ function applyGyro(){
   camera.quaternion.multiply(_qO);
 }
 let drag=false,px=0,py=0,yaw=0,pitch=0;
-renderer.domElement.addEventListener('pointerdown',e=>{drag=true;px=e.clientX;py=e.clientY;},{passive:true});
-window.addEventListener('pointerup',()=>drag=false);
+let _tapDownX=0,_tapDownY=0,_tapDownTs=0;
+renderer.domElement.addEventListener('pointerdown',e=>{drag=true;px=e.clientX;py=e.clientY;_tapDownX=e.clientX;_tapDownY=e.clientY;_tapDownTs=performance.now();},{passive:true});
+window.addEventListener('pointerup',e=>{
+  drag=false;
+  // tap = finger up within 300 ms and <12 px movement → immediate answer
+  const moved=Math.hypot(e.clientX-_tapDownX,e.clientY-_tapDownY);
+  if(!locked&&gazeTarget>=0&&moved<12&&(performance.now()-_tapDownTs)<300){
+    const q=VR.questions[curQIdx];
+    answers[q.id]=answerBtns[gazeTarget].opt.value;
+    const next=curQIdx+1;
+    gazeTarget=-1;
+    if(next>=VR.questions.length){submitAnswers();}
+    else{questionTransition(next,()=>goToQuestion(next));}
+  }
+});
 window.addEventListener('pointermove',e=>{if(!drag||gyroOK)return;yaw-=(e.clientX-px)*.003;pitch-=(e.clientY-py)*.003;pitch=Math.max(-PI/2,Math.min(PI/2,pitch));px=e.clientX;py=e.clientY;});
+
+let previewMode=false;
 
 document.getElementById('btn-vr').addEventListener('click',async()=>{
   if(typeof DeviceOrientationEvent?.requestPermission==='function'){
@@ -564,6 +580,15 @@ document.getElementById('btn-vr').addEventListener('click',async()=>{
   document.getElementById('overlay').style.display='none';
   document.getElementById('btn-back').style.display='block';
   document.getElementById('reticle').style.display='block';
+  goToQuestion(0);
+  requestAnimationFrame(loop);
+});
+
+document.getElementById('btn-preview').addEventListener('click',()=>{
+  previewMode=true;
+  document.getElementById('overlay').style.display='none';
+  document.getElementById('btn-back').style.display='block';
+  document.getElementById('reticle').style.display='none';
   goToQuestion(0);
   requestAnimationFrame(loop);
 });
@@ -606,7 +631,8 @@ function loop(ts){
   _rigQ.copy(camera.quaternion);
   panelRig.quaternion.slerp(_rigQ,.03);
 
-  effect.render(scene,camera);
+  if(previewMode)renderer.render(scene,camera);
+  else effect.render(scene,camera);
 }
 </script>
 </body>
