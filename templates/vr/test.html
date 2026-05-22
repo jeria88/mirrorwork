@@ -361,7 +361,7 @@ function buildAnswerBtns(opts){
   answerBtns.forEach(b=>{dockGroup.remove(b.mesh);b.mat.dispose();b.tex.dispose();});
   answerBtns=[];
   const N=opts.length;
-  const SPREAD=Math.min(2.0,0.40*N);
+  const SPREAD=Math.min(2.0,Math.max(1.2,0.40*N));
   opts.forEach((opt,i)=>{
     const cv=document.createElement('canvas'); cv.width=BTN_W; cv.height=BTN_H;
     const tex=new THREE.CanvasTexture(cv);
@@ -622,7 +622,8 @@ function loop(ts){
     panelUnis.uReveal.value=revealProgress;
   }
 
-  if(document.getElementById('reticle').style.display!=='none')updateGaze(ts);
+  // en preview mode el reticle está oculto pero el gaze debe correr igual (tap trigger lo necesita)
+  if(!locked&&answerBtns.length)updateGaze(ts);
 
   if(gyroOK)applyGyro();
   else{_eu.set(pitch,yaw,0,'YXZ');camera.quaternion.setFromEuler(_eu);}
