@@ -104,12 +104,12 @@
 <div id="overlay">
   <p class="ov-tag">MirrorWork VR</p>
   <h1 class="ov-name">Hola, {{ user_name }}</h1>
-  <p class="ov-hint">
+  <p class="ov-hint" id="ov-hint-text">
     Coloca el teléfono en el visor.<br>
-    Habla con el Espejo desde adentro<br>del túnel.
+    Gira para explorar tu espacio interior.
   </p>
-  <button id="btn-vr">✦ Entrar al túnel</button>
-  <p class="desk-hint">Escritorio: arrastra · Espacio: escena · Tab: panel</p>
+  <button id="btn-vr">✦ Entrar</button>
+  <p class="desk-hint" id="ov-desk-hint">Escritorio: arrastra · Tab: panel</p>
 </div>
 
 <a href="{% url 'dashboard' %}" id="btn-back">← Salir</a>
@@ -156,6 +156,32 @@ const CSRF = "{{ csrf_token }}";
 import * as THREE from 'three';
 import { StereoEffect } from 'three/addons/effects/StereoEffect.js';
 
+// ── Normalizar aesthetic (arbol/archipielago → cosmos) ────────────────────
+const _aes = (VR.aesthetic === 'arbol' || VR.aesthetic === 'archipielago')
+  ? 'cosmos' : VR.aesthetic;
+
+// ── Overlay — texto por aesthetic ─────────────────────────────────────────
+{
+  const _hints = {
+    cosmos:      'Flota en el campo kepleriano.<br>Mira hacia el horizonte de eventos.',
+    mandala:     'Estás dentro del mandala sagrado.<br>Gira para explorar la geometría.',
+    psychedelic: 'El campo psicodélico envuelve tu percepción.<br>Espacio: cambia escena · Tab: panel',
+  };
+  const _btns = {
+    cosmos:      '✦ Entrar al cosmos',
+    mandala:     '✦ Entrar al mandala',
+    psychedelic: '✦ Entrar al campo',
+  };
+  const _deskhints = {
+    cosmos:      'Escritorio: arrastra · Tab: panel',
+    mandala:     'Escritorio: arrastra · Tab: panel',
+    psychedelic: 'Escritorio: arrastra · Espacio: escena · Tab: panel',
+  };
+  document.getElementById('ov-hint-text').innerHTML  = _hints[_aes]  || _hints.cosmos;
+  document.getElementById('btn-vr').textContent       = _btns[_aes]   || _btns.cosmos;
+  document.getElementById('ov-desk-hint').textContent = _deskhints[_aes] || _deskhints.cosmos;
+}
+
 // ── Irracionales chamánicos ───────────────────────────────────────────────
 const PHI = 1.61803398875, PI = Math.PI, E = Math.E, SQ7 = Math.sqrt(7);
 
@@ -189,7 +215,7 @@ let _mandalaCtx = null, _mandalaTex = null;
 let _psychMats = null, _psychSpeeds = null, _psychNames = null;
 let curScene = VR.initScene;
 
-if (VR.aesthetic === 'cosmos') {
+if (_aes === 'cosmos') {
   // ── VR Cosmos — partículas keplerianas con glow simulado ──────────────
   // Sin bloom (incompatible StereoEffect) — glow via multi-ring fragment + AdditiveBlending
   const BH_R = 7, N = 110000, R_MIN = 1.5, R_MAX = 140;
@@ -292,7 +318,7 @@ if (VR.aesthetic === 'cosmos') {
   scene.add(new THREE.Mesh(new THREE.SphereGeometry(BH_R,32,32), new THREE.MeshBasicMaterial({color:0x000000})));
   camera.position.set(0, 22, 95);
 
-} else if (VR.aesthetic === 'mandala') {
+} else if (_aes === 'mandala') {
   // Canvas 2D mandala → CanvasTexture → SphereGeometry
   const mCv = document.createElement('canvas'); mCv.width = mCv.height = 2048;
   _mandalaCtx = mCv.getContext('2d');
@@ -323,43 +349,85 @@ if (VR.aesthetic === 'cosmos') {
 }
 
 // ── Dibujo mandala VR ─────────────────────────────────────────────────────
+// Parámetros VR: más simetría y capas para la esfera inmersiva 360°
+const _MPALS = {
+  arcano: [35,  15,  50 ],   // dorado-naranja-ámbar
+  blanco: [210, 240, 220],   // azul-gris suave
+  nebula: [280, 320, 200],   // violeta-rosa-teal
+  aurora: [45,  175, 270],   // ámbar-verde-violeta
+  tiempo: [140, 160, 120],   // verde bosque
+};
+const _MP = {
+  sym:     8,      // más pétalos para 360° inmersivo
+  speed:   0.09,   // T multiplier de rotación
+  alpha:   0.60,
+  pal:     _MPALS.arcano,
+  layers:  5,
+};
+
 function _drawMandala(T) {
   if (!_mandalaCtx) return;
   const W = _mandalaCtx.canvas.width, H = _mandalaCtx.canvas.height;
   const ctx = _mandalaCtx;
-  ctx.fillStyle = '#00000a';
+  ctx.fillStyle = '#00000c';
   ctx.fillRect(0, 0, W, H);
   ctx.save();
   ctx.translate(W/2, H/2);
   const TAU = Math.PI*2;
-  const sr = Math.min(W,H)*0.44;
-  const sym = 6, rot = T * 0.06;
-  const alpha = 0.5;
+  const sr = Math.min(W,H) * 0.46;
+  const sym = _MP.sym, rot = T * _MP.speed, alpha = _MP.alpha;
+  const pal = _MP.pal;
+  const hue  = (pal[0] + T * 4) % 360;
+  const hue2 = (pal[1] + T * 3) % 360;
+  const hue3 = (pal[2] + T * 5) % 360;
+
   function poly(r, n, ang) {
-    return function(){ ctx.moveTo(r*Math.cos(ang),r*Math.sin(ang)); for(let i=1;i<=n;i++){const a=ang+TAU*i/n;ctx.lineTo(r*Math.cos(a),r*Math.sin(a));}ctx.closePath(); };
+    return function(){
+      ctx.moveTo(r*Math.cos(ang), r*Math.sin(ang));
+      for(let i=1;i<=n;i++){const a=ang+TAU*i/n;ctx.lineTo(r*Math.cos(a),r*Math.sin(a));}
+      ctx.closePath();
+    };
   }
   function star(r, n, ang, skip) {
-    return function(){ for(let i=0;i<=n*2;i++){const a=ang+TAU*i/(n*2),rr=i%2===0?r:r*(skip||0.5);i===0?ctx.moveTo(rr*Math.cos(a),rr*Math.sin(a)):ctx.lineTo(rr*Math.cos(a),rr*Math.sin(a));}ctx.closePath(); };
+    return function(){
+      for(let i=0;i<=n*2;i++){
+        const a=ang+TAU*i/(n*2), rr=i%2===0?r:r*(skip||0.5);
+        i===0?ctx.moveTo(rr*Math.cos(a),rr*Math.sin(a)):ctx.lineTo(rr*Math.cos(a),rr*Math.sin(a));
+      }
+      ctx.closePath();
+    };
   }
   function magic(fn, h, am) {
     const a = alpha * (am||1);
     ctx.beginPath(); fn();
-    ctx.strokeStyle=`hsla(${h},100%,58%,${a*0.12})`; ctx.lineWidth=18; ctx.stroke();
+    ctx.strokeStyle=`hsla(${h},100%,58%,${a*0.10})`; ctx.lineWidth=22; ctx.stroke();
     ctx.beginPath(); fn();
-    ctx.strokeStyle=`hsla(${h},100%,58%,${a*0.38})`; ctx.lineWidth=5; ctx.stroke();
+    ctx.strokeStyle=`hsla(${h},100%,58%,${a*0.35})`; ctx.lineWidth=4; ctx.stroke();
     ctx.beginPath(); fn();
-    ctx.strokeStyle=`hsla(${(h+20)%360},60%,90%,${a*0.82})`; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.strokeStyle=`hsla(${(h+18)%360},55%,92%,${a*0.80})`; ctx.lineWidth=1.2; ctx.stroke();
   }
-  const hue = (35 + T*6) % 360;
-  const hue2 = (hue + 180) % 360;
-  [0.42,0.66,0.84,1.0].forEach((fr, li) => {
-    const r = sr*fr, r2 = rot + (li%2===0 ? 0 : PI/sym);
-    magic(poly(r, sym, r2), li%2===0 ? hue : hue2, 0.55 + li*0.12);
+
+  // Capas de polígonos — radio proporcional a _MP.layers
+  const fracs = [0.32, 0.50, 0.65, 0.80, 0.96, 1.10].slice(0, _MP.layers + 1);
+  fracs.forEach((fr, li) => {
+    const r   = sr * fr;
+    const r2  = rot + (li % 2 === 0 ? 0 : PI / sym);
+    const h   = li % 3 === 0 ? hue : li % 3 === 1 ? hue2 : hue3;
+    magic(poly(r, sym, r2), h, 0.50 + li * 0.10);
   });
-  magic(star(sr*1.08, sym, rot*0.7, 0.45), hue, 0.5);
-  magic(star(sr*0.7, sym, rot*0.5+PI/sym, 0.52), hue2, 0.4);
-  ctx.beginPath(); ctx.arc(0,0,sr*0.07,0,TAU);
-  ctx.fillStyle=`hsla(${hue},100%,65%,0.9)`; ctx.fill();
+
+  // Estrellas — dos capas
+  magic(star(sr * 1.12, sym,     rot * 0.65, 0.42), hue,  0.45);
+  magic(star(sr * 0.72, sym,     rot * 0.45 + PI/sym, 0.50), hue2, 0.38);
+  magic(star(sr * 0.48, sym * 2, rot * 0.80, 0.55), hue3, 0.30);
+
+  // Núcleo luminoso
+  const grad = ctx.createRadialGradient(0,0,0, 0,0, sr*0.10);
+  grad.addColorStop(0, `hsla(${hue},100%,88%,0.95)`);
+  grad.addColorStop(1, `hsla(${hue},100%,60%,0.0)`);
+  ctx.beginPath(); ctx.arc(0, 0, sr*0.10, 0, TAU);
+  ctx.fillStyle = grad; ctx.fill();
+
   ctx.restore();
   if (_mandalaTex) _mandalaTex.needsUpdate = true;
 }
@@ -703,7 +771,7 @@ function setStatus(txt) {
 let T=0, lastTs=0;
 function tickTime(ts) {
   const dt = Math.min((ts-lastTs)/1000,0.05); lastTs=ts;
-  if (VR.aesthetic === 'psychedelic' && _psychSpeeds) {
+  if (_aes === 'psychedelic' && _psychSpeeds) {
     const pulse = Math.max(0.3,1+0.40*Math.sin(T*PI*0.3731)+0.25*Math.sin(T*PHI*0.6247)+0.18*Math.sin(T*E*0.4153)+0.10*Math.sin(T*SQ7*0.5289));
     T += dt*_psychSpeeds[curScene]*pulse;
   } else {
@@ -770,7 +838,7 @@ document.getElementById('btn-vr').addEventListener('click', async () => {
   document.getElementById('crosshairs').style.display = 'block';
   document.getElementById('scene-label').style.display= 'block';
   document.getElementById('vr-status').style.display  = 'block';
-  if (VR.aesthetic === 'psychedelic') {
+  if (_aes === 'psychedelic') {
     document.getElementById('scene-ui').style.display = 'flex';
     updateDots(); showLabel(_psychNames[curScene]);
   }
@@ -784,13 +852,13 @@ function loop(ts) {
   requestAnimationFrame(loop);
   const dt = tickTime(ts);
 
-  if (VR.aesthetic === 'psychedelic') {
+  if (_aes === 'psychedelic') {
     realTimer += dt;
     if(realTimer>=45){realTimer=0;triggerFade((curScene+1)%4);}
   }
 
   bgUnis.uT.value = T;
-  if (VR.aesthetic === 'mandala') _drawMandala(T);
+  if (_aes === 'mandala') _drawMandala(T);
   panelUnis.uT.value = T;
 
   // Reveal chamánico
