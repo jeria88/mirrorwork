@@ -78,8 +78,11 @@
   <p class="ov-tag">MirrorWork VR</p>
   <h1 class="ov-name">Hola, {{ user_name }}</h1>
   <p class="ov-hint" id="ov-hint">Coloca el teléfono en el visor.<br>Gira para explorar tu espacio interior.</p>
-  <button id="btn-vr">✦ Entrar</button>
-  <p class="desk-hint" id="ov-desk">Arrastra · Tab: panel</p>
+  <div style="display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap">
+    <button id="btn-vr">⬡ Modo VR</button>
+    <button id="btn-preview" style="border-color:rgba(255,255,255,.25);color:rgba(255,255,255,.5)">◻ Vista previa</button>
+  </div>
+  <p class="desk-hint" id="ov-desk">VR: visor cardboard · Vista previa: desktop sin split</p>
 </div>
 
 <a href="{% url 'dashboard' %}" id="btn-back">← Salir</a>
@@ -378,10 +381,10 @@ const PANEL_FRAG=`
   }`;
 const panelUnis={uTex:{value:panelTex},uReveal:{value:0.0},uT:{value:0.0}};
 const panelMat=new THREE.ShaderMaterial({uniforms:panelUnis,vertexShader:VERT,fragmentShader:PANEL_FRAG,transparent:true,side:THREE.DoubleSide});
-const panelMesh=new THREE.Mesh(new THREE.PlaneGeometry(4.8,2.4),panelMat);
+const panelMesh=new THREE.Mesh(new THREE.PlaneGeometry(3.8,1.9),panelMat); // ratio 2:1, ocupa ~60% FOV
 const panelRig=new THREE.Object3D();
 scene.add(panelRig); panelRig.add(panelMesh);
-panelMesh.position.set(0,-0.3,-3.2);
+panelMesh.position.set(0,0.1,-3.0); // 3 unidades frente, ligeramente sobre el centro
 
 let revealProgress=0, revealActive=false, revealFading=false;
 function startReveal(from=0){revealProgress=from;revealActive=true;}
@@ -569,14 +572,14 @@ const VR_SECTIONS = [
 ];
 let curSecIdx = 0;
 
-// Canvas por botón de dock
-const BTN_W=256, BTN_H=128;
+// Canvas por botón de dock — 512×256 para mejor legibilidad
+const BTN_W=512, BTN_H=256;
 VR_SECTIONS.forEach(sec => {
   sec.btnCanvas = document.createElement('canvas');
   sec.btnCanvas.width=BTN_W; sec.btnCanvas.height=BTN_H;
   sec.btnTex = new THREE.CanvasTexture(sec.btnCanvas);
   sec.btnMat = new THREE.MeshBasicMaterial({map:sec.btnTex, transparent:true, side:THREE.DoubleSide, depthWrite:false});
-  sec.btnMesh = new THREE.Mesh(new THREE.PlaneGeometry(.42,.21), sec.btnMat);
+  sec.btnMesh = new THREE.Mesh(new THREE.PlaneGeometry(.56,.28), sec.btnMat); // más grande
   sec.gazeTime = 0;
 });
 
@@ -603,15 +606,17 @@ function drawDockBtn(sec, progress=0, isActive=false){
 
 // Grupo del dock — hijo del panelRig, debajo del panel
 const dockGroup = new THREE.Group();
-dockGroup.position.set(0,-1.85,0);
+dockGroup.position.set(0,-0.9,0); // -0.9 = ~24° abajo, visible sin agachar la cabeza
 panelRig.add(dockGroup);
 
 const N_SEC=VR_SECTIONS.length;
-const SPREAD=1.05; // radianes totales del arco
+const SPREAD=1.15; // radianes totales del arco
+const DOCK_R=2.2;  // radio reducido para que los botones queden más cerca
 VR_SECTIONS.forEach((sec,i)=>{
   const angle=-SPREAD/2+(i/(N_SEC-1))*SPREAD;
-  sec.btnMesh.position.set(Math.sin(angle)*2.8,0,-Math.cos(angle)*2.8);
-  sec.btnMesh.lookAt(dockGroup.position); // mirando al centro
+  sec.btnMesh.position.set(Math.sin(angle)*DOCK_R,0,-Math.cos(angle)*DOCK_R);
+  // lookAt en espacio local del dockGroup: centro del arco
+  sec.btnMesh.lookAt(new THREE.Vector3(0,0,0));
   sec.btnMesh.userData.secIdx=i;
   dockGroup.add(sec.btnMesh);
   drawDockBtn(sec,0,i===0);
@@ -777,9 +782,12 @@ document.addEventListener('keydown',e=>{
   if(e.code==='Space'&&_aes==='psychedelic'){e.preventDefault();triggerFade((curPsychScene+1)%4);}
 });
 
-// ── Botón de entrada ──────────────────────────────────────────────────────
-document.getElementById('btn-vr').addEventListener('click',async()=>{
-  if(typeof DeviceOrientationEvent?.requestPermission==='function'){
+// ── Entrada ────────────────────────────────────────────────────────────────
+let _useEffect=true; // true=StereoEffect (VR), false=render normal (preview)
+
+async function enterVR(stereo){
+  _useEffect=stereo;
+  if(stereo && typeof DeviceOrientationEvent?.requestPermission==='function'){
     try{const r=await DeviceOrientationEvent.requestPermission();if(r!=='granted'){alert('Permiso denegado.');return;}}catch(e){}
   }
   document.getElementById('overlay').style.display    ='none';
@@ -787,11 +795,12 @@ document.getElementById('btn-vr').addEventListener('click',async()=>{
   document.getElementById('section-label').style.display='block';
   document.getElementById('vr-status').style.display  ='block';
   document.getElementById('reticle').style.display    ='block';
-  // Dibujar sección inicial (hub)
   drawHubPanel(); panelTex.needsUpdate=true;
   startReveal(0);
   requestAnimationFrame(loop);
-});
+}
+document.getElementById('btn-vr').addEventListener('click',()=>enterVR(true));
+document.getElementById('btn-preview').addEventListener('click',()=>enterVR(false));
 
 // ── Loop ──────────────────────────────────────────────────────────────────
 const _rigQ=new THREE.Quaternion();
@@ -830,10 +839,13 @@ function loop(ts){
   else{_eu.set(pitch,yaw,0,'YXZ');camera.quaternion.setFromEuler(_eu);}
 
   // Panel + dock siguen la cabeza
+  // posición: cámara exacta; rotación: lag suave (slerp)
+  panelRig.position.copy(camera.position);
   _rigQ.copy(camera.quaternion);
   panelRig.quaternion.slerp(_rigQ,.03);
 
-  effect.render(scene,camera);
+  if(_useEffect)effect.render(scene,camera);
+  else renderer.render(scene,camera);
 }
 </script>
 </body>
