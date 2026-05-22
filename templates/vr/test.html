@@ -121,35 +121,43 @@ uniform vec3 uC1,uC2,uC3;
 uniform vec4 uCamQ;
 varying vec3 vPos;
 const float PI=3.14159265,TAU=6.28318530,PHI=1.61803398875;
-vec3 rotQ(vec4 q,vec3 v){vec3 t=2.0*cross(q.xyz,v);return v+q.w*t+cross(q.xyz,t);}
-float rg(float r,float ri){return exp(-pow((r-ri)*24.0,2.0));}
+vec3 rotQ(vec4 q,vec3 v){vec3 t=2.*cross(q.xyz,v);return v+q.w*t+cross(q.xyz,t);}
+float pgon(vec2 p,float n,float R,float rot){
+  float a=atan(p.y,p.x)-rot,s=TAU/n,h=s*.5;
+  float fa=mod(a+h,s)-h;
+  return abs(length(p)-R*cos(PI/n)/max(cos(fa),.02));
+}
+float starD(vec2 p,float n,float R,float sk,float rot){
+  float a=atan(p.y,p.x)-rot,s=PI/n;
+  float t=mod(a,s*2.)/s; t=t<1.?t:2.-t;
+  return abs(length(p)-mix(R,R*sk,t));
+}
+float stk(float d,float w){return exp(-d*d/(w*w));}
 void main(){
   vec4 qi=vec4(-uCamQ.xyz,uCamQ.w);
   vec3 d=rotQ(qi,vPos);
-  float phi=atan(d.y,d.x);
-  float r=length(d.xy);
-  float fwd=-d.z;
-  float bf=smoothstep(-0.12,0.18,fwd);
-  if(bf<0.003) discard;
-  float rot=uT*uSpeed;
-  float fp=mod(phi+rot+PI,TAU/uSym);
-  fp=abs(fp-PI/uSym);
-  float arm=pow(max(0.,cos(fp*uSym*0.5)),2.0);
-  float star=pow(max(0.,cos(fp*uSym+PI/uSym)),3.0);
-  float pat=arm*0.7+star*0.5;
-  float rings=0.0;
-  rings+=rg(r,0.14)*pat;rings+=rg(r,0.27)*pat;rings+=rg(r,0.42)*pat;
-  rings+=rg(r,0.58)*pat;rings+=rg(r,0.74)*pat;
-  float spoke=pow(max(0.,cos(fp*uSym*0.5)),12.0)*smoothstep(0.82,0.,r)*0.5;
-  float nuc=exp(-r*20.0)*(0.85+0.15*sin(uT*2.8));
-  float fill=(sin(r*18.0-uT*0.4+phi*0.5)*0.5+0.5)*smoothstep(0.75,0.1,r)*0.08;
-  float total=(rings*0.80+spoke+fill+nuc)*bf;
-  if(total<0.003) discard;
-  float tc=r+uT*0.014;
-  vec3 col=mix(uC1,uC2,sin(tc*PHI)*0.5+0.5);
-  col=mix(col,uC3,sin(fp*uSym*2.0+uT*0.35)*0.5+0.5);
-  col=mix(col,vec3(1.0),nuc*0.65);
-  gl_FragColor=vec4(col*(total+nuc*0.4)*2.8,total*0.94);
+  float bf=smoothstep(-0.05,0.22,-d.z);
+  if(bf<.003)discard;
+  vec2 p=d.xy;
+  float r=length(p),phi=atan(p.y,p.x);
+  float rot=uT*uSpeed,sym=max(uSym,3.);
+  float total=0.;
+  total+=stk(pgon(p,sym,.11, rot),.012)*.50;
+  total+=stk(pgon(p,sym,.23,-rot),.012)*.58;
+  total+=stk(pgon(p,sym,.39, rot),.012)*.66;
+  total+=stk(pgon(p,sym,.57,-rot),.012)*.74;
+  total+=stk(pgon(p,sym,.75, rot),.012)*.82;
+  total+=stk(starD(p,sym,.88,.42,-rot*.65),.014)*.72;
+  total+=stk(starD(p,sym,.58,.50, rot*.44+PI/sym),.011)*.58;
+  total+=stk(starD(p,sym*2.,.37,.55,-rot*.82),.009)*.42;
+  float nuc=exp(-r*22.)*(0.85+.15*sin(uT*2.8));
+  total+=nuc*2.8; total*=bf;
+  if(total<.004)discard;
+  float tc=r+uT*.015,fa=mod(phi+rot,TAU/sym);
+  vec3 col=mix(uC1,uC2,sin(tc*PHI)*.5+.5);
+  col=mix(col,uC3,sin(fa*sym*2.+uT*.3)*.5+.5);
+  col=mix(col,vec3(1.),nuc*.7);
+  gl_FragColor=vec4(col*total*2.6,total*.96);
 }`;
 function lerp(a,b,t){return a+(b-a)*t;}
 
@@ -248,15 +256,20 @@ let _psychMats=null,_psychSpeeds=null,curPsychScene=VR.initScene,fadeDoing=false
 let _psychSpeedMult=1.0,_psychSpeedMultTgt=1.0,_psychMesh=null;
 
 if(_aes==='psychedelic'){
+  const HSL=`vec3 hsl(float h,float s,float l){float h6=fract(h)*6.,x=1.-abs(mod(h6,2.)-1.);vec3 r=h6<1.?vec3(1,x,0):h6<2.?vec3(x,1,0):h6<3.?vec3(0,1,x):h6<4.?vec3(0,x,1):h6<5.?vec3(x,0,1):vec3(1,0,x);return r*s*(.5+l*.5)+(1.-s)*l;}`;
   const PSYCH_FRAGS=[
-    `uniform float uT,uFade;varying vec2 vUv;const float PI=3.14159265,PHI=1.61803398875,SQ3=1.73205080;vec3 hsl(float h,float s,float l){float h6=fract(h)*6.,x=1.-abs(mod(h6,2.)-1.);vec3 r=h6<1.?vec3(1,x,0):h6<2.?vec3(x,1,0):h6<3.?vec3(0,1,x):h6<4.?vec3(0,x,1):h6<5.?vec3(x,0,1):vec3(1,0,x);return r*s*(.5+l*.5)+(1.-s)*l;}void main(){float a=vUv.x*PI*2.,d=vUv.y*10.-uT*1.4;float w=(sin(a*3.+d*1.1+uT*.5)+sin(a*5.*PHI-d*.9+uT*.7)+sin((a+d*.7)*2.5+uT*SQ3*.4))/3.;gl_FragColor=vec4(hsl(.50+w*.13,.85,.55)*max(0.,.35+w*.65)*uFade,1.);}`,
-    `uniform float uT,uFade;varying vec2 vUv;const float PI=3.14159265,SQ2=1.41421356,SQ3=1.73205080;void main(){float a=vUv.x*PI*2.,d=vUv.y*12.-uT*2.5;float fr=3.5+sin(uT*SQ3*.3)*2.2,ro=uT*SQ2*.15;float li=pow(max(0.,sin(fr*(cos(ro)*a+sin(ro)*d)-uT*2.5)),5.);vec3 c=li<.5?mix(vec3(.03,0.,.06),vec3(.35,0.,.55),li*2.):mix(vec3(.35,0.,.55),vec3(1.,.92,1.),(li-.5)*2.);gl_FragColor=vec4(c*uFade,1.);}`,
-    `uniform float uT,uFade;varying vec2 vUv;const float PI=3.14159265,PHI=1.61803398875,SQ7=2.64575131;vec3 hsl(float h,float s,float l){float h6=fract(h)*6.,x=1.-abs(mod(h6,2.)-1.);vec3 r=h6<1.?vec3(1,x,0):h6<2.?vec3(x,1,0):h6<3.?vec3(0,1,x):h6<4.?vec3(0,x,1):h6<5.?vec3(x,0,1):vec3(1,0,x);return r*s*(.5+l*.5)+(1.-s)*l;}void main(){float a=vUv.x*PI*2.,d=vUv.y*10.-uT*1.8;float A=uT*PHI*.2,f=4.+sin(uT*SQ7*.5)*3.;float act=(cos(f*(cos(A)*a+sin(A)*d)+uT*1.5)+cos(f*(cos(A+PI/3.)*a+sin(A+PI/3.)*d)-uT*1.5)+cos(f*(cos(A-PI/3.)*a+sin(A-PI/3.)*d)+uT*.75))/3.;gl_FragColor=vec4(hsl(fract(act*.5+uT*.04+vUv.x*.15),.9,.55)*(max(0.,act)*.85+.08)*uFade,1.);}`,
-    `uniform float uT,uFade;varying vec2 vUv;const float PI=3.14159265,PHI=1.61803398875,LOGPHI=0.48121182506;vec3 hsl(float h,float s,float l){float h6=fract(h)*6.,x=1.-abs(mod(h6,2.)-1.);vec3 r=h6<1.?vec3(1,x,0):h6<2.?vec3(x,1,0):h6<3.?vec3(0,1,x):h6<4.?vec3(0,x,1):h6<5.?vec3(x,0,1):vec3(1,0,x);return r*s*(.5+l*.5)+(1.-s)*l;}void main(){float a=vUv.x*PI*2.,d=vUv.y*8.-uT*2.2;float sN=log(max(.001,abs(d)*.25+.1))/LOGPHI;float fib=(sin(a*8.-sN*2.+uT*1.3)*sin(a*13.+d*1.5-uT*.9)+sin((a+sN*.618)*5.+uT*PHI*.4))/2.;gl_FragColor=vec4(hsl(fract(fib*.4+a/(PI*2.)*.25+uT*.03),.85,.6)*(pow(max(0.,fib*.5+.5),1.4)*.9+.05)*uFade,1.);}`
+    `uniform float uT,uFade;varying vec3 vPos;const float PHI=1.61803398875,SQ3=1.73205080;${HSL}
+void main(){vec3 p=vPos;float t=uT;float w=(sin(p.x*3.+p.y*2.+t*1.1)+sin(p.y*4.+p.z*2.5+t*.9*PHI)+sin(p.z*3.+p.x*3.5+t*SQ3*.8)+sin((p.x+p.y+p.z)*5.5+t*1.7))*.25;gl_FragColor=vec4(hsl(.50+w*.15,.90,.65)*max(0.,.25+w*.75)*uFade*2.2,1.);}`,
+    `uniform float uT,uFade;varying vec3 vPos;const float SQ2=1.41421356,SQ3=1.73205080;
+void main(){vec3 p=vPos;float t=uT;float f=3.5+sin(t*SQ3*.3)*1.5,a=t*SQ2*.12;float ca=cos(a),sa=sin(a);vec3 q=vec3(ca*p.x-sa*p.z,p.y,sa*p.x+ca*p.z);float w=cos(f*(q.x+q.y)+t*2.)*cos(f*(q.y+q.z)-t*2.5)*cos(f*(q.z+q.x)+t*1.5);float li=pow(max(0.,w),3.);vec3 c=li<.5?mix(vec3(.02,0.,.05),vec3(.5,0.,.8),li*2.):mix(vec3(.5,0.,.8),vec3(1.,.95,1.),(li-.5)*2.);gl_FragColor=vec4(c*uFade*2.2,1.);}`,
+    `uniform float uT,uFade;varying vec3 vPos;const float PHI=1.61803398875,SQ7=2.64575131;${HSL}
+void main(){vec3 p=vPos;float t=uT;float A=t*PHI*.18,f=5.+sin(t*SQ7*.4)*2.5;float ca=cos(A),sa=sin(A);vec3 pp=vec3(ca*p.x-sa*p.y,sa*p.x+ca*p.y,p.z);float act=(cos(f*dot(pp,normalize(vec3(1.,0.,0.)))+t*1.5)+cos(f*dot(pp,normalize(vec3(-.5,.866,0.)))-t*1.5)+cos(f*dot(pp,normalize(vec3(-.5,-.866,0.)))+t*.75))/3.;gl_FragColor=vec4(hsl(fract(act*.5+t*.04+dot(p,vec3(1.,PHI,PHI*.5))*.1),.95,.62)*(max(0.,act)*.88+.07)*uFade*2.0,1.);}`,
+    `uniform float uT,uFade;varying vec3 vPos;const float PI=3.14159265,PHI=1.61803398875;${HSL}
+void main(){vec3 p=vPos;float lat=asin(clamp(p.y,-1.,1.)),lon=atan(p.z,p.x);float theta=lon+lat*PHI*3.+uT*.8,rho=lat+lon*PHI*.5-uT*.3;float fib=(sin(theta*8.+rho*5.-uT*1.3)*sin(theta*13.-rho*8.+uT*.9)+sin(theta*5.+rho*3.+uT*PHI*.4))*.5;gl_FragColor=vec4(hsl(fract(fib*.4+lon/(PI*2.)*.2+uT*.03),.92,.64)*(pow(max(0.,fib*.5+.5),1.3)*.92+.04)*uFade*2.0,1.);}`
   ];
   _psychSpeeds=[1.0,2.2,1.5,1.9];
   _psychMats=PSYCH_FRAGS.map(f=>new THREE.ShaderMaterial({
-    uniforms:bgUnis, vertexShader:VERT_SPHY, fragmentShader:f,
+    uniforms:bgUnis, vertexShader:VERT_SPHVR, fragmentShader:f,
     side:THREE.BackSide, blending:THREE.AdditiveBlending, depthWrite:false,
   }));
   _psychMesh=new THREE.Mesh(new THREE.SphereGeometry(100,64,32),_psychMats[curPsychScene]);
