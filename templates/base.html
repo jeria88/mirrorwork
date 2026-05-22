@@ -697,24 +697,32 @@ const IS_MOBILE = window.innerWidth <= 768;
 
 const PRESETS = {
   desktop: {
-    onboarding: { bhr:4.0,  density:0.32, sizeMult:0.90, bloom:6.0,  speedInner:3.05, speedOuter:0.05, camZ:149, camAng:4  },
-    mapa:       { bhr:4.0,  density:0.32, sizeMult:1.80, bloom:6.0,  speedInner:3.05, speedOuter:0.05, camZ:149, camAng:16 },
-    espejo:     { bhr:4.0,  density:0.18, sizeMult:2.40, bloom:9.5,  speedInner:4.50, speedOuter:0.05, camZ:149, camAng:85 },
-    tests:      { bhr:4.0,  density:0.55, sizeMult:1.40, bloom:5.0,  speedInner:2.00, speedOuter:0.05, camZ:118, camAng:32 },
-    birth:      { bhr:4.0,  density:0.20, sizeMult:1.60, bloom:7.5,  speedInner:1.20, speedOuter:0.03, camZ:220, camAng:4  },
-    sensorial:  { bhr:4.0,  density:0.90, sizeMult:1.20, bloom:4.0,  speedInner:6.00, speedOuter:0.08, camZ:95,  camAng:50 },
-    perfil:     { bhr:4.0,  density:0.25, sizeMult:2.00, bloom:8.5,  speedInner:2.20, speedOuter:0.05, camZ:145, camAng:72 },
-    general:    { bhr:4.0,  density:0.32, sizeMult:1.80, bloom:6.0,  speedInner:3.05, speedOuter:0.05, camZ:149, camAng:16 },
+    onboarding:   { bhr:4.0, density:0.32, sizeMult:0.90, bloom:6.0, speedInner:3.05, speedOuter:0.05, camZ:149, camAng:4  },
+    mapa:         { bhr:4.0, density:0.40, sizeMult:2.00, bloom:7.0, speedInner:2.60, speedOuter:0.05, camZ:138, camAng:24 },
+    espejo:       { bhr:4.0, density:0.18, sizeMult:2.40, bloom:9.5, speedInner:4.50, speedOuter:0.05, camZ:149, camAng:85 },
+    tests:        { bhr:4.0, density:0.55, sizeMult:1.40, bloom:5.0, speedInner:2.00, speedOuter:0.05, camZ:118, camAng:32 },
+    birth:        { bhr:4.0, density:0.20, sizeMult:1.60, bloom:7.5, speedInner:1.20, speedOuter:0.03, camZ:220, camAng:4  },
+    sensorial:    { bhr:4.0, density:0.90, sizeMult:1.20, bloom:4.0, speedInner:6.00, speedOuter:0.08, camZ:95,  camAng:50 },
+    perfil:       { bhr:4.0, density:0.25, sizeMult:2.00, bloom:8.5, speedInner:2.20, speedOuter:0.05, camZ:145, camAng:72 },
+    tokens:       { bhr:4.0, density:0.38, sizeMult:1.60, bloom:5.5, speedInner:2.40, speedOuter:0.05, camZ:128, camAng:28 },
+    reportes:     { bhr:4.0, density:0.45, sizeMult:1.75, bloom:6.8, speedInner:2.80, speedOuter:0.05, camZ:162, camAng:20 },
+    practicantes: { bhr:4.0, density:0.50, sizeMult:1.65, bloom:5.8, speedInner:2.30, speedOuter:0.05, camZ:125, camAng:35 },
+    home:         { bhr:4.0, density:0.22, sizeMult:2.20, bloom:7.5, speedInner:1.80, speedOuter:0.04, camZ:180, camAng:8  },
+    general:      { bhr:4.0, density:0.32, sizeMult:1.80, bloom:6.0, speedInner:3.05, speedOuter:0.05, camZ:149, camAng:16 },
   },
   mobile: {
-    onboarding: { bhr:12.4, density:0.67, sizeMult:1.40, bloom:6.0,  speedInner:1.95, speedOuter:0.00, camZ:200, camAng:11 },
-    mapa:       { bhr:12.4, density:1.00, sizeMult:2.15, bloom:6.0,  speedInner:1.95, speedOuter:0.00, camZ:116, camAng:22 },
-    espejo:     { bhr:12.4, density:0.62, sizeMult:2.60, bloom:4.0,  speedInner:3.50, speedOuter:0.00, camZ:200, camAng:85 },
-    tests:      { bhr:12.4, density:0.90, sizeMult:1.60, bloom:5.0,  speedInner:1.40, speedOuter:0.00, camZ:130, camAng:35 },
-    birth:      { bhr:12.4, density:0.45, sizeMult:1.80, bloom:7.0,  speedInner:0.90, speedOuter:0.00, camZ:240, camAng:6  },
-    sensorial:  { bhr:12.4, density:1.40, sizeMult:1.30, bloom:3.5,  speedInner:4.50, speedOuter:0.00, camZ:88,  camAng:55 },
-    perfil:     { bhr:12.4, density:0.55, sizeMult:2.20, bloom:7.5,  speedInner:1.60, speedOuter:0.00, camZ:150, camAng:75 },
-    general:    { bhr:12.4, density:1.00, sizeMult:2.15, bloom:6.0,  speedInner:1.95, speedOuter:0.00, camZ:116, camAng:22 },
+    onboarding:   { bhr:12.4, density:0.67, sizeMult:1.40, bloom:6.0, speedInner:1.95, speedOuter:0.00, camZ:200, camAng:11 },
+    mapa:         { bhr:12.4, density:1.10, sizeMult:2.20, bloom:6.5, speedInner:2.00, speedOuter:0.00, camZ:122, camAng:28 },
+    espejo:       { bhr:12.4, density:0.62, sizeMult:2.60, bloom:4.0, speedInner:3.50, speedOuter:0.00, camZ:200, camAng:85 },
+    tests:        { bhr:12.4, density:0.90, sizeMult:1.60, bloom:5.0, speedInner:1.40, speedOuter:0.00, camZ:130, camAng:35 },
+    birth:        { bhr:12.4, density:0.45, sizeMult:1.80, bloom:7.0, speedInner:0.90, speedOuter:0.00, camZ:240, camAng:6  },
+    sensorial:    { bhr:12.4, density:1.40, sizeMult:1.30, bloom:3.5, speedInner:4.50, speedOuter:0.00, camZ:88,  camAng:55 },
+    perfil:       { bhr:12.4, density:0.55, sizeMult:2.20, bloom:7.5, speedInner:1.60, speedOuter:0.00, camZ:150, camAng:75 },
+    tokens:       { bhr:12.4, density:0.90, sizeMult:1.80, bloom:5.0, speedInner:1.60, speedOuter:0.00, camZ:115, camAng:32 },
+    reportes:     { bhr:12.4, density:1.00, sizeMult:1.90, bloom:6.0, speedInner:2.10, speedOuter:0.00, camZ:135, camAng:24 },
+    practicantes: { bhr:12.4, density:1.10, sizeMult:1.75, bloom:5.5, speedInner:1.50, speedOuter:0.00, camZ:110, camAng:38 },
+    home:         { bhr:12.4, density:0.50, sizeMult:2.30, bloom:7.0, speedInner:1.20, speedOuter:0.00, camZ:160, camAng:10 },
+    general:      { bhr:12.4, density:1.00, sizeMult:2.15, bloom:6.0, speedInner:1.95, speedOuter:0.00, camZ:116, camAng:22 },
   },
 };
 
@@ -728,9 +736,13 @@ function presetForPath(path) {
   if (/\/(espejo|mirror)/.test(path))                        return 'espejo';
   if (/\/(test|psychometrics)/.test(path))                   return 'tests';
   if (/\/(birth|nacimiento)/.test(path))                     return 'birth';
-  if (/\/(sensorial)/.test(path))                            return 'sensorial';
+  if (/\/(sensorial|regulacion)/.test(path))                 return 'sensorial';
   if (/\/(perfil)/.test(path))                               return 'perfil';
   if (/\/(mapa|dashboard)/.test(path))                       return 'mapa';
+  if (/\/(tokens|planes)/.test(path))                        return 'tokens';
+  if (/\/(reportes|reports)/.test(path))                     return 'reportes';
+  if (/\/(practicantes|practitioners)/.test(path))           return 'practicantes';
+  if (path === '/')                                           return 'home';
   return 'general';
 }
 
@@ -937,14 +949,18 @@ if (!{ mandala: true, psychedelic: true }[_BH_AESTHETIC]) {
 
   // ── Presets por sección (capturados desde el configurador) ──────────
   const PRESETS = {
-    onboarding: { zoom:1.84, symmetry:3,  layers:4, speed:0.45, alpha:70, detail:4, tilt:0, palette:'blanco' },
-    mapa:       { zoom:1.84, symmetry:6,  layers:5, speed:1.20, alpha:40, detail:4, tilt:0, palette:'arcano' },
-    espejo:     { zoom:1.84, symmetry:4,  layers:4, speed:0.95, alpha:40, detail:3, tilt:0, palette:'blanco' },
-    tests:      { zoom:1.84, symmetry:8,  layers:5, speed:1.50, alpha:35, detail:5, tilt:0, palette:'aurora' },
-    birth:      { zoom:1.84, symmetry:3,  layers:4, speed:0.40, alpha:70, detail:4, tilt:0, palette:'blanco' },
-    sensorial:  { zoom:1.84, symmetry:5,  layers:4, speed:0.80, alpha:45, detail:4, tilt:0, palette:'tiempo' },
-    perfil:     { zoom:2.10, symmetry:12, layers:5, speed:0.55, alpha:30, detail:5, tilt:0, palette:'nebula' },
-    general:    { zoom:1.84, symmetry:6,  layers:5, speed:1.20, alpha:40, detail:4, tilt:0, palette:'arcano' },
+    onboarding:   { zoom:1.84, symmetry:3,  layers:4, speed:0.45, alpha:70, detail:4, tilt:0, palette:'blanco' },
+    mapa:         { zoom:1.84, symmetry:9,  layers:5, speed:1.40, alpha:35, detail:5, tilt:0, palette:'arcano' },
+    espejo:       { zoom:1.84, symmetry:4,  layers:4, speed:0.95, alpha:40, detail:3, tilt:0, palette:'blanco' },
+    tests:        { zoom:1.84, symmetry:8,  layers:5, speed:1.50, alpha:35, detail:5, tilt:0, palette:'aurora' },
+    birth:        { zoom:1.84, symmetry:4,  layers:4, speed:0.38, alpha:68, detail:4, tilt:0, palette:'blanco' },
+    sensorial:    { zoom:1.84, symmetry:5,  layers:4, speed:0.80, alpha:45, detail:4, tilt:0, palette:'tiempo' },
+    perfil:       { zoom:2.10, symmetry:12, layers:5, speed:0.55, alpha:30, detail:5, tilt:0, palette:'nebula' },
+    tokens:       { zoom:1.84, symmetry:4,  layers:4, speed:0.75, alpha:48, detail:4, tilt:0, palette:'arcano' },
+    reportes:     { zoom:1.84, symmetry:9,  layers:5, speed:0.95, alpha:38, detail:5, tilt:0, palette:'nebula' },
+    practicantes: { zoom:1.84, symmetry:7,  layers:4, speed:1.05, alpha:42, detail:4, tilt:0, palette:'nebula' },
+    home:         { zoom:1.84, symmetry:6,  layers:4, speed:0.55, alpha:55, detail:4, tilt:0, palette:'blanco' },
+    general:      { zoom:1.84, symmetry:6,  layers:5, speed:1.20, alpha:40, detail:4, tilt:0, palette:'arcano' },
   };
 
   function presetForPath(path) {
@@ -952,9 +968,13 @@ if (!{ mandala: true, psychedelic: true }[_BH_AESTHETIC]) {
     if (/\/(espejo|mirror)/.test(path))                        return 'espejo';
     if (/\/(test|psychometrics)/.test(path))                   return 'tests';
     if (/\/(birth|nacimiento)/.test(path))                     return 'birth';
-    if (/\/(sensorial)/.test(path))                            return 'sensorial';
+    if (/\/(sensorial|regulacion)/.test(path))                 return 'sensorial';
     if (/\/(perfil)/.test(path))                               return 'perfil';
     if (/\/(mapa|dashboard)/.test(path))                       return 'mapa';
+    if (/\/(tokens|planes)/.test(path))                        return 'tokens';
+    if (/\/(reportes|reports)/.test(path))                     return 'reportes';
+    if (/\/(practicantes|practitioners)/.test(path))           return 'practicantes';
+    if (path === '/')                                           return 'home';
     return 'general';
   }
 
@@ -1215,14 +1235,18 @@ if (!{ mandala: true, psychedelic: true }[_BH_AESTHETIC]) {
 
   // ── Sección Mirrorwork → escena psicodélica ──────────────────────────
   const SECTION_SCENE = {
-    onboarding: 0,   // corriente  — entrada fluida
-    general:    0,   // corriente  — default
-    mapa:       0,   // corriente  — hub central, fluido
-    tests:      2,   // hexagonal  — grid estructurado / análisis
-    birth:      3,   // fibonacci  — espiral áurea / geometría natal
-    espejo:     1,   // obsidiana  — oscuro / introspectivo
-    sensorial:  0,   // corriente  — fluido, corporal
-    perfil:     1,   // obsidiana  — identidad, profundidad
+    onboarding:   0,  // corriente  — entrada fluida
+    general:      0,  // corriente  — default
+    home:         0,  // corriente  — landing
+    mapa:         2,  // hexagonal  — hub estructurado, nodos
+    tests:        2,  // hexagonal  — análisis, grid de instrumentos
+    reportes:     2,  // hexagonal  — datos, progreso
+    birth:        3,  // fibonacci  — espiral áurea / geometría natal
+    sensorial:    3,  // fibonacci  — orgánico, respiración, cuerpo
+    espejo:       1,  // obsidiana  — oscuro / introspectivo
+    perfil:       1,  // obsidiana  — identidad, profundidad
+    tokens:       0,  // corriente  — neutro
+    practicantes: 0,  // corriente  — neutro
   };
 
   // ── Escena actual y cola de transición ──────────────────────────────
@@ -1252,9 +1276,13 @@ if (!{ mandala: true, psychedelic: true }[_BH_AESTHETIC]) {
     else if (/\/(espejo|mirror)/.test(path))                   sec = 'espejo';
     else if (/\/(test|psychometrics)/.test(path))              sec = 'tests';
     else if (/\/(birth|nacimiento)/.test(path))                sec = 'birth';
-    else if (/\/(sensorial)/.test(path))                       sec = 'sensorial';
+    else if (/\/(sensorial|regulacion)/.test(path))            sec = 'sensorial';
     else if (/\/(perfil)/.test(path))                          sec = 'perfil';
     else if (/\/(mapa|dashboard)/.test(path))                  sec = 'mapa';
+    else if (/\/(tokens|planes)/.test(path))                   sec = 'tokens';
+    else if (/\/(reportes|reports)/.test(path))                sec = 'reportes';
+    else if (/\/(practicantes|practitioners)/.test(path))      sec = 'practicantes';
+    else if (path === '/')                                      sec = 'home';
     currentScene = SECTION_SCENE[sec] ?? 0;
     Object.assign(P, SCENE_PRESETS[currentScene]);
   })();
@@ -1517,9 +1545,13 @@ function presetForPath(path) {
   if (/\/(espejo|mirror)/.test(path))                        return 'espejo';
   if (/\/(test|psychometrics)/.test(path))                   return 'tests';
   if (/\/(birth|nacimiento)/.test(path))                     return 'birth';
-  if (/\/(sensorial)/.test(path))                            return 'sensorial';
+  if (/\/(sensorial|regulacion)/.test(path))                 return 'sensorial';
   if (/\/(perfil)/.test(path))                               return 'perfil';
   if (/\/(mapa|dashboard)/.test(path))                       return 'mapa';
+  if (/\/(tokens|planes)/.test(path))                        return 'tokens';
+  if (/\/(reportes|reports)/.test(path))                     return 'reportes';
+  if (/\/(practicantes|practitioners)/.test(path))           return 'practicantes';
+  if (path === '/')                                           return 'home';
   return 'general';
 }
 
