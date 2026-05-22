@@ -320,30 +320,36 @@ function wrapText(ctx,text,x,y,maxW,lineH,maxLines){
 
 function drawQuestion(qIdx){
   const c=panelCanvas.getContext('2d'); c.clearRect(0,0,PW,PH);
-  c.fillStyle='rgba(0,0,0,0.88)'; _rr(c,0,0,PW,PH,32); c.fill();
+  c.fillStyle='rgba(0,0,0,0.90)'; _rr(c,0,0,PW,PH,32); c.fill();
   c.strokeStyle='rgba(78,205,196,0.28)'; c.lineWidth=2; _rr(c,1,1,PW-2,PH-2,31); c.stroke();
 
-  // Barra de progreso
+  // Barra de progreso — más gruesa y legible
   const pct=qIdx/VR.questions.length;
-  c.fillStyle='rgba(255,255,255,.07)'; _rr(c,40,14,PW-80,6,3); c.fill();
-  if(pct>0){c.fillStyle='#4ecdc4'; _rr(c,40,14,Math.max(6,(PW-80)*pct),6,3); c.fill();}
+  c.fillStyle='rgba(255,255,255,.07)'; _rr(c,40,12,PW-80,10,5); c.fill();
+  if(pct>0){
+    const grd=c.createLinearGradient(40,0,40+(PW-80)*pct,0);
+    grd.addColorStop(0,'#7c6dfa'); grd.addColorStop(1,'#4ecdc4');
+    c.fillStyle=grd; _rr(c,40,12,Math.max(10,(PW-80)*pct),10,5); c.fill();
+  }
 
   // Header
-  c.fillStyle='#4ecdc4'; c.font='500 19px system-ui'; c.fillText(VR.testName,44,46);
-  c.fillStyle='#7070a0'; c.font='400 19px system-ui'; c.textAlign='right';
-  c.fillText(`${qIdx+1} / ${VR.questions.length}`,PW-44,46); c.textAlign='left';
-  c.fillStyle='rgba(78,205,196,0.15)'; c.fillRect(40,58,PW-80,1);
+  c.fillStyle='#4ecdc4'; c.font='500 20px system-ui'; c.fillText(VR.testName,44,48);
+  c.fillStyle='rgba(255,255,255,.45)'; c.font='400 20px system-ui'; c.textAlign='right';
+  c.fillText(`${qIdx+1} / ${VR.questions.length}`,PW-44,48); c.textAlign='left';
+  c.fillStyle='rgba(78,205,196,0.18)'; c.fillRect(40,60,PW-80,1);
 
-  // Texto pregunta
+  // Texto pregunta — mayor y más espacio
   const q=VR.questions[qIdx];
-  c.fillStyle='#e2e2f0'; c.font='300 30px system-ui';
-  wrapText(c,q.text,44,96,PW-88,42,7);
+  c.fillStyle='#e8e8f4'; c.font='300 36px system-ui';
+  const textEnd=wrapText(c,q.text,48,100,PW-96,50,5);
 
-  // Hint escala
+  // Hint escala — solo para escalas con 3+ opciones
   const opts=q.options;
-  if(opts.length>=3){
-    c.fillStyle='rgba(255,255,255,.22)'; c.font='400 16px system-ui';
-    c.fillText(`${opts[0].label.replace(/\n/g,' ')}  ·····  ${opts[opts.length-1].label.replace(/\n/g,' ')}`,44,PH-26);
+  if(opts.length>=3&&textEnd<PH-50){
+    const first=opts[0].label.replace(/\n/g,' ');
+    const last=opts[opts.length-1].label.replace(/\n/g,' ');
+    c.fillStyle='rgba(255,255,255,.18)'; c.font='italic 400 18px system-ui';
+    c.fillText(`${first}  ←·····→  ${last}`,48,PH-22);
   }
 }
 
@@ -351,10 +357,10 @@ function drawQuestion(qIdx){
 // BOTONES DE RESPUESTA — arco 3D, hijos del dockGroup
 // ═══════════════════════════════════════════════════════════════════════════
 const dockGroup=new THREE.Group();
-dockGroup.position.set(0,-0.9,0);
+dockGroup.position.set(0,-0.65,0); // 15° abajo del centro — cómodo sin agachar la cabeza
 panelRig.add(dockGroup);
 
-const BTN_W=200,BTN_H=96;
+const BTN_W=240,BTN_H=120;
 let answerBtns=[];
 
 function buildAnswerBtns(opts){
@@ -362,14 +368,15 @@ function buildAnswerBtns(opts){
   answerBtns=[];
   const N=opts.length;
   const SPREAD=Math.min(2.0,Math.max(1.2,0.40*N));
+  const R=2.4; // radio reducido: botones más cerca = se ven más grandes
   opts.forEach((opt,i)=>{
     const cv=document.createElement('canvas'); cv.width=BTN_W; cv.height=BTN_H;
     const tex=new THREE.CanvasTexture(cv);
     const mat=new THREE.MeshBasicMaterial({map:tex,transparent:true,side:THREE.DoubleSide,depthWrite:false});
-    const mesh=new THREE.Mesh(new THREE.PlaneGeometry(.38,.18),mat);
+    const mesh=new THREE.Mesh(new THREE.PlaneGeometry(.50,.25),mat);
     const angle=-SPREAD/2+(i/(Math.max(N-1,1)))*SPREAD;
-    mesh.position.set(Math.sin(angle)*2.8,0,-Math.cos(angle)*2.8);
-    mesh.lookAt(dockGroup.position);
+    mesh.position.set(Math.sin(angle)*R,0,-Math.cos(angle)*R);
+    mesh.rotation.y=-angle; // cada botón rota para enfrentar el centro del arco
     mesh.userData.answerIdx=i;
     dockGroup.add(mesh);
     answerBtns.push({opt,mesh,mat,tex,cv});
@@ -381,21 +388,44 @@ function drawAnswerBtn(idx,progress,isHovered){
   const b=answerBtns[idx];
   const ctx=b.cv.getContext('2d'),W=BTN_W,H=BTN_H;
   ctx.clearRect(0,0,W,H);
-  ctx.fillStyle=isHovered?'rgba(78,205,196,.20)':'rgba(0,0,8,.82)';
-  _rr(ctx,3,3,W-6,H-6,16); ctx.fill();
-  ctx.strokeStyle=isHovered?'rgba(78,205,196,.90)':'rgba(255,255,255,.22)';
-  ctx.lineWidth=isHovered?2.5:1.5; _rr(ctx,3,3,W-6,H-6,16); ctx.stroke();
-  ctx.fillStyle=isHovered?'#4ecdc4':'#e2e2f0';
-  ctx.font=`600 ${H*.36}px system-ui`; ctx.textAlign='center';
-  ctx.fillText(String(b.opt.value),W/2,H*.52);
-  ctx.fillStyle=isHovered?'rgba(78,205,196,.85)':'#7070a0';
-  ctx.font=`400 ${H*.14}px system-ui`;
-  ctx.fillText(b.opt.label.replace(/\n/g,' ').substring(0,14),W/2,H*.85);
+  const isBinary=answerBtns.length<=2;
+  ctx.fillStyle=isHovered?'rgba(78,205,196,.22)':'rgba(0,0,8,.88)';
+  _rr(ctx,3,3,W-6,H-6,18); ctx.fill();
+  ctx.strokeStyle=isHovered?'rgba(78,205,196,.95)':'rgba(255,255,255,.28)';
+  ctx.lineWidth=isHovered?3:1.5; _rr(ctx,3,3,W-6,H-6,18); ctx.stroke();
+  ctx.textAlign='center';
+  if(isBinary){
+    // Escala binaria: el label es el contenido principal
+    ctx.fillStyle=isHovered?'#4ecdc4':'#e2e2f0';
+    ctx.font=`500 ${H*.30}px system-ui`;
+    ctx.fillText(b.opt.label.replace(/\n/g,' '),W/2,H*.62);
+  }else{
+    // Likert: número grande + label completo
+    ctx.fillStyle=isHovered?'#4ecdc4':'#e2e2f0';
+    ctx.font=`600 ${H*.40}px system-ui`;
+    ctx.fillText(String(b.opt.value),W/2,H*.54);
+    const label=b.opt.label.replace(/\n/g,' ');
+    ctx.fillStyle=isHovered?'rgba(78,205,196,.9)':'rgba(160,160,200,.75)';
+    ctx.font=`400 ${H*.155}px system-ui`;
+    ctx.fillText(label.length>16?label.substring(0,15)+'…':label,W/2,H*.84);
+  }
   if(progress>0){
     const cx=W/2,cy=H/2,r=Math.min(W,H)*.44;
     ctx.beginPath(); ctx.arc(cx,cy,r,-PI/2,-PI/2+PI*2*progress);
-    ctx.strokeStyle='#4ecdc4'; ctx.lineWidth=4; ctx.stroke();
+    ctx.strokeStyle='#4ecdc4'; ctx.lineWidth=5; ctx.stroke();
   }
+  ctx.textAlign='left';
+  b.tex.needsUpdate=true;
+}
+
+function drawAnswerBtnConfirmed(idx){
+  const b=answerBtns[idx];
+  const ctx=b.cv.getContext('2d'),W=BTN_W,H=BTN_H;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='rgba(78,205,196,.30)'; _rr(ctx,3,3,W-6,H-6,18); ctx.fill();
+  ctx.strokeStyle='#4ecdc4'; ctx.lineWidth=3; _rr(ctx,3,3,W-6,H-6,18); ctx.stroke();
+  ctx.fillStyle='#4ecdc4'; ctx.font=`700 ${H*.48}px system-ui`; ctx.textAlign='center';
+  ctx.fillText('✓',W/2,H*.66);
   ctx.textAlign='left';
   b.tex.needsUpdate=true;
 }
@@ -511,8 +541,9 @@ function updateGaze(ts){
         gazeTarget=-1;
         const q=VR.questions[curQIdx];
         answers[q.id]=answerBtns[idx].opt.value;
+        drawAnswerBtnConfirmed(idx); // flash visual de confirmación
         const next=curQIdx+1;
-        if(next>=VR.questions.length){submitAnswers();}
+        if(next>=VR.questions.length){setTimeout(submitAnswers,320);}
         else{questionTransition(next,()=>goToQuestion(next));}
       }
     } else {
@@ -563,9 +594,11 @@ window.addEventListener('pointerup',e=>{
   if(!locked&&gazeTarget>=0&&moved<12&&(performance.now()-_tapDownTs)<300){
     const q=VR.questions[curQIdx];
     answers[q.id]=answerBtns[gazeTarget].opt.value;
-    const next=curQIdx+1;
+    const confirmedIdx=gazeTarget;
     gazeTarget=-1;
-    if(next>=VR.questions.length){submitAnswers();}
+    drawAnswerBtnConfirmed(confirmedIdx); // flash visual de confirmación
+    const next=curQIdx+1;
+    if(next>=VR.questions.length){setTimeout(submitAnswers,320);}
     else{questionTransition(next,()=>goToQuestion(next));}
   }
 });
