@@ -10,16 +10,16 @@
     * { margin:0; padding:0; box-sizing:border-box; }
     body { background:#000; overflow:hidden; font-family:system-ui,sans-serif; }
 
-    /* ── Overlay ── */
+    /* ── Overlay de entrada ── */
     #overlay {
       position:fixed; inset:0; z-index:200;
       display:flex; flex-direction:column; align-items:center; justify-content:center;
       background:#000; color:#fff; text-align:center; padding:2rem;
     }
-    .ov-tag   { font-size:.7rem; letter-spacing:.35em; text-transform:uppercase; color:#4ecdc4; margin-bottom:.5rem; }
-    .ov-name  { font-size:2rem; font-weight:300; margin-bottom:1.5rem; }
-    .ov-hint  { font-size:.78rem; color:#7070a0; line-height:2; margin-bottom:2rem; }
-    #btn-vr   {
+    .ov-tag  { font-size:.7rem; letter-spacing:.35em; text-transform:uppercase; color:#4ecdc4; margin-bottom:.5rem; }
+    .ov-name { font-size:2rem; font-weight:300; margin-bottom:1.5rem; }
+    .ov-hint { font-size:.78rem; color:#7070a0; line-height:2; margin-bottom:2rem; }
+    #btn-vr  {
       padding:.9rem 2.5rem; border:1px solid #4ecdc4; border-radius:100px;
       background:transparent; color:#4ecdc4; font-size:.95rem; letter-spacing:.08em;
       cursor:pointer; touch-action:manipulation; transition:background .2s;
@@ -33,36 +33,25 @@
       font-size:.7rem; letter-spacing:.12em; text-transform:uppercase;
       color:rgba(255,255,255,.4); text-decoration:none;
       padding:.4rem .8rem; border:1px solid rgba(255,255,255,.1); border-radius:100px;
-      transition:color .2s, border-color .2s;
     }
     #btn-back:hover { color:#4ecdc4; border-color:#4ecdc4; }
 
-    /* ── Tabs de panel ── */
-    #panel-tabs {
-      position:fixed; bottom:2.8rem; left:50%; transform:translateX(-50%);
-      display:none; gap:.5rem; z-index:100;
+    /* ── Reticle (gaze) ── */
+    #reticle {
+      position:fixed; left:50%; top:50%;
+      transform:translate(-50%,-50%);
+      pointer-events:none; z-index:50; display:none;
     }
-    .ptab {
-      padding:.38rem 1.1rem; border:1px solid rgba(255,255,255,.15); border-radius:100px;
-      background:transparent; color:rgba(255,255,255,.4); font-size:.72rem;
-      letter-spacing:.1em; cursor:pointer; touch-action:manipulation;
-      transition:border-color .2s, color .2s, background .2s;
-    }
-    .ptab.active { border-color:#4ecdc4; color:#4ecdc4; background:rgba(78,205,196,.08); }
 
-    /* ── Selector de escena ── */
-    #scene-ui {
-      position:fixed; bottom:1rem; width:100%; display:none;
-      justify-content:center; gap:.8rem; z-index:100;
+    /* ── Section label ── */
+    #section-label {
+      position:fixed; top:1rem; left:50%; transform:translateX(-50%);
+      font-size:.65rem; letter-spacing:.3em; text-transform:uppercase;
+      color:#4ecdc4; z-index:100; opacity:0; transition:opacity .4s;
+      pointer-events:none; white-space:nowrap; display:none;
     }
-    .s-dot {
-      width:8px; height:8px; border-radius:50%;
-      background:rgba(255,255,255,.18); border:none; cursor:pointer;
-      touch-action:manipulation; transition:background .2s;
-    }
-    .s-dot.active { background:#4ecdc4; }
 
-    /* ── Botón micrófono ── */
+    /* ── Micrófono ── */
     #btn-mic {
       position:fixed; bottom:1rem; right:1.2rem; z-index:100; display:none;
       width:52px; height:52px; border-radius:50%;
@@ -70,9 +59,9 @@
       color:#4ecdc4; font-size:1.3rem; cursor:pointer; touch-action:manipulation;
       transition:border-color .2s, background .2s;
     }
-    #btn-mic.listening { border-color:#e05050; color:#e05050; background:rgba(224,80,80,.12); }
+    #btn-mic.listening  { border-color:#e05050; color:#e05050; background:rgba(224,80,80,.12); }
     #btn-mic.processing { border-color:#f0c040; color:#f0c040; animation:pulse .8s infinite alternate; }
-    @keyframes pulse { from { opacity:.5; } to { opacity:1; } }
+    @keyframes pulse { from{opacity:.5} to{opacity:1} }
 
     /* ── Status de voz ── */
     #vr-status {
@@ -81,22 +70,6 @@
       color:rgba(78,205,196,.6); z-index:100; display:none;
       pointer-events:none; white-space:nowrap;
     }
-
-    /* ── Miras VR ── */
-    #crosshairs { position:fixed; inset:0; pointer-events:none; z-index:50; display:none; }
-    .ch { position:absolute; top:50%; width:16px; height:16px; transform:translate(-50%,-50%); }
-    .ch::before,.ch::after { content:''; position:absolute; background:rgba(255,255,255,.45); }
-    .ch::before { width:1px; height:100%; left:50%; }
-    .ch::after  { height:1px; width:100%; top:50%; }
-    #ch-l { left:25%; } #ch-r { left:75%; }
-
-    /* ── Label escena ── */
-    #scene-label {
-      position:fixed; top:1rem; left:50%; transform:translateX(-50%);
-      font-size:.65rem; letter-spacing:.3em; text-transform:uppercase;
-      color:#4ecdc4; z-index:100; opacity:0; transition:opacity .4s;
-      pointer-events:none; white-space:nowrap; display:none;
-    }
   </style>
 </head>
 <body>
@@ -104,33 +77,26 @@
 <div id="overlay">
   <p class="ov-tag">MirrorWork VR</p>
   <h1 class="ov-name">Hola, {{ user_name }}</h1>
-  <p class="ov-hint" id="ov-hint-text">
-    Coloca el teléfono en el visor.<br>
-    Gira para explorar tu espacio interior.
-  </p>
+  <p class="ov-hint" id="ov-hint">Coloca el teléfono en el visor.<br>Gira para explorar tu espacio interior.</p>
   <button id="btn-vr">✦ Entrar</button>
-  <p class="desk-hint" id="ov-desk-hint">Escritorio: arrastra · Tab: panel</p>
+  <p class="desk-hint" id="ov-desk">Arrastra · Tab: panel</p>
 </div>
 
 <a href="{% url 'dashboard' %}" id="btn-back">← Salir</a>
 
-<div id="crosshairs" aria-hidden="true">
-  <div class="ch" id="ch-l"></div>
-  <div class="ch" id="ch-r"></div>
-</div>
-<div id="panel-tabs">
-  <button class="ptab active" data-mode="perfil">◉ Perfil</button>
-  <button class="ptab" data-mode="espejo">◎ Espejo</button>
-</div>
-<div id="scene-ui">
-  <button class="s-dot active" data-i="0"></button>
-  <button class="s-dot" data-i="1"></button>
-  <button class="s-dot" data-i="2"></button>
-  <button class="s-dot" data-i="3"></button>
-</div>
+<!-- Reticle SVG con anillo de progreso de gaze -->
+<svg id="reticle" viewBox="0 0 44 44" width="44" height="44">
+  <circle cx="22" cy="22" r="5"  fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1.2"/>
+  <circle cx="22" cy="22" r="1.8" fill="rgba(255,255,255,.45)"/>
+  <circle id="gaze-ring" cx="22" cy="22" r="14" fill="none"
+    stroke="#4ecdc4" stroke-width="2.5"
+    stroke-dasharray="87.96" stroke-dashoffset="87.96"
+    transform="rotate(-90 22 22)" style="transition:stroke-dashoffset .05s linear"/>
+</svg>
+
+<div id="section-label"></div>
 <button id="btn-mic" title="Hablar con el Espejo">🎤</button>
 <div id="vr-status"></div>
-<div id="scene-label"></div>
 
 <!-- Datos Django → JS -->
 <script>
@@ -143,6 +109,9 @@ const VR = {
   total:     {{ total_tests }},
   question:  "{{ onboarding_question|escapejs|truncatechars:72 }}",
   initScene: {{ initial_scene }},
+  dimData:         {{ dim_data_json|safe }},
+  birthTypes:      {{ birth_types_json|safe }},
+  breathPatterns:  {{ breath_patterns_json|safe }},
 };
 const CSRF = "{{ csrf_token }}";
 </script>
@@ -156,36 +125,29 @@ const CSRF = "{{ csrf_token }}";
 import * as THREE from 'three';
 import { StereoEffect } from 'three/addons/effects/StereoEffect.js';
 
-// ── Normalizar aesthetic (arbol/archipielago → cosmos) ────────────────────
+const PHI = 1.61803398875, PI = Math.PI, E = Math.E, SQ7 = Math.sqrt(7);
+
+// ── Normalizar aesthetic ───────────────────────────────────────────────────
 const _aes = (VR.aesthetic === 'arbol' || VR.aesthetic === 'archipielago')
   ? 'cosmos' : VR.aesthetic;
 
-// ── Overlay — texto por aesthetic ─────────────────────────────────────────
+// ── Overlay por aesthetic ─────────────────────────────────────────────────
 {
-  const _hints = {
+  const hints = {
     cosmos:      'Flota en el campo kepleriano.<br>Mira hacia el horizonte de eventos.',
     mandala:     'Estás dentro del mandala sagrado.<br>Gira para explorar la geometría.',
-    psychedelic: 'El campo psicodélico envuelve tu percepción.<br>Espacio: cambia escena · Tab: panel',
+    psychedelic: 'El campo psicodélico te envuelve.<br>El dock cambia el entorno.',
   };
-  const _btns = {
-    cosmos:      '✦ Entrar al cosmos',
-    mandala:     '✦ Entrar al mandala',
-    psychedelic: '✦ Entrar al campo',
+  const btns = {
+    cosmos:'✦ Entrar al cosmos', mandala:'✦ Entrar al mandala', psychedelic:'✦ Entrar al campo',
   };
-  const _deskhints = {
-    cosmos:      'Escritorio: arrastra · Tab: panel',
-    mandala:     'Escritorio: arrastra · Tab: panel',
-    psychedelic: 'Escritorio: arrastra · Espacio: escena · Tab: panel',
-  };
-  document.getElementById('ov-hint-text').innerHTML  = _hints[_aes]  || _hints.cosmos;
-  document.getElementById('btn-vr').textContent       = _btns[_aes]   || _btns.cosmos;
-  document.getElementById('ov-desk-hint').textContent = _deskhints[_aes] || _deskhints.cosmos;
+  document.getElementById('ov-hint').innerHTML  = hints[_aes] || hints.cosmos;
+  document.getElementById('btn-vr').textContent  = btns[_aes]  || btns.cosmos;
+  if (_aes === 'psychedelic')
+    document.getElementById('ov-desk').textContent = 'Arrastra · Espacio: escena · Tab: panel';
 }
 
-// ── Irracionales chamánicos ───────────────────────────────────────────────
-const PHI = 1.61803398875, PI = Math.PI, E = Math.E, SQ7 = Math.sqrt(7);
-
-// ── Renderer ──────────────────────────────────────────────────────────────
+// ── Renderer + StereoEffect ───────────────────────────────────────────────
 const renderer = new THREE.WebGLRenderer({ antialias:false, powerPreference:'high-performance' });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
 renderer.setSize(innerWidth, innerHeight);
@@ -205,62 +167,86 @@ window.addEventListener('resize', () => {
   effect.setSize(innerWidth, innerHeight);
 });
 
-// ── Vertex compartido ─────────────────────────────────────────────────────
 const VERT = `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`;
 
-// ── Fondo según aesthetic ─────────────────────────────────────────────────
-let bgUnis = { uT: { value: 0 }, uFade: { value: 1 } };
+// ── Estado de fondo ───────────────────────────────────────────────────────
+let bgUnis = { uT:{value:0}, uFade:{value:1} };
 let bgMesh = null;
 let _mandalaCtx = null, _mandalaTex = null;
 let _psychMats = null, _psychSpeeds = null, _psychNames = null;
-let curScene = VR.initScene;
+let curPsychScene = VR.initScene;
+let vrField = null; // ref al Points de cosmos para animar diskTilt
 
+// ── Presets VR cosmos por sección ─────────────────────────────────────────
+// En VR no movemos la cámara (es el giroscopio quien lo hace)
+// Cambiamos: speedInner, sizeMult, diskTilt (inclinación del disco)
+const VR_COS_PRESETS = {
+  hub:       { speedInner:2.6,  sizeMult:3.5, diskTilt:10  },
+  espejo:    { speedInner:4.5,  sizeMult:4.0, diskTilt:75  },
+  tests:     { speedInner:2.0,  sizeMult:3.0, diskTilt:25  },
+  birth:     { speedInner:0.8,  sizeMult:5.5, diskTilt:5   },
+  sensorial: { speedInner:6.5,  sizeMult:2.5, diskTilt:40  },
+  perfil:    { speedInner:2.2,  sizeMult:4.2, diskTilt:60  },
+};
+let vrCosCur = { ...VR_COS_PRESETS.hub };
+let vrCosTgt = { ...VR_COS_PRESETS.hub };
+let _vrLerpBoost = 0;
+function lerp(a,b,t){ return a+(b-a)*t; }
+
+// ── Paletas mandala VR ────────────────────────────────────────────────────
+const _MPALS = {
+  arcano: [35,  15,  50 ],
+  blanco: [210, 240, 220],
+  nebula: [280, 320, 200],
+  aurora: [45,  175, 270],
+  tiempo: [140, 160, 120],
+};
+const VR_MAN_PRESETS = {
+  hub:       { sym:8,  speed:0.09, pal:_MPALS.arcano },
+  espejo:    { sym:4,  speed:0.07, pal:_MPALS.blanco },
+  tests:     { sym:8,  speed:0.12, pal:_MPALS.aurora },
+  birth:     { sym:4,  speed:0.05, pal:_MPALS.blanco },
+  sensorial: { sym:5,  speed:0.08, pal:_MPALS.tiempo },
+  perfil:    { sym:12, speed:0.06, pal:_MPALS.nebula },
+};
+const _MP = { sym:8, speed:0.09, pal:_MPALS.arcano, alpha:0.60, layers:5 };
+
+// ── Escenas psychedelic por sección ──────────────────────────────────────
+const VR_PSY_SCENES = {
+  hub:2, espejo:1, tests:2, birth:3, sensorial:3, perfil:1,
+};
+
+// ── Fondo cosmos ──────────────────────────────────────────────────────────
 if (_aes === 'cosmos') {
-  // ── VR Cosmos — partículas keplerianas con glow simulado ──────────────
-  // Sin bloom (incompatible StereoEffect) — glow via multi-ring fragment + AdditiveBlending
-  const BH_R = 7, N = 110000, R_MIN = 1.5, R_MAX = 140;
-  const pGeo = new THREE.BufferGeometry();
-  const pPos = new Float32Array(N*3), pCol = new Float32Array(N*3);
-  const pAng = new Float32Array(N),   pRad = new Float32Array(N);
-  const pSpd = new Float32Array(N),   pSz  = new Float32Array(N);
-
-  for (let i = 0; i < N; i++) {
-    // Distribución: 65% disco interior, 20% anillo medio, 15% halo exterior
-    let r;
-    const roll = Math.random();
-    if      (roll < 0.65) r = R_MIN + Math.pow(Math.random(), 1.8) * 38;
-    else if (roll < 0.85) r = 38 + Math.random() * 42;
-    else                  r = 80 + Math.random() * (R_MAX - 80);
-
-    const a = Math.random() * PI * 2;
-    const norm = r / R_MAX;
-    const diskThick = r < 40 ? 0.04 + norm * 0.3 : 0.3 + norm * 0.7;
-    const y = (Math.random() - 0.5) * r * diskThick;
-    pPos[i*3] = Math.cos(a)*r; pPos[i*3+1] = y; pPos[i*3+2] = Math.sin(a)*r;
-
-    // Colores: interior blanco-dorado, medio teal, exterior azul frío
-    if (r < 20) {
-      pCol[i*3] = 0.95+Math.random()*0.05; pCol[i*3+1] = 0.88+Math.random()*0.12; pCol[i*3+2] = 0.70+Math.random()*0.25;
-    } else if (r < 55) {
-      pCol[i*3] = 0.30+Math.random()*0.50; pCol[i*3+1] = 0.75+Math.random()*0.25; pCol[i*3+2] = 0.80+Math.random()*0.20;
-    } else {
-      pCol[i*3] = 0.20+Math.random()*0.30; pCol[i*3+1] = 0.40+Math.random()*0.30; pCol[i*3+2] = 0.75+Math.random()*0.25;
-    }
-
-    pAng[i] = a; pRad[i] = r;
-    pSpd[i] = (1.0 / Math.sqrt(r)) * 2.8 * (0.80 + Math.random() * 0.40);
-    // Partículas interiores más grandes (simulan concentración de brillo)
-    pSz[i]  = r < 20 ? 1.2 + Math.random()*1.8 : 0.4 + norm*norm*3.0 + Math.random()*0.6;
+  const BH_R=7, N=110000, R_MIN=1.5, R_MAX=140;
+  const pGeo=new THREE.BufferGeometry();
+  const pPos=new Float32Array(N*3), pCol=new Float32Array(N*3);
+  const pAng=new Float32Array(N),   pRad=new Float32Array(N);
+  const pSpd=new Float32Array(N),   pSz=new Float32Array(N);
+  for(let i=0;i<N;i++){
+    let r; const roll=Math.random();
+    if(roll<0.65)      r=R_MIN+Math.pow(Math.random(),1.8)*38;
+    else if(roll<0.85) r=38+Math.random()*42;
+    else               r=80+Math.random()*(R_MAX-80);
+    const a=Math.random()*PI*2, norm=r/R_MAX;
+    const thick=r<40?0.04+norm*0.3:0.3+norm*0.7;
+    const y=(Math.random()-.5)*r*thick;
+    pPos[i*3]=Math.cos(a)*r; pPos[i*3+1]=y; pPos[i*3+2]=Math.sin(a)*r;
+    if(r<20){pCol[i*3]=0.95+Math.random()*.05;pCol[i*3+1]=0.88+Math.random()*.12;pCol[i*3+2]=0.70+Math.random()*.25;}
+    else if(r<55){pCol[i*3]=0.30+Math.random()*.50;pCol[i*3+1]=0.75+Math.random()*.25;pCol[i*3+2]=0.80+Math.random()*.20;}
+    else{pCol[i*3]=0.20+Math.random()*.30;pCol[i*3+1]=0.40+Math.random()*.30;pCol[i*3+2]=0.75+Math.random()*.25;}
+    pAng[i]=a; pRad[i]=r;
+    pSpd[i]=(1.0/Math.sqrt(r))*2.8*(0.80+Math.random()*.40);
+    pSz[i]=r<20?1.2+Math.random()*1.8:0.4+norm*norm*3.0+Math.random()*.6;
   }
-  pGeo.setAttribute('position', new THREE.BufferAttribute(pPos,3));
-  pGeo.setAttribute('color',    new THREE.BufferAttribute(pCol,3));
-  pGeo.setAttribute('aAngle',   new THREE.BufferAttribute(pAng,1));
-  pGeo.setAttribute('aRadius',  new THREE.BufferAttribute(pRad,1));
-  pGeo.setAttribute('aSpeed',   new THREE.BufferAttribute(pSpd,1));
-  pGeo.setAttribute('aSize',    new THREE.BufferAttribute(pSz, 1));
-
-  const cosmosMat = new THREE.ShaderMaterial({
-    uniforms: { uT:{value:0}, uFade:{value:1}, uSpeedInner:{value:2.5}, uSpeedOuter:{value:0.05}, uSizeMult:{value:3.5} },
+  pGeo.setAttribute('position',new THREE.BufferAttribute(pPos,3));
+  pGeo.setAttribute('color',   new THREE.BufferAttribute(pCol,3));
+  pGeo.setAttribute('aAngle',  new THREE.BufferAttribute(pAng,1));
+  pGeo.setAttribute('aRadius', new THREE.BufferAttribute(pRad,1));
+  pGeo.setAttribute('aSpeed',  new THREE.BufferAttribute(pSpd,1));
+  pGeo.setAttribute('aSize',   new THREE.BufferAttribute(pSz, 1));
+  const cosmosMat=new THREE.ShaderMaterial({
+    uniforms:{uT:{value:0},uFade:{value:1},uSpeedInner:{value:2.6},uSpeedOuter:{value:0.05},uSizeMult:{value:3.5}},
     vertexShader:`
       uniform float uT,uSpeedInner,uSpeedOuter,uSizeMult;
       attribute float aAngle,aRadius,aSpeed,aSize;
@@ -275,542 +261,502 @@ if (_aes === 'cosmos') {
         gl_PointSize=clamp(aSize*uSizeMult*(110.0/-mv.z),0.5,28.0);
       }`,
     fragmentShader:`
-      varying vec3 vCol; varying float vNorm;
-      uniform float uFade;
+      varying vec3 vCol; varying float vNorm; uniform float uFade;
       void main(){
         vec2 c=gl_PointCoord-.5; float d=length(c);
         if(d>.5)discard;
-        // Multi-ring glow: núcleo brillante + halo suave (simula bloom)
-        float core  = smoothstep(0.50, 0.00, d);
-        float halo  = smoothstep(0.50, 0.18, d) * 0.55;
-        float ring  = smoothstep(0.28, 0.12, d) * smoothstep(0.04, 0.12, d) * 0.35;
-        float alpha = (core + halo + ring) * uFade;
-        gl_FragColor = vec4(vCol * (1.0 + (1.0-vNorm)*0.8), alpha);
+        float core=smoothstep(.50,.00,d);
+        float halo=smoothstep(.50,.18,d)*.55;
+        float ring=smoothstep(.28,.12,d)*smoothstep(.04,.12,d)*.35;
+        gl_FragColor=vec4(vCol*(1.0+(1.0-vNorm)*.8),(core+halo+ring)*uFade);
       }`,
-    transparent:true, vertexColors:true,
-    blending:THREE.AdditiveBlending, depthWrite:false,
+    transparent:true, vertexColors:true, blending:THREE.AdditiveBlending, depthWrite:false,
   });
-  bgUnis = cosmosMat.uniforms;
-  scene.add(new THREE.Points(pGeo, cosmosMat));
-
-  // Disco de acreción — comparte uT con cosmosMat (bgUnis.uT se actualiza en el loop principal)
-  const ringMat = new THREE.ShaderMaterial({
-    uniforms: { uT: bgUnis.uT },  // mismo objeto → se actualiza automáticamente
-    vertexShader:`varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
-    fragmentShader:`
-      varying vec2 vUv; uniform float uT;
-      void main(){
-        float ang=atan(vUv.y-.5,vUv.x-.5);
-        float r=length(vUv-.5)*2.0;
-        if(r<0.35||r>1.0)discard;
-        float pulse=0.6+0.4*sin(ang*3.0+uT*1.8);
-        float fade=smoothstep(1.0,0.55,r)*smoothstep(0.35,0.50,r);
-        vec3 col=mix(vec3(1.0,0.6,0.2),vec3(0.3,0.9,1.0),(r-0.35)*2.0);
-        gl_FragColor=vec4(col*pulse,fade*0.7);
-      }`,
+  bgUnis=cosmosMat.uniforms;
+  vrField=new THREE.Points(pGeo,cosmosMat);
+  vrField.rotation.x=VR_COS_PRESETS.hub.diskTilt*PI/180;
+  scene.add(vrField);
+  // Disco de acreción
+  const ringMat=new THREE.ShaderMaterial({
+    uniforms:{uT:bgUnis.uT},
+    vertexShader:`varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
+    fragmentShader:`varying vec2 vUv;uniform float uT;void main(){float ang=atan(vUv.y-.5,vUv.x-.5);float r=length(vUv-.5)*2.;if(r<.35||r>1.)discard;float pulse=.6+.4*sin(ang*3.+uT*1.8);float fade=smoothstep(1.,.55,r)*smoothstep(.35,.5,r);vec3 col=mix(vec3(1.,.6,.2),vec3(.3,.9,1.),(r-.35)*2.);gl_FragColor=vec4(col*pulse,fade*.7);}`,
     transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, side:THREE.DoubleSide,
   });
-  const ring = new THREE.Mesh(new THREE.PlaneGeometry(18,18,1,1), ringMat);
-  ring.rotation.x = -Math.PI * 0.5;
-  scene.add(ring);
-
-  // Agujero negro central
-  scene.add(new THREE.Mesh(new THREE.SphereGeometry(BH_R,32,32), new THREE.MeshBasicMaterial({color:0x000000})));
-  camera.position.set(0, 22, 95);
+  const ring=new THREE.Mesh(new THREE.PlaneGeometry(18,18),ringMat);
+  ring.rotation.x=-PI*.5; scene.add(ring);
+  scene.add(new THREE.Mesh(new THREE.SphereGeometry(BH_R,32,32),new THREE.MeshBasicMaterial({color:0x000000})));
+  camera.position.set(0,22,95);
 
 } else if (_aes === 'mandala') {
-  // Canvas 2D mandala → CanvasTexture → SphereGeometry
-  const mCv = document.createElement('canvas'); mCv.width = mCv.height = 2048;
-  _mandalaCtx = mCv.getContext('2d');
-  _mandalaTex = new THREE.CanvasTexture(mCv);
-  const mSph = new THREE.Mesh(
-    new THREE.SphereGeometry(100, 64, 64),
-    new THREE.MeshBasicMaterial({ map: _mandalaTex, side: THREE.BackSide })
-  );
-  scene.add(mSph);
-  camera.position.set(0, 0, 0);
+  const mCv=document.createElement('canvas'); mCv.width=mCv.height=2048;
+  _mandalaCtx=mCv.getContext('2d');
+  _mandalaTex=new THREE.CanvasTexture(mCv);
+  scene.add(new THREE.Mesh(
+    new THREE.SphereGeometry(100,64,64),
+    new THREE.MeshBasicMaterial({map:_mandalaTex,side:THREE.BackSide})
+  ));
+  camera.position.set(0,0,0);
 
 } else {
-  // Psychedelic: 4 shaders en esfera (más inmersivo que cilindro)
-  const PSYCH_FRAGS = [
+  // psychedelic
+  const PSYCH_FRAGS=[
     `uniform float uT,uFade;varying vec2 vUv;const float PI=3.14159265,PHI=1.61803398875,SQ3=1.73205080;vec3 hsl(float h,float s,float l){float h6=fract(h)*6.,x=1.-abs(mod(h6,2.)-1.);vec3 r=h6<1.?vec3(1,x,0):h6<2.?vec3(x,1,0):h6<3.?vec3(0,1,x):h6<4.?vec3(0,x,1):h6<5.?vec3(x,0,1):vec3(1,0,x);return r*s*(.5+l*.5)+(1.-s)*l;}void main(){float a=vUv.x*PI*2.,d=vUv.y*10.-uT*1.4;float w=(sin(a*3.+d*1.1+uT*.5)+sin(a*5.*PHI-d*.9+uT*.7)+sin((a+d*.7)*2.5+uT*SQ3*.4))/3.;gl_FragColor=vec4(hsl(.50+w*.13,.85,.55)*max(0.,.35+w*.65)*uFade,1.);}`,
     `uniform float uT,uFade;varying vec2 vUv;const float PI=3.14159265,SQ2=1.41421356,SQ3=1.73205080;void main(){float a=vUv.x*PI*2.,d=vUv.y*12.-uT*2.5;float fr=3.5+sin(uT*SQ3*.3)*2.2,ro=uT*SQ2*.15;float li=pow(max(0.,sin(fr*(cos(ro)*a+sin(ro)*d)-uT*2.5)),5.);vec3 c=li<.5?mix(vec3(.03,0.,.06),vec3(.35,0.,.55),li*2.):mix(vec3(.35,0.,.55),vec3(1.,.92,1.),(li-.5)*2.);gl_FragColor=vec4(c*uFade,1.);}`,
     `uniform float uT,uFade;varying vec2 vUv;const float PI=3.14159265,PHI=1.61803398875,SQ7=2.64575131;vec3 hsl(float h,float s,float l){float h6=fract(h)*6.,x=1.-abs(mod(h6,2.)-1.);vec3 r=h6<1.?vec3(1,x,0):h6<2.?vec3(x,1,0):h6<3.?vec3(0,1,x):h6<4.?vec3(0,x,1):h6<5.?vec3(x,0,1):vec3(1,0,x);return r*s*(.5+l*.5)+(1.-s)*l;}void main(){float a=vUv.x*PI*2.,d=vUv.y*10.-uT*1.8;float A=uT*PHI*.2,f=4.+sin(uT*SQ7*.5)*3.;float act=(cos(f*(cos(A)*a+sin(A)*d)+uT*1.5)+cos(f*(cos(A+PI/3.)*a+sin(A+PI/3.)*d)-uT*1.5)+cos(f*(cos(A-PI/3.)*a+sin(A-PI/3.)*d)+uT*.75))/3.;gl_FragColor=vec4(hsl(fract(act*.5+uT*.04+vUv.x*.15),.9,.55)*(max(0.,act)*.85+.08)*uFade,1.);}`,
     `uniform float uT,uFade;varying vec2 vUv;const float PI=3.14159265,PHI=1.61803398875,LOGPHI=0.48121182506;vec3 hsl(float h,float s,float l){float h6=fract(h)*6.,x=1.-abs(mod(h6,2.)-1.);vec3 r=h6<1.?vec3(1,x,0):h6<2.?vec3(x,1,0):h6<3.?vec3(0,1,x):h6<4.?vec3(0,x,1):h6<5.?vec3(x,0,1):vec3(1,0,x);return r*s*(.5+l*.5)+(1.-s)*l;}void main(){float a=vUv.x*PI*2.,d=vUv.y*8.-uT*2.2;float sN=log(max(.001,abs(d)*.25+.1))/LOGPHI;float fib=(sin(a*8.-sN*2.+uT*1.3)*sin(a*13.+d*1.5-uT*.9)+sin((a+sN*.618)*5.+uT*PHI*.4))/2.;gl_FragColor=vec4(hsl(fract(fib*.4+a/(PI*2.)*.25+uT*.03),.85,.6)*(pow(max(0.,fib*.5+.5),1.4)*.9+.05)*uFade,1.);}`
   ];
-  _psychSpeeds = [1.0, 2.2, 1.5, 1.9];
-  _psychNames  = ['Corriente','Obsidiana','Hexagonal','Fibonacci'];
-  _psychMats   = PSYCH_FRAGS.map(f => new THREE.ShaderMaterial({
-    uniforms: bgUnis, vertexShader: VERT, fragmentShader: f, side: THREE.BackSide
-  }));
-  bgMesh = new THREE.Mesh(new THREE.SphereGeometry(100, 64, 32), _psychMats[curScene]);
+  _psychSpeeds=[1.0,2.2,1.5,1.9];
+  _psychNames=['Corriente','Obsidiana','Hexagonal','Fibonacci'];
+  _psychMats=PSYCH_FRAGS.map(f=>new THREE.ShaderMaterial({uniforms:bgUnis,vertexShader:VERT,fragmentShader:f,side:THREE.BackSide}));
+  bgMesh=new THREE.Mesh(new THREE.SphereGeometry(100,64,32),_psychMats[curPsychScene]);
   scene.add(bgMesh);
-  camera.position.set(0, 0, 0);
+  camera.position.set(0,0,0);
 }
 
-// ── Dibujo mandala VR ─────────────────────────────────────────────────────
-// Parámetros VR: más simetría y capas para la esfera inmersiva 360°
-const _MPALS = {
-  arcano: [35,  15,  50 ],   // dorado-naranja-ámbar
-  blanco: [210, 240, 220],   // azul-gris suave
-  nebula: [280, 320, 200],   // violeta-rosa-teal
-  aurora: [45,  175, 270],   // ámbar-verde-violeta
-  tiempo: [140, 160, 120],   // verde bosque
-};
-const _MP = {
-  sym:     8,      // más pétalos para 360° inmersivo
-  speed:   0.09,   // T multiplier de rotación
-  alpha:   0.60,
-  pal:     _MPALS.arcano,
-  layers:  5,
-};
-
+// ── Dibujo mandala ────────────────────────────────────────────────────────
 function _drawMandala(T) {
   if (!_mandalaCtx) return;
-  const W = _mandalaCtx.canvas.width, H = _mandalaCtx.canvas.height;
-  const ctx = _mandalaCtx;
-  ctx.fillStyle = '#00000c';
-  ctx.fillRect(0, 0, W, H);
-  ctx.save();
-  ctx.translate(W/2, H/2);
-  const TAU = Math.PI*2;
-  const sr = Math.min(W,H) * 0.46;
-  const sym = _MP.sym, rot = T * _MP.speed, alpha = _MP.alpha;
-  const pal = _MP.pal;
-  const hue  = (pal[0] + T * 4) % 360;
-  const hue2 = (pal[1] + T * 3) % 360;
-  const hue3 = (pal[2] + T * 5) % 360;
-
-  function poly(r, n, ang) {
-    return function(){
-      ctx.moveTo(r*Math.cos(ang), r*Math.sin(ang));
-      for(let i=1;i<=n;i++){const a=ang+TAU*i/n;ctx.lineTo(r*Math.cos(a),r*Math.sin(a));}
-      ctx.closePath();
-    };
+  const W=_mandalaCtx.canvas.width, H=_mandalaCtx.canvas.height, ctx=_mandalaCtx;
+  ctx.fillStyle='#00000c'; ctx.fillRect(0,0,W,H);
+  ctx.save(); ctx.translate(W/2,H/2);
+  const TAU=PI*2, sr=Math.min(W,H)*.46;
+  const sym=_MP.sym, rot=T*_MP.speed, alpha=_MP.alpha, pal=_MP.pal;
+  const hue=(pal[0]+T*4)%360, hue2=(pal[1]+T*3)%360, hue3=(pal[2]+T*5)%360;
+  function poly(r,n,a){return()=>{ctx.moveTo(r*Math.cos(a),r*Math.sin(a));for(let i=1;i<=n;i++){const ag=a+TAU*i/n;ctx.lineTo(r*Math.cos(ag),r*Math.sin(ag));}ctx.closePath()};}
+  function star(r,n,a,sk){return()=>{for(let i=0;i<=n*2;i++){const ag=a+TAU*i/(n*2),rr=i%2===0?r:r*(sk||.5);i===0?ctx.moveTo(rr*Math.cos(ag),rr*Math.sin(ag)):ctx.lineTo(rr*Math.cos(ag),rr*Math.sin(ag));}ctx.closePath()};}
+  function magic(fn,h,am){
+    const a=alpha*(am||1);
+    ctx.beginPath();fn();ctx.strokeStyle=`hsla(${h},100%,58%,${a*.10})`;ctx.lineWidth=22;ctx.stroke();
+    ctx.beginPath();fn();ctx.strokeStyle=`hsla(${h},100%,58%,${a*.35})`;ctx.lineWidth=4;ctx.stroke();
+    ctx.beginPath();fn();ctx.strokeStyle=`hsla(${(h+18)%360},55%,92%,${a*.80})`;ctx.lineWidth=1.2;ctx.stroke();
   }
-  function star(r, n, ang, skip) {
-    return function(){
-      for(let i=0;i<=n*2;i++){
-        const a=ang+TAU*i/(n*2), rr=i%2===0?r:r*(skip||0.5);
-        i===0?ctx.moveTo(rr*Math.cos(a),rr*Math.sin(a)):ctx.lineTo(rr*Math.cos(a),rr*Math.sin(a));
-      }
-      ctx.closePath();
-    };
-  }
-  function magic(fn, h, am) {
-    const a = alpha * (am||1);
-    ctx.beginPath(); fn();
-    ctx.strokeStyle=`hsla(${h},100%,58%,${a*0.10})`; ctx.lineWidth=22; ctx.stroke();
-    ctx.beginPath(); fn();
-    ctx.strokeStyle=`hsla(${h},100%,58%,${a*0.35})`; ctx.lineWidth=4; ctx.stroke();
-    ctx.beginPath(); fn();
-    ctx.strokeStyle=`hsla(${(h+18)%360},55%,92%,${a*0.80})`; ctx.lineWidth=1.2; ctx.stroke();
-  }
-
-  // Capas de polígonos — radio proporcional a _MP.layers
-  const fracs = [0.32, 0.50, 0.65, 0.80, 0.96, 1.10].slice(0, _MP.layers + 1);
-  fracs.forEach((fr, li) => {
-    const r   = sr * fr;
-    const r2  = rot + (li % 2 === 0 ? 0 : PI / sym);
-    const h   = li % 3 === 0 ? hue : li % 3 === 1 ? hue2 : hue3;
-    magic(poly(r, sym, r2), h, 0.50 + li * 0.10);
+  [.32,.50,.65,.80,.96,1.10].slice(0,_MP.layers+1).forEach((fr,li)=>{
+    const r=sr*fr, r2=rot+(li%2===0?0:PI/sym), h=li%3===0?hue:li%3===1?hue2:hue3;
+    magic(poly(r,sym,r2),h,.50+li*.10);
   });
-
-  // Estrellas — dos capas
-  magic(star(sr * 1.12, sym,     rot * 0.65, 0.42), hue,  0.45);
-  magic(star(sr * 0.72, sym,     rot * 0.45 + PI/sym, 0.50), hue2, 0.38);
-  magic(star(sr * 0.48, sym * 2, rot * 0.80, 0.55), hue3, 0.30);
-
-  // Núcleo luminoso
-  const grad = ctx.createRadialGradient(0,0,0, 0,0, sr*0.10);
-  grad.addColorStop(0, `hsla(${hue},100%,88%,0.95)`);
-  grad.addColorStop(1, `hsla(${hue},100%,60%,0.0)`);
-  ctx.beginPath(); ctx.arc(0, 0, sr*0.10, 0, TAU);
-  ctx.fillStyle = grad; ctx.fill();
-
+  magic(star(sr*1.12,sym,rot*.65,.42),hue,.45);
+  magic(star(sr*.72,sym,rot*.45+PI/sym,.50),hue2,.38);
+  magic(star(sr*.48,sym*2,rot*.80,.55),hue3,.30);
+  const grad=ctx.createRadialGradient(0,0,0,0,0,sr*.10);
+  grad.addColorStop(0,`hsla(${hue},100%,88%,.95)`); grad.addColorStop(1,`hsla(${hue},100%,60%,.0)`);
+  ctx.beginPath(); ctx.arc(0,0,sr*.10,0,TAU); ctx.fillStyle=grad; ctx.fill();
   ctx.restore();
-  if (_mandalaTex) _mandalaTex.needsUpdate = true;
+  if(_mandalaTex) _mandalaTex.needsUpdate=true;
 }
 
-// ── Canvas del panel (compartido para ambos modos) ────────────────────────
-const PW = 1024, PH = 512;
-const panelCanvas = document.createElement('canvas');
-panelCanvas.width = PW; panelCanvas.height = PH;
-
-// ── Estado del espejo ─────────────────────────────────────────────────────
-let panelMode     = 'perfil';       // 'perfil' | 'espejo'
-let espejoSession = null;
-let espejoHistory = [];             // [{role, content}]
-let espejoStatus  = 'idle';        // idle | listening | processing | speaking
-let interimText   = '';            // transcripción en curso
-
-// ── Helpers de canvas ─────────────────────────────────────────────────────
-function _rr(ctx,x,y,w,h,r){
-  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);
-  ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
-  ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);
-  ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
+// ── Psychedelic fade ──────────────────────────────────────────────────────
+let fadeDoing=false;
+function triggerFade(to){
+  if(!bgMesh||!_psychMats||fadeDoing||to===curPsychScene)return; fadeDoing=true; let f=1;
+  const out=()=>{f-=.07;bgUnis.uFade.value=Math.max(0,f);if(f>0){requestAnimationFrame(out);return;}
+    curPsychScene=to;bgMesh.material=_psychMats[curPsychScene];
+    const inn=()=>{f+=.05;bgUnis.uFade.value=Math.min(1,f);if(f<1){requestAnimationFrame(inn);return;}fadeDoing=false;};
+    requestAnimationFrame(inn);};requestAnimationFrame(out);
 }
 
-function wrapText(ctx, text, x, y, maxW, lineH, maxLines) {
-  const words = text.split(' ');
-  let line = '', lines = 0;
-  for (let i = 0; i < words.length; i++) {
-    const test = line + words[i] + ' ';
-    if (ctx.measureText(test).width > maxW && line) {
-      ctx.fillText(line.trim(), x, y);
-      line = words[i] + ' '; y += lineH; lines++;
-      if (maxLines && lines >= maxLines) { ctx.fillText('…', x, y); return y; }
-    } else { line = test; }
-  }
-  if (line.trim()) ctx.fillText(line.trim(), x, y);
-  return y + lineH;
-}
-
-// ── Dibuja panel PERFIL ───────────────────────────────────────────────────
-function drawPerfilPanel() {
-  const c = panelCanvas.getContext('2d');
-  c.clearRect(0,0,PW,PH);
-
-  // Fondo
-  c.fillStyle='rgba(0,0,0,0.88)';_rr(c,0,0,PW,PH,32);c.fill();
-  c.strokeStyle='rgba(78,205,196,0.3)';c.lineWidth=2;_rr(c,1,1,PW-2,PH-2,31);c.stroke();
-  c.fillStyle='rgba(78,205,196,0.15)';c.fillRect(40,58,PW-80,1);
-
-  // Tag
-  c.fillStyle='#4ecdc4';c.font='500 22px system-ui';c.fillText('✦  MIRRORWORK  VR',44,46);
-
-  // Nombre
-  c.fillStyle='#e2e2f0';c.font='300 68px system-ui';c.fillText(`Hola, ${VR.userName}`,44,132);
-
-  // Barra mapa
-  const bx=44,by=165,bw=PW-88,bh=16,pct=VR.mapPct/100;
-  c.fillStyle='rgba(255,255,255,0.07)';_rr(c,bx,by,bw,bh,8);c.fill();
-  if(pct>0){c.fillStyle='#4ecdc4';_rr(c,bx,by,bw*pct,bh,8);c.fill();}
-  c.fillStyle='#7070a0';c.font='400 20px system-ui';c.fillText('Mapa interior',bx,by-8);
-  c.fillStyle='#4ecdc4';c.font='600 20px system-ui';c.fillText(`${VR.mapPct}%`,bx+bw-42,by-8);
-
-  // Stats
-  const sy=222,col2=bx+330,col3=bx+660;
-  [[bx,'Tests',`${VR.completed} / ${VR.total}`,'#e2e2f0'],[col2,'Fractones',`◈ ${VR.tokens}`,'#f0c040'],[col3,'Estética',{cosmos:'Cosmos',mandala:'Sagrada',psychedelic:'Psico',arbol:'Árbol',archipielago:'Archi'}[VR.aesthetic]||VR.aesthetic,'#7c6dfa']].forEach(([x,lbl,val,col])=>{
-    c.fillStyle='#7070a0';c.font='400 20px system-ui';c.fillText(lbl,x,sy);
-    c.fillStyle=col;c.font='600 28px system-ui';c.fillText(val,x,sy+32);
-  });
-
-  // Pregunta
-  if(VR.question){
-    c.fillStyle='rgba(255,255,255,0.1)';c.fillRect(44,PH-108,PW-88,1);
-    c.fillStyle='rgba(255,255,255,0.35)';c.font='italic 300 21px system-ui';
-    wrapText(c,`"${VR.question}"`,44,PH-72,PW-88,28,2);
-  }
-}
-
-// ── Dibuja panel ESPEJO ───────────────────────────────────────────────────
-function drawEspejoPanel() {
-  const c = panelCanvas.getContext('2d');
-  c.clearRect(0,0,PW,PH);
-
-  // Fondo violeta suave
-  c.fillStyle='rgba(0,0,0,0.88)';_rr(c,0,0,PW,PH,32);c.fill();
-
-  const borderCol = espejoStatus==='listening' ? 'rgba(224,80,80,0.45)' :
-                    espejoStatus==='processing'? 'rgba(240,192,64,0.35)' :
-                    espejoStatus==='speaking'  ? 'rgba(78,205,196,0.55)' :
-                                                 'rgba(124,109,250,0.3)';
-  c.strokeStyle=borderCol;c.lineWidth=2;_rr(c,1,1,PW-2,PH-2,31);c.stroke();
-
-  // Tag + status
-  const statusLabel = {idle:'',listening:'● escuchando',processing:'◌ procesando',speaking:'▶ hablando'}[espejoStatus];
-  c.fillStyle='#7c6dfa';c.font='500 22px system-ui';c.fillText('◎  ESPEJO  DE  CONFLICTOS',44,46);
-  if(statusLabel){
-    c.fillStyle= espejoStatus==='listening'?'#e05050':espejoStatus==='processing'?'#f0c040':'#4ecdc4';
-    c.font='400 20px system-ui';
-    c.fillText(statusLabel, PW-200, 46);
-  }
-  c.fillStyle='rgba(124,109,250,0.15)';c.fillRect(40,58,PW-80,1);
-
-  // Historial (últimos 2 intercambios)
-  const maxExchanges = 2;
-  const msgs = espejoHistory.slice(-maxExchanges*2);
-  let y = 90;
-  const textW = PW - 88;
-
-  if (msgs.length === 0 && !interimText) {
-    // Estado vacío
-    c.fillStyle='rgba(255,255,255,0.2)';
-    c.font='300 26px system-ui';
-    c.fillText('Toca el micrófono y habla.',44,y+40);
-    c.font='italic 300 22px system-ui';
-    c.fillStyle='rgba(255,255,255,0.12)';
-    c.fillText('El Espejo escucha desde adentro del túnel.',44,y+82);
-  }
-
-  for (let i=0; i<msgs.length; i++) {
-    const m = msgs[i];
-    const isUser = m.role==='user';
-
-    if (isUser) {
-      c.fillStyle='rgba(255,255,255,0.4)';
-      c.font='400 18px system-ui';
-      c.fillText('Tú', 44, y);
-      y += 24;
-      c.fillStyle='rgba(255,255,255,0.75)';
-      c.font='400 22px system-ui';
-      y = wrapText(c, m.content, 44, y, textW, 28, 2) + 8;
-    } else {
-      c.fillStyle='#7c6dfa';
-      c.font='400 18px system-ui';
-      c.fillText('Espejo', 44, y);
-      y += 24;
-      c.fillStyle='#e2e2f0';
-      c.font='300 22px system-ui';
-      y = wrapText(c, m.content, 44, y, textW, 30, 4) + 8;
-    }
-
-    if (y > PH - 100) break;
-  }
-
-  // Transcripción en tiempo real
-  if (interimText) {
-    c.fillStyle='rgba(255,255,255,0.3)';
-    c.font='italic 400 20px system-ui';
-    wrapText(c, interimText, 44, Math.max(y, PH-90), textW, 26, 2);
-  }
-}
-
-// ── Texture y material del panel ──────────────────────────────────────────
-drawPerfilPanel();
-const panelTex = new THREE.CanvasTexture(panelCanvas);
-
-const PANEL_FRAG = `
-  uniform sampler2D uTex; uniform float uReveal,uT;
-  varying vec2 vUv;
+// ═══════════════════════════════════════════════════════════════════════════
+// PANEL CANVAS
+// ═══════════════════════════════════════════════════════════════════════════
+const PW=1024, PH=512;
+const panelCanvas=document.createElement('canvas'); panelCanvas.width=PW; panelCanvas.height=PH;
+const panelTex=new THREE.CanvasTexture(panelCanvas);
+const PANEL_FRAG=`
+  uniform sampler2D uTex; uniform float uReveal,uT; varying vec2 vUv;
   const float PI=3.14159265,PHI=1.61803398875,LOGPHI=0.48121182506;
   void main(){
-    vec2 c=vUv-.5; float r=length(c), ang=atan(c.y,c.x);
-    float pulse=0.38*sin(uT*PI*0.3731)+0.26*sin(uT*PHI*0.6247)+0.19*sin(uT*2.71828*0.4153);
-    float fibVar=0.12*sin(log(max(.001,r*5.))/LOGPHI*3.-ang*2.);
+    vec2 c=vUv-.5; float r=length(c),ang=atan(c.y,c.x);
+    float pulse=.38*sin(uT*PI*.3731)+.26*sin(uT*PHI*.6247)+.19*sin(uT*2.71828*.4153);
+    float fibVar=.12*sin(log(max(.001,r*5.))/LOGPHI*3.-ang*2.);
     float revR=uReveal+pulse*.07*uReveal*(1.-uReveal)+fibVar*uReveal*(1.-uReveal);
     float mask=smoothstep(revR+.04,revR-.02,r*1.2);
     float edge=smoothstep(revR-.10,revR,r*1.2)*smoothstep(revR+.04,revR,r*1.2);
     vec4 tex=texture2D(uTex,vUv);
     vec3 glow=vec3(.30,.85,.78);
     vec3 col=tex.rgb*mask+glow*edge*(.7+pulse*.3);
-    float alpha=max(mask*tex.a,edge*.9)*min(1.,uReveal*3.);
-    gl_FragColor=vec4(col,alpha);
-  }
-`;
-const panelUnis = { uTex:{value:panelTex}, uReveal:{value:0.0}, uT:{value:0.0} };
-const panelMat  = new THREE.ShaderMaterial({
-  uniforms:panelUnis, vertexShader:VERT, fragmentShader:PANEL_FRAG,
-  transparent:true, side:THREE.DoubleSide,
-});
-const panelMesh = new THREE.Mesh(new THREE.PlaneGeometry(4.8,2.4), panelMat);
-const panelRig  = new THREE.Object3D();
-scene.add(panelRig);
-panelRig.add(panelMesh);
+    gl_FragColor=vec4(col,max(mask*tex.a,edge*.9)*min(1.,uReveal*3.));
+  }`;
+const panelUnis={uTex:{value:panelTex},uReveal:{value:0.0},uT:{value:0.0}};
+const panelMat=new THREE.ShaderMaterial({uniforms:panelUnis,vertexShader:VERT,fragmentShader:PANEL_FRAG,transparent:true,side:THREE.DoubleSide});
+const panelMesh=new THREE.Mesh(new THREE.PlaneGeometry(4.8,2.4),panelMat);
+const panelRig=new THREE.Object3D();
+scene.add(panelRig); panelRig.add(panelMesh);
 panelMesh.position.set(0,-0.3,-3.2);
 
-// ── Reveal del panel ──────────────────────────────────────────────────────
-let revealProgress = 0;
-let revealActive   = false;
-let revealFading   = false;   // true mientras hace fade-out para cambio de modo
-
-function startReveal(fromProgress = 0) {
-  revealProgress = fromProgress;
-  revealActive   = true;
+let revealProgress=0, revealActive=false, revealFading=false;
+function startReveal(from=0){revealProgress=from;revealActive=true;}
+function fadePanel(cb){
+  revealFading=true; revealActive=false; let f=revealProgress;
+  const out=()=>{f-=.06;panelUnis.uReveal.value=Math.max(0,f);
+    if(f>0){requestAnimationFrame(out);return;}
+    cb(); panelTex.needsUpdate=true; revealFading=false; startReveal(0);};
+  requestAnimationFrame(out);
 }
 
-// Cambia modo con fade chamánico (out → swap → in)
-function switchPanel(mode) {
-  if (mode === panelMode) return;
-  revealFading = true;
-  revealActive = false;
-  let f = revealProgress;
-  const fadeOut = () => {
-    f -= 0.06;
-    panelUnis.uReveal.value = Math.max(0, f);
-    if (f > 0) { requestAnimationFrame(fadeOut); return; }
-    // Swap
-    panelMode = mode;
-    if (mode === 'espejo') drawEspejoPanel();
-    else drawPerfilPanel();
-    panelTex.needsUpdate = true;
-    document.querySelectorAll('.ptab').forEach(b => b.classList.toggle('active', b.dataset.mode===mode));
-    document.getElementById('btn-mic').style.display = mode==='espejo' ? 'flex' : 'none';
-    revealFading = false;
-    startReveal(0);
-  };
-  requestAnimationFrame(fadeOut);
+// ── Helpers de canvas ─────────────────────────────────────────────────────
+function _rr(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
+function wrapText(ctx,text,x,y,maxW,lineH,maxLines){
+  const words=text.split(' '); let line='';
+  for(let i=0;i<words.length;i++){const t=line+words[i]+' ';if(ctx.measureText(t).width>maxW&&line){ctx.fillText(line.trim(),x,y);line=words[i]+' ';y+=lineH;if(maxLines&&--maxLines<=0){ctx.fillText('…',x,y);return y;}}else line=t;}
+  if(line.trim())ctx.fillText(line.trim(),x,y); return y+lineH;
+}
+function _panelBg(ctx,accentRGB='78,205,196'){
+  ctx.fillStyle='rgba(0,0,0,0.88)';_rr(ctx,0,0,PW,PH,32);ctx.fill();
+  ctx.strokeStyle=`rgba(${accentRGB},0.30)`;ctx.lineWidth=2;_rr(ctx,1,1,PW-2,PH-2,31);ctx.stroke();
+  ctx.fillStyle=`rgba(${accentRGB},0.15)`;ctx.fillRect(40,58,PW-80,1);
 }
 
-// ── Actualiza el canvas del espejo (sin reveal, solo redibuja) ────────────
-function refreshEspejoPanel() {
-  if (panelMode !== 'espejo') return;
-  drawEspejoPanel();
-  panelTex.needsUpdate = true;
-  // Re-revela ligeramente la zona baja (nueva respuesta)
-  if (revealProgress >= 0.9) startReveal(0.55);
+// ── Dibuja panel HUB (mapa interior) ─────────────────────────────────────
+function drawHubPanel(){
+  const c=panelCanvas.getContext('2d'); c.clearRect(0,0,PW,PH);
+  _panelBg(c,'78,205,196');
+  c.fillStyle='#4ecdc4';c.font='500 22px system-ui';c.fillText('◉  MAPA  INTERIOR',44,46);
+  c.fillStyle='#e2e2f0';c.font='300 52px system-ui';c.fillText(`${VR.mapPct}% explorado`,44,118);
+  // Barras de dimensión (top 6 por espacio)
+  const dims=Object.entries(VR.dimData).slice(0,6);
+  const bx=44,bw=(PW-88)/2-16,bh=14,sy=148;
+  dims.forEach(([,d],i)=>{
+    const col=i<3?bx:bx+bw+32, row=sy+(i%3)*52;
+    c.fillStyle='#7070a0';c.font='400 18px system-ui';c.fillText(d.label,col,row);
+    c.fillStyle='rgba(255,255,255,.07)';_rr(c,col,row+6,bw,bh,7);c.fill();
+    if(d.pct>0){c.fillStyle='#4ecdc4';_rr(c,col,row+6,bw*d.pct/100,bh,7);c.fill();}
+    c.fillStyle='#4ecdc4';c.font='600 16px system-ui';c.textAlign='right';
+    c.fillText(`${d.pct}%`,col+bw,row);c.textAlign='left';
+  });
+  // Stats bottom
+  c.fillStyle='rgba(255,255,255,.10)';c.fillRect(44,PH-80,PW-88,1);
+  [[44,'Tests',`${VR.completed} / ${VR.total}`,'#e2e2f0'],[380,'Fractones',`◈ ${VR.tokens}`,'#f0c040']].forEach(([x,lbl,val,col])=>{
+    c.fillStyle='#7070a0';c.font='400 18px system-ui';c.fillText(lbl,x,PH-54);
+    c.fillStyle=col;c.font='600 24px system-ui';c.fillText(val,x,PH-26);
+  });
 }
 
-// ── SpeechRecognition ─────────────────────────────────────────────────────
-const SR_Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
-let recognition = null;
+// ── Dibuja panel ESPEJO ───────────────────────────────────────────────────
+let espejoSession=null, espejoHistory=[], espejoStatus='idle', interimText='';
+function drawEspejoPanel(){
+  const c=panelCanvas.getContext('2d'); c.clearRect(0,0,PW,PH);
+  _panelBg(c,'124,109,250');
+  const statusLabel={idle:'',listening:'● escuchando',processing:'◌ procesando',speaking:'▶ hablando'}[espejoStatus];
+  c.fillStyle='#7c6dfa';c.font='500 22px system-ui';c.fillText('◎  ESPEJO  DE  CONFLICTOS',44,46);
+  if(statusLabel){
+    c.fillStyle=espejoStatus==='listening'?'#e05050':espejoStatus==='processing'?'#f0c040':'#4ecdc4';
+    c.font='400 20px system-ui';c.textAlign='right';c.fillText(statusLabel,PW-44,46);c.textAlign='left';
+  }
+  const msgs=espejoHistory.slice(-4); let y=90;
+  if(msgs.length===0&&!interimText){
+    c.fillStyle='rgba(255,255,255,.20)';c.font='300 26px system-ui';
+    c.fillText('Toca el micrófono y habla.',44,y+40);
+    c.fillStyle='rgba(255,255,255,.12)';c.font='italic 300 22px system-ui';
+    c.fillText('El Espejo escucha desde tu espacio interior.',44,y+82);
+  }
+  for(let i=0;i<msgs.length;i++){
+    const m=msgs[i],isUser=m.role==='user';
+    c.fillStyle=isUser?'rgba(255,255,255,.40)':'#7c6dfa';
+    c.font='400 18px system-ui';c.fillText(isUser?'Tú':'Espejo',44,y);y+=24;
+    c.fillStyle=isUser?'rgba(255,255,255,.75)':'#e2e2f0';
+    c.font=isUser?'400 22px system-ui':'300 22px system-ui';
+    y=wrapText(c,m.content,44,y,PW-88,28,isUser?2:3)+6;
+    if(y>PH-100)break;
+  }
+  if(interimText){c.fillStyle='rgba(255,255,255,.30)';c.font='italic 400 20px system-ui';wrapText(c,interimText,44,Math.max(y,PH-90),PW-88,26,2);}
+}
 
-function startListening() {
-  if (!SR_Ctor) { alert('Tu navegador no soporta reconocimiento de voz.\nUsa Chrome en Android.'); return; }
-  recognition = new SR_Ctor();
-  recognition.lang = 'es-ES';
-  recognition.continuous = false;
-  recognition.interimResults = true;
+// ── Dibuja panel TESTS ────────────────────────────────────────────────────
+function drawTestsPanel(){
+  const c=panelCanvas.getContext('2d'); c.clearRect(0,0,PW,PH);
+  _panelBg(c,'124,109,250');
+  c.fillStyle='#7c6dfa';c.font='500 22px system-ui';c.fillText('◈  TESTS  PSICOMÉTRICOS',44,46);
+  c.fillStyle='#e2e2f0';c.font='300 52px system-ui';
+  c.fillText(`${VR.completed} de ${VR.total}`,44,118);
+  c.fillStyle='#7070a0';c.font='400 20px system-ui';c.fillText('completados',44,148);
+  // Barra global
+  const bx=44,bw=PW-88,bh=16;
+  c.fillStyle='rgba(255,255,255,.07)';_rr(c,bx,170,bw,bh,8);c.fill();
+  if(VR.mapPct>0){c.fillStyle='#7c6dfa';_rr(c,bx,170,bw*VR.mapPct/100,bh,8);c.fill();}
+  // Dimensiones con más tests pendientes
+  const pending=Object.entries(VR.dimData)
+    .filter(([,d])=>d.total>d.completed)
+    .sort((a,b)=>(b[1].total-b[1].completed)-(a[1].total-a[1].completed))
+    .slice(0,4);
+  c.fillStyle='rgba(255,255,255,.10)';c.fillRect(44,210,PW-88,1);
+  c.fillStyle='#7070a0';c.font='400 18px system-ui';c.fillText('Dimensiones con más por explorar:',44,238);
+  pending.forEach(([,d],i)=>{
+    c.fillStyle='#e2e2f0';c.font='400 22px system-ui';c.fillText(d.label,44,270+i*42);
+    c.fillStyle='#7070a0';c.font='400 18px system-ui';
+    c.fillText(`${d.completed}/${d.total}`,44+200,270+i*42);
+  });
+  c.fillStyle='rgba(255,255,255,.10)';c.fillRect(44,PH-70,PW-88,1);
+  c.fillStyle='rgba(255,255,255,.35)';c.font='italic 300 20px system-ui';
+  c.fillText('Accede a los tests desde la web para tomarlos.',44,PH-32);
+}
 
-  recognition.onstart = () => {
-    espejoStatus = 'listening';
-    interimText  = '';
-    setMicState('listening');
-    setStatus('escuchando…');
-  };
+// ── Dibuja panel NACIMIENTO ───────────────────────────────────────────────
+function drawBirthPanel(){
+  const c=panelCanvas.getContext('2d'); c.clearRect(0,0,PW,PH);
+  _panelBg(c,'240,192,64');
+  c.fillStyle='#f0c040';c.font='500 22px system-ui';c.fillText('✦  NACIMIENTO',44,46);
+  c.fillStyle='#e2e2f0';c.font='300 36px system-ui';c.fillText('Sistemas disponibles:',44,110);
+  const systems=[
+    {key:'astral',name:'Carta Astral',   icon:'☽', desc:'Posiciones planetarias en el momento de tu nacimiento'},
+    {key:'hd',    name:'Diseño Humano',  icon:'◈', desc:'Tipo, estrategia y autoridad de tu diseño energético'},
+    {key:'saju',  name:'Saju (4 Pilares)',icon:'✦', desc:'Geometría del tiempo según la astrología china'},
+  ];
+  systems.forEach((s,i)=>{
+    const y=155+i*105, hasIt=VR.birthTypes.includes(s.key);
+    c.fillStyle=hasIt?'rgba(240,192,64,.15)':'rgba(255,255,255,.04)';
+    _rr(c,44,y,PW-88,88,14);c.fill();
+    c.strokeStyle=hasIt?'rgba(240,192,64,.50)':'rgba(255,255,255,.12)';
+    c.lineWidth=1.5;_rr(c,44,y,PW-88,88,14);c.stroke();
+    c.fillStyle=hasIt?'#f0c040':'#7070a0';c.font=`500 28px system-ui`;c.fillText(s.icon,70,y+56);
+    c.fillStyle=hasIt?'#e2e2f0':'#7070a0';c.font='500 22px system-ui';c.fillText(s.name,110,y+40);
+    c.fillStyle='#7070a0';c.font='400 18px system-ui';
+    c.fillText(hasIt?s.desc:'Genera desde Nacimiento en la web',110,y+66);
+    if(hasIt){c.fillStyle='#f0c040';c.font='600 18px system-ui';c.textAlign='right';c.fillText('Generado ✓',PW-60,y+40);c.textAlign='left';}
+  });
+}
 
-  recognition.onresult = (e) => {
-    const allResults = Array.from(e.results);
-    interimText = allResults.map(r => r[0].transcript).join('');
-    refreshEspejoPanel();
-    if (allResults[allResults.length-1].isFinal) {
-      recognition.stop();
+// ── Dibuja panel REGULACIÓN ───────────────────────────────────────────────
+function drawSensorialPanel(){
+  const c=panelCanvas.getContext('2d'); c.clearRect(0,0,PW,PH);
+  _panelBg(c,'78,205,196');
+  c.fillStyle='#4ecdc4';c.font='500 22px system-ui';c.fillText('◌  REGULACIÓN  SENSORIAL',44,46);
+  c.fillStyle='#e2e2f0';c.font='300 28px system-ui';c.fillText('Patrones de respiración disponibles:',44,100);
+  VR.breathPatterns.forEach((p,i)=>{
+    const y=128+i*108;
+    c.fillStyle='rgba(78,205,196,.10)';_rr(c,44,y,PW-88,90,14);c.fill();
+    c.strokeStyle='rgba(78,205,196,.30)';c.lineWidth=1.5;_rr(c,44,y,PW-88,90,14);c.stroke();
+    c.fillStyle='#4ecdc4';c.font='600 26px system-ui';c.fillText(p.name,70,y+36);
+    c.fillStyle='#7070a0';c.font='400 20px system-ui';c.fillText(p.note||'',70,y+66);
+  });
+  c.fillStyle='rgba(255,255,255,.10)';c.fillRect(44,PH-70,PW-88,1);
+  c.fillStyle='rgba(255,255,255,.35)';c.font='italic 300 20px system-ui';
+  c.fillText('Accede a las sesiones desde la web.',44,PH-32);
+}
+
+// ── Dibuja panel PERFIL ───────────────────────────────────────────────────
+function drawPerfilPanel(){
+  const c=panelCanvas.getContext('2d'); c.clearRect(0,0,PW,PH);
+  _panelBg(c,'78,205,196');
+  c.fillStyle='#4ecdc4';c.font='500 22px system-ui';c.fillText('✦  MIRRORWORK  VR',44,46);
+  c.fillStyle='#e2e2f0';c.font='300 68px system-ui';c.fillText(`Hola, ${VR.userName}`,44,132);
+  const bx=44,bw=PW-88,bh=16,pct=VR.mapPct/100;
+  c.fillStyle='rgba(255,255,255,.07)';_rr(c,bx,165,bw,bh,8);c.fill();
+  if(pct>0){c.fillStyle='#4ecdc4';_rr(c,bx,165,bw*pct,bh,8);c.fill();}
+  c.fillStyle='#7070a0';c.font='400 20px system-ui';c.fillText('Mapa interior',bx,157);
+  c.fillStyle='#4ecdc4';c.font='600 20px system-ui';c.textAlign='right';c.fillText(`${VR.mapPct}%`,bx+bw,157);c.textAlign='left';
+  const sy=222,col2=bx+330,col3=bx+660;
+  [[bx,'Tests',`${VR.completed} / ${VR.total}`,'#e2e2f0'],[col2,'Fractones',`◈ ${VR.tokens}`,'#f0c040'],[col3,'Estética',{cosmos:'Cosmos',mandala:'Sagrada',psychedelic:'Psico',arbol:'Árbol',archipielago:'Archi'}[VR.aesthetic]||VR.aesthetic,'#7c6dfa']].forEach(([x,lbl,val,col])=>{
+    c.fillStyle='#7070a0';c.font='400 20px system-ui';c.fillText(lbl,x,sy);
+    c.fillStyle=col;c.font='600 28px system-ui';c.fillText(val,x,sy+32);
+  });
+  if(VR.question){
+    c.fillStyle='rgba(255,255,255,.10)';c.fillRect(44,PH-108,PW-88,1);
+    c.fillStyle='rgba(255,255,255,.35)';c.font='italic 300 21px system-ui';
+    wrapText(c,`"${VR.question}"`,44,PH-72,PW-88,28,2);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SECCIONES + DOCK 3D
+// ═══════════════════════════════════════════════════════════════════════════
+const VR_SECTIONS = [
+  { id:'hub',       icon:'◉', label:'Mapa',       draw:drawHubPanel      },
+  { id:'espejo',    icon:'◎', label:'Espejo',     draw:drawEspejoPanel   },
+  { id:'tests',     icon:'◈', label:'Tests',      draw:drawTestsPanel    },
+  { id:'birth',     icon:'✦', label:'Nacimiento', draw:drawBirthPanel    },
+  { id:'sensorial', icon:'◌', label:'Regulación', draw:drawSensorialPanel},
+  { id:'perfil',    icon:'⚙', label:'Perfil',     draw:drawPerfilPanel   },
+];
+let curSecIdx = 0;
+
+// Canvas por botón de dock
+const BTN_W=256, BTN_H=128;
+VR_SECTIONS.forEach(sec => {
+  sec.btnCanvas = document.createElement('canvas');
+  sec.btnCanvas.width=BTN_W; sec.btnCanvas.height=BTN_H;
+  sec.btnTex = new THREE.CanvasTexture(sec.btnCanvas);
+  sec.btnMat = new THREE.MeshBasicMaterial({map:sec.btnTex, transparent:true, side:THREE.DoubleSide, depthWrite:false});
+  sec.btnMesh = new THREE.Mesh(new THREE.PlaneGeometry(.42,.21), sec.btnMat);
+  sec.gazeTime = 0;
+});
+
+function drawDockBtn(sec, progress=0, isActive=false){
+  const cv=sec.btnCanvas, ctx=cv.getContext('2d'), W=BTN_W, H=BTN_H;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle=isActive?'rgba(78,205,196,.20)':'rgba(0,0,8,.78)';
+  _rr(ctx,3,3,W-6,H-6,18);ctx.fill();
+  ctx.strokeStyle=isActive?'rgba(78,205,196,.85)':'rgba(255,255,255,.22)';
+  ctx.lineWidth=isActive?2.5:1.5;_rr(ctx,3,3,W-6,H-6,18);ctx.stroke();
+  ctx.fillStyle=isActive?'#4ecdc4':'#e2e2f0';
+  ctx.font=`${H*.42}px system-ui`;ctx.textAlign='center';
+  ctx.fillText(sec.icon,W/2,H*.58);
+  ctx.fillStyle=isActive?'#4ecdc4':'#7070a0';
+  ctx.font=`bold ${H*.16}px system-ui`;
+  ctx.fillText(sec.label,W/2,H*.88);
+  if(progress>0){
+    const cx=W/2,cy=H/2,r=Math.min(W,H)*.41;
+    ctx.beginPath();ctx.arc(cx,cy,r,-PI/2,-PI/2+PI*2*progress);
+    ctx.strokeStyle='#4ecdc4';ctx.lineWidth=5;ctx.stroke();
+  }
+  sec.btnTex.needsUpdate=true;
+}
+
+// Grupo del dock — hijo del panelRig, debajo del panel
+const dockGroup = new THREE.Group();
+dockGroup.position.set(0,-1.85,0);
+panelRig.add(dockGroup);
+
+const N_SEC=VR_SECTIONS.length;
+const SPREAD=1.05; // radianes totales del arco
+VR_SECTIONS.forEach((sec,i)=>{
+  const angle=-SPREAD/2+(i/(N_SEC-1))*SPREAD;
+  sec.btnMesh.position.set(Math.sin(angle)*2.8,0,-Math.cos(angle)*2.8);
+  sec.btnMesh.lookAt(dockGroup.position); // mirando al centro
+  sec.btnMesh.userData.secIdx=i;
+  dockGroup.add(sec.btnMesh);
+  drawDockBtn(sec,0,i===0);
+});
+
+// ── Raycasting para gaze ───────────────────────────────────────────────────
+const raycaster=new THREE.Raycaster();
+const _gazeDir=new THREE.Vector3();
+const dockMeshes=VR_SECTIONS.map(s=>s.btnMesh);
+const DWELL_MS=1600;
+let gazeTarget=-1, gazeStart=0;
+const gazeRing=document.getElementById('gaze-ring');
+const GAZE_CIRC=87.96;
+
+function updateGaze(ts){
+  camera.getWorldDirection(_gazeDir);
+  raycaster.set(camera.position,_gazeDir);
+  const hits=raycaster.intersectObjects(dockMeshes,false);
+  if(hits.length>0){
+    const idx=hits[0].object.userData.secIdx;
+    if(idx===gazeTarget){
+      const progress=Math.min(1,(ts-gazeStart)/DWELL_MS);
+      VR_SECTIONS[idx].gazeTime=progress;
+      drawDockBtn(VR_SECTIONS[idx],progress,idx===curSecIdx);
+      gazeRing.style.strokeDashoffset=GAZE_CIRC*(1-progress);
+      if(progress>=1){gazeTarget=-1;setSection(idx);}
+    } else {
+      if(gazeTarget>=0){VR_SECTIONS[gazeTarget].gazeTime=0;drawDockBtn(VR_SECTIONS[gazeTarget],0,gazeTarget===curSecIdx);}
+      gazeTarget=idx; gazeStart=ts;
     }
-  };
+  } else {
+    if(gazeTarget>=0){VR_SECTIONS[gazeTarget].gazeTime=0;drawDockBtn(VR_SECTIONS[gazeTarget],0,gazeTarget===curSecIdx);}
+    gazeTarget=-1;
+    gazeRing.style.strokeDashoffset=GAZE_CIRC;
+  }
+}
 
-  recognition.onend = () => {
-    if (!interimText.trim()) {
-      espejoStatus = 'idle'; setMicState('idle'); setStatus(''); refreshEspejoPanel(); return;
-    }
-    const finalText = interimText.trim();
-    interimText = '';
-    espejoHistory.push({ role:'user', content: finalText });
-    espejoStatus = 'processing';
-    setMicState('processing');
-    setStatus('procesando…');
-    refreshEspejoPanel();
-    sendToEspejo(finalText);
-  };
+// ── Cambio de sección ─────────────────────────────────────────────────────
+function setSection(idx){
+  if(idx===curSecIdx&&revealProgress>0.5)return;
+  const sec=VR_SECTIONS[idx];
+  const prev=curSecIdx; curSecIdx=idx;
 
-  recognition.onerror = () => {
-    espejoStatus='idle'; interimText='';
-    setMicState('idle'); setStatus('');
-    refreshEspejoPanel();
-  };
+  // Fondo
+  if(_aes==='cosmos'){
+    Object.assign(vrCosTgt,VR_COS_PRESETS[sec.id]||VR_COS_PRESETS.hub);
+    _vrLerpBoost=1;
+  } else if(_aes==='mandala'){
+    Object.assign(_MP,VR_MAN_PRESETS[sec.id]||VR_MAN_PRESETS.hub);
+  } else if(_aes==='psychedelic'){
+    triggerFade(VR_PSY_SCENES[sec.id]??0);
+  }
 
+  // Panel
+  fadePanel(()=>{ sec.draw(); });
+
+  // Dock highlights
+  if(prev!==idx){drawDockBtn(VR_SECTIONS[prev],0,false);}
+  drawDockBtn(VR_SECTIONS[idx],0,true);
+
+  // Micrófono solo en espejo
+  document.getElementById('btn-mic').style.display=sec.id==='espejo'?'flex':'none';
+
+  // Label
+  const lbl=document.getElementById('section-label');
+  lbl.textContent=`${sec.icon} ${sec.label}`;
+  lbl.style.opacity='1';
+  setTimeout(()=>lbl.style.opacity='0',2200);
+}
+
+// ── Tap para activar sección apuntada ────────────────────────────────────
+renderer.domElement.addEventListener('pointerdown', e=>{
+  e.preventDefault();
+  camera.getWorldDirection(_gazeDir);
+  raycaster.set(camera.position,_gazeDir);
+  const hits=raycaster.intersectObjects(dockMeshes,false);
+  if(hits.length>0){ setSection(hits[0].object.userData.secIdx); return; }
+  // Tap en área vacía → si en espejo, abrir mic
+  if(VR_SECTIONS[curSecIdx].id==='espejo'){
+    if(espejoStatus==='listening')stopListening();
+    else if(espejoStatus==='idle')startListening();
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VOZ — ESPEJO
+// ═══════════════════════════════════════════════════════════════════════════
+function refreshEspejo(){
+  if(VR_SECTIONS[curSecIdx].id!=='espejo')return;
+  drawEspejoPanel();panelTex.needsUpdate=true;
+  if(revealProgress>=0.9)startReveal(0.55);
+}
+const SR_Ctor=window.SpeechRecognition||window.webkitSpeechRecognition;
+let recognition=null;
+function startListening(){
+  if(!SR_Ctor){alert('Usa Chrome en Android para voz.');return;}
+  recognition=new SR_Ctor();recognition.lang='es-ES';recognition.continuous=false;recognition.interimResults=true;
+  recognition.onstart=()=>{espejoStatus='listening';interimText='';setMicState('listening');setStatus('escuchando…');};
+  recognition.onresult=e=>{interimText=Array.from(e.results).map(r=>r[0].transcript).join('');refreshEspejo();if(e.results[e.results.length-1].isFinal)recognition.stop();};
+  recognition.onend=()=>{
+    if(!interimText.trim()){espejoStatus='idle';setMicState('idle');setStatus('');refreshEspejo();return;}
+    const txt=interimText.trim();interimText='';
+    espejoHistory.push({role:'user',content:txt});espejoStatus='processing';setMicState('processing');setStatus('procesando…');refreshEspejo();
+    sendToEspejo(txt);
+  };
+  recognition.onerror=()=>{espejoStatus='idle';interimText='';setMicState('idle');setStatus('');refreshEspejo();};
   recognition.start();
 }
-
-function stopListening() {
-  if (recognition) { try { recognition.stop(); } catch(e){} }
+function stopListening(){if(recognition){try{recognition.stop();}catch(e){}}}
+const synth=window.speechSynthesis;
+let voice=null;
+function pickVoice(){const vs=synth.getVoices();voice=vs.find(v=>v.lang.startsWith('es')&&v.name.includes('Google'))||vs.find(v=>v.lang.startsWith('es'))||vs[0];}
+synth.addEventListener('voiceschanged',pickVoice);pickVoice();
+function speak(text){
+  synth.cancel();const u=new SpeechSynthesisUtterance(text);if(voice)u.voice=voice;
+  u.lang='es-ES';u.rate=0.86;u.pitch=0.88;
+  u.onend=()=>{espejoStatus='idle';setMicState('idle');setStatus('');refreshEspejo();};
+  synth.speak(u);espejoStatus='speaking';setMicState('idle');setStatus('hablando…');
 }
-
-// ── SpeechSynthesis ───────────────────────────────────────────────────────
-const synth = window.speechSynthesis;
-let voice = null;
-function pickVoice() {
-  const vs = synth.getVoices();
-  voice = vs.find(v=>v.lang.startsWith('es')&&v.name.includes('Google'))
-       || vs.find(v=>v.lang.startsWith('es'))
-       || vs[0];
+async function sendToEspejo(text){
+  try{
+    const res=await fetch('/espejo/send/',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},body:JSON.stringify({mensaje:text,sesion_id:espejoSession})});
+    if(!res.ok)throw new Error(res.status);
+    const data=await res.json();espejoSession=data.sesion_id;
+    const r=(data.respuesta||'').trim();if(r){espejoHistory.push({role:'assistant',content:r});refreshEspejo();speak(r);}
+  }catch(err){espejoStatus='idle';setMicState('idle');setStatus('Error de conexión');setTimeout(()=>setStatus(''),2000);refreshEspejo();}
 }
-synth.addEventListener('voiceschanged', pickVoice);
-pickVoice();
-
-function speak(text) {
-  synth.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  if (voice) u.voice = voice;
-  u.lang='es-ES'; u.rate=0.86; u.pitch=0.88;
-  u.onend = () => {
-    espejoStatus='idle'; setMicState('idle'); setStatus('');
-    refreshEspejoPanel();
-  };
-  synth.speak(u);
-  espejoStatus='speaking'; setMicState('idle'); setStatus('hablando…');
-}
-
-// ── API espejo ────────────────────────────────────────────────────────────
-async function sendToEspejo(text) {
-  try {
-    const res = await fetch('/espejo/send/', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json', 'X-CSRFToken': CSRF },
-      body: JSON.stringify({ mensaje: text, sesion_id: espejoSession }),
-    });
-    if (!res.ok) throw new Error(res.status);
-    const data = await res.json();
-    espejoSession = data.sesion_id;
-    const respuesta = (data.respuesta || '').trim();
-    if (respuesta) {
-      espejoHistory.push({ role:'assistant', content: respuesta });
-      refreshEspejoPanel();
-      speak(respuesta);
-    }
-  } catch(err) {
-    espejoStatus='idle'; setMicState('idle'); setStatus('Error de conexión');
-    setTimeout(()=>setStatus(''),2000);
-    refreshEspejoPanel();
-  }
-}
-
-// ── Helpers UI ────────────────────────────────────────────────────────────
-function setMicState(state) {
-  const btn = document.getElementById('btn-mic');
-  btn.className = state==='listening'?'listening':state==='processing'?'processing':'';
-  btn.textContent = state==='listening'?'⏹':'🎤';
-}
-function setStatus(txt) {
-  const el = document.getElementById('vr-status');
-  el.textContent = txt;
-}
+function setMicState(s){const b=document.getElementById('btn-mic');b.className=s==='listening'?'listening':s==='processing'?'processing':'';b.textContent=s==='listening'?'⏹':'🎤';}
+function setStatus(t){document.getElementById('vr-status').textContent=t;}
+document.getElementById('btn-mic').addEventListener('pointerdown',e=>{e.preventDefault();if(espejoStatus==='listening')stopListening();else if(espejoStatus==='idle')startListening();});
 
 // ── Tiempo chamánico ──────────────────────────────────────────────────────
-let T=0, lastTs=0;
-function tickTime(ts) {
-  const dt = Math.min((ts-lastTs)/1000,0.05); lastTs=ts;
-  if (_aes === 'psychedelic' && _psychSpeeds) {
-    const pulse = Math.max(0.3,1+0.40*Math.sin(T*PI*0.3731)+0.25*Math.sin(T*PHI*0.6247)+0.18*Math.sin(T*E*0.4153)+0.10*Math.sin(T*SQ7*0.5289));
-    T += dt*_psychSpeeds[curScene]*pulse;
-  } else {
-    T += dt;
-  }
+let T=0,lastTs=0;
+function tickTime(ts){
+  const dt=Math.min((ts-lastTs)/1000,.05);lastTs=ts;
+  if(_aes==='psychedelic'&&_psychSpeeds){
+    const pulse=Math.max(.3,1+.40*Math.sin(T*PI*.3731)+.25*Math.sin(T*PHI*.6247)+.18*Math.sin(T*E*.4153)+.10*Math.sin(T*SQ7*.5289));
+    T+=dt*_psychSpeeds[curPsychScene]*pulse;
+  }else{T+=dt;}
   return dt;
 }
 
-// ── Transición de escena (solo psychedelic) ───────────────────────────────
-let fadeDoing=false;
-function triggerFade(to){
-  if(!bgMesh||!_psychMats||fadeDoing||to===curScene)return; fadeDoing=true; let f=1;
-  const out=()=>{f-=.07;bgUnis.uFade.value=Math.max(0,f);if(f>0){requestAnimationFrame(out);return;}
-    curScene=to;bgMesh.material=_psychMats[curScene];updateDots();showLabel(_psychNames[curScene]);
-    const inn=()=>{f+=.05;bgUnis.uFade.value=Math.min(1,f);if(f<1){requestAnimationFrame(inn);return;}fadeDoing=false;};
-    requestAnimationFrame(inn);};requestAnimationFrame(out);
-}
-function updateDots(){document.querySelectorAll('.s-dot').forEach((d,i)=>d.classList.toggle('active',i===curScene));}
-function showLabel(n){const el=document.getElementById('scene-label');el.textContent=n;el.style.opacity='1';setTimeout(()=>el.style.opacity='0',2200);}
-let realTimer=0;
-
-// ── Eventos ───────────────────────────────────────────────────────────────
-document.querySelectorAll('.s-dot').forEach(b=>b.addEventListener('pointerdown',e=>{e.preventDefault();triggerFade(parseInt(b.dataset.i));}));
-document.querySelectorAll('.ptab').forEach(b=>b.addEventListener('pointerdown',e=>{e.preventDefault();switchPanel(b.dataset.mode);}));
-
-document.getElementById('btn-mic').addEventListener('pointerdown', e => {
-  e.preventDefault();
-  if (espejoStatus==='listening') stopListening();
-  else if (espejoStatus==='idle') startListening();
-});
-
-document.addEventListener('keydown', e=>{
-  if(e.code==='Space'){e.preventDefault();triggerFade((curScene+1)%4);}
-  if(e.code==='Tab'){e.preventDefault();switchPanel(panelMode==='perfil'?'espejo':'perfil');}
-});
-
-// ── Device Orientation ────────────────────────────────────────────────────
+// ── Gyroscope ─────────────────────────────────────────────────────────────
 let dA=0,dB=90,dG=0,gyroOK=false;
-const Q_SCR=new THREE.Quaternion(-Math.sqrt(0.5),0,0,Math.sqrt(0.5));
+const Q_SCR=new THREE.Quaternion(-Math.sqrt(.5),0,0,Math.sqrt(.5));
 const _eu=new THREE.Euler(),_qO=new THREE.Quaternion();
 window.addEventListener('deviceorientation',e=>{if(e.alpha==null)return;gyroOK=true;dA=e.alpha||0;dB=e.beta||90;dG=e.gamma||0;},true);
 function applyGyro(){
@@ -820,63 +766,74 @@ function applyGyro(){
   _qO.setFromAxisAngle(new THREE.Vector3(0,0,1),-THREE.MathUtils.degToRad(ori));
   camera.quaternion.multiply(_qO);
 }
-
-// Mouse/touch drag
 let drag=false,px=0,py=0,yaw=0,pitch=0;
-renderer.domElement.addEventListener('pointerdown',e=>{drag=true;px=e.clientX;py=e.clientY;});
+renderer.domElement.addEventListener('pointerdown',e=>{drag=true;px=e.clientX;py=e.clientY;},{passive:true});
 window.addEventListener('pointerup',()=>drag=false);
 window.addEventListener('pointermove',e=>{if(!drag||gyroOK)return;yaw-=(e.clientX-px)*.003;pitch-=(e.clientY-py)*.003;pitch=Math.max(-PI/2,Math.min(PI/2,pitch));px=e.clientX;py=e.clientY;});
 
+// Tab: navegar secciones en secuencia
+document.addEventListener('keydown',e=>{
+  if(e.code==='Tab'){e.preventDefault();setSection((curSecIdx+1)%VR_SECTIONS.length);}
+  if(e.code==='Space'&&_aes==='psychedelic'){e.preventDefault();triggerFade((curPsychScene+1)%4);}
+});
+
 // ── Botón de entrada ──────────────────────────────────────────────────────
-document.getElementById('btn-vr').addEventListener('click', async () => {
-  if (typeof DeviceOrientationEvent?.requestPermission==='function') {
+document.getElementById('btn-vr').addEventListener('click',async()=>{
+  if(typeof DeviceOrientationEvent?.requestPermission==='function'){
     try{const r=await DeviceOrientationEvent.requestPermission();if(r!=='granted'){alert('Permiso denegado.');return;}}catch(e){}
   }
-  document.getElementById('overlay').style.display    = 'none';
-  document.getElementById('btn-back').style.display   = 'block';
-  document.getElementById('panel-tabs').style.display = 'flex';
-  document.getElementById('crosshairs').style.display = 'block';
-  document.getElementById('scene-label').style.display= 'block';
-  document.getElementById('vr-status').style.display  = 'block';
-  if (_aes === 'psychedelic') {
-    document.getElementById('scene-ui').style.display = 'flex';
-    updateDots(); showLabel(_psychNames[curScene]);
-  }
+  document.getElementById('overlay').style.display    ='none';
+  document.getElementById('btn-back').style.display   ='block';
+  document.getElementById('section-label').style.display='block';
+  document.getElementById('vr-status').style.display  ='block';
+  document.getElementById('reticle').style.display    ='block';
+  // Dibujar sección inicial (hub)
+  drawHubPanel(); panelTex.needsUpdate=true;
   startReveal(0);
   requestAnimationFrame(loop);
 });
 
 // ── Loop ──────────────────────────────────────────────────────────────────
-const _rigQ = new THREE.Quaternion();
-function loop(ts) {
+const _rigQ=new THREE.Quaternion();
+function loop(ts){
   requestAnimationFrame(loop);
-  const dt = tickTime(ts);
+  const dt=tickTime(ts);
 
-  if (_aes === 'psychedelic') {
-    realTimer += dt;
-    if(realTimer>=45){realTimer=0;triggerFade((curScene+1)%4);}
+  // Lerp cosmos por sección
+  if(_aes==='cosmos'&&vrField){
+    _vrLerpBoost=Math.max(0,_vrLerpBoost-.008);
+    const VL=0.018+(0.12-0.018)*_vrLerpBoost;
+    vrCosCur.speedInner=lerp(vrCosCur.speedInner,vrCosTgt.speedInner,VL);
+    vrCosCur.sizeMult  =lerp(vrCosCur.sizeMult,  vrCosTgt.sizeMult,  VL);
+    vrCosCur.diskTilt  =lerp(vrCosCur.diskTilt,  vrCosTgt.diskTilt,  VL);
+    bgUnis.uSpeedInner.value=vrCosCur.speedInner;
+    bgUnis.uSizeMult.value  =vrCosCur.sizeMult;
+    vrField.rotation.x      =vrCosCur.diskTilt*PI/180;
   }
 
-  bgUnis.uT.value = T;
-  if (_aes === 'mandala') _drawMandala(T);
-  panelUnis.uT.value = T;
+  bgUnis.uT.value=T;
+  if(_aes==='mandala')_drawMandala(T);
+  panelUnis.uT.value=T;
 
   // Reveal chamánico
-  if (revealActive && revealProgress < 1 && !revealFading) {
-    const pulse = 0.38*Math.sin(T*PI*0.3731)+0.26*Math.sin(T*PHI*0.6247);
-    revealProgress = Math.min(1, revealProgress + dt*(0.28+Math.abs(pulse)*0.18));
-    panelUnis.uReveal.value = revealProgress;
+  if(revealActive&&revealProgress<1&&!revealFading){
+    const pulse=.38*Math.sin(T*PI*.3731)+.26*Math.sin(T*PHI*.6247);
+    revealProgress=Math.min(1,revealProgress+dt*(.28+Math.abs(pulse)*.18));
+    panelUnis.uReveal.value=revealProgress;
   }
 
+  // Gaze (solo si VR activo)
+  if(document.getElementById('reticle').style.display!=='none')updateGaze(ts);
+
   // Cámara
-  if(gyroOK) applyGyro();
+  if(gyroOK)applyGyro();
   else{_eu.set(pitch,yaw,0,'YXZ');camera.quaternion.setFromEuler(_eu);}
 
-  // Panel sigue suavemente la mirada
+  // Panel + dock siguen la cabeza
   _rigQ.copy(camera.quaternion);
-  panelRig.quaternion.slerp(_rigQ, 0.03);
+  panelRig.quaternion.slerp(_rigQ,.03);
 
-  effect.render(scene, camera);
+  effect.render(scene,camera);
 }
 </script>
 </body>

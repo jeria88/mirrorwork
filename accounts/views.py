@@ -438,15 +438,46 @@ def vr_home(request):
 
     from psychometrics.models import Test, TestResult
     total_tests = Test.objects.filter(active=True).count()
-    completed_tests = (
-        TestResult.objects.filter(user=request.user).values('test').distinct().count()
+    done_slugs = set(
+        TestResult.objects.filter(user=request.user)
+        .values_list('test__slug', flat=True).distinct()
     )
+    completed_tests = len(done_slugs)
     map_pct = round(completed_tests / total_tests * 100) if total_tests else 0
+
+    # Dimensiones para el panel Hub
+    dim_data = {}
+    for dim, label in _DIMENSION_LABELS.items():
+        total = Test.objects.filter(dimension=dim, active=True).count()
+        completed = Test.objects.filter(
+            dimension=dim, active=True, slug__in=done_slugs
+        ).count()
+        dim_data[dim] = {
+            'label': label,
+            'pct': round(completed / total * 100) if total else 0,
+            'completed': completed,
+            'total': total,
+        }
+
+    # Birth charts generados
+    try:
+        from birth.models import BirthReport
+        birth_types = list(
+            BirthReport.objects.filter(user=request.user)
+            .values_list('report_type', flat=True).distinct()
+        )
+    except Exception:
+        birth_types = []
+
+    # Patrones de respiración
+    from sensorial.views import PATTERNS as BREATH_PATTERNS
+
     try:
         token_balance = request.user.token_balance.balance
     except Exception:
         token_balance = 0
 
+    import json as _json
     return render(request, 'vr/index.html', {
         'user_name': request.user.first_name or request.user.email.split('@')[0],
         'map_aesthetic': profile.map_aesthetic,
@@ -456,6 +487,12 @@ def vr_home(request):
         'total_tests': total_tests,
         'initial_scene': _AESTHETIC_SCENE.get(profile.map_aesthetic, 0),
         'onboarding_question': profile.onboarding_question or '',
+        'dim_data_json': _json.dumps(dim_data),
+        'birth_types_json': _json.dumps(birth_types),
+        'breath_patterns_json': _json.dumps([
+            {'key': k, 'name': v['name'], 'note': v.get('note', '')}
+            for k, v in BREATH_PATTERNS.items()
+        ]),
     })
 
 
