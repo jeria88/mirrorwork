@@ -394,6 +394,25 @@
       .nav-links { gap: 1rem; font-size: 0.75rem; }
     }
 
+    /* ── VR FAB ─────────────────────────────────────────────────────────── */
+    {% if user.is_authenticated %}
+    #vr-fab {
+      position: fixed; bottom: calc(96px + 1.2rem + env(safe-area-inset-bottom, 0px)); right: 1.1rem;
+      z-index: 155;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(0,0,0,0.72); border: 1px solid rgba(78,205,196,0.28);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      cursor: pointer; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 1px;
+      color: rgba(78,205,196,0.55); text-decoration: none;
+      transition: color 0.2s, border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      touch-action: manipulation;
+    }
+    #vr-fab:hover { color: #4ecdc4; border-color: rgba(78,205,196,0.65); background: rgba(0,0,0,0.88); box-shadow: 0 0 18px rgba(78,205,196,0.18); }
+    #vr-fab .vrf-icon { font-size: 1.1rem; line-height: 1; }
+    #vr-fab .vrf-label { font-size: 0.38rem; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 600; line-height: 1; }
+    {% endif %}
+
     /* ── MIXER FAB + PANEL ──────────────────────────────────────────────── */
     {% if user.is_authenticated %}
     #mixer-fab {
@@ -498,7 +517,7 @@
 
     @media print {
       @page { size: Letter portrait; margin: 2.2cm 1.8cm 2cm; }
-      nav, #bh-canvas, #dock, #mixer-fab, #mixer-panel, #mixer-scrim,
+      nav, #bh-canvas, #dock, #vr-fab, #mixer-fab, #mixer-panel, #mixer-scrim,
       .print-btn, .back-link, .spin-ring,
       .interp-spinner, .no-tokens-note { display: none !important; }
       :root {
@@ -574,6 +593,14 @@
   {% block extra_body %}{% endblock %}
 </div>
 
+
+<!-- VR FAB ─────────────────────────────────────────────────────────── -->
+{% if user.is_authenticated %}
+<a id="vr-fab" href="{% url 'vr_home' %}" data-no-spa aria-label="Entrar a MirrorWork VR">
+  <span class="vrf-icon">⬡</span>
+  <span class="vrf-label">VR</span>
+</a>
+{% endif %}
 
 <!-- MIXER FAB + PANEL ───────────────────────────────────────────────── -->
 {% if user.is_authenticated %}
@@ -671,9 +698,6 @@
     </a>
     <a class="dn-item" href="{% url 'sensorial:home' %}">
       <span class="dn-icon">◌</span><span class="dn-label">Regulación</span>
-    </a>
-    <a class="dn-item" href="{% url 'vr_home' %}" data-no-spa>
-      <span class="dn-icon">⬡</span><span class="dn-label">VR</span>
     </a>
     <a class="dn-item" href="{% url 'perfil' %}">
       <span class="dn-icon">⚙</span><span class="dn-label">Perfil</span>
