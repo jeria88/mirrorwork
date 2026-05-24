@@ -142,7 +142,7 @@
           {% else %}<span style="width:16px;height:16px;border-radius:50%;background:var(--surface2);display:inline-flex;align-items:center;justify-content:center;font-size:0.55rem;color:var(--accent);">{{ insight.user.email|first|upper }}</span>
           {% endif %}
         {% endwith %}
-        <a href="{% url 'community:perfil' insight.user.username %}" style="color:var(--muted);text-decoration:none;">{{ insight.user.username|default:insight.user.email|truncatechars:20 }}</a>
+        <a href="{% url 'community:perfil' insight.user.username|default:insight.user.pk %}" style="color:var(--muted);text-decoration:none;">{{ insight.user.username|default:insight.user.email|truncatechars:20 }}</a>
         reposteó
       </div>
       <div class="repost-inner">
@@ -153,7 +153,7 @@
             {% else %}{{ orig.user.email|first|upper }}{% endif %}
           </div>
           <div class="insight-meta">
-            <div class="insight-author"><a href="{% url 'community:perfil' orig.user.username %}">{{ orig.user.username|default:orig.user.email|truncatechars:22 }}</a></div>
+            <div class="insight-author"><a href="{% url 'community:perfil' orig.user.username|default:orig.user.pk %}">{{ orig.user.username|default:orig.user.email|truncatechars:22 }}</a></div>
             <div class="insight-date">{{ orig.created_at|date:"d M Y" }}</div>
           </div>
           <span class="insight-source-tag">{% if orig.source_type == 'test_result' %}Test{% else %}Espejo{% endif %}</span>
@@ -179,7 +179,7 @@
         </div>
         <div class="insight-meta">
           <div class="insight-author">
-            <a href="{% url 'community:perfil' insight.user.username %}">{{ insight.user.username|default:insight.user.email|truncatechars:24 }}</a>
+            <a href="{% url 'community:perfil' insight.user.username|default:insight.user.pk %}">{{ insight.user.username|default:insight.user.email|truncatechars:24 }}</a>
           </div>
           <div class="insight-date">{{ insight.created_at|date:"d M Y" }}</div>
         </div>

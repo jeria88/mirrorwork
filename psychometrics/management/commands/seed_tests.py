@@ -36,7 +36,6 @@ class Command(BaseCommand):
                 'dimension': dimension,
                 'description': description,
                 'estimated_minutes': estimated_minutes,
-                'token_cost': 0,
                 'order': order,
                 'active': True,
                 'instrument_type': instrument_type,

@@ -961,6 +961,7 @@ _REPORT_TYPE_KEYS = {
 
 def _birth_lectura_view(request, pk, report_type):
     from django.urls import reverse
+    from mirror.models import ConflictSession
     report = get_object_or_404(BirthReport, pk=pk, user=request.user, report_type=report_type)
     is_processing = report.interpretation == 'processing'
     is_revealed   = bool(report.interpretation) and report.interpretation != 'processing'
@@ -973,6 +974,8 @@ def _birth_lectura_view(request, pk, report_type):
     type_key  = _REPORT_TYPE_KEYS.get(report_type, 'astral')
     sec_cfg   = _SECTION_CONFIGS.get(type_key, [])
     sections  = _parse_lectura_sections(report.interpretation, sec_cfg) if is_revealed else []
+    espejo_count = ConflictSession.objects.filter(user=request.user, status='archived').count()
+    desbloqueado = espejo_count >= 1
     return render(request, 'birth/lectura.html', {
         'report':               report,
         'label':                _BIRTH_TYPE_LABELS.get(report_type, ''),
@@ -983,6 +986,7 @@ def _birth_lectura_view(request, pk, report_type):
         'back_url':             reverse(back_view, args=[report.pk]),
         'sections':             sections,
         'sections_config_json': json.dumps(sec_cfg, ensure_ascii=False),
+        'desbloqueado':         desbloqueado,
     })
 
 
@@ -1046,3 +1050,12 @@ def birth_insight_status(request, pk):
     if report.status == BirthReport.STATUS_FAILED:
         return JsonResponse({'status': 'failed'})
     return JsonResponse({'status': 'complete', 'interpretation': report.interpretation})
+
+
+@login_required
+def toggle_report_public(request, pk):
+    from django.views.decorators.http import require_POST
+    report = get_object_or_404(BirthReport, pk=pk, user=request.user)
+    report.is_public = not report.is_public
+    report.save(update_fields=['is_public'])
+    return JsonResponse({'ok': True, 'is_public': report.is_public})

@@ -523,10 +523,17 @@
   <aside class="espejo-sidebar">
     <div class="sidebar-header">
       <span class="sidebar-title">Conversaciones</span>
-      <form method="post" action="{% url 'mirror:nuevo' %}">
-        {% csrf_token %}
-        <button type="submit" class="btn-nuevo">+ Nueva conversación</button>
-      </form>
+      <div style="display:flex;gap:0.4rem;align-items:center;">
+        <form method="post" action="{% url 'mirror:nuevo' %}">
+          {% csrf_token %}
+          <button type="submit" class="btn-nuevo">+ Nueva</button>
+        </form>
+        <a href="{% url 'mirror:cerebro' %}"
+          style="font-size:0.68rem;color:var(--muted);border:1px solid var(--border);border-radius:999px;padding:0.25rem 0.6rem;text-decoration:none;transition:all 0.2s;white-space:nowrap;"
+          onmouseover="this.style.borderColor='var(--accent2)';this.style.color='var(--accent2)'"
+          onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'"
+          title="Ver la memoria del Espejo">Cerebro</a>
+      </div>
     </div>
     <div class="sessions-list">
       {% if sessions %}
@@ -576,6 +583,14 @@
     </div>
 
     <div class="messages-area" id="messages-area">
+
+      {% if pregunta_retorno %}
+      <div id="retorno-banner" style="background:rgba(78,205,196,0.08);border:1px solid rgba(78,205,196,0.25);border-radius:12px;padding:1rem 1.25rem;margin:0.75rem 1.5rem;cursor:pointer;" onclick="enviarPreguntaRetorno(this)">
+        <div style="font-size:0.62rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:0.4rem;">Hace un mes te preguntaste…</div>
+        <div style="font-size:0.88rem;color:var(--text);">{{ pregunta_retorno.pregunta_cierre }}</div>
+        <div style="font-size:0.68rem;color:var(--muted);margin-top:0.4rem;">Toca para explorar cómo lo ves hoy →</div>
+      </div>
+      {% endif %}
 
       {% if not active or not active.messages %}
         <div class="espejo-welcome" id="welcome-state">
@@ -672,6 +687,14 @@
     input.focus();
   }
 
+  function enviarPreguntaRetorno(el) {
+    el.style.display = 'none';
+    const texto = el.querySelector('[style*="0.88rem"]').textContent.trim();
+    if (welcome) welcome.style.display = 'none';
+    appendUserMsg(texto);
+    sendMessage(texto);
+  }
+
   function scrollBottom() { area.scrollTop = area.scrollHeight; }
 
   function showError(msg) {
@@ -710,7 +733,7 @@
     }
 
     if (testRec && testRec.slug) {
-      html += `<a href="/tests/${escAttr(testRec.slug)}/tomar/" class="test-rec-card" target="_blank">
+      html += `<a href="/psicometria/${escAttr(testRec.slug)}/" class="test-rec-card" target="_blank">
         <div class="test-rec-icon">◈</div>
         <div class="test-rec-body">
           <div class="test-rec-label">Test recomendado</div>

@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
-{% block title %}{{ perfil_user.username|default:perfil_user.email }} — MirrorWork{% endblock %}
+{% block title %}{{ perfil_user.get_full_name|default:perfil_user.username|default:perfil_user.email }} — MirrorWork{% endblock %}
 
 {% block extra_head %}
 <style data-page-style>
-.perfil-com-wrap { max-width: 680px; margin: 0 auto; padding: 2rem 1.25rem 6rem; }
+.perfil-wrap { max-width: 680px; margin: 0 auto; padding: 2rem 1.25rem 6rem; }
 
 /* ── Header ── */
 .perfil-header {
   background: rgba(0,0,0,0.55); border: 1px solid var(--border);
-  border-radius: 20px; padding: 2rem 2rem 1.5rem; margin-bottom: 1.5rem;
+  border-radius: 20px; padding: 2rem 2rem 1.5rem; margin-bottom: 0;
 }
 .perfil-top { display: flex; align-items: flex-start; gap: 1.25rem; margin-bottom: 1.25rem; }
 .perfil-avatar-wrap { position: relative; flex-shrink: 0; }
@@ -27,17 +27,20 @@
   font-size: 0.6rem; color: #000; transition: opacity 0.2s;
 }
 .avatar-edit-btn:hover { opacity: 0.85; }
-
 .perfil-info { flex: 1; min-width: 0; }
 .perfil-name { font-size: 1.15rem; font-weight: 700; color: var(--text); margin-bottom: 0.2rem; }
-.perfil-profession { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.5rem; }
+.perfil-plan {
+  display: inline-block; font-size: 0.62rem; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 0.15rem 0.55rem; border-radius: 999px;
+  border: 1px solid rgba(78,205,196,0.3); color: var(--accent); margin-bottom: 0.3rem;
+}
+.perfil-profession { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.4rem; }
 .perfil-bio { font-size: 0.88rem; color: var(--muted); line-height: 1.6; }
 
 .perfil-stats { display: flex; gap: 2rem; margin-bottom: 1.25rem; }
 .perfil-stat-n { font-size: 1.1rem; font-weight: 700; color: var(--text); }
 .perfil-stat-l { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
 
-/* Social links */
 .social-links { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
 .social-link {
   font-size: 0.72rem; color: var(--muted); text-decoration: none;
@@ -46,11 +49,16 @@
 }
 .social-link:hover { border-color: var(--accent); color: var(--accent); }
 
-/* Toggle público */
-.visibility-row {
-  display: flex; align-items: center; gap: 0.75rem;
-  font-size: 0.8rem; color: var(--muted);
+/* Follow btn */
+.follow-btn {
+  padding: 0.5rem 1.4rem; border-radius: 999px; font-size: 0.82rem; font-weight: 500;
+  cursor: pointer; transition: all 0.2s; border: 1px solid var(--accent); font-family: var(--font-ui);
 }
+.follow-btn.following { background: transparent; color: var(--accent); }
+.follow-btn.not-following { background: var(--accent); color: #000; }
+
+/* Toggle público */
+.visibility-row { display: flex; align-items: center; gap: 0.75rem; font-size: 0.8rem; color: var(--muted); }
 .toggle-switch { position: relative; width: 40px; height: 22px; cursor: pointer; }
 .toggle-switch input { opacity: 0; width: 0; height: 0; }
 .toggle-slider {
@@ -65,35 +73,26 @@
 .toggle-switch input:checked + .toggle-slider { background: rgba(78,205,196,0.12); border-color: var(--accent); }
 .toggle-switch input:checked + .toggle-slider::before { transform: translateX(18px); background: var(--accent); }
 
-/* Follow btn */
-.follow-btn {
-  padding: 0.5rem 1.4rem; border-radius: 999px; font-size: 0.82rem; font-weight: 500;
-  cursor: pointer; transition: all 0.2s; border: 1px solid var(--accent); font-family: var(--font-ui);
+/* ── Tabs ── */
+.perfil-tabs {
+  display: flex; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem;
+  background: rgba(0,0,0,0.55); border-radius: 0 0 0 0;
+  border-left: 1px solid var(--border); border-right: 1px solid var(--border);
+  border-bottom-left-radius: 0; border-bottom-right-radius: 0;
 }
-.follow-btn.following { background: transparent; color: var(--accent); }
-.follow-btn.following:hover { background: rgba(78,205,196,0.08); }
-.follow-btn.not-following { background: var(--accent); color: #000; }
-.follow-btn.not-following:hover { opacity: 0.85; }
+.perfil-tab {
+  font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); padding: 0.7rem 1.1rem;
+  border-bottom: 2px solid transparent; cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  background: none; border-top: none; border-left: none; border-right: none;
+  font-family: var(--font-ui);
+}
+.perfil-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.perfil-tab:hover:not(.active) { color: var(--text); }
 
-/* Edit form */
-.edit-form { margin-top: 1.25rem; border-top: 1px solid var(--border); padding-top: 1.25rem; display: none; }
-.edit-form.open { display: block; }
-.form-group { margin-bottom: 1rem; }
-.form-label { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.35rem; display: block; }
-.form-input, .form-textarea {
-  width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
-  border-radius: 8px; padding: 0.55rem 0.75rem; font-size: 0.88rem; color: var(--text);
-  font-family: var(--font-ui); outline: none; box-sizing: border-box; transition: border-color 0.2s;
-}
-.form-input:focus, .form-textarea:focus { border-color: var(--accent); }
-.form-textarea { resize: vertical; min-height: 70px; }
-.social-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
-.form-save-btn {
-  background: var(--accent); color: #000; border: none; border-radius: 8px;
-  padding: 0.6rem 1.5rem; font-size: 0.85rem; font-weight: 600; cursor: pointer;
-  font-family: var(--font-ui); transition: opacity 0.2s;
-}
-.form-save-btn:hover { opacity: 0.85; }
+.perfil-tab-panel { display: none; }
+.perfil-tab-panel.active { display: block; }
 
 /* Insights */
 .section-label { font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin: 0 0 0.85rem; }
@@ -112,18 +111,79 @@
 .del-btn { background: none; border: none; font-size: 0.68rem; color: rgba(255,255,255,0.18); cursor: pointer; float: right; transition: color 0.2s; padding: 0; }
 .del-btn:hover { color: #e05050; }
 
+/* Cartas */
+.carta-card {
+  background: rgba(0,0,0,0.55); border: 1px solid var(--border);
+  border-radius: 14px; padding: 1.1rem 1.25rem; margin-bottom: 0.75rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+}
+.carta-tipo {
+  font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--accent); border: 1px solid rgba(78,205,196,0.25);
+  border-radius: 999px; padding: 0.15rem 0.5rem; flex-shrink: 0;
+}
+.carta-fecha { font-size: 0.7rem; color: var(--muted); }
+.carta-actions { display: flex; gap: 0.4rem; align-items: center; flex-shrink: 0; }
+.carta-btn {
+  font-size: 0.68rem; padding: 0.25rem 0.65rem; border-radius: 999px;
+  border: 1px solid var(--border); background: none; color: var(--muted);
+  cursor: pointer; transition: all 0.2s; font-family: var(--font-ui); text-decoration: none;
+  display: inline-flex; align-items: center;
+}
+.carta-btn:hover { border-color: var(--accent); color: var(--accent); }
+.carta-btn.public { border-color: rgba(78,205,196,0.4); color: var(--accent); }
+
+/* Configuración */
+.config-section { margin-bottom: 1.75rem; }
+.config-title { font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.85rem; }
+.config-card { background: rgba(0,0,0,0.55); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem 1.5rem; }
+.form-group { margin-bottom: 1rem; }
+.form-label { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.35rem; display: block; }
+.form-input, .form-textarea {
+  width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+  border-radius: 8px; padding: 0.55rem 0.75rem; font-size: 0.88rem; color: var(--text);
+  font-family: var(--font-ui); outline: none; box-sizing: border-box; transition: border-color 0.2s;
+}
+.form-input:focus, .form-textarea:focus { border-color: var(--accent); }
+.form-textarea { resize: vertical; min-height: 70px; }
+.social-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+.form-save-btn {
+  background: var(--accent); color: #000; border: none; border-radius: 8px;
+  padding: 0.6rem 1.5rem; font-size: 0.85rem; font-weight: 600; cursor: pointer;
+  font-family: var(--font-ui); transition: opacity 0.2s;
+}
+.form-save-btn:hover { opacity: 0.85; }
+
+/* Aesthetic picker mini */
+.aesthetic-mini { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+.ae-btn {
+  font-size: 0.75rem; padding: 0.3rem 0.8rem; border-radius: 999px;
+  border: 1px solid var(--border); background: none; color: var(--muted);
+  cursor: pointer; transition: all 0.2s; font-family: var(--font-ui);
+}
+.ae-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(78,205,196,0.08); }
+
+/* Plan card mini */
+.plan-mini {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.plan-mini:last-child { border-bottom: none; }
+
 .empty-state { text-align: center; padding: 2.5rem 1rem; color: var(--muted); font-size: 0.88rem; }
 
 @media(max-width:600px){
   .social-grid { grid-template-columns: 1fr; }
-  .perfil-com-wrap { padding: 1rem 1rem 5rem; }
+  .perfil-wrap { padding: 1rem 1rem 5rem; }
+  .perfil-header { padding: 1.25rem; }
 }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="perfil-com-wrap">
+<div class="perfil-wrap">
 
+  <!-- ── HEADER (siempre visible) ── -->
   <div class="perfil-header">
     <div class="perfil-top">
       <div class="perfil-avatar-wrap">
@@ -140,69 +200,83 @@
       </div>
       <div class="perfil-info">
         <div class="perfil-name">{{ perfil_user.get_full_name|default:perfil_user.username|default:perfil_user.email|truncatechars:30 }}</div>
+        {% if es_propio %}
+          <span class="perfil-plan">
+            {% if perfil_user.profile.plan == 'free' %}Free
+            {% elif perfil_user.profile.plan == 'navegante' %}Navegante
+            {% elif perfil_user.profile.plan == 'practicante' %}Facilitador
+            {% elif perfil_user.profile.plan == 'empresa' %}Empresa
+            {% endif %}
+          </span>
+        {% endif %}
         {% if perfil_user.profile.profession %}<div class="perfil-profession">{{ perfil_user.profile.profession }}</div>{% endif %}
         {% if perfil_user.profile.bio %}<div class="perfil-bio">{{ perfil_user.profile.bio }}</div>{% endif %}
       </div>
     </div>
 
     <div class="perfil-stats">
-      <div>
-        <div class="perfil-stat-n">{{ followers_count }}</div>
-        <div class="perfil-stat-l">Seguidores</div>
-      </div>
-      <div>
-        <div class="perfil-stat-n">{{ following_count }}</div>
-        <div class="perfil-stat-l">Siguiendo</div>
-      </div>
-      <div>
-        <div class="perfil-stat-n">{{ insights|length }}</div>
-        <div class="perfil-stat-l">Insights</div>
-      </div>
+      <div><div class="perfil-stat-n">{{ followers_count }}</div><div class="perfil-stat-l">Seguidores</div></div>
+      <div><div class="perfil-stat-n">{{ following_count }}</div><div class="perfil-stat-l">Siguiendo</div></div>
+      <div><div class="perfil-stat-n">{{ insights|length }}</div><div class="perfil-stat-l">Insights</div></div>
     </div>
 
-    {% with links=perfil_user.profile.social_links %}
-    {% if links %}
+    {% with links=perfil_user.profile.social_links %}{% if links %}
     <div class="social-links">
       {% if links.instagram %}<a class="social-link" href="https://instagram.com/{{ links.instagram }}" target="_blank" rel="noopener">𝕀 {{ links.instagram }}</a>{% endif %}
       {% if links.x %}<a class="social-link" href="https://x.com/{{ links.x }}" target="_blank" rel="noopener">𝕏 {{ links.x }}</a>{% endif %}
       {% if links.linkedin %}<a class="social-link" href="{{ links.linkedin }}" target="_blank" rel="noopener">in LinkedIn</a>{% endif %}
       {% if links.web %}<a class="social-link" href="{{ links.web }}" target="_blank" rel="noopener">↗ Web</a>{% endif %}
     </div>
-    {% endif %}
-    {% endwith %}
+    {% endif %}{% endwith %}
 
     {% if es_propio %}
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
-        <div class="visibility-row">
-          <span>Perfil público</span>
-          <label class="toggle-switch">
-            <input type="checkbox" id="toggle-public"
-              {% if request.user.profile.profile_public %}checked{% endif %}
-              onchange="togglePublic(this)">
-            <span class="toggle-slider"></span>
-          </label>
-          <span id="public-label">{% if request.user.profile.profile_public %}Activado{% else %}Desactivado{% endif %}</span>
-        </div>
-        <button onclick="document.getElementById('edit-form').classList.toggle('open')"
-          style="background:none;border:1px solid var(--border);border-radius:999px;padding:0.3rem 0.85rem;font-size:0.72rem;color:var(--muted);cursor:pointer;font-family:var(--font-ui);transition:all 0.2s;"
-          onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
-          onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
-          Editar perfil
-        </button>
+      <div class="visibility-row">
+        <span>Perfil público</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-public"
+            {% if request.user.profile.profile_public %}checked{% endif %}
+            onchange="togglePublic(this)">
+          <span class="toggle-slider"></span>
+        </label>
+        <span id="public-label">{% if request.user.profile.profile_public %}Activado{% else %}Desactivado{% endif %}</span>
       </div>
+    {% else %}
+      <button class="follow-btn {% if is_following %}following{% else %}not-following{% endif %}"
+              id="follow-btn" onclick="toggleFollow('{{ perfil_user.username|default:perfil_user.pk }}', this)">
+        {% if is_following %}Siguiendo{% else %}Seguir{% endif %}
+      </button>
+    {% endif %}
+  </div>
 
-      <!-- Formulario edición -->
-      <form id="edit-form" class="edit-form" method="post" action="{% url 'perfil' %}" enctype="multipart/form-data">
-        {% csrf_token %}
-        <input type="file" id="avatar-input" name="avatar" accept="image/*" style="display:none" onchange="this.form.submit()">
+  <!-- ── TABS (conectadas al header) ── -->
+  <div class="perfil-tabs">
+    <button class="perfil-tab active" onclick="switchTab('inicio', this)">Inicio</button>
+    {% if es_propio %}
+    <button class="perfil-tab" onclick="switchTab('tests', this)">Tests</button>
+    {% endif %}
+    {% if birth_reports %}<button class="perfil-tab" onclick="switchTab('cartas', this)">Cartas</button>{% endif %}
+    {% if es_propio and client_profiles is not None %}
+    <button class="perfil-tab" onclick="switchTab('cuentas', this)">Cuentas</button>
+    {% endif %}
+    {% if es_propio %}
+    <button class="perfil-tab" onclick="switchTab('config', this)">Configuración</button>
+    {% endif %}
+  </div>
 
+  <!-- ─── TAB: INICIO ─── -->
+  <div id="tab-inicio" class="perfil-tab-panel active">
+    {% if es_propio %}
+    <form id="edit-form" method="post" action="{% url 'perfil' %}" enctype="multipart/form-data" style="margin-bottom:1.5rem;">
+      {% csrf_token %}
+      <input type="file" id="avatar-input" name="avatar" accept="image/*" style="display:none" onchange="this.form.submit()">
+      <div style="background:rgba(0,0,0,0.45);border:1px solid var(--border);border-radius:14px;padding:1.25rem 1.5rem;">
         <div class="form-group">
           <label class="form-label">Nombre visible</label>
           <input class="form-input" name="first_name" value="{{ request.user.first_name }}" placeholder="Tu nombre…">
         </div>
         <div class="form-group">
           <label class="form-label">Profesión / rol</label>
-          <input class="form-input" name="profession" value="{{ request.user.profile.profession }}" placeholder="Ej: Terapeuta, Coach, Psicólogo…">
+          <input class="form-input" name="profession" value="{{ request.user.profile.profession }}" placeholder="Ej: Terapeuta, Coach…">
         </div>
         <div class="form-group">
           <label class="form-label">Bio</label>
@@ -215,46 +289,266 @@
             <input class="form-input" name="social_instagram" placeholder="Instagram (sin @)" value="{{ links.instagram|default:'' }}">
             <input class="form-input" name="social_x" placeholder="X / Twitter (sin @)" value="{{ links.x|default:'' }}">
             <input class="form-input" name="social_linkedin" placeholder="URL LinkedIn" value="{{ links.linkedin|default:'' }}">
-            <input class="form-input" name="social_web" placeholder="Sitio web (URL)" value="{{ links.web|default:'' }}">
+            <input class="form-input" name="social_web" placeholder="Sitio web" value="{{ links.web|default:'' }}">
             {% endwith %}
           </div>
         </div>
         <button type="submit" class="form-save-btn">Guardar cambios</button>
-      </form>
+      </div>
+    </form>
+    {% endif %}
 
+    {% if insights %}
+      <p class="section-label">Insights compartidos</p>
+      {% for insight in insights %}
+      <div class="insight-card" id="insight-{{ insight.pk }}">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;margin-bottom:0.3rem;">
+          <span class="insight-source-tag">{% if insight.source_type == 'test_result' %}Test{% else %}Espejo{% endif %}</span>
+          {% if es_propio %}<button class="del-btn" onclick="eliminarInsight({{ insight.pk }})">✕</button>{% endif %}
+        </div>
+        <div class="insight-title">{{ insight.source_title }} · {{ insight.created_at|date:"d M Y" }}</div>
+        {% if insight.reflection_text %}
+          <div class="insight-reflection">{{ insight.reflection_text }}</div>
+        {% else %}
+          <div class="insight-reflection" style="opacity:0.35;font-style:italic;">Sin reflexión adjunta.</div>
+        {% endif %}
+      </div>
+      {% endfor %}
     {% else %}
-      <button class="follow-btn {% if is_following %}following{% else %}not-following{% endif %}"
-              id="follow-btn" onclick="toggleFollow('{{ perfil_user.username }}', this)">
-        {% if is_following %}Siguiendo{% else %}Seguir{% endif %}
-      </button>
+      <div class="empty-state">
+        {% if es_propio %}Sin insights compartidos aún.{% else %}Este endonauta no ha compartido insights aún.{% endif %}
+      </div>
     {% endif %}
   </div>
 
-  {% if insights %}
-    <p class="section-label">Insights compartidos</p>
-    {% for insight in insights %}
-    <div class="insight-card" id="insight-{{ insight.pk }}">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;margin-bottom:0.3rem;">
-        <span class="insight-source-tag">{% if insight.source_type == 'test_result' %}Test{% else %}Espejo{% endif %}</span>
-        {% if es_propio %}<button class="del-btn" onclick="eliminarInsight({{ insight.pk }})">✕</button>{% endif %}
+  <!-- ─── TAB: TESTS (solo propio) ─── -->
+  {% if es_propio %}
+  <div id="tab-tests" class="perfil-tab-panel">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+      <p class="section-label" style="margin:0;">Mis resultados</p>
+      <a href="{% url 'psychometrics:test_list' %}" class="carta-btn" style="text-decoration:none;">
+        Ver todos los tests →
+      </a>
+    </div>
+
+    {% if recent_results %}
+      {% for result in recent_results %}
+      <div class="insight-card" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:0.9rem 1.25rem;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent2);margin-bottom:0.2rem;">{{ result.test.get_dimension_display|default:result.test.dimension }}</div>
+          <div style="font-size:0.92rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ result.test.name }}</div>
+          <div style="font-size:0.7rem;color:var(--muted);margin-top:0.2rem;">{{ result.completed_at|date:"d M Y" }}</div>
+        </div>
+        <a href="{% url 'psychometrics:test_result' result.pk %}" class="carta-btn" style="text-decoration:none;flex-shrink:0;">Ver →</a>
       </div>
-      <div class="insight-title">{{ insight.source_title }} · {{ insight.created_at|date:"d M Y" }}</div>
-      {% if insight.reflection_text %}
-        <div class="insight-reflection">{{ insight.reflection_text }}</div>
-      {% else %}
-        <div class="insight-reflection" style="opacity:0.35;font-style:italic;">Sin reflexión adjunta.</div>
-      {% endif %}
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <p>Sin resultados aún.</p>
+        <a href="{% url 'psychometrics:test_list' %}" class="form-save-btn" style="text-decoration:none;display:inline-block;margin-top:0.75rem;">
+          Explorar tests →
+        </a>
+      </div>
+    {% endif %}
+
+    {% if available_tests %}
+    <p class="section-label" style="margin:1.5rem 0 0.85rem;">Tests disponibles</p>
+    {% regroup available_tests by dimension as tests_by_dim %}
+    {% for group in tests_by_dim %}
+    <div style="margin-bottom:1rem;">
+      <div style="font-size:0.65rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:0.45rem;">{{ group.grouper }}</div>
+      {% for test in group.list %}
+      <div class="insight-card" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:0.75rem 1.1rem;margin-bottom:0.4rem;">
+        <div style="font-size:0.88rem;color:var(--text);">{{ test.name }}</div>
+        <a href="{% url 'psychometrics:test_take' test.slug %}" class="carta-btn" style="text-decoration:none;flex-shrink:0;">Tomar →</a>
+      </div>
+      {% endfor %}
     </div>
     {% endfor %}
-  {% else %}
-    <div class="empty-state">
-      {% if es_propio %}Sin insights compartidos aún.{% else %}Este endonauta no ha compartido insights aún.{% endif %}
+    {% endif %}
+
+  </div>
+  {% endif %}
+
+  <!-- ─── TAB: CARTAS ─── -->
+  {% if birth_reports %}
+  <div id="tab-cartas" class="perfil-tab-panel">
+    <p class="section-label">Cartas de nacimiento</p>
+    {% for rep in birth_reports %}
+    {% with tipo=rep.report_type %}
+    <div class="carta-card">
+      <div>
+        <span class="carta-tipo">
+          {% if tipo == 'astral' %}Carta Astral
+          {% elif tipo == 'human_design' %}Diseño Humano
+          {% elif tipo == 'saju' %}Saju{% endif %}
+        </span>
+        <div class="carta-fecha" style="margin-top:0.3rem;">{{ rep.created_at|date:"d M Y" }}</div>
+      </div>
+      <div class="carta-actions">
+        <a href="{% if tipo == 'astral' %}{% url 'birth:astral_lectura' rep.pk %}{% elif tipo == 'human_design' %}{% url 'birth:hd_lectura' rep.pk %}{% else %}{% url 'birth:saju_lectura' rep.pk %}{% endif %}"
+           class="carta-btn">Ver →</a>
+        {% if es_propio %}
+        <button class="carta-btn {% if rep.is_public %}public{% endif %}"
+                id="carta-pub-{{ rep.pk }}"
+                onclick="toggleCartaPublic({{ rep.pk }}, this)">
+          {% if rep.is_public %}Pública{% else %}Privada{% endif %}
+        </button>
+        {% endif %}
+      </div>
     </div>
+    {% endwith %}
+    {% endfor %}
+    {% if es_propio %}
+    <p style="font-size:0.75rem;color:var(--muted);margin-top:0.75rem;line-height:1.6;">
+      Las cartas públicas son visibles para quienes visiten tu perfil.
+    </p>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- ─── TAB: CUENTAS (solo Facilitadores) ─── -->
+  {% if es_propio and client_profiles is not None %}
+  <div id="tab-cuentas" class="perfil-tab-panel">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+      <p class="section-label" style="margin:0;">Cuentas de clientes</p>
+      <a href="{% url 'practitioners:crear' %}" class="carta-btn" style="text-decoration:none;">+ Nuevo cliente</a>
+    </div>
+
+    {% for cp in client_profiles %}
+    <div class="carta-card">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:0.92rem;font-weight:600;color:var(--text);margin-bottom:0.2rem;">{{ cp.alias }}</div>
+        <div style="font-size:0.7rem;color:var(--muted);">
+          {% if cp.claimed_by %}
+            <span style="color:var(--accent);">● Cuenta activa</span> — {{ cp.claimed_by.email }}
+          {% else %}
+            <span style="color:var(--muted);">○ Sin reclamar</span>
+          {% endif %}
+        </div>
+        <div style="font-size:0.68rem;color:var(--muted);margin-top:0.2rem;">
+          Creado {{ cp.created_at|date:"d M Y" }}{% if not cp.active %} · Archivado{% endif %}
+        </div>
+      </div>
+      <div class="carta-actions">
+        <a href="{% url 'practitioners:detalle' cp.pk %}" class="carta-btn" style="text-decoration:none;">Ver →</a>
+        {% if not cp.claimed_by %}
+        <button class="carta-btn" onclick="copiarEnlace('{{ request.scheme }}://{{ request.get_host }}{% url 'practitioners:acceso' cp.access_code %}', this)">Copiar enlace</button>
+        {% endif %}
+      </div>
+    </div>
+    {% empty %}
+    <div class="empty-state">
+      <p>Sin clientes aún.</p>
+      <a href="{% url 'practitioners:crear' %}" class="form-save-btn" style="text-decoration:none;display:inline-block;margin-top:0.75rem;">
+        Crear primer cliente →
+      </a>
+    </div>
+    {% endfor %}
+
+  </div>
+  {% endif %}
+
+  <!-- ─── TAB: CONFIGURACIÓN (solo propio) ─── -->
+  {% if es_propio %}
+  <div id="tab-config" class="perfil-tab-panel">
+
+    <!-- Fondo visual -->
+    <div class="config-section">
+      <div class="config-title">Fondo del mundo interior</div>
+      <div class="config-card">
+        {% if request.user.profile.active_template %}
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:0.85rem;color:var(--text);">Template activo: <strong>{{ request.user.profile.active_template.name|truncatechars:30 }}</strong></span>
+          <button onclick="desactivarFondo()" class="carta-btn">Desactivar</button>
+        </div>
+        {% else %}
+        <div style="font-size:0.82rem;color:var(--muted);margin-bottom:0.75rem;">Sin template personalizado — usando fondo estándar.</div>
+        {% endif %}
+        <div class="aesthetic-mini" style="margin-top:0.75rem;">
+          {% for val, label in aesthetic_choices %}
+          <button class="ae-btn {% if request.user.profile.map_aesthetic == val %}active{% endif %}"
+                  onclick="setAesthetic('{{ val }}', this)">{{ label }}</button>
+          {% endfor %}
+        </div>
+        <a href="{% url 'background:mapa_tab' %}" style="font-size:0.75rem;color:var(--accent);text-decoration:none;display:block;margin-top:0.75rem;">
+          Explorar y crear fondos personalizados →
+        </a>
+      </div>
+    </div>
+
+    <!-- Plan y fractones -->
+    <div class="config-section">
+      <div class="config-title">Plan y fractones</div>
+      <div class="config-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+          <div>
+            <div style="font-size:0.82rem;color:var(--muted);">Plan actual</div>
+            <div style="font-size:1.05rem;font-weight:700;color:var(--text);">
+              {% if request.user.profile.plan == 'free' %}Free
+              {% elif request.user.profile.plan == 'navegante' %}Navegante
+              {% elif request.user.profile.plan == 'practicante' %}Facilitador
+              {% elif request.user.profile.plan == 'empresa' %}Empresa{% endif %}
+            </div>
+          </div>
+          {% if token_balance %}
+          <div style="text-align:right;">
+            <div style="font-size:1.4rem;font-weight:800;color:var(--accent);">{{ token_balance.balance }}</div>
+            <div style="font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);">Fractones</div>
+          </div>
+          {% endif %}
+        </div>
+        {% if request.user.profile.plan == 'free' %}
+        <a href="{% url 'tokens:planes' %}" class="form-save-btn" style="text-decoration:none;display:inline-block;">
+          Ver planes →
+        </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Resumen de viaje -->
+    <div class="config-section">
+      <div class="config-title">Resumen del viaje</div>
+      <div class="config-card">
+        <div style="font-size:0.82rem;color:var(--muted);margin-bottom:0.85rem;">
+          Dashboard con todos tus tests, sesiones espejo y evolución por dimensión.
+        </div>
+        <a href="{% url 'reports:dashboard' %}" class="form-save-btn" style="text-decoration:none;display:inline-block;">
+          Ver resumen →
+        </a>
+      </div>
+    </div>
+
+    <!-- Cuenta -->
+    <div class="config-section">
+      <div class="config-title">Cuenta</div>
+      <div class="config-card">
+        <div style="font-size:0.82rem;color:var(--muted);margin-bottom:0.5rem;">Email</div>
+        <div style="font-size:0.92rem;color:var(--text);margin-bottom:1.25rem;">{{ request.user.email }}</div>
+        <a href="{% url 'accounts:password_reset' %}" style="font-size:0.8rem;color:var(--muted);text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:0.45rem 0.85rem;transition:all 0.2s;"
+           onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
+           onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+          Cambiar contraseña →
+        </a>
+      </div>
+    </div>
+
+  </div>
   {% endif %}
 
 </div>
 
 <script>
+function switchTab(name, btn) {
+  document.querySelectorAll('.perfil-tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.perfil-tab').forEach(b => b.classList.remove('active'));
+  const panel = document.getElementById('tab-' + name);
+  if (panel) panel.classList.add('active');
+  btn.classList.add('active');
+}
+
 function togglePublic(cb) {
   document.getElementById('public-label').textContent = cb.checked ? 'Activado' : 'Desactivado';
   fetch('/accounts/perfil/toggle-public/', {
@@ -283,6 +577,48 @@ function eliminarInsight(pk) {
   })
   .then(r => r.json())
   .then(d => { if (d.ok) document.getElementById('insight-' + pk).remove(); });
+}
+
+function toggleCartaPublic(pk, btn) {
+  fetch(`/nacimiento/reporte/${pk}/toggle-publico/`, {
+    method: 'POST', headers: { 'X-CSRFToken': getCsrfToken() },
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (!d.ok) return;
+    btn.textContent = d.is_public ? 'Pública' : 'Privada';
+    btn.classList.toggle('public', d.is_public);
+    showToast(d.is_public ? 'Carta visible en tu perfil' : 'Carta ocultada');
+  });
+}
+
+function setAesthetic(val, btn) {
+  fetch('/perfil/aesthetic/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+    body: JSON.stringify({ aesthetic: val }),
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (!d.ok) return;
+    document.querySelectorAll('.ae-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.body.dataset.aesthetic = val;
+    showToast('Fondo actualizado');
+  });
+}
+
+function desactivarFondo() {
+  fetch('/fondos/desactivar/', { method: 'POST', headers: { 'X-CSRFToken': getCsrfToken() } })
+  .then(() => location.reload());
+}
+
+function copiarEnlace(url, btn) {
+  navigator.clipboard.writeText(url).then(() => {
+    const original = btn.textContent;
+    btn.textContent = '¡Copiado!';
+    setTimeout(() => { btn.textContent = original; }, 2000);
+  });
 }
 </script>
 {% endblock %}

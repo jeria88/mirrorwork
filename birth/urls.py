@@ -17,4 +17,5 @@ urlpatterns = [
     path('reporte/<int:pk>/saju/lectura/', views.saju_lectura, name='saju_lectura'),
     path('reporte/<int:pk>/revelar/', views.birth_insight_reveal, name='birth_insight_reveal'),
     path('reporte/<int:pk>/lectura-estado/', views.birth_insight_status, name='birth_insight_status'),
+    path('reporte/<int:pk>/toggle-publico/', views.toggle_report_public, name='toggle_public'),
 ]

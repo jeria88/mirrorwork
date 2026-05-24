@@ -36,6 +36,30 @@ MISSIONS = [
         'fracton_reward': 50,
         'order': 4,
     },
+    {
+        'slug': 'multi_sesion_espejo',
+        'name': 'Profundidad en el espejo',
+        'description': 'Completa 3 sesiones en el Espejo de Conflictos.',
+        'fracton_reward': 30,
+        'prerequisite_slug': 'first_espejo',
+        'order': 5,
+    },
+    {
+        'slug': 'patron_nombrado',
+        'name': 'Primer patrón revelado',
+        'description': 'El Espejo detectó y registró un patrón tuyo.',
+        'fracton_reward': 50,
+        'prerequisite_slug': 'first_espejo',
+        'order': 6,
+    },
+    {
+        'slug': 'dimension_y_espejo',
+        'name': 'Mapa y espejo conectados',
+        'description': 'Completa una dimensión y usa el Espejo para integrarla.',
+        'fracton_reward': 40,
+        'prerequisite_slug': 'first_dimension',
+        'order': 7,
+    },
 ]
 
 

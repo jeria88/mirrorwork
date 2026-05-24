@@ -49,9 +49,19 @@ def _generate_ai_insight(test_name, instrument_type, evaluation):
         return ""
 
 
-def _run_insight_thread(result_pk, test_name, instrument_type, evaluation):
+def _run_insight_thread(result_pk, user_pk, test_name, instrument_type, evaluation):
+    from django.contrib.auth import get_user_model
+    from tokens.service import spend
     insight = _generate_ai_insight(test_name, instrument_type, evaluation)
-    TestResult.objects.filter(pk=result_pk).update(ai_insight=insight or "—")
+    if insight:
+        User = get_user_model()
+        try:
+            spend(User.objects.get(pk=user_pk), 'ai_insight')
+        except Exception:
+            pass
+        TestResult.objects.filter(pk=result_pk).update(ai_insight=insight)
+    else:
+        TestResult.objects.filter(pk=result_pk).update(ai_insight="—")
 
 
 @login_required
@@ -162,19 +172,10 @@ def insight_reveal(request, pk):
     if result.ai_insight and result.ai_insight not in ("", "—"):
         return redirect("psychometrics:insight_view", pk=pk)
 
-    try:
-        from tokens.models import TokenBalance
-        balance, _ = TokenBalance.objects.get_or_create(
-            user=request.user, defaults={"balance": 50}
-        )
-        balance.spend(5, reason=f"Lectura endonauta — {result.test.name}")
-    except Exception:
-        pass
-
     TestResult.objects.filter(pk=pk).update(ai_insight="processing")
     threading.Thread(
         target=_run_insight_thread,
-        args=(result.pk, result.test.name, result.test.instrument_type, result.evaluation),
+        args=(result.pk, request.user.pk, result.test.name, result.test.instrument_type, result.evaluation),
         daemon=True,
     ).start()
     return redirect("psychometrics:insight_view", pk=pk)

@@ -85,9 +85,10 @@ class Mission(models.Model):
     slug           = models.CharField(max_length=60, unique=True)
     name           = models.CharField(max_length=120)
     description    = models.TextField(blank=True)
-    fracton_reward = models.IntegerField(default=0)
-    order          = models.IntegerField(default=0)
-    active         = models.BooleanField(default=True)
+    fracton_reward    = models.IntegerField(default=0)
+    prerequisite_slug = models.CharField(max_length=60, blank=True)
+    order             = models.IntegerField(default=0)
+    active            = models.BooleanField(default=True)
 
     class Meta:
         ordering = ['order']

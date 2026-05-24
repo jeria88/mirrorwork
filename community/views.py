@@ -140,6 +140,12 @@ def mensajes(request):
 
 @login_required
 def perfil_propio(request):
+    from birth.models import BirthReport
+    from tokens.models import TokenBalance
+    from django.conf import settings
+    from psychometrics.models import Test, TestResult
+    from practitioners.models import TemporaryProfile
+
     insights = (
         SharedInsight.objects
         .filter(user=request.user, visibility=SharedInsight.VISIBILITY_PUBLIC)
@@ -148,19 +154,58 @@ def perfil_propio(request):
     )
     followers_count = Follow.objects.filter(following=request.user).count()
     following_count = Follow.objects.filter(follower=request.user).count()
+    birth_reports   = BirthReport.objects.filter(user=request.user, status='complete')
+
+    recent_results = (
+        TestResult.objects
+        .filter(user=request.user)
+        .select_related('test')
+        .order_by('-completed_at')[:10]
+    )
+    available_tests = Test.objects.filter(active=True).order_by('dimension', 'order')
+
+    profile = request.user.profile
+    client_profiles = None
+    if profile.plan == 'practicante':
+        client_profiles = (
+            TemporaryProfile.objects
+            .filter(created_by=request.user)
+            .select_related('claimed_by')
+            .order_by('-created_at')
+        )
+
+    try:
+        token_balance = request.user.token_balance
+    except Exception:
+        token_balance = None
+
+    hotmart_urls = getattr(settings, 'HOTMART_CHECKOUT_URLS', {})
 
     return render(request, 'community/perfil.html', {
-        'perfil_user': request.user,
-        'insights': insights,
-        'followers_count': followers_count,
-        'following_count': following_count,
-        'es_propio': True,
+        'perfil_user':       request.user,
+        'insights':          insights,
+        'followers_count':   followers_count,
+        'following_count':   following_count,
+        'es_propio':         True,
+        'birth_reports':     birth_reports,
+        'recent_results':    recent_results,
+        'available_tests':   available_tests,
+        'client_profiles':   client_profiles,
+        'token_balance':     token_balance,
+        'profile':           profile,
+        'hotmart_urls':      hotmart_urls,
+        'plan_choices':      profile.PLAN_CHOICES,
+        'aesthetic_choices': profile.MAP_AESTHETIC_CHOICES,
     })
 
 
 @login_required
 def perfil(request, username):
-    perfil_user = get_object_or_404(User, username=username)
+    # Acepta username o pk numérico como fallback
+    if username.isdigit():
+        perfil_user = get_object_or_404(User, pk=int(username))
+    else:
+        perfil_user = get_object_or_404(User, username=username)
 
     if perfil_user == request.user:
         return perfil_propio(request)
@@ -180,13 +225,17 @@ def perfil(request, username):
     followers_count = Follow.objects.filter(following=perfil_user).count()
     following_count = Follow.objects.filter(follower=perfil_user).count()
 
+    from birth.models import BirthReport
+    birth_reports = BirthReport.objects.filter(user=perfil_user, status='complete', is_public=True)
+
     return render(request, 'community/perfil.html', {
-        'perfil_user': perfil_user,
-        'insights': insights,
+        'perfil_user':     perfil_user,
+        'insights':        insights,
         'followers_count': followers_count,
         'following_count': following_count,
-        'es_propio': False,
-        'is_following': is_following,
+        'es_propio':       False,
+        'is_following':    is_following,
+        'birth_reports':   birth_reports,
     })
 
 
@@ -313,7 +362,10 @@ def comentar(request, pk):
 @login_required
 @require_POST
 def seguir(request, username):
-    target = get_object_or_404(User, username=username)
+    if username.isdigit():
+        target = get_object_or_404(User, pk=int(username))
+    else:
+        target = get_object_or_404(User, username=username)
     if target == request.user:
         return JsonResponse({'error': 'No puedes seguirte a ti mismo'}, status=400)
 

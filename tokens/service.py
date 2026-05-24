@@ -35,9 +35,19 @@ def has_balance(user, cost_key):
 
 
 def credit_mission(user, slug):
-    """Completa una misión y acredita su recompensa (idempotente)."""
-    from tokens.signals import _try_complete_mission
-    _try_complete_mission(user, slug)
+    """Completa una misión verificando prerequisito (idempotente). Retorna True si se completó ahora."""
+    from tokens.models import Mission, MissionCompletion
+    try:
+        mission = Mission.objects.get(slug=slug, active=True)
+    except Mission.DoesNotExist:
+        return False
+    if mission.prerequisite_slug:
+        if not MissionCompletion.objects.filter(user=user, mission__slug=mission.prerequisite_slug).exists():
+            return False
+    _, created = MissionCompletion.objects.get_or_create(user=user, mission=mission)
+    if created and mission.fracton_reward:
+        _balance(user).credit_permanent(mission.fracton_reward, reason=f'Misión: {mission.name}')
+    return created
 
 
 def credit_pack(user, fractones, offer_code=''):

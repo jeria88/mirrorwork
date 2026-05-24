@@ -17,7 +17,7 @@ class UserProfile(models.Model):
     PLAN_CHOICES = [
         ('free', 'Free'),
         ('navegante', 'Navegante — $10/mes'),
-        ('practicante', 'Practicante — $39/mes'),
+        ('practicante', 'Facilitador — $39/mes'),
         ('empresa', 'Empresa'),
     ]
 
@@ -27,11 +27,9 @@ class UserProfile(models.Model):
     hotmart_subscriber_code = models.CharField(max_length=120, blank=True)
     tokens_last_renewed = models.DateField(null=True, blank=True)
     MAP_AESTHETIC_CHOICES = [
-        ('cosmos',       'Cósmico'),
-        ('mandala',      'Geometría Sagrada'),
-        ('psychedelic',  'Psicodélico'),
-        ('archipielago', 'Archipiélago'),
-        ('arbol',        'Árbol'),
+        ('cosmos',      'Cósmico'),
+        ('mandala',     'Geometría Sagrada'),
+        ('psychedelic', 'Psicodélico'),
     ]
     map_aesthetic = models.CharField(max_length=20, choices=MAP_AESTHETIC_CHOICES, blank=True, default='')
 
@@ -40,6 +38,10 @@ class UserProfile(models.Model):
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
     social_links = models.JSONField(default=dict, blank=True)
     profile_public = models.BooleanField(default=False)
+    active_template = models.ForeignKey(
+        'background.BackgroundTemplate', null=True, blank=True,
+        on_delete=models.SET_NULL, related_name='active_users'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     onboarding_entry_point = models.CharField(max_length=80, blank=True)

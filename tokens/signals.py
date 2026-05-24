@@ -91,5 +91,16 @@ def on_test_completed(sender, instance, created, **kwargs):
     _check_dimension_complete(instance.user, instance.test.dimension)
     _check_weekly_streak(instance.user)
 
-    # Misión: primer test completado (onboarding parcial, se evalúa aquí también)
     _try_complete_mission(instance.user, 'first_test')
+    _try_complete_mission(instance.user, 'first_dimension')
+
+
+@receiver(post_save, sender='mirror.ConflictSession')
+def on_session_archived(sender, instance, **kwargs):
+    if not instance.user or instance.status != 'archived':
+        return
+    from mirror.models import ConflictSession
+    from tokens.service import credit_mission
+    count = ConflictSession.objects.filter(user=instance.user, status='archived').count()
+    if count >= 3:
+        credit_mission(instance.user, 'multi_sesion_espejo')

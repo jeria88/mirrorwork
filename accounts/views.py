@@ -110,7 +110,7 @@ def dashboard(request):
     })
 
 
-_VALID_AESTHETICS = {'cosmos', 'mandala', 'psychedelic', 'archipielago', 'arbol'}
+_VALID_AESTHETICS = {'cosmos', 'mandala', 'psychedelic'}
 
 @login_required
 def onboarding_mapa(request):
@@ -135,11 +135,16 @@ def onboarding_mapa(request):
 
 
 def bienvenido(request):
+    if request.user.is_authenticated:
+        from tokens.service import credit_mission
+        credit_mission(request.user, 'onboarding')
     return render(request, 'bienvenido.html')
 
 
 @login_required
 def perfil(request):
+    if request.method == 'GET':
+        return redirect('community:perfil_propio')
     try:
         profile = request.user.profile
     except Exception:
@@ -203,8 +208,9 @@ def perfil(request):
         try:
             from mirror.views import _reseed_brain
             _reseed_brain(request.user)
-        except Exception:
-            pass
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning("_reseed_brain failed: %s", e)
         saved = True
 
     _KNOWN_ENTRY_POINTS = {'cambio', 'ciclos', 'busqueda', 'algo-mas', 'entenderme'}
@@ -294,6 +300,54 @@ def mapa_interior(request):
     completed_tests = sum(d['completed'] for d in dim_data.values())
     total_pct = round(completed_tests / total_tests * 100) if total_tests else 0
 
+    from mirror.models import ConflictSession
+    from birth.models import BirthReport
+
+    recent_results = (
+        TestResult.objects.filter(user=request.user)
+        .select_related('test')
+        .order_by('-completed_at')[:10]
+    )
+    mirror_count = ConflictSession.objects.filter(user=request.user).count()
+    birth_reports = BirthReport.objects.filter(user=request.user, status='complete')
+
+    # Patrones del cerebro activo
+    from mirror.models import EspejoMemoria
+    import re as _re
+    mem = EspejoMemoria.objects.filter(user=request.user, activa=True).first()
+    patrones = []
+    if mem and mem.contenido:
+        m = _re.search(r'## Patrones que he notado(.*?)(?=\n## |\Z)', mem.contenido, _re.DOTALL)
+        if m:
+            bloque = m.group(1).strip()
+            patrones = [
+                p.lstrip('-•· ').strip() for p in bloque.split('\n')
+                if p.strip() and '(Aún sin' not in p and '(Sin obs' not in p
+            ]
+
+    # Resonancias colectivas (últimos 7 días)
+    from datetime import timedelta as _td
+    from django.utils import timezone as _tz
+    import re as _re2
+    semana = _tz.now() - _td(days=7)
+    descripciones = list(
+        ConflictSession.objects.filter(created_at__gte=semana)
+        .exclude(conflict_description='')
+        .values_list('conflict_description', flat=True)[:300]
+    )
+    _stop = {'de','la','el','en','un','una','que','es','y','a','los','las','por','para',
+             'con','como','su','se','al','del','lo','mi','me','te','no','si','más','pero',
+             'hay','tiene','tengo','siento','cuando','porque','todo','nada','algo','muy',
+             'bien','mal','quiero','hacer','ser','estoy','este','esta','creo','nunca','siempre'}
+    freq = {}
+    for d in descripciones:
+        for w in _re2.findall(r'\b[a-záéíóúüñ]{5,}\b', d.lower()):
+            if w not in _stop:
+                freq[w] = freq.get(w, 0) + 1
+    resonancias = [{'palabra': w, 'count': c}
+                   for w, c in sorted(freq.items(), key=lambda x: -x[1])[:5] if c >= 2]
+    total_activos = ConflictSession.objects.filter(created_at__gte=semana).values('user').distinct().count()
+
     return render(request, 'accounts/mapa_interior.html', {
         'dim_data': dim_data,
         'dim_data_json': json.dumps(dim_data, ensure_ascii=False),
@@ -301,6 +355,12 @@ def mapa_interior(request):
         'total_pct': total_pct,
         'completed_tests': completed_tests,
         'total_tests': total_tests,
+        'recent_results': recent_results,
+        'mirror_count': mirror_count,
+        'birth_reports': birth_reports,
+        'patrones': patrones,
+        'resonancias': resonancias,
+        'total_activos': total_activos,
     })
 
 
@@ -441,7 +501,7 @@ def onboarding_viaje_nacimiento(request):
 
 
 # ── Escena inicial según aesthetic ───────────────────────────────────────
-_AESTHETIC_SCENE = {'cosmos': 0, 'mandala': 2, 'psychedelic': 1, 'arbol': 3, 'archipielago': 0}
+_AESTHETIC_SCENE = {'cosmos': 0, 'mandala': 2, 'psychedelic': 1}
 
 @login_required
 def vr_home(request):
@@ -577,6 +637,70 @@ def vr_test(request, slug):
 
 
 @login_required
+@login_required
+def diario(request):
+    from mirror.models import ConflictSession, EspejoMemoria
+    from birth.models import BirthReport
+    from psychometrics.models import TestResult
+    from community.models import SharedInsight
+    from django.utils import timezone
+
+    events = []
+
+    for r in TestResult.objects.filter(user=request.user).select_related('test').order_by('-completed_at'):
+        events.append({
+            'type': 'test', 'date': r.completed_at,
+            'title': r.test.name, 'subtitle': r.test.get_dimension_display(),
+            'url': f'/psicometria/resultado/{r.pk}/',
+            'icon': '◈',
+        })
+
+    for s in ConflictSession.objects.filter(user=request.user, status='archived').order_by('-updated_at'):
+        events.append({
+            'type': 'espejo', 'date': s.updated_at,
+            'title': s.title or 'Sesión del Espejo',
+            'subtitle': f'{len(s.messages)//2} intercambios',
+            'url': None, 'icon': '◎',
+        })
+
+    for i in SharedInsight.objects.filter(user=request.user).select_related('test_result__test').order_by('-created_at'):
+        events.append({
+            'type': 'insight', 'date': i.created_at,
+            'title': 'Insight compartido',
+            'subtitle': i.source_title, 'url': None, 'icon': '◉',
+        })
+
+    for b in BirthReport.objects.filter(user=request.user, status='complete').order_by('-created_at'):
+        tipo = {'astral': 'Carta Astral', 'human_design': 'Diseño Humano', 'saju': 'Saju'}.get(b.report_type, b.report_type)
+        events.append({
+            'type': 'birth', 'date': b.created_at,
+            'title': tipo, 'subtitle': None, 'url': None, 'icon': '✦',
+        })
+
+    for m in EspejoMemoria.objects.filter(user=request.user).order_by('-created_at'):
+        events.append({
+            'type': 'cerebro', 'date': m.created_at,
+            'title': f'Cerebro v{m.version}',
+            'subtitle': {'perfil': 'Desde perfil', 'sesion': 'Desde sesión', 'restauracion': 'Restaurado'}.get(m.fuente, m.fuente),
+            'url': '/espejo/cerebro/', 'icon': '◑',
+        })
+
+    events.sort(key=lambda e: e['date'] if e['date'] else timezone.now(), reverse=True)
+
+    from itertools import groupby
+
+    def _month_key(e):
+        return e['date'].strftime('%Y-%m') if e['date'] else '0000-00'
+
+    grouped = []
+    for key, group in groupby(events, key=_month_key):
+        grp_list = list(group)
+        label = grp_list[0]['date'].strftime('%B %Y').capitalize() if grp_list[0]['date'] else 'Sin fecha'
+        grouped.append({'label': label, 'events': grp_list})
+
+    return render(request, 'accounts/diario.html', {'grouped': grouped})
+
+
 @require_POST
 def toggle_profile_public(request):
     import json as _json

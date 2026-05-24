@@ -533,6 +533,11 @@ def _update_brain_async(session_pk, user_pk):
         nuevo_contenido = data.get("cerebro", "").strip()
         if nuevo_contenido and len(nuevo_contenido) > 50:
             _nueva_version_cerebro(user, nuevo_contenido, fuente='sesion', sesion=session)
+            # Credit patron_nombrado mission if brain has real patterns
+            m_check = re.search(r'## Patrones que he notado(.*?)(?=\n## |\Z)', nuevo_contenido, re.DOTALL)
+            if m_check and '(Aún sin' not in m_check.group(1) and m_check.group(1).strip():
+                from tokens.service import credit_mission
+                credit_mission(user, 'patron_nombrado')
     except Exception:
         pass
 
@@ -599,6 +604,19 @@ def _call_deepseek_json(messages, kb_context, test_context, brain_context='', mo
         return None, str(e)
 
 
+# ── Helpers de engagement ─────────────────────────────────────────────────────
+
+def _extract_closing_question(messages):
+    for msg in reversed(messages):
+        if msg.get('role') == 'assistant':
+            text = msg.get('content', '')
+            sentences = re.split(r'(?<=[.!?])\s+', text)
+            questions = [s.strip() for s in sentences if s.strip().endswith('?')]
+            if questions:
+                return questions[-1]
+    return ""
+
+
 # ── Views ─────────────────────────────────────────────────────────────────────
 
 @login_required
@@ -612,9 +630,20 @@ def espejo_home(request):
     elif sessions.exists():
         active = sessions.first()
 
+    from datetime import timedelta
+    from django.utils import timezone as _tz
+    hace_30 = _tz.now() - timedelta(days=30)
+    hace_40 = _tz.now() - timedelta(days=40)
+    pregunta_retorno = ConflictSession.objects.filter(
+        user=request.user, status='archived',
+        pregunta_cierre__gt='',
+        updated_at__range=(hace_40, hace_30),
+    ).first()
+
     return render(request, "mirror/espejo.html", {
         "sessions": sessions,
         "active": active,
+        "pregunta_retorno": pregunta_retorno,
     })
 
 
@@ -685,14 +714,9 @@ def espejo_send(request):
     # Determinar modo
     mode = "focused" if enfoque else "open"
 
-    # Deducir fractones
-    from tokens.service import spend, credit_mission
-    spend(request.user, 'espejo_exchange')
-    if len(sesion.messages) <= 2:  # primera respuesta de esta sesión
-        credit_mission(request.user, 'first_espejo')
-
     # Recopilar contexto cerebro antes de cerrar la conexión
     brain_context = _get_brain_context(request.user)
+    is_first_exchange = len(sesion.messages) <= 2
 
     # Cerrar la conexión DB antes del API call largo — evita NO_SOCKET/TCP_ABORT en Railway
     # (Railway mata conexiones Postgres idle durante los 20-60s que tarda DeepSeek)
@@ -708,6 +732,12 @@ def espejo_send(request):
     texto = parsed.get("texto") or ""
     enfoques = parsed.get("enfoques")
     test_rec = parsed.get("test_recomendado")
+
+    # Deducir fractones solo si la API respondió correctamente
+    from tokens.service import spend, credit_mission
+    spend(request.user, 'espejo_exchange')
+    if is_first_exchange:
+        credit_mission(request.user, 'first_espejo')
 
     # Guardar respuesta del asistente
     sesion.add_message("assistant", texto)
@@ -726,7 +756,11 @@ def espejo_send(request):
 def espejo_archivar(request, pk):
     sesion = get_object_or_404(ConflictSession, pk=pk, user=request.user)
     sesion.status = "archived"
-    sesion.save(update_fields=["status"])
+    if not sesion.pregunta_cierre:
+        q = _extract_closing_question(sesion.messages or [])
+        if q:
+            sesion.pregunta_cierre = q
+    sesion.save(update_fields=["status", "pregunta_cierre"])
     threading.Thread(
         target=_update_brain_async,
         args=[sesion.pk, request.user.pk],

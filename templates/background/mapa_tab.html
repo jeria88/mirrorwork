@@ -1,0 +1,419 @@
+{% extends 'base.html' %}
+{% block title %}Mapa Interior — MirrorWork{% endblock %}
+
+{% block extra_head %}
+<style data-page-style>
+.mapa-wrap { max-width: 760px; margin: 0 auto; padding: 2rem 1.25rem 6rem; }
+
+/* Tabs */
+.mapa-tabs {
+  display: flex; gap: 0; margin-bottom: 2rem;
+  border-bottom: 1px solid var(--border);
+}
+.mapa-tab {
+  font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); padding: 0.65rem 1.1rem;
+  border-bottom: 2px solid transparent; cursor: pointer;
+  transition: color 0.2s, border-color 0.2s; background: none; border-top: none;
+  border-left: none; border-right: none; font-family: var(--font-ui);
+}
+.mapa-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.mapa-tab:hover:not(.active) { color: var(--text); }
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* Template cards */
+.tpl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+.tpl-card {
+  background: rgba(0,0,0,0.55); border: 1px solid var(--border);
+  border-radius: 14px; overflow: hidden; transition: border-color 0.2s;
+  cursor: pointer;
+}
+.tpl-card:hover { border-color: rgba(78,205,196,0.25); }
+.tpl-card.active-card { border-color: var(--accent); }
+.tpl-preview {
+  width: 100%; aspect-ratio: 16/9; background: #0a0a12;
+  position: relative; overflow: hidden;
+}
+.tpl-preview iframe {
+  width: 200%; height: 200%; transform: scale(0.5); transform-origin: top left;
+  pointer-events: none; border: none;
+}
+.tpl-info { padding: 0.75rem 0.85rem; }
+.tpl-name { font-size: 0.82rem; color: var(--text); font-weight: 600; margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tpl-meta { font-size: 0.68rem; color: var(--muted); display: flex; gap: 0.6rem; align-items: center; }
+.tpl-actions { display: flex; gap: 0.4rem; padding: 0 0.85rem 0.75rem; flex-wrap: wrap; }
+.tpl-btn {
+  font-size: 0.68rem; padding: 0.25rem 0.65rem; border-radius: 999px;
+  border: 1px solid var(--border); background: none; color: var(--muted);
+  cursor: pointer; transition: all 0.2s; font-family: var(--font-ui);
+}
+.tpl-btn:hover { border-color: var(--accent); color: var(--accent); }
+.tpl-btn.primary { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 600; }
+.tpl-btn.primary:hover { opacity: 0.85; }
+.tpl-btn.danger:hover { border-color: #e05050; color: #e05050; }
+
+/* Estrellas */
+.stars { display: inline-flex; gap: 1px; cursor: pointer; }
+.star { font-size: 0.8rem; color: var(--border); transition: color 0.1s; }
+.star.lit { color: var(--luz-intensa); }
+
+/* ── Generador ── */
+.gen-card {
+  background: rgba(0,0,0,0.55); border: 1px solid var(--border);
+  border-radius: 18px; padding: 1.75rem 2rem;
+}
+.gen-label { font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; display: block; }
+.gen-textarea {
+  width: 100%; min-height: 110px; background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 0.75rem 0.9rem; font-size: 0.92rem; color: var(--text);
+  font-family: var(--font-ui); outline: none; resize: vertical;
+  transition: border-color 0.2s; box-sizing: border-box;
+}
+.gen-textarea:focus { border-color: var(--accent); }
+
+.media-row { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; }
+.media-input {
+  flex: 1; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+  border-radius: 8px; padding: 0.45rem 0.75rem; font-size: 0.82rem; color: var(--text);
+  font-family: var(--font-ui); outline: none; transition: border-color 0.2s;
+}
+.media-input:focus { border-color: var(--accent); }
+.del-row-btn { background: none; border: none; color: rgba(255,255,255,0.2); cursor: pointer; font-size: 0.8rem; padding: 0.3rem; transition: color 0.2s; }
+.del-row-btn:hover { color: #e05050; }
+.add-url-btn {
+  font-size: 0.72rem; color: var(--muted); background: none;
+  border: 1px dashed var(--border); border-radius: 8px;
+  padding: 0.4rem 0.85rem; cursor: pointer; transition: all 0.2s;
+  font-family: var(--font-ui);
+}
+.add-url-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.pexels-toggle { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--muted); margin: 0.85rem 0; cursor: pointer; }
+.pexels-toggle input { accent-color: var(--accent); }
+
+.pexels-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.4rem; margin: 0.6rem 0 1rem; }
+.pexels-img {
+  aspect-ratio: 16/9; object-fit: cover; border-radius: 6px;
+  cursor: pointer; border: 2px solid transparent; transition: border-color 0.2s;
+}
+.pexels-img:hover, .pexels-img.selected { border-color: var(--accent); }
+
+.gen-btn {
+  background: var(--accent); color: #000; border: none; border-radius: 10px;
+  padding: 0.7rem 2rem; font-size: 0.9rem; font-weight: 700;
+  cursor: pointer; font-family: var(--font-ui); transition: opacity 0.2s;
+  display: flex; align-items: center; gap: 0.5rem; margin-top: 1.25rem;
+}
+.gen-btn:hover { opacity: 0.85; }
+.gen-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.gen-status {
+  margin-top: 1rem; font-size: 0.82rem; color: var(--muted); min-height: 1.2em;
+}
+
+/* Preview modal */
+.preview-modal {
+  display: none; position: fixed; inset: 0; z-index: 9000;
+  background: rgba(0,0,0,0.85); backdrop-filter: blur(6px);
+  align-items: center; justify-content: center;
+}
+.preview-modal.open { display: flex; }
+.preview-inner {
+  width: min(92vw, 800px); aspect-ratio: 16/9; background: #000;
+  border-radius: 14px; overflow: hidden; position: relative;
+}
+.preview-inner iframe { width: 100%; height: 100%; border: none; }
+.preview-close {
+  position: absolute; top: 0.75rem; right: 0.75rem;
+  background: rgba(0,0,0,0.7); border: 1px solid var(--border);
+  border-radius: 50%; width: 30px; height: 30px; display: flex;
+  align-items: center; justify-content: center; color: var(--text);
+  cursor: pointer; font-size: 0.8rem; z-index: 10;
+}
+.preview-section-tabs {
+  position: absolute; bottom: 0.75rem; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 0.4rem; background: rgba(0,0,0,0.6); border-radius: 999px;
+  padding: 0.3rem 0.5rem; z-index: 10;
+}
+.preview-section-tab {
+  font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); padding: 0.2rem 0.6rem; border-radius: 999px;
+  cursor: pointer; transition: all 0.18s; background: none; border: none;
+  font-family: var(--font-ui);
+}
+.preview-section-tab.active { background: var(--accent); color: #000; font-weight: 600; }
+
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--muted); font-size: 0.88rem; }
+
+@media(max-width:600px){
+  .mapa-wrap { padding: 1rem 1rem 5rem; }
+  .gen-card { padding: 1.25rem 1.25rem; }
+  .tpl-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mapa-wrap">
+  <nav class="mapa-tabs">
+    <button class="mapa-tab active" onclick="switchTab('mis-templates', this)">Mis fondos</button>
+    <button class="mapa-tab" onclick="switchTab('biblioteca', this)">Biblioteca</button>
+    <button class="mapa-tab" onclick="switchTab('crear', this)">✦ Crear con IA</button>
+  </nav>
+
+  <!-- ─── MIS FONDOS ─── -->
+  <div id="tab-mis-templates" class="tab-panel active">
+    {% if user_templates %}
+    <div class="tpl-grid">
+      {% for tpl in user_templates %}
+      <div class="tpl-card {% if active_template.pk == tpl.pk %}active-card{% endif %}" id="utpl-{{ tpl.pk }}">
+        <div class="tpl-preview">
+          <iframe src="{% url 'background:preview' tpl.pk %}?section=general"
+                  sandbox="allow-scripts" loading="lazy"></iframe>
+        </div>
+        <div class="tpl-info">
+          <div class="tpl-name" title="{{ tpl.name }}">{{ tpl.name|truncatechars:28 }}</div>
+          <div class="tpl-meta">
+            <span>{{ tpl.created_at|date:"d M Y" }}</span>
+            {% if tpl.is_public %}<span style="color:var(--accent)">Público</span>{% endif %}
+          </div>
+        </div>
+        <div class="tpl-actions">
+          {% if active_template.pk == tpl.pk %}
+            <button class="tpl-btn" onclick="deactivate()">Desactivar</button>
+          {% else %}
+            <button class="tpl-btn primary" onclick="activateTpl({{ tpl.pk }}, this)">Activar</button>
+          {% endif %}
+          <button class="tpl-btn" onclick="openPreview({{ tpl.pk }})">Vista previa</button>
+          {% if not tpl.is_public %}
+          <button class="tpl-btn" onclick="publishTpl({{ tpl.pk }}, this)">Publicar</button>
+          {% endif %}
+          <button class="tpl-btn danger" onclick="deleteTpl({{ tpl.pk }}, this)">✕</button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      Todavía no tienes fondos guardados.<br>
+      <button onclick="switchTab('crear', document.querySelector('.mapa-tab:nth-child(3)'))"
+        style="margin-top:1rem;background:none;border:1px solid var(--border);border-radius:999px;padding:0.4rem 1rem;font-size:0.8rem;color:var(--muted);cursor:pointer;font-family:var(--font-ui);">
+        Crear uno con IA →
+      </button>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ─── BIBLIOTECA ─── -->
+  <div id="tab-biblioteca" class="tab-panel">
+    {% if public_templates %}
+    <div class="tpl-grid">
+      {% for tpl in public_templates %}
+      <div class="tpl-card" id="ptpl-{{ tpl.pk }}">
+        <div class="tpl-preview">
+          <iframe src="{% url 'background:preview' tpl.pk %}?section=general"
+                  sandbox="allow-scripts" loading="lazy"></iframe>
+        </div>
+        <div class="tpl-info">
+          <div class="tpl-name" title="{{ tpl.name }}">{{ tpl.name|truncatechars:28 }}</div>
+          <div class="tpl-meta">
+            <span title="Usuarios usando este fondo">{{ tpl.use_count }} usando</span>
+            <span class="stars" onclick="rateTpl({{ tpl.pk }}, event)">
+              {% for i in "12345" %}
+              <span class="star {% if tpl.avg_rating >= forloop.counter %}lit{% endif %}" data-v="{{ forloop.counter }}">★</span>
+              {% endfor %}
+            </span>
+          </div>
+        </div>
+        <div class="tpl-actions">
+          <button class="tpl-btn primary" onclick="activateTpl({{ tpl.pk }}, this)">Usar</button>
+          <button class="tpl-btn" onclick="openPreview({{ tpl.pk }})">Vista previa</button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">Aún no hay fondos públicos en la biblioteca.</div>
+    {% endif %}
+  </div>
+
+  <!-- ─── CREAR CON IA ─── -->
+  <div id="tab-crear" class="tab-panel">
+    <div class="gen-card">
+      <label class="gen-label">Describe tu mundo interior</label>
+      <textarea class="gen-textarea" id="gen-description"
+        placeholder="Ej: Mi mundo interior se siente como un bosque submarino de noche, con luz bioluminiscente que pulsa lentamente. Cuando estoy en conflicto, las corrientes se agitan y el fondo se oscurece…"></textarea>
+
+      <div style="margin-top:1.25rem;">
+        <label class="gen-label">URLs de imágenes o videos (opcional)</label>
+        <div id="media-urls-list"></div>
+        <button class="add-url-btn" onclick="addUrlRow()">+ Agregar URL</button>
+      </div>
+
+      <label class="pexels-toggle">
+        <input type="checkbox" id="use-pexels">
+        Buscar imágenes automáticamente en Pexels según la descripción
+      </label>
+
+      <button class="gen-btn" id="gen-btn" onclick="generateTemplate()">
+        <span id="gen-btn-text">✦ Generar fondo</span>
+      </button>
+      <div class="gen-status" id="gen-status"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Preview modal -->
+<div class="preview-modal" id="preview-modal">
+  <div class="preview-inner">
+    <button class="preview-close" onclick="closePreview()">✕</button>
+    <iframe id="preview-iframe" sandbox="allow-scripts" src="about:blank"></iframe>
+    <div class="preview-section-tabs">
+      <button class="preview-section-tab active"   data-section="general"    onclick="switchPreviewSection('general', this)">general</button>
+      <button class="preview-section-tab"          data-section="espejo"     onclick="switchPreviewSection('espejo', this)">espejo</button>
+      <button class="preview-section-tab"          data-section="tests"      onclick="switchPreviewSection('tests', this)">tests</button>
+      <button class="preview-section-tab"          data-section="onboarding" onclick="switchPreviewSection('onboarding', this)">inicio</button>
+      <button class="preview-section-tab"          data-section="birth"      onclick="switchPreviewSection('birth', this)">nacimiento</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let _previewTplId = null;
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.mapa-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+function addUrlRow() {
+  const list = document.getElementById('media-urls-list');
+  const row = document.createElement('div');
+  row.className = 'media-row';
+  row.innerHTML = `<input class="media-input" type="url" placeholder="https://…">
+    <button class="del-row-btn" onclick="this.parentElement.remove()">✕</button>`;
+  list.appendChild(row);
+  row.querySelector('input').focus();
+}
+
+function getMediaUrls() {
+  return Array.from(document.querySelectorAll('#media-urls-list .media-input'))
+    .map(i => i.value.trim()).filter(Boolean);
+}
+
+async function generateTemplate() {
+  const desc = document.getElementById('gen-description').value.trim();
+  if (!desc) { showToast('Escribe una descripción primero'); return; }
+
+  const btn = document.getElementById('gen-btn');
+  const status = document.getElementById('gen-status');
+  btn.disabled = true;
+  document.getElementById('gen-btn-text').textContent = 'Generando…';
+  status.textContent = 'El agente IA está diseñando tu mundo interior (puede tardar ~30s)…';
+
+  try {
+    const r = await fetch('/fondos/generar/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+      body: JSON.stringify({
+        description: desc,
+        media_urls: getMediaUrls(),
+        use_pexels: document.getElementById('use-pexels').checked,
+      }),
+    });
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Error desconocido');
+    status.textContent = '✓ Fondo generado: "' + d.name + '"';
+    showToast('Fondo generado — activar desde "Mis fondos"');
+    setTimeout(() => location.reload(), 1200);
+  } catch (e) {
+    status.textContent = '✗ Error: ' + e.message;
+    btn.disabled = false;
+    document.getElementById('gen-btn-text').textContent = '✦ Generar fondo';
+  }
+}
+
+function openPreview(tplId) {
+  _previewTplId = tplId;
+  const modal = document.getElementById('preview-modal');
+  const iframe = document.getElementById('preview-iframe');
+  iframe.src = '/fondos/preview/' + tplId + '/?section=general';
+  modal.classList.add('open');
+  document.querySelectorAll('.preview-section-tab').forEach((t,i) => t.classList.toggle('active', i===0));
+}
+function closePreview() {
+  document.getElementById('preview-modal').classList.remove('open');
+  document.getElementById('preview-iframe').src = 'about:blank';
+  _previewTplId = null;
+}
+function switchPreviewSection(section, btn) {
+  if (!_previewTplId) return;
+  document.getElementById('preview-iframe').src = '/fondos/preview/' + _previewTplId + '/?section=' + section;
+  document.querySelectorAll('.preview-section-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+async function activateTpl(tplId, btn) {
+  const r = await fetch('/fondos/activar/' + tplId + '/', {
+    method: 'POST', headers: { 'X-CSRFToken': getCsrfToken() },
+  });
+  const d = await r.json();
+  if (!d.ok) return;
+  showToast('Fondo activado');
+  setTimeout(() => location.reload(), 800);
+}
+
+async function deactivate() {
+  await fetch('/fondos/desactivar/', { method: 'POST', headers: { 'X-CSRFToken': getCsrfToken() } });
+  showToast('Fondo desactivado');
+  setTimeout(() => location.reload(), 800);
+}
+
+async function publishTpl(tplId, btn) {
+  if (!confirm('¿Publicar este fondo en la biblioteca pública?')) return;
+  const r = await fetch('/fondos/publicar/' + tplId + '/', {
+    method: 'POST', headers: { 'X-CSRFToken': getCsrfToken() },
+  });
+  const d = await r.json();
+  if (d.ok) { showToast('Publicado en la biblioteca'); btn.remove(); }
+}
+
+async function deleteTpl(tplId, btn) {
+  if (!confirm('¿Eliminar este fondo?')) return;
+  const r = await fetch('/fondos/eliminar/' + tplId + '/', {
+    method: 'POST', headers: { 'X-CSRFToken': getCsrfToken() },
+  });
+  const d = await r.json();
+  if (d.ok) {
+    const card = document.getElementById('utpl-' + tplId);
+    if (card) card.remove();
+    showToast('Eliminado');
+  }
+}
+
+async function rateTpl(tplId, event) {
+  const star = event.target.closest('.star');
+  if (!star) return;
+  const score = parseInt(star.dataset.v);
+  const r = await fetch('/fondos/valorar/' + tplId + '/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+    body: JSON.stringify({ score }),
+  });
+  const d = await r.json();
+  if (!d.ok) return;
+  const stars = star.closest('.stars').querySelectorAll('.star');
+  stars.forEach((s, i) => s.classList.toggle('lit', i < score));
+  showToast('Valorado con ' + score + '★');
+}
+
+document.getElementById('preview-modal').addEventListener('click', function(e) {
+  if (e.target === this) closePreview();
+});
+</script>
+{% endblock %}

@@ -94,42 +94,82 @@
   }
 
   /* Right: version timeline */
-  .cb-timeline {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
   .cb-timeline-title {
     font-size: 0.7rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--muted, #A1A1AA);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
   }
-  .cb-ver {
+
+  .cb-tl-wrap {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .cb-tl-wrap::before {
+    content: '';
+    position: absolute;
+    left: 0.85rem;
+    top: 0.6rem;
+    bottom: 0.6rem;
+    width: 1px;
+    border-left: 1px dashed rgba(255,255,255,0.1);
+  }
+
+  .cb-tl-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    padding: 0.5rem 0;
+  }
+
+  .cb-tl-icon {
+    width: 1.7rem;
+    height: 1.7rem;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.88);
+    border: 1px solid rgba(255,255,255,0.1);
+    font-size: 0.8rem;
+    color: var(--muted, #A1A1AA);
+    position: relative;
+    z-index: 1;
+  }
+  .cb-tl-icon.fuente-perfil      { color: #a89cff; border-color: rgba(124,109,250,0.3); }
+  .cb-tl-icon.fuente-sesion       { color: #4ecdc4; border-color: rgba(78,205,196,0.3); }
+  .cb-tl-icon.fuente-restauracion { color: #f4a035; border-color: rgba(244,160,53,0.3); }
+
+  .cb-tl-body {
+    flex: 1;
     background: var(--surface, rgba(255,255,255,0.03));
     border: 1px solid var(--border, rgba(255,255,255,0.08));
-    border-radius: 8px;
-    padding: 0.9rem 1rem;
-    position: relative;
+    border-radius: 10px;
+    padding: 0.75rem 0.9rem;
     transition: border-color 0.2s;
   }
-  .cb-ver.is-active {
+  .cb-tl-body.is-active {
     border-color: var(--accent, #4ecdc4);
+    background: rgba(78,205,196,0.04);
   }
-  .cb-ver-head {
+
+  .cb-tl-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.3rem;
   }
-  .cb-ver-num {
-    font-size: 0.95rem;
+  .cb-tl-ver-num {
+    font-size: 0.88rem;
     font-weight: 600;
     color: var(--text, #fff);
   }
   .cb-ver-badge {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     padding: 2px 7px;
@@ -138,36 +178,42 @@
     color: var(--accent, #4ecdc4);
     border: 1px solid rgba(78,205,196,0.3);
   }
-  .cb-ver-meta {
+
+  .cb-tl-meta {
+    font-size: 0.7rem;
+    color: var(--muted, #A1A1AA);
+    margin-bottom: 0.35rem;
+  }
+  .cb-tl-excerpt {
     font-size: 0.75rem;
     color: var(--muted, #A1A1AA);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    line-height: 1.5;
+    font-style: italic;
+    margin-bottom: 0.4rem;
+    font-weight: 300;
   }
-  .cb-ver-meta span { display: flex; align-items: center; gap: 0.25rem; }
 
-  .cb-fuente {
+  .cb-fuente-badge {
     display: inline-block;
-    font-size: 0.68rem;
+    font-size: 0.62rem;
     padding: 1px 6px;
     border-radius: 4px;
-    margin-top: 0.35rem;
   }
-  .cb-fuente-inicial      { background: rgba(124,109,250,0.15); color: #a89cff; }
+  .cb-fuente-perfil       { background: rgba(124,109,250,0.15); color: #a89cff; }
   .cb-fuente-sesion       { background: rgba(78,205,196,0.12); color: #4ecdc4; }
   .cb-fuente-restauracion { background: rgba(244,160,53,0.15); color: #f4a035; }
+  .cb-fuente-inicial      { background: rgba(124,109,250,0.15); color: #a89cff; }
 
   .cb-restore-btn {
     display: block;
     width: 100%;
-    margin-top: 0.75rem;
-    padding: 0.45rem 0;
+    margin-top: 0.6rem;
+    padding: 0.38rem 0;
     background: transparent;
     border: 1px solid var(--border, rgba(255,255,255,0.08));
     border-radius: 6px;
     color: var(--muted, #A1A1AA);
-    font-size: 0.78rem;
+    font-size: 0.72rem;
     cursor: pointer;
     transition: border-color 0.2s, color 0.2s;
     text-align: center;
@@ -179,33 +225,33 @@
 
   .cb-confirm {
     display: none;
-    margin-top: 0.6rem;
-    padding: 0.7rem;
+    margin-top: 0.5rem;
+    padding: 0.65rem;
     background: rgba(255,255,255,0.03);
     border-radius: 6px;
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     color: var(--muted, #A1A1AA);
     line-height: 1.5;
   }
-  .cb-confirm p { margin: 0 0 0.6rem; }
+  .cb-confirm p { margin: 0 0 0.5rem; }
   .cb-confirm-actions { display: flex; gap: 0.5rem; }
   .cb-confirm-yes {
-    padding: 4px 14px;
+    padding: 4px 12px;
     border-radius: 5px;
     border: none;
     background: var(--accent, #4ecdc4);
     color: #000;
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     cursor: pointer;
     font-weight: 600;
   }
   .cb-confirm-no {
-    padding: 4px 14px;
+    padding: 4px 12px;
     border-radius: 5px;
     border: 1px solid var(--border, rgba(255,255,255,0.08));
     background: transparent;
     color: var(--muted, #A1A1AA);
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     cursor: pointer;
   }
 
@@ -213,6 +259,7 @@
     color: var(--muted, #A1A1AA);
     font-size: 0.85rem;
     font-style: italic;
+    padding: 1rem 0;
   }
 </style>
 
@@ -239,47 +286,53 @@
       {% endif %}
     </div>
 
-    <!-- RIGHT: version history -->
+    <!-- RIGHT: version timeline -->
     <div>
       <p class="cb-timeline-title">Historial de versiones</p>
       {% if versiones %}
-        <div class="cb-timeline">
+        <div class="cb-tl-wrap">
           {% for v in versiones %}
-            <div class="cb-ver {% if v.activa %}is-active{% endif %}">
-              <div class="cb-ver-head">
-                <span class="cb-ver-num">v{{ v.version }}</span>
-                {% if v.activa %}<span class="cb-ver-badge">activa</span>{% endif %}
+            {% with fuente=v.fuente %}
+            <div class="cb-tl-item">
+              <!-- Icon por fuente -->
+              <div class="cb-tl-icon fuente-{{ fuente }}">
+                {% if fuente == 'sesion' %}◎
+                {% elif fuente == 'restauracion' %}↺
+                {% else %}◉{% endif %}
               </div>
-              <div class="cb-ver-meta">
-                <span>{{ v.created_at|date:"d M Y, H:i" }}</span>
-                <span>{{ v.contenido|wordcount }} palabras</span>
-              </div>
-              <span class="cb-fuente cb-fuente-{{ v.fuente }}">{{ v.get_fuente_display }}</span>
-
-              {% if not v.activa %}
-                <button
-                  class="cb-restore-btn"
-                  onclick="cbToggleConfirm(this)"
-                  type="button"
-                >
-                  Restaurar esta versión
-                </button>
-                <div class="cb-confirm">
-                  <p>¿Restaurar esta versión? El Espejo dejará de recordar lo que aprendió después.</p>
-                  <div class="cb-confirm-actions">
-                    <form method="post" action="{% url 'mirror:cerebro_restaurar' v.pk %}" style="display:inline">
-                      {% csrf_token %}
-                      <button type="submit" class="cb-confirm-yes">Restaurar</button>
-                    </form>
-                    <button type="button" class="cb-confirm-no" onclick="cbToggleConfirm(this.closest('.cb-ver').querySelector('.cb-restore-btn'))">Cancelar</button>
-                  </div>
+              <div class="cb-tl-body {% if v.activa %}is-active{% endif %}">
+                <div class="cb-tl-head">
+                  <span class="cb-tl-ver-num">v{{ v.version }}</span>
+                  {% if v.activa %}<span class="cb-ver-badge">Activa</span>{% endif %}
                 </div>
-              {% endif %}
+                <div class="cb-tl-meta">{{ v.created_at|date:"d M Y, H:i" }} · {{ v.contenido|wordcount }} palabras</div>
+                {% if v.contenido %}
+                <div class="cb-tl-excerpt">{{ v.contenido|slice:":100" }}…</div>
+                {% endif %}
+                <span class="cb-fuente-badge cb-fuente-{{ fuente }}">{{ v.get_fuente_display }}</span>
+
+                {% if not v.activa %}
+                  <button class="cb-restore-btn" onclick="cbToggleConfirm(this)" type="button">
+                    Restaurar
+                  </button>
+                  <div class="cb-confirm">
+                    <p>¿Restaurar esta versión? El Espejo dejará de recordar lo que aprendió después.</p>
+                    <div class="cb-confirm-actions">
+                      <form method="post" action="{% url 'mirror:cerebro_restaurar' v.pk %}" style="display:inline">
+                        {% csrf_token %}
+                        <button type="submit" class="cb-confirm-yes">Restaurar</button>
+                      </form>
+                      <button type="button" class="cb-confirm-no" onclick="cbToggleConfirm(this.closest('.cb-tl-body').querySelector('.cb-restore-btn'))">Cancelar</button>
+                    </div>
+                  </div>
+                {% endif %}
+              </div>
             </div>
+            {% endwith %}
           {% endfor %}
         </div>
       {% else %}
-        <p class="cb-no-versions">Sin versiones guardadas todavía.</p>
+        <p class="cb-no-versions">Aún no hay versiones guardadas. El cerebro se genera al archivar la primera sesión.</p>
       {% endif %}
     </div>
 
@@ -316,8 +369,9 @@ function formatParagraphs(text) {
 }
 
 function cbToggleConfirm(btn) {
-  let ver = btn.closest('.cb-ver');
-  let confirm = ver.querySelector('.cb-confirm');
+  let body = btn.closest('.cb-tl-body') || btn.closest('.cb-ver');
+  if (!body) return;
+  let confirm = body.querySelector('.cb-confirm');
   if (!confirm) return;
   let visible = confirm.style.display === 'block';
   confirm.style.display = visible ? 'none' : 'block';

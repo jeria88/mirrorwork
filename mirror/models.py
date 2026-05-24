@@ -60,8 +60,8 @@ class ConflictSession(models.Model):
     conflict_description = models.TextField()
     messages = models.JSONField(default=list)
     pattern_revealed = models.TextField(blank=True)
+    pregunta_cierre  = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
-    tokens_used = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -79,7 +79,7 @@ class ConflictSession(models.Model):
 
 class EspejoMemoria(models.Model):
     FUENTE_CHOICES = [
-        ('inicial',      'Estado inicial'),
+        ('perfil',       'Generada desde perfil'),
         ('sesion',       'Generada desde sesión'),
         ('restauracion', 'Restaurada por usuario'),
     ]

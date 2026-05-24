@@ -80,6 +80,7 @@ class BirthReport(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
     chart_data = models.JSONField(null=True, blank=True)
     interpretation = models.TextField(blank=True)
+    is_public = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

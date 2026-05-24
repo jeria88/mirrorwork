@@ -566,6 +566,53 @@
 <!-- CANVAS Mandala 2D (solo aesthetic=mandala) ──────────────────────── -->
 <canvas id="mandala-bg" aria-hidden="true" style="display:none"></canvas>
 
+{% if user.is_authenticated and user.profile.active_template %}
+<!-- CUSTOM BACKGROUND TEMPLATE iframe ───────────────────────────────── -->
+<iframe id="custom-bg-iframe"
+  src="{% url 'background:preview' user.profile.active_template.pk %}?section=general"
+  sandbox="allow-scripts"
+  aria-hidden="true"
+  style="position:fixed;inset:0;width:100%;height:100%;border:none;z-index:-1;pointer-events:none;"
+></iframe>
+<script>
+(function(){
+  /* Suprimir fondos nativos cuando hay template custom activo */
+  const spaceBg  = document.getElementById('space-bg');
+  const mandalaBg = document.getElementById('mandala-bg');
+  const psychBg  = document.getElementById('psych-bg');
+  if (spaceBg)   spaceBg.style.display   = 'none';
+  if (mandalaBg) mandalaBg.style.display = 'none';
+  if (psychBg)   psychBg.style.display   = 'none';
+  window.__customBgActive = true;
+
+  const iframe = document.getElementById('custom-bg-iframe');
+  const SECTION_MAP = {
+    espejo: 'espejo', mirror: 'espejo',
+    tests: 'tests', psicometria: 'tests',
+    nacimiento: 'birth', birth: 'birth',
+    onboarding: 'onboarding', login: 'onboarding', register: 'onboarding',
+  };
+  function sectionFromPath(path) {
+    for (const [k, v] of Object.entries(SECTION_MAP)) {
+      if (path.includes(k)) return v;
+    }
+    return 'general';
+  }
+  function updateBg(path) {
+    const section = sectionFromPath(path);
+    const base = iframe.src.split('?')[0];
+    iframe.src = base + '?section=' + section;
+  }
+  window.addEventListener('bg:preset', e => {
+    const sec = e.detail?.section || sectionFromPath(location.pathname);
+    const base = iframe.src.split('?')[0];
+    iframe.src = base + '?section=' + sec;
+  });
+  document.addEventListener('spa:navigate', e => updateBg(e.detail?.url || location.pathname));
+})();
+</script>
+{% endif %}
+
 <!-- NAV ────────────────────────────────────────────────────────────── -->
 <nav>
   <a class="nav-logo" href="{% if user.is_authenticated %}{% url 'mapa_interior' %}{% else %}{% url 'home' %}{% endif %}">Mirror<em>Work</em></a>
@@ -723,16 +770,13 @@
     <a class="dn-item" href="{% url 'mirror:home' %}">
       <span class="dn-icon">◎</span><span class="dn-label">Espejo</span>
     </a>
-    <a class="dn-item" href="{% url 'psychometrics:test_list' %}">
-      <span class="dn-icon">◈</span><span class="dn-label">Tests</span>
-    </a>
-    <a class="dn-item" href="{% url 'birth:profile' %}">
-      <span class="dn-icon">✦</span><span class="dn-label">Nacimiento</span>
-    </a>
     <a class="dn-item" href="{% url 'sensorial:home' %}">
       <span class="dn-icon">◌</span><span class="dn-label">Regulación</span>
     </a>
-    <a class="dn-item" href="{% url 'perfil' %}">
+    <a class="dn-item" href="{% url 'community:feed' %}">
+      <span class="dn-icon">◈</span><span class="dn-label">Home</span>
+    </a>
+    <a class="dn-item" href="{% url 'community:perfil_propio' %}">
       <span class="dn-icon">⚙</span><span class="dn-label">Perfil</span>
     </a>
   </div>
@@ -984,7 +1028,7 @@ function animate() {
   animate();
 } // end _startThreeJS
 
-if (!{ mandala: true, psychedelic: true }[_BH_AESTHETIC]) {
+if (!window.__customBgActive && !{ mandala: true, psychedelic: true }[_BH_AESTHETIC]) {
   _startThreeJS();
 } else {
   window.__initCosmos = _startThreeJS; // lazy para preview en perfil
@@ -999,7 +1043,7 @@ if (!{ mandala: true, psychedelic: true }[_BH_AESTHETIC]) {
 (function () {
   const TAU = Math.PI * 2;
   const canvas = document.getElementById('mandala-bg');
-  if (document.body.dataset.aesthetic === 'mandala') canvas.style.display = 'block';
+  if (!window.__customBgActive && document.body.dataset.aesthetic === 'mandala') canvas.style.display = 'block';
   window.__mandalaCanvas = canvas;
   const ctx    = canvas.getContext('2d', { alpha: false });
   let W, H;

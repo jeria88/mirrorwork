@@ -31,7 +31,6 @@ class Test(models.Model):
     description = models.TextField()
     instructions = models.TextField(blank=True)
     estimated_minutes = models.IntegerField(default=5)
-    token_cost = models.IntegerField(default=0)
     active = models.BooleanField(default=True)
     order = models.IntegerField(default=0)
 

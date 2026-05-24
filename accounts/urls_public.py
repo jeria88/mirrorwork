@@ -11,6 +11,7 @@ urlpatterns = [
     path('onboarding/viaje/guardar/', views.onboarding_viaje_guardar, name='onboarding_viaje_guardar'),
     path('onboarding/viaje/nacimiento/', views.onboarding_viaje_nacimiento, name='onboarding_viaje_nacimiento'),
     path('mapa/', views.mapa_interior, name='mapa_interior'),
+    path('viaje/', views.diario, name='diario'),
     path('perfil/', views.perfil, name='perfil'),
     path('vr/', views.vr_home, name='vr_home'),
     path('vr/test/<slug:slug>/', views.vr_test, name='vr_test'),
