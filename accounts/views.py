@@ -429,6 +429,8 @@ _AESTHETIC_SCENE = {'cosmos': 0, 'mandala': 2, 'psychedelic': 1, 'arbol': 3, 'ar
 
 @login_required
 def vr_home(request):
+    if not request.user.is_staff:
+        return redirect('dashboard')
     try:
         profile = request.user.profile
     except Exception:
@@ -528,6 +530,8 @@ _SCALE_OPTIONS = {
 
 @login_required
 def vr_test(request, slug):
+    if not request.user.is_staff:
+        return redirect('dashboard')
     from psychometrics.models import Test
     from django.shortcuts import get_object_or_404
     test = get_object_or_404(Test, slug=slug, active=True)

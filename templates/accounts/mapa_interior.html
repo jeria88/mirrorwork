@@ -795,7 +795,8 @@
 const DIM_DATA = {{ dim_data_json|safe }};
 const TOTAL_PCT = {{ total_pct }};
 const TEST_TAKE_URL_TMPL = "{% url 'psychometrics:test_take' '__slug__' %}";
-const VR_TEST_URL_TMPL   = "{% url 'vr_test' '__slug__' %}";
+const VR_TEST_URL_TMPL   = {% if request.user.is_staff %}"{% url 'vr_test' '__slug__' %}"{% else %}null{% endif %};
+const USER_IS_STAFF      = {{ request.user.is_staff|yesno:"true,false" }};
 let activeNode = null;
 
 function updateMap() {
@@ -868,7 +869,7 @@ function openDimPanel(dim) {
       '</div>' +
       '<div class="dp-test-actions">' +
         '<a href="' + takeUrl + '" class="dp-btn">' + (test.done ? 'Ver' : 'Hacer') + '</a>' +
-        '<a href="' + vrUrl + '" class="dp-btn dp-btn-vr" data-no-spa>⬡ VR</a>' +
+        (USER_IS_STAFF ? '<a href="' + vrUrl + '" class="dp-btn dp-btn-vr" data-no-spa>⬡ VR</a>' : '') +
       '</div>';
     list.appendChild(item);
   });

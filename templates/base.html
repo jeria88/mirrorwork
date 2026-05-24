@@ -595,7 +595,7 @@
 
 
 <!-- VR FAB ─────────────────────────────────────────────────────────── -->
-{% if user.is_authenticated %}
+{% if user.is_authenticated and user.is_staff %}
 <a id="vr-fab" href="{% url 'vr_home' %}" data-no-spa aria-label="Entrar a MirrorWork VR">
   <span class="vrf-icon">⬡</span>
   <span class="vrf-label">VR</span>

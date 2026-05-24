@@ -349,12 +349,14 @@
     </p>
   </div>
 
-  <!-- Acceso VR -->
+  <!-- Acceso VR (solo staff) -->
+  {% if request.user.is_staff %}
   <a href="{% url 'vr_home' %}" class="vr-entry reveal" title="Modo inmersivo Google Cardboard">
     <span class="vr-icon">⬡</span>
     <span class="vr-label">Entrar en VR</span>
-    <span class="vr-sub">Modo inmersivo 3D</span>
+    <span class="vr-sub">Experimental · Admin</span>
   </a>
+  {% endif %}
 
   <!-- Mapa Interior hero card -->
   <a href="{% url 'mapa_interior' %}" class="mapa-hero reveal">
