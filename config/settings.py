@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'reports',
     'birth',
     'sensorial',
+    'community',
 ]
 
 MIDDLEWARE = [

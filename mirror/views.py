@@ -685,15 +685,11 @@ def espejo_send(request):
     # Determinar modo
     mode = "focused" if enfoque else "open"
 
-    # Deducir tokens
-    try:
-        from tokens.models import TokenBalance
-        balance, _ = TokenBalance.objects.get_or_create(
-            user=request.user, defaults={"balance": 0}
-        )
-        balance.spend(10, reason=f"Mirror — sesión {sesion.pk}")
-    except Exception:
-        pass
+    # Deducir fractones
+    from tokens.service import spend, credit_mission
+    spend(request.user, 'espejo_exchange')
+    if len(sesion.messages) <= 2:  # primera respuesta de esta sesión
+        credit_mission(request.user, 'first_espejo')
 
     # Recopilar contexto cerebro antes de cerrar la conexión
     brain_context = _get_brain_context(request.user)
