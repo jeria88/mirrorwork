@@ -38,6 +38,7 @@ class UserProfile(models.Model):
     bio = models.TextField(blank=True)
     profession = models.CharField(max_length=120, blank=True)
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
+    social_links = models.JSONField(default=dict, blank=True)
     profile_public = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 

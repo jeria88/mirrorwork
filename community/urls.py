@@ -13,6 +13,7 @@ urlpatterns = [
     path('compartir/',                views.compartir,        name='compartir'),
     path('compartir/info/',           views.compartir_info,   name='compartir_info'),
     path('insight/<int:pk>/eliminar/',views.eliminar_insight, name='eliminar_insight'),
-    path('insight/<int:pk>/reaccion/',views.reaccionar,       name='reaccionar'),
-    path('insight/<int:pk>/comentar/',views.comentar,         name='comentar'),
+    path('insight/<int:pk>/reaccion/', views.reaccionar,  name='reaccionar'),
+    path('insight/<int:pk>/comentar/', views.comentar,    name='comentar'),
+    path('insight/<int:pk>/repost/',   views.repostear,   name='repostear'),
 ]

@@ -179,12 +179,27 @@ def perfil(request):
         if aesthetic in valid_aesthetics:
             profile.map_aesthetic = aesthetic
 
-        profile.save(update_fields=[
-            'bio', 'profession', 'map_aesthetic',
+        # Avatar
+        if 'avatar' in request.FILES:
+            profile.avatar = request.FILES['avatar']
+
+        # Social links
+        social_keys = ['instagram', 'x', 'linkedin', 'web']
+        profile.social_links = {
+            k: request.POST.get(f'social_{k}', '').strip()
+            for k in social_keys
+            if request.POST.get(f'social_{k}', '').strip()
+        }
+
+        update_fields = [
+            'bio', 'profession', 'map_aesthetic', 'social_links',
             'onboarding_question', 'onboarding_entry_point',
             'onboarding_noise_area', 'onboarding_prior_exploration',
             'onboarding_nucleo',
-        ])
+        ]
+        if 'avatar' in request.FILES:
+            update_fields.append('avatar')
+        profile.save(update_fields=update_fields)
         try:
             from mirror.views import _reseed_brain
             _reseed_brain(request.user)

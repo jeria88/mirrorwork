@@ -1,13 +1,18 @@
 import json
+from datetime import timezone as dt_tz
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from .models import Comment, Follow, Reaction, SharedInsight
 
 User = get_user_model()
+
+REACTIONS_CHOICES = Reaction._meta.get_field('type').choices
 
 
 def _get_facilitador(user):
@@ -17,51 +22,95 @@ def _get_facilitador(user):
         return None
 
 
+# ── Algoritmo de scoring ──────────────────────────────────────────────────────
+
+def _score(insight, following_ids, facilitador_id):
+    """
+    Hacker News gravity + boosts relacionales.
+    engagement = reacciones×2 + comentarios×3 + reposts×5
+    score = (engagement + 1) / (horas + 2)^1.8  ×  boost_relacional
+    """
+    now = timezone.now()
+    age_hours = max((now - insight.created_at).total_seconds() / 3600, 0.01)
+
+    reactions = insight.reactions.count()
+    comments  = insight.comments.count()
+    reposts   = insight.reposts.count()
+
+    engagement = reactions * 2 + comments * 3 + reposts * 5
+    base = (engagement + 1) / (age_hours + 2) ** 1.8
+
+    uid = insight.user_id
+    if uid == facilitador_id:
+        boost = 1.5
+    elif uid in following_ids:
+        boost = 1.2
+    else:
+        boost = 1.0
+
+    return base * boost
+
+
+def _ranked(qs, viewer):
+    following_ids  = set(Follow.objects.filter(follower=viewer).values_list('following_id', flat=True))
+    facilitador    = _get_facilitador(viewer)
+    facilitador_id = facilitador.pk if facilitador else None
+
+    insights = list(
+        qs.select_related('user', 'user__profile',
+                          'test_result__test', 'espejo_session',
+                          'repost_of__user', 'repost_of__user__profile',
+                          'repost_of__test_result__test', 'repost_of__espejo_session')
+          .prefetch_related('reactions', 'comments', 'reposts')
+    )
+    insights.sort(key=lambda i: _score(i, following_ids, facilitador_id), reverse=True)
+    return insights, facilitador
+
+
 # ── Feed ──────────────────────────────────────────────────────────────────────
 
 @login_required
 def feed(request):
     following_ids = Follow.objects.filter(follower=request.user).values_list('following_id', flat=True)
-    facilitador = _get_facilitador(request.user)
+    facilitador   = _get_facilitador(request.user)
 
     author_ids = set(following_ids)
     if facilitador:
         author_ids.add(facilitador.pk)
+    author_ids.add(request.user.pk)  # include own posts in personal feed
 
-    insights = (
+    qs = (
         SharedInsight.objects
         .filter(user_id__in=author_ids, visibility=SharedInsight.VISIBILITY_PUBLIC)
-        .select_related('user', 'test_result__test', 'espejo_session')
-        .prefetch_related('reactions', 'comments')
-        [:40]
     )
+    insights, facilitador = _ranked(qs, request.user)
 
     return render(request, 'community/feed.html', {
-        'insights': insights,
+        'insights': insights[:40],
         'facilitador': facilitador,
         'tab': 'feed',
-        'reactions_choices': Reaction._meta.get_field('type').choices,
+        'reactions_choices': REACTIONS_CHOICES,
+        'viewer_pk': request.user.pk,
     })
 
 
 @login_required
 def explorar(request):
-    insights = (
+    qs = (
         SharedInsight.objects
         .filter(
             visibility=SharedInsight.VISIBILITY_PUBLIC,
             user__profile__profile_public=True,
         )
         .exclude(user=request.user)
-        .select_related('user', 'test_result__test', 'espejo_session')
-        .prefetch_related('reactions', 'comments')
-        [:40]
     )
+    insights, _ = _ranked(qs, request.user)
 
     return render(request, 'community/feed.html', {
-        'insights': insights,
+        'insights': insights[:40],
         'tab': 'explorar',
-        'reactions_choices': Reaction._meta.get_field('type').choices,
+        'reactions_choices': REACTIONS_CHOICES,
+        'viewer_pk': request.user.pk,
     })
 
 
@@ -308,3 +357,34 @@ def compartir_info(request):
     ]
 
     return JsonResponse({'facilitador': fac_data, 'following': following_list})
+
+
+# ── AJAX: repostear ───────────────────────────────────────────────────────────
+
+@login_required
+@require_POST
+def repostear(request, pk):
+    original = get_object_or_404(
+        SharedInsight, pk=pk, visibility=SharedInsight.VISIBILITY_PUBLIC
+    )
+    if original.user == request.user:
+        return JsonResponse({'error': 'No puedes repostear tu propio insight'}, status=400)
+
+    # Idempotente: un usuario solo puede repostear el mismo insight una vez
+    already = SharedInsight.objects.filter(
+        user=request.user, repost_of=original
+    ).exists()
+    if already:
+        return JsonResponse({'error': 'Ya lo reposteaste'}, status=400)
+
+    repost = SharedInsight.objects.create(
+        user=request.user,
+        source_type=original.source_type,
+        test_result=original.test_result,
+        espejo_session=original.espejo_session,
+        reflection_text='',
+        visibility=SharedInsight.VISIBILITY_PUBLIC,
+        repost_of=original,
+    )
+    count = original.reposts.count()
+    return JsonResponse({'ok': True, 'repost_id': repost.pk, 'reposts': count})

@@ -30,6 +30,7 @@ class SharedInsight(models.Model):
     reflection_text = models.TextField(blank=True)
     visibility      = models.CharField(max_length=10, choices=VISIBILITY_CHOICES, default=VISIBILITY_PUBLIC)
     recipient       = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='received_insights')
+    repost_of       = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='reposts')
     created_at      = models.DateTimeField(auto_now_add=True)
 
     class Meta:
