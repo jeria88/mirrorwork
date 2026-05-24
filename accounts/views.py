@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 from django import forms
 from .models import User
 
@@ -558,3 +559,20 @@ def vr_test(request, slug):
         'aesthetic': aesthetic,
         'initial_scene': _AESTHETIC_SCENE.get(aesthetic, 0),
     })
+
+
+@login_required
+@require_POST
+def toggle_profile_public(request):
+    import json as _json
+    try:
+        data = _json.loads(request.body)
+    except Exception:
+        return JsonResponse({'error': 'JSON inválido'}, status=400)
+    try:
+        profile = request.user.profile
+    except Exception:
+        return JsonResponse({'error': 'Sin perfil'}, status=400)
+    profile.profile_public = bool(data.get('value', False))
+    profile.save(update_fields=['profile_public'])
+    return JsonResponse({'ok': True, 'profile_public': profile.profile_public})

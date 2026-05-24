@@ -229,6 +229,10 @@
 
   <div class="action-row">
     <a href="{% url 'psychometrics:test_list' %}" class="btn btn-ghost">Explorar otros tests</a>
+    <button class="btn btn-ghost"
+            onclick="openShareModal('test_result', {{ result.pk }}, '{{ result.test.name|escapejs }}')">
+      Compartir resultado
+    </button>
     <a href="{% url 'dashboard' %}" class="btn btn-primary">Ir al dashboard</a>
   </div>
 </div>

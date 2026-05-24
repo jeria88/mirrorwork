@@ -13,5 +13,6 @@ urlpatterns = [
     path('reportes/', include('reports.urls')),
     path('nacimiento/', include('birth.urls')),
     path('regulacion/', include('sensorial.urls')),
+    path('comunidad/', include('community.urls')),
     path('', include('accounts.urls_public')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

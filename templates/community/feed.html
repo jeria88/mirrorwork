@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+{% block title %}Comunidad — MirrorWork{% endblock %}
+
+{% block extra_head %}
+<style data-page-style>
+.com-wrap { max-width: 680px; margin: 0 auto; padding: 2rem 1.25rem 6rem; }
+
+.com-tabs {
+  display: flex; gap: 0.5rem; margin-bottom: 2rem;
+  border-bottom: 1px solid var(--border); padding-bottom: 0;
+}
+.com-tab {
+  font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); padding: 0.6rem 1rem; border-bottom: 2px solid transparent;
+  text-decoration: none; transition: color 0.2s, border-color 0.2s;
+}
+.com-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.com-tab:hover { color: var(--text); }
+
+.insight-card {
+  background: rgba(0,0,0,0.55); border: 1px solid var(--border);
+  border-radius: 16px; padding: 1.5rem; margin-bottom: 1rem;
+  transition: border-color 0.2s;
+}
+.insight-card:hover { border-color: rgba(78,205,196,0.2); }
+
+.insight-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+.insight-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--surface2); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem; color: var(--accent); font-weight: 600; flex-shrink: 0;
+}
+.insight-meta { flex: 1; }
+.insight-author { font-size: 0.88rem; font-weight: 500; color: var(--text); }
+.insight-date { font-size: 0.72rem; color: var(--muted); }
+.insight-source-tag {
+  font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--accent2); border: 1px solid rgba(124,109,250,0.25);
+  border-radius: 999px; padding: 0.15rem 0.55rem; white-space: nowrap;
+}
+
+.insight-title { font-size: 0.82rem; color: var(--muted); margin-bottom: 0.5rem; }
+.insight-reflection {
+  font-size: 0.95rem; color: var(--text); line-height: 1.7;
+  border-left: 2px solid var(--accent); padding-left: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.insight-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+.reaction-btn {
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+  border-radius: 999px; padding: 0.3rem 0.85rem; font-size: 0.78rem;
+  color: var(--muted); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 0.35rem;
+}
+.reaction-btn:hover { border-color: var(--accent); color: var(--accent); }
+.reaction-btn.active { background: rgba(78,205,196,0.1); border-color: var(--accent); color: var(--accent); }
+
+.comment-toggle {
+  background: none; border: none; font-size: 0.78rem; color: var(--muted);
+  cursor: pointer; padding: 0.3rem 0.5rem; transition: color 0.2s;
+}
+.comment-toggle:hover { color: var(--text); }
+
+.comments-section { margin-top: 1rem; display: none; }
+.comments-section.open { display: block; }
+.comment-item {
+  font-size: 0.85rem; color: var(--muted); padding: 0.5rem 0;
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+.comment-item strong { color: var(--text); font-weight: 500; }
+.comment-form { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+.comment-input {
+  flex: 1; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+  border-radius: 8px; padding: 0.5rem 0.75rem; font-size: 0.85rem;
+  color: var(--text); font-family: var(--font-ui); outline: none;
+  transition: border-color 0.2s;
+}
+.comment-input:focus { border-color: var(--accent); }
+.comment-submit {
+  background: var(--accent); color: #000; border: none; border-radius: 8px;
+  padding: 0.5rem 1rem; font-size: 0.78rem; font-weight: 500; cursor: pointer;
+  transition: opacity 0.2s;
+}
+.comment-submit:hover { opacity: 0.85; }
+
+.empty-state {
+  text-align: center; padding: 4rem 2rem; color: var(--muted);
+}
+.empty-state h3 { font-size: 1.1rem; color: var(--text); margin-bottom: 0.5rem; }
+.empty-state p { font-size: 0.9rem; line-height: 1.6; }
+
+@media(max-width:600px){ .com-wrap{ padding: 1rem 1rem 5rem; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="com-wrap">
+
+  <nav class="com-tabs">
+    <a href="{% url 'community:feed' %}" class="com-tab {% if tab == 'feed' %}active{% endif %}">Mi red</a>
+    <a href="{% url 'community:explorar' %}" class="com-tab {% if tab == 'explorar' %}active{% endif %}">Explorar</a>
+    <a href="{% url 'community:mensajes' %}" class="com-tab">Mensajes</a>
+    <a href="{% url 'community:perfil_propio' %}" class="com-tab">Mi perfil</a>
+  </nav>
+
+  {% if not insights %}
+    <div class="empty-state">
+      {% if tab == 'feed' %}
+        <h3>Tu red está vacía</h3>
+        <p>Cuando las personas que sigues compartan un resultado o una sesión del Espejo, aparecerá aquí.</p>
+        <a href="{% url 'community:explorar' %}" class="btn btn-ghost" style="margin-top:1.5rem;display:inline-block;">Explorar endonautas</a>
+      {% else %}
+        <h3>Sin insights públicos aún</h3>
+        <p>Cuando los endonautas compartan sus exploraciones, aparecerán aquí.</p>
+      {% endif %}
+    </div>
+  {% else %}
+    {% for insight in insights %}
+    <div class="insight-card" id="insight-{{ insight.pk }}">
+      <div class="insight-header">
+        <div class="insight-avatar">{{ insight.user.email|first|upper }}</div>
+        <div class="insight-meta">
+          <div class="insight-author">
+            <a href="{% url 'community:perfil' insight.user.username %}" style="color:inherit;text-decoration:none;">
+              {{ insight.user.username|default:insight.user.email|truncatechars:24 }}
+            </a>
+          </div>
+          <div class="insight-date">{{ insight.created_at|date:"d M Y" }}</div>
+        </div>
+        <span class="insight-source-tag">
+          {% if insight.source_type == 'test_result' %}Test{% else %}Espejo{% endif %}
+        </span>
+      </div>
+
+      <div class="insight-title">{{ insight.source_title }}</div>
+
+      {% if insight.reflection_text %}
+      <div class="insight-reflection">{{ insight.reflection_text }}</div>
+      {% endif %}
+
+      <div class="insight-actions">
+        {% for tipo, label in reactions_choices %}
+        <button class="reaction-btn {% if request.user in insight.reactions.all %}active{% endif %}"
+                data-insight="{{ insight.pk }}" data-type="{{ tipo }}"
+                onclick="reaccionar(this)">
+          {{ label }}
+          <span class="count">{{ insight.reactions.all|length }}</span>
+        </button>
+        {% endfor %}
+        <button class="comment-toggle" onclick="toggleComments({{ insight.pk }})">
+          💬 {{ insight.comments.count }}
+        </button>
+      </div>
+
+      <div class="comments-section" id="comments-{{ insight.pk }}">
+        {% for c in insight.comments.all %}
+        <div class="comment-item">
+          <strong>{{ c.user.username|default:c.user.email|truncatechars:16 }}</strong>
+          · {{ c.text }}
+          <span style="font-size:0.7rem;opacity:0.5;float:right;">{{ c.created_at|date:"d M" }}</span>
+        </div>
+        {% endfor %}
+        <div class="comment-form">
+          <input class="comment-input" placeholder="Tu comentario…" id="cinput-{{ insight.pk }}">
+          <button class="comment-submit" onclick="comentar({{ insight.pk }})">Enviar</button>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  {% endif %}
+
+</div>
+
+<script>
+function toggleComments(pk) {
+  const s = document.getElementById('comments-' + pk);
+  s.classList.toggle('open');
+}
+
+function reaccionar(btn) {
+  const pk   = btn.dataset.insight;
+  const tipo = btn.dataset.type;
+  fetch(`/comunidad/insight/${pk}/reaccion/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+    body: JSON.stringify({ type: tipo }),
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (!d.ok) return;
+    const card = document.getElementById('insight-' + pk);
+    card.querySelectorAll('.reaction-btn').forEach(b => {
+      const t = b.dataset.type;
+      const c = d.counts[t] || 0;
+      b.querySelector('.count').textContent = c;
+      b.classList.toggle('active', d.action !== 'removed' && b.dataset.type === tipo);
+    });
+  });
+}
+
+function comentar(pk) {
+  const input = document.getElementById('cinput-' + pk);
+  const text  = input.value.trim();
+  if (!text) return;
+  fetch(`/comunidad/insight/${pk}/comentar/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+    body: JSON.stringify({ text }),
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (!d.ok) return;
+    const section = document.getElementById('comments-' + pk);
+    const div = document.createElement('div');
+    div.className = 'comment-item';
+    div.innerHTML = `<strong>${d.comment.user}</strong> · ${d.comment.text}`;
+    section.insertBefore(div, section.querySelector('.comment-form'));
+    input.value = '';
+  });
+}
+
+function getCsrf() {
+  return document.cookie.split('; ').find(r => r.startsWith('csrftoken='))?.split('=')[1] || '';
+}
+</script>
+{% endblock %}

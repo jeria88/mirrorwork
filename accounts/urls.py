@@ -24,4 +24,5 @@ urlpatterns = [
     path('password-reset/listo/', auth_views.PasswordResetCompleteView.as_view(
         template_name='accounts/password_reset_complete.html',
     ), name='password_reset_complete'),
+    path('perfil/toggle-public/', views.toggle_profile_public, name='toggle_profile_public'),
 ]

@@ -553,6 +553,26 @@
         {% if active %}{{ active.title|default:"El Espejo" }}{% else %}El Espejo{% endif %}
       </span>
       <span class="chat-hint">Todo lo que emerge apunta hacia adentro.</span>
+      {% if active and active.messages %}
+      <div style="display:flex;gap:0.5rem;align-items:center;margin-left:auto;flex-shrink:0;">
+        <button onclick="openShareModal('espejo_exchange', {{ active.pk }}, '{{ active.title|default:'Sesión del Espejo'|escapejs }}')"
+          style="background:none;border:1px solid var(--border);border-radius:999px;padding:0.3rem 0.85rem;font-size:0.72rem;color:var(--muted);cursor:pointer;font-family:var(--font-ui);letter-spacing:0.06em;transition:all 0.2s;"
+          onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
+          onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+          Compartir
+        </button>
+        <form method="post" action="{% url 'mirror:archivar' active.pk %}" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit"
+            style="background:none;border:1px solid var(--border);border-radius:999px;padding:0.3rem 0.85rem;font-size:0.72rem;color:var(--muted);cursor:pointer;font-family:var(--font-ui);letter-spacing:0.06em;transition:all 0.2s;"
+            onmouseover="this.style.borderColor='rgba(240,192,64,0.4)';this.style.color='var(--luz-intensa)'"
+            onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'"
+            title="Cerrar y archivar esta sesión">
+            Archivar
+          </button>
+        </form>
+      </div>
+      {% endif %}
     </div>
 
     <div class="messages-area" id="messages-area">

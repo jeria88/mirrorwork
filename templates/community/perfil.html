@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% block title %}{{ perfil_user.username|default:perfil_user.email }} — MirrorWork{% endblock %}
+
+{% block extra_head %}
+<style data-page-style>
+.perfil-com-wrap { max-width: 680px; margin: 0 auto; padding: 2rem 1.25rem 6rem; }
+
+.perfil-header {
+  background: rgba(0,0,0,0.55); border: 1px solid var(--border);
+  border-radius: 20px; padding: 2rem; margin-bottom: 1.5rem; text-align: center;
+}
+.perfil-avatar {
+  width: 72px; height: 72px; border-radius: 50%; background: var(--surface2);
+  border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem; color: var(--accent); font-weight: 700; margin: 0 auto 1rem;
+}
+.perfil-name { font-size: 1.15rem; font-weight: 700; color: var(--text); margin-bottom: 0.3rem; }
+.perfil-bio { font-size: 0.88rem; color: var(--muted); line-height: 1.6; max-width: 400px; margin: 0 auto 1.25rem; }
+.perfil-stats { display: flex; gap: 2rem; justify-content: center; margin-bottom: 1.25rem; }
+.perfil-stat { text-align: center; }
+.perfil-stat-n { font-size: 1.2rem; font-weight: 700; color: var(--text); }
+.perfil-stat-l { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+
+.follow-btn {
+  padding: 0.55rem 1.5rem; border-radius: 999px; font-size: 0.82rem; font-weight: 500;
+  cursor: pointer; transition: all 0.2s; border: 1px solid var(--accent); font-family: var(--font-ui);
+}
+.follow-btn.following { background: transparent; color: var(--accent); }
+.follow-btn.following:hover { background: rgba(78,205,196,0.1); }
+.follow-btn.not-following { background: var(--accent); color: #000; border-color: var(--accent); }
+.follow-btn.not-following:hover { opacity: 0.85; }
+
+.visibility-toggle {
+  display: flex; align-items: center; gap: 0.75rem; justify-content: center;
+  margin-top: 0.75rem; font-size: 0.82rem; color: var(--muted);
+}
+.toggle-switch {
+  position: relative; width: 40px; height: 22px; cursor: pointer;
+}
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute; inset: 0; background: var(--surface2);
+  border-radius: 999px; border: 1px solid var(--border); transition: background 0.2s;
+}
+.toggle-slider::before {
+  content: ''; position: absolute; width: 14px; height: 14px; border-radius: 50%;
+  background: var(--muted); top: 3px; left: 3px; transition: transform 0.2s, background 0.2s;
+}
+.toggle-switch input:checked + .toggle-slider { background: rgba(78,205,196,0.15); border-color: var(--accent); }
+.toggle-switch input:checked + .toggle-slider::before { transform: translateX(18px); background: var(--accent); }
+
+.section-title {
+  font-size: 0.7rem; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--muted); margin: 0 0 1rem;
+}
+
+.insight-card {
+  background: rgba(0,0,0,0.55); border: 1px solid var(--border);
+  border-radius: 14px; padding: 1.25rem; margin-bottom: 0.75rem;
+  transition: border-color 0.2s;
+}
+.insight-card:hover { border-color: rgba(78,205,196,0.2); }
+.insight-source-tag {
+  font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--accent2); border: 1px solid rgba(124,109,250,0.25);
+  border-radius: 999px; padding: 0.15rem 0.55rem;
+}
+.insight-title { font-size: 0.78rem; color: var(--muted); margin: 0.4rem 0 0.5rem; }
+.insight-reflection { font-size: 0.92rem; color: var(--text); line-height: 1.65; border-left: 2px solid var(--accent); padding-left: 0.75rem; }
+.insight-delete-btn {
+  background: none; border: none; font-size: 0.7rem; color: rgba(255,255,255,0.2);
+  cursor: pointer; float: right; transition: color 0.2s; padding: 0;
+}
+.insight-delete-btn:hover { color: var(--sombra-dom); }
+
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--muted); font-size: 0.9rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="perfil-com-wrap">
+
+  <div class="perfil-header">
+    <div class="perfil-avatar">{{ perfil_user.email|first|upper }}</div>
+    <div class="perfil-name">{{ perfil_user.username|default:perfil_user.email|truncatechars:30 }}</div>
+    {% with bio=perfil_user.profile.bio %}
+      {% if bio %}<div class="perfil-bio">{{ bio }}</div>{% endif %}
+    {% endwith %}
+    <div class="perfil-stats">
+      <div class="perfil-stat">
+        <div class="perfil-stat-n">{{ followers_count }}</div>
+        <div class="perfil-stat-l">Seguidores</div>
+      </div>
+      <div class="perfil-stat">
+        <div class="perfil-stat-n">{{ following_count }}</div>
+        <div class="perfil-stat-l">Siguiendo</div>
+      </div>
+      <div class="perfil-stat">
+        <div class="perfil-stat-n">{{ insights|length }}</div>
+        <div class="perfil-stat-l">Insights</div>
+      </div>
+    </div>
+
+    {% if es_propio %}
+      <div class="visibility-toggle">
+        <span>Perfil público</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-public"
+            {% if request.user.profile.profile_public %}checked{% endif %}
+            onchange="togglePublic(this)">
+          <span class="toggle-slider"></span>
+        </label>
+        <span id="public-label">{% if request.user.profile.profile_public %}Activado{% else %}Desactivado{% endif %}</span>
+      </div>
+    {% else %}
+      <button class="follow-btn {% if is_following %}following{% else %}not-following{% endif %}"
+              id="follow-btn-{{ perfil_user.username }}"
+              onclick="toggleFollow('{{ perfil_user.username }}', this)">
+        {% if is_following %}Siguiendo{% else %}Seguir{% endif %}
+      </button>
+    {% endif %}
+  </div>
+
+  {% if insights %}
+    <p class="section-title">Insights compartidos</p>
+    {% for insight in insights %}
+    <div class="insight-card" id="insight-{{ insight.pk }}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;">
+        <span class="insight-source-tag">
+          {% if insight.source_type == 'test_result' %}Test{% else %}Espejo{% endif %}
+        </span>
+        {% if es_propio %}
+        <button class="insight-delete-btn" onclick="eliminarInsight({{ insight.pk }})">✕</button>
+        {% endif %}
+      </div>
+      <div class="insight-title">{{ insight.source_title }} · {{ insight.created_at|date:"d M Y" }}</div>
+      {% if insight.reflection_text %}
+        <div class="insight-reflection">{{ insight.reflection_text }}</div>
+      {% else %}
+        <div class="insight-reflection" style="opacity:0.4;font-style:italic;">Sin reflexión.</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-state">
+      {% if es_propio %}Sin insights compartidos aún. Comparte un resultado o sesión del Espejo para que aparezca aquí.
+      {% else %}Este endonauta no ha compartido insights aún.{% endif %}
+    </div>
+  {% endif %}
+
+</div>
+
+<script>
+function togglePublic(checkbox) {
+  const label = document.getElementById('public-label');
+  fetch('/accounts/perfil/toggle-public/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+    body: JSON.stringify({ value: checkbox.checked }),
+  })
+  .then(r => r.json())
+  .then(d => { if (d.ok) label.textContent = checkbox.checked ? 'Activado' : 'Desactivado'; });
+}
+
+function toggleFollow(username, btn) {
+  fetch(`/comunidad/seguir/${username}/`, {
+    method: 'POST',
+    headers: { 'X-CSRFToken': getCsrf() },
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (!d.ok) return;
+    if (d.action === 'followed') {
+      btn.textContent = 'Siguiendo'; btn.className = 'follow-btn following';
+    } else {
+      btn.textContent = 'Seguir'; btn.className = 'follow-btn not-following';
+    }
+  });
+}
+
+function eliminarInsight(pk) {
+  if (!confirm('¿Eliminar este insight?')) return;
+  fetch(`/comunidad/insight/${pk}/eliminar/`, {
+    method: 'POST',
+    headers: { 'X-CSRFToken': getCsrf() },
+  })
+  .then(r => r.json())
+  .then(d => { if (d.ok) document.getElementById('insight-' + pk).remove(); });
+}
+
+function getCsrf() {
+  return document.cookie.split('; ').find(r => r.startsWith('csrftoken='))?.split('=')[1] || '';
+}
+</script>
+{% endblock %}

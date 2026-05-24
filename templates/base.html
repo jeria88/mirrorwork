@@ -574,6 +574,7 @@
       <a href="{% url 'accounts:login' %}">Entrar</a>
       <a href="{% url 'accounts:register' %}" class="btn btn-primary" style="padding:7px 20px;">Comenzar</a>
     {% else %}
+      <a href="{% url 'community:feed' %}" style="font-size:.78rem;">Comunidad</a>
       <a href="{% url 'accounts:logout' %}" data-no-spa style="font-size:.72rem;color:var(--dim)">Salir</a>
     {% endif %}
   </div>
@@ -593,6 +594,38 @@
   {% block extra_body %}{% endblock %}
 </div>
 
+
+<!-- MODAL COMPARTIR ────────────────────────────────────────────────── -->
+{% if user.is_authenticated %}
+<div id="share-scrim" onclick="closeShareModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:900;backdrop-filter:blur(4px);"></div>
+<div id="share-modal" role="dialog" aria-label="Compartir insight" style="display:none;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(520px,100%);background:var(--surface);border:1px solid var(--border);border-radius:20px 20px 0 0;z-index:901;padding:1.75rem 1.5rem 2rem;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+    <span style="font-size:0.7rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);">Compartir</span>
+    <button onclick="closeShareModal()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;padding:0;">✕</button>
+  </div>
+  <div id="share-source-info" style="font-size:0.82rem;color:var(--muted);margin-bottom:1rem;padding:0.6rem 0.85rem;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid var(--border);"></div>
+  <textarea id="share-reflection" placeholder="Agrega una reflexión (opcional)…" rows="3"
+    style="width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;padding:0.75rem;font-size:0.9rem;color:var(--text);font-family:var(--font-ui);resize:none;outline:none;box-sizing:border-box;transition:border-color 0.2s;"
+    onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+  <div style="margin:1rem 0 0.5rem;font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);">¿A quién?</div>
+  <div style="display:flex;flex-direction:column;gap:0.5rem;" id="share-recipient-options">
+    <label style="display:flex;align-items:center;gap:0.6rem;cursor:pointer;padding:0.6rem 0.85rem;border-radius:10px;border:1px solid var(--border);transition:border-color 0.2s;" onmouseover="this.style.borderColor='rgba(78,205,196,0.3)'" onmouseout="this.style.borderColor='var(--border)'">
+      <input type="radio" name="share-visibility" value="public" checked style="accent-color:var(--accent);">
+      <span style="font-size:0.88rem;color:var(--text);">Público — en mi perfil</span>
+    </label>
+    <div id="share-facilitador-option" style="display:none;">
+      <label style="display:flex;align-items:center;gap:0.6rem;cursor:pointer;padding:0.6rem 0.85rem;border-radius:10px;border:1px solid rgba(78,205,196,0.3);background:rgba(78,205,196,0.05);">
+        <input type="radio" name="share-visibility" value="direct" data-recipient-id="" style="accent-color:var(--accent);">
+        <span style="font-size:0.88rem;color:var(--text);">Enviar a mi facilitador — <span id="share-fac-name" style="color:var(--accent);"></span></span>
+      </label>
+    </div>
+    <div id="share-following-options"></div>
+  </div>
+  <button onclick="submitShare()" style="width:100%;margin-top:1.25rem;padding:0.75rem;background:var(--accent);color:#000;border:none;border-radius:10px;font-size:0.9rem;font-weight:600;font-family:var(--font-ui);cursor:pointer;transition:opacity 0.2s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+    Compartir
+  </button>
+</div>
+{% endif %}
 
 <!-- VR FAB ─────────────────────────────────────────────────────────── -->
 {% if user.is_authenticated and user.is_staff %}
@@ -1828,6 +1861,94 @@ document.addEventListener('mixer:bloom', e => {
 syncMixerToAesthetic(document.body.dataset.aesthetic || 'cosmos');
 {% endif %}
 </script>
+
+{% if user.is_authenticated %}
+<script data-global>
+// ── MODAL COMPARTIR ───────────────────────────────────────────────────────────
+let _shareData = {};
+
+function openShareModal(sourceType, sourceId, sourceTitle) {
+  _shareData = { source_type: sourceType, source_id: sourceId };
+  document.getElementById('share-source-info').textContent = sourceTitle;
+  document.getElementById('share-reflection').value = '';
+  document.getElementById('share-scrim').style.display = 'block';
+  document.getElementById('share-modal').style.display = 'block';
+
+  // Load facilitador + following
+  fetch('/comunidad/compartir/info/')
+    .then(r => r.json())
+    .then(d => {
+      // Facilitador
+      const facOpt = document.getElementById('share-facilitador-option');
+      if (d.facilitador) {
+        facOpt.style.display = 'block';
+        document.getElementById('share-fac-name').textContent = d.facilitador.name;
+        facOpt.querySelector('input').dataset.recipientId = d.facilitador.id;
+      } else {
+        facOpt.style.display = 'none';
+      }
+      // Following
+      const container = document.getElementById('share-following-options');
+      container.innerHTML = '';
+      d.following.forEach(f => {
+        const label = document.createElement('label');
+        label.style.cssText = 'display:flex;align-items:center;gap:0.6rem;cursor:pointer;padding:0.6rem 0.85rem;border-radius:10px;border:1px solid var(--border);transition:border-color 0.2s;';
+        label.innerHTML = `<input type="radio" name="share-visibility" value="direct" data-recipient-id="${f.id}" style="accent-color:var(--accent);"> <span style="font-size:0.88rem;color:var(--text);">Enviar a ${f.name}</span>`;
+        container.appendChild(label);
+      });
+    });
+}
+
+function closeShareModal() {
+  document.getElementById('share-scrim').style.display = 'none';
+  document.getElementById('share-modal').style.display = 'none';
+}
+
+function submitShare() {
+  const reflection = document.getElementById('share-reflection').value.trim();
+  const selected   = document.querySelector('input[name="share-visibility"]:checked');
+  if (!selected) return;
+
+  const visibility   = selected.value;
+  const recipient_id = selected.dataset.recipientId || null;
+
+  fetch('/comunidad/compartir/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+    body: JSON.stringify({
+      ..._shareData,
+      reflection_text: reflection,
+      visibility,
+      recipient_id: recipient_id ? parseInt(recipient_id) : null,
+    }),
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.ok) {
+      closeShareModal();
+      showToast('Compartido correctamente');
+    }
+  });
+}
+
+function getCsrfToken() {
+  return document.cookie.split('; ').find(r => r.startsWith('csrftoken='))?.split('=')[1] || '';
+}
+
+function showToast(msg) {
+  let t = document.getElementById('share-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'share-toast';
+    t.style.cssText = 'position:fixed;bottom:5rem;left:50%;transform:translateX(-50%);background:var(--accent);color:#000;padding:0.6rem 1.25rem;border-radius:999px;font-size:0.82rem;font-weight:600;z-index:999;opacity:0;transition:opacity 0.25s;pointer-events:none;';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  setTimeout(() => { t.style.opacity = '0'; }, 2200);
+}
+</script>
+{% endif %}
 
 </body>
 </html>
