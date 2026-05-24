@@ -40,6 +40,7 @@ def feed(request):
         'insights': insights,
         'facilitador': facilitador,
         'tab': 'feed',
+        'reactions_choices': Reaction._meta.get_field('type').choices,
     })
 
 
@@ -60,6 +61,7 @@ def explorar(request):
     return render(request, 'community/feed.html', {
         'insights': insights,
         'tab': 'explorar',
+        'reactions_choices': Reaction._meta.get_field('type').choices,
     })
 
 
