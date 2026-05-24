@@ -1,104 +1,432 @@
 {% extends 'base.html' %}
-{% block title %}MirrorWork — El mapa de tu mundo interior{% endblock %}
+{% block title %}MirrorWork — La plataforma del método endonauta{% endblock %}
 
 {% block extra_head %}
-<style>
-  .hero {
-    min-height: calc(100vh - 60px);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 4rem 1.5rem 6rem;
-  }
+<style data-page-style>
+/* ── HERO ─────────────────────────────────────────────────────── */
+.lp-hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 6rem 1.5rem 5rem;
+}
+.lp-eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+}
+.lp-eyebrow::before, .lp-eyebrow::after {
+  content: '';
+  width: 20px;
+  height: 1px;
+  background: var(--border);
+}
+.lp-h1 {
+  font-size: clamp(2.6rem, 8vw, 5rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.02;
+  max-width: 820px;
+  margin-bottom: 1.75rem;
+  color: var(--text);
+}
+.lp-h1 em {
+  font-style: normal;
+  color: var(--accent);
+}
+.lp-sub {
+  color: var(--muted);
+  font-size: 1.1rem;
+  max-width: 520px;
+  line-height: 1.8;
+  margin-bottom: 3rem;
+}
+.lp-cta {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 4rem;
+}
+.btn-lg { padding: 0.85rem 2.25rem; font-size: 1rem; }
+.lp-libro-hint {
+  font-size: 0.8rem;
+  color: var(--muted);
+  opacity: 0.6;
+}
+.lp-libro-hint a { color: var(--accent); text-decoration: none; }
+.lp-libro-hint a:hover { text-decoration: underline; }
 
-  .hero-eyebrow {
-    font-size: 0.75rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 2rem;
-  }
+/* ── FEATURES ─────────────────────────────────────────────────── */
+.lp-section {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 6rem 2rem;
+}
+.lp-section-header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+.lp-section-header h2 {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  margin-bottom: 0.75rem;
+}
+.lp-section-header p {
+  color: var(--muted);
+  font-size: 1rem;
+  max-width: 500px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
+.feat-card {
+  background: rgba(0,0,0,0.6);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2rem 1.75rem;
+  transition: border-color 0.2s;
+}
+.feat-card:hover { border-color: rgba(78,205,196,0.3); }
+.feat-icon {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+.feat-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+.feat-desc {
+  font-size: 0.9rem;
+  color: var(--muted);
+  line-height: 1.65;
+}
+.feat-badge {
+  display: inline-block;
+  margin-top: 0.75rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid rgba(78,205,196,0.25);
+  border-radius: 999px;
+  padding: 0.2rem 0.65rem;
+}
 
-  .hero h1 {
-    font-size: clamp(2.5rem, 7vw, 4.5rem);
-    font-weight: 800;
-    letter-spacing: -0.04em;
-    line-height: 1.05;
-    max-width: 760px;
-    margin-bottom: 1.75rem;
-  }
+/* ── DIMENSIONES ──────────────────────────────────────────────── */
+.dims-section {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 2rem 6rem;
+}
+.dims-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+.dim-card {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem 1.25rem;
+}
+.dim-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.35rem;
+}
+.dim-hint {
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
 
-  .hero h1 em {
-    font-style: normal;
-    color: var(--accent);
-  }
+/* ── DIFERENCIA ───────────────────────────────────────────────── */
+.diff-section {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 0 2rem 6rem;
+  text-align: center;
+}
+.diff-quote {
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  line-height: 1.3;
+  margin-bottom: 1.5rem;
+}
+.diff-body {
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.8;
+  max-width: 600px;
+  margin: 0 auto 2.5rem;
+}
+.diff-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  text-align: left;
+  margin-bottom: 2.5rem;
+}
+.diff-col {
+  background: rgba(0,0,0,0.5);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+.diff-col-title {
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 1rem;
+}
+.diff-col ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.diff-col li {
+  font-size: 0.9rem;
+  color: var(--muted);
+  padding-left: 1.25rem;
+  position: relative;
+  line-height: 1.5;
+}
+.diff-col li::before {
+  content: '·';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+}
 
-  .hero-desc {
-    color: var(--muted);
-    font-size: 1.1rem;
-    max-width: 480px;
-    line-height: 1.8;
-    margin-bottom: 3rem;
-  }
+/* ── CTA FINAL ────────────────────────────────────────────────── */
+.lp-cta-final {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 2rem 8rem;
+  text-align: center;
+}
+.lp-cta-final h2 {
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  margin-bottom: 0.75rem;
+}
+.lp-cta-final p {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin-bottom: 2rem;
+  line-height: 1.7;
+}
+.lp-sep {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0 2rem;
+}
 
-  .hero-cta {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-bottom: 5rem;
-  }
-
-  .btn-lg { padding: 0.85rem 2.25rem; font-size: 1rem; }
-
-  .dimensions-flow {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-    justify-content: center;
-    max-width: 600px;
-    opacity: 0.5;
-  }
-
-  .dim-pill {
-    font-size: 0.8rem;
-    color: var(--muted);
-    padding: 0.35rem 0.9rem;
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    letter-spacing: 0.04em;
-  }
+/* ── RESPONSIVE ───────────────────────────────────────────────── */
+@media (max-width: 700px) {
+  .features-grid, .diff-cols { grid-template-columns: 1fr; }
+  .dims-grid { grid-template-columns: repeat(2, 1fr); }
+  .lp-section, .dims-section, .diff-section, .lp-cta-final { padding-left: 1.25rem; padding-right: 1.25rem; }
+}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="hero">
-  <p class="hero-eyebrow">Motor psicométrico endonauta</p>
-  <h1>Tu mundo interior<br>tiene <em>estructura</em></h1>
-  <p class="hero-desc">
-    35 instrumentos validados. Sombra, luz y todo lo que vive entre medio —
-    medido, interpretado, contextualizado.
+
+<!-- ── HERO ─────────────────────────────────────────────────── -->
+<div class="lp-hero">
+  <p class="lp-eyebrow">La plataforma del método endonauta</p>
+  <h1 class="lp-h1">
+    Aquí el mapa<br>cobra <em>vida.</em>
+  </h1>
+  <p class="lp-sub">
+    El mundo interior no es misterio — es territorio. Tiene patrones, dimensiones y una lógica propia. MirrorWork es la plataforma donde puedes leerlo.
   </p>
-  <div class="hero-cta">
+  <div class="lp-cta">
     <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-lg">Comenzar gratis</a>
     <a href="{% url 'accounts:login' %}" class="btn btn-ghost btn-lg">Ya tengo cuenta</a>
   </div>
-
-  <div class="dimensions-flow">
-    <span class="dim-pill">Identidad</span>
-    <span class="dim-pill">Emociones</span>
-    <span class="dim-pill">Cuerpo</span>
-    <span class="dim-pill">Sombra</span>
-    <span class="dim-pill">Vínculos</span>
-    <span class="dim-pill">Espiritualidad</span>
-    <span class="dim-pill">Sueños</span>
-    <span class="dim-pill">Propósito</span>
-    <span class="dim-pill">Mente</span>
-    <span class="dim-pill">Creatividad</span>
-    <span class="dim-pill">Abundancia</span>
-    <span class="dim-pill">Comunidad</span>
-  </div>
+  <p class="lp-libro-hint">
+    ¿Quieres entender el método primero? →
+    <a href="https://ebook.endonautas.cl" target="_blank" rel="noopener">Leer el libro</a>
+  </p>
 </div>
+
+<hr class="lp-sep">
+
+<!-- ── QUÉ VAS A EXPLORAR ────────────────────────────────────── -->
+<section class="lp-section">
+  <div class="lp-section-header">
+    <h2>Lo que vas a explorar</h2>
+    <p>Cuatro herramientas construidas desde el mismo lenguaje — el de tu mundo interior.</p>
+  </div>
+
+  <div class="features-grid">
+
+    <div class="feat-card">
+      <span class="feat-icon">◉</span>
+      <div class="feat-title">Mapa Interior</div>
+      <p class="feat-desc">12 dimensiones de tu mundo interior representadas como territorio vivo. A medida que completas instrumentos, el mapa revela qué zonas has explorado y cuáles permanecen en sombra.</p>
+      <span class="feat-badge">12 dimensiones</span>
+    </div>
+
+    <div class="feat-card">
+      <span class="feat-icon">⬡</span>
+      <div class="feat-title">35 Instrumentos</div>
+      <p class="feat-desc">Tests clínicos, adaptaciones validadas y herramientas propias del método endonauta. Cada resultado se interpreta en dos ejes: sombra y luz — lo que aún no integras y lo que ya opera desde la conciencia.</p>
+      <span class="feat-badge">Clínico · Adaptado · Endonauta</span>
+    </div>
+
+    <div class="feat-card">
+      <span class="feat-icon">◈</span>
+      <div class="feat-title">Espejo de Conflictos</div>
+      <p class="feat-desc">Una conversación con IA entrenada en el método. Cuando algo afuera te genera una reacción intensa — una persona, una situación, una emoción que se repite — el Espejo te ayuda a leer el reflejo.</p>
+      <span class="feat-badge">IA · Ley del espejo</span>
+    </div>
+
+    <div class="feat-card">
+      <span class="feat-icon">✦</span>
+      <div class="feat-title">Cartografía Natal</div>
+      <p class="feat-desc">Carta astral, Saju y Diseño Humano como lenguajes del origen. No como predicción — como mapas adicionales de la configuración con la que llegaste, para contextualizarla dentro del viaje interior.</p>
+      <span class="feat-badge">Astral · Saju · Diseño Humano</span>
+    </div>
+
+  </div>
+</section>
+
+<hr class="lp-sep">
+
+<!-- ── LAS 12 DIMENSIONES ────────────────────────────────────── -->
+<section class="dims-section">
+  <div class="lp-section-header">
+    <h2>12 dimensiones. Un territorio.</h2>
+    <p>Cada dimensión es una región del mundo interior con sus propios instrumentos, patrones y formas de expresarse en tu vida exterior.</p>
+  </div>
+  <div class="dims-grid">
+    <div class="dim-card">
+      <div class="dim-name">Identidad</div>
+      <div class="dim-hint">Quién crees que eres — y quién eres cuando nadie mira.</div>
+    </div>
+    <div class="dim-card">
+      <div class="dim-name">Emociones</div>
+      <div class="dim-hint">Tu relación con lo que sientes: regulación, expresión, historia emocional.</div>
+    </div>
+    <div class="dim-card">
+      <div class="dim-name">Cuerpo</div>
+      <div class="dim-hint">El cuerpo como territorio — conciencia interoceptiva, señales, sueño.</div>
+    </div>
+    <div class="dim-card">
+      <div class="dim-name">Sombra</div>
+      <div class="dim-hint">Lo que rechazas de ti y proyectas afuera. Lo que aún no integras.</div>
+    </div>
+    <div class="dim-card">
+      <div class="dim-name">Vínculos</div>
+      <div class="dim-hint">Apego, intimidad, patrones relacionales. Cómo te vinculas con el otro.</div>
+    </div>
+    <div class="dim-card">
+      <div class="dim-name">Espiritualidad</div>
+      <div class="dim-hint">Tu relación con la totalidad — sentido, divinidad, lógica fractal.</div>
+    </div>
+    <div class="dim-card">
+      <div class="dim-name">Sueños</div>
+      <div class="dim-hint">El inconsciente comunicándose mientras el yo duerme.</div>
+    </div>
+    <div class="dim-card">
+      <div class="dim-name">Propósito</div>
+      <div class="dim-hint">No una meta. Un proceso. Los talentos que nacen al explorar la sombra.</div>
+    </div>
+    <div class="dim-card">
+      <div class="dim-name">Mente</div>
+      <div class="dim-hint">Creencias, patrones cognitivos y la narrativa que construyes de ti mismo.</div>
+    </div>
+    <div class="dim-card">
+      <div class="dim-name">Creatividad</div>
+      <div class="dim-hint">La expresión del mundo interior hacia afuera. Qué canales tienes abiertos.</div>
+    </div>
+    <div class="dim-card">
+      <div class="dim-name">Abundancia</div>
+      <div class="dim-hint">Tu relación con la energía material — dinero, recursos, merecimiento.</div>
+    </div>
+    <div class="dim-card">
+      <div class="dim-name">Comunidad</div>
+      <div class="dim-hint">Tu lugar en el tejido colectivo. Cómo das y cómo recibes.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="lp-sep">
+
+<!-- ── LA DIFERENCIA ─────────────────────────────────────────── -->
+<section class="diff-section">
+  <h2 class="diff-quote">No es diagnóstico.<br>Es cartografía.</h2>
+  <p class="diff-body">Los tests clínicos miden si algo está fuera de rango. Los instrumentos endonautas miden el territorio — qué hay en sombra, qué opera en luz, dónde están los patrones que se repiten aunque ya no sirvan.</p>
+
+  <div class="diff-cols">
+    <div class="diff-col">
+      <div class="diff-col-title">Diagnóstico clínico</div>
+      <ul>
+        <li>Evalúa si hay disfunción</li>
+        <li>Resultado: rango normal / alterado</li>
+        <li>Foco en el síntoma</li>
+        <li>Requiere profesional para interpretar</li>
+      </ul>
+    </div>
+    <div class="diff-col">
+      <div class="diff-col-title">Cartografía endonauta</div>
+      <ul>
+        <li>Mapea el territorio interior completo</li>
+        <li>Resultado: sombra / luz / integración</li>
+        <li>Foco en el patrón y su origen</li>
+        <li>Diseñada para el autoconocimiento autónomo</li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="lp-libro-hint" style="opacity:0.7;font-size:0.85rem;">
+    La teoría completa del método está en el libro —
+    <a href="https://ebook.endonautas.cl" target="_blank" rel="noopener">Endonautica, de Franco Jeria</a>
+  </p>
+</section>
+
+<hr class="lp-sep">
+
+<!-- ── CTA FINAL ─────────────────────────────────────────────── -->
+<div class="lp-cta-final">
+  <h2>El mapa no se estudia.<br>Se navega.</h2>
+  <p>Crea tu cuenta gratuita y empieza con cualquier instrumento. El Mapa Interior se construye solo, a medida que exploras.</p>
+  <div class="lp-cta">
+    <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-lg">Comenzar gratis</a>
+    <a href="{% url 'accounts:login' %}" class="btn btn-ghost btn-lg">Ya tengo cuenta</a>
+  </div>
+  <p class="lp-libro-hint" style="margin-top:1rem;">Sin tarjeta. Sin compromiso. 100 fractones de bienvenida.</p>
+</div>
+
 {% endblock %}
