@@ -16,35 +16,25 @@ DEEPSEEK_MODEL = getattr(settings, 'DEEPSEEK_MODEL', 'deepseek-chat')
 
 SECTIONS = ['general', 'espejo', 'tests', 'onboarding', 'birth']
 
-AGENT_SYSTEM_PROMPT = """Eres un agente experto en HTML/CSS/JS creativo.
-Tu tarea es generar el código HTML de un fondo visual para una sección específica de una app web de autoconocimiento llamada MirrorWork.
+AGENT_SYSTEM_PROMPT = """Eres un agente experto en HTML/CSS/JS generativo.
+Tu tarea: generar UN SOLO documento HTML autocontenido que actúa como fondo visual animado para una app web de autoconocimiento (MirrorWork).
 
-Reglas obligatorias:
-1. El HTML debe ser COMPLETAMENTE AUTOCONTENIDO — todo el CSS y JS va inline, en etiquetas <style> y <script>.
-2. El fondo ocupa el 100% del viewport: body { margin:0; overflow:hidden; width:100vw; height:100vh; background:#000; }
-3. Puedes usar canvas, SVG, animaciones CSS, Three.js via CDN (https://cdn.jsdelivr.net/npm/three@0.160/build/three.min.js), o efectos con partículas.
-4. Si el usuario proporcionó URLs de imágenes/videos, úsalas como recursos centrales del diseño.
-5. Si el usuario no proporcionó imágenes, diseña el fondo solo con código (generativo/procesal).
-6. Cada sección tiene un tono:
-   - general: neutro, contemplativo
-   - espejo: introspectivo, profundo, sombra/luz
-   - tests: activo, exploración
-   - onboarding: acogedor, inicio del viaje
-   - birth: natal, cósmico, tiempo
-7. Las transiciones entre secciones deben ser suaves — diseña cada HTML para que pueda fundirse (opacity transition).
-8. No incluyas texto ni UI. Solo el fondo visual.
-9. Responde con JSON puro, sin markdown, sin explicaciones:
-{
-  "general":    "<html completo>",
-  "espejo":     "<html completo>",
-  "tests":      "<html completo>",
-  "onboarding": "<html completo>",
-  "birth":      "<html completo>",
-  "transitions": {
-    "general_to_espejo": "fade",
-    "espejo_to_tests":   "dissolve"
-  }
-}"""
+El HTML recibe la sección activa como query param `?section=general|espejo|tests|onboarding|birth` y adapta su paleta/energía según el valor.
+
+REGLAS TÉCNICAS OBLIGATORIAS:
+1. TODO inline: CSS en <style>, JS en <script>. Sin imports externos, sin CDN, sin fetch.
+2. Usa solo: Canvas 2D API, SVG inline, CSS animations/keyframes. NO uses Three.js ni WebGL.
+3. body { margin:0; padding:0; overflow:hidden; width:100vw; height:100vh; background:#000; }
+4. Al cargar, leer: const section = new URLSearchParams(location.search).get('section') || 'general';
+5. Adaptar colores/velocidad/densidad según section. Ejemplo: espejo = más lento y oscuro, tests = más rápido y brillante.
+6. Si el usuario dio URLs de imágenes, úsalas como texturas en canvas drawImage() o como background-image en CSS.
+7. Sin texto. Sin UI. Solo el fondo.
+8. El canvas debe redimensionarse con window.resize.
+
+RESPONDE con JSON puro (sin markdown, sin backticks, sin explicaciones):
+{"html": "<el documento HTML completo>"}
+
+Nada más. Solo ese JSON."""
 
 
 def _pexels_search(query: str, per_page: int = 6) -> list:
@@ -64,14 +54,24 @@ def _pexels_search(query: str, per_page: int = 6) -> list:
     return []
 
 
-def _call_deepseek(user_description: str, media_urls: list) -> dict:
+def _strip_markdown(text: str) -> str:
+    """Remove markdown code fences from a string."""
+    t = text.strip()
+    if t.startswith('```'):
+        t = t.split('\n', 1)[1] if '\n' in t else t[3:]
+        t = t.rsplit('```', 1)[0]
+    return t.strip()
+
+
+def _call_deepseek(user_description: str, media_urls: list) -> str:
+    """Returns a single adaptive HTML string."""
     media_block = ''
     if media_urls:
-        media_block = '\n\nIMÁGENES/VIDEOS proporcionados por el usuario:\n' + '\n'.join(f'- {u}' for u in media_urls)
+        media_block = '\n\nURLs de imágenes del usuario:\n' + '\n'.join(f'- {u}' for u in media_urls)
 
     user_msg = (
-        f'Descripción del mundo interior del usuario:\n"{user_description}"{media_block}\n\n'
-        'Genera los 5 HTMLs de fondo (general, espejo, tests, onboarding, birth) inspirados en esta descripción.'
+        f'Mundo interior del usuario:\n"{user_description}"{media_block}\n\n'
+        'Genera el HTML adaptativo de fondo inspirado en esta descripción.'
     )
 
     payload = {
@@ -80,8 +80,8 @@ def _call_deepseek(user_description: str, media_urls: list) -> dict:
             {'role': 'system', 'content': AGENT_SYSTEM_PROMPT},
             {'role': 'user',   'content': user_msg},
         ],
-        'temperature': 0.85,
-        'max_tokens': 8000,
+        'temperature': 0.80,
+        'max_tokens': 7500,
     }
     resp = requests.post(
         f'{DEEPSEEK_URL}/chat/completions',
@@ -90,13 +90,15 @@ def _call_deepseek(user_description: str, media_urls: list) -> dict:
             'Content-Type': 'application/json',
         },
         json=payload,
-        timeout=90,
+        timeout=120,
     )
     resp.raise_for_status()
-    raw = resp.json()['choices'][0]['message']['content'].strip()
-    if raw.startswith('```'):
-        raw = raw.split('\n', 1)[1].rsplit('```', 1)[0]
-    return json.loads(raw)
+    raw = _strip_markdown(resp.json()['choices'][0]['message']['content'])
+    data = json.loads(raw)
+    html = data.get('html', '')
+    if not html:
+        raise ValueError("DeepSeek no retornó campo 'html'")
+    return _strip_markdown(html)
 
 
 @login_required
@@ -130,20 +132,16 @@ def generate(request):
         user_urls = _pexels_search(description[:80], per_page=4)
 
     try:
-        scenes_data = _call_deepseek(description, user_urls)
+        html = _call_deepseek(description, user_urls)
     except Exception as e:
         return JsonResponse({'ok': False, 'error': str(e)}, status=500)
-
-    scenes = {k: scenes_data.get(k) or '' for k in SECTIONS}
-    transitions = scenes_data.get('transitions', {})
 
     template = BackgroundTemplate.objects.create(
         user=request.user,
         name=description[:60],
         description=description,
         prompt_used=description,
-        scenes=scenes,
-        transitions=transitions,
+        scenes={'html': html},
         media_urls=user_urls,
     )
 
@@ -157,8 +155,15 @@ def preview(request, template_id):
         from django.http import HttpResponseForbidden
         return HttpResponseForbidden()
     section = request.GET.get('section', 'general')
-    _fallback = '<html><body style="margin:0;background:#000;width:100vw;height:100vh"></body></html>'
-    html = (tpl.scenes or {}).get(section) or _fallback
+    scenes = tpl.scenes or {}
+    # New format: single adaptive HTML with ?section= param
+    html = scenes.get('html') or ''
+    # Legacy fallback: per-section dict
+    if not html:
+        html = scenes.get(section) or ''
+    if not html:
+        html = '<html><body style="margin:0;background:#000;width:100vw;height:100vh"></body></html>'
+    # Inject section param into the HTML's URL if not already present
     from django.http import HttpResponse
     return HttpResponse(html, content_type='text/html')
 
