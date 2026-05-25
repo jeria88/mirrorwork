@@ -134,7 +134,7 @@ def generate(request):
     except Exception as e:
         return JsonResponse({'ok': False, 'error': str(e)}, status=500)
 
-    scenes = {k: scenes_data.get(k, '') for k in SECTIONS}
+    scenes = {k: scenes_data.get(k) or '' for k in SECTIONS}
     transitions = scenes_data.get('transitions', {})
 
     template = BackgroundTemplate.objects.create(
@@ -157,7 +157,8 @@ def preview(request, template_id):
         from django.http import HttpResponseForbidden
         return HttpResponseForbidden()
     section = request.GET.get('section', 'general')
-    html = tpl.scenes.get(section, '<html><body style="background:#000"></body></html>')
+    _fallback = '<html><body style="margin:0;background:#000;width:100vw;height:100vh"></body></html>'
+    html = (tpl.scenes or {}).get(section) or _fallback
     from django.http import HttpResponse
     return HttpResponse(html, content_type='text/html')
 

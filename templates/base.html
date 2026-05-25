@@ -570,7 +570,7 @@
 <!-- CUSTOM BACKGROUND TEMPLATE iframe ───────────────────────────────── -->
 <iframe id="custom-bg-iframe"
   src="{% url 'background:preview' user.profile.active_template.pk %}?section=general"
-  sandbox="allow-scripts"
+  sandbox="allow-scripts allow-same-origin"
   aria-hidden="true"
   style="position:fixed;inset:0;width:100%;height:100%;border:none;z-index:-1;pointer-events:none;"
 ></iframe>

@@ -1,6 +1,9 @@
 import json
+import logging
 import os
 import threading
+
+logger = logging.getLogger(__name__)
 
 import requests
 from django.contrib.auth.decorators import login_required
@@ -45,7 +48,8 @@ def _generate_ai_insight(test_name, instrument_type, evaluation):
         )
         resp.raise_for_status()
         return resp.json()["choices"][0]["message"]["content"]
-    except Exception:
+    except Exception as e:
+        logger.warning("_generate_ai_insight failed: %s", e)
         return ""
 
 
@@ -57,8 +61,8 @@ def _run_insight_thread(result_pk, user_pk, test_name, instrument_type, evaluati
         User = get_user_model()
         try:
             spend(User.objects.get(pk=user_pk), 'ai_insight')
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("insight spend failed for user %s: %s", user_pk, e)
         TestResult.objects.filter(pk=result_pk).update(ai_insight=insight)
     else:
         TestResult.objects.filter(pk=result_pk).update(ai_insight="—")
@@ -170,6 +174,12 @@ def insight_reveal(request, pk):
     result = get_object_or_404(TestResult, pk=pk, user=request.user)
 
     if result.ai_insight and result.ai_insight not in ("", "—"):
+        return redirect("psychometrics:insight_view", pk=pk)
+
+    from tokens.service import has_balance
+    if not has_balance(request.user, 'ai_insight'):
+        from django.contrib import messages
+        messages.error(request, "Fractones insuficientes para generar el insight.")
         return redirect("psychometrics:insight_view", pk=pk)
 
     TestResult.objects.filter(pk=pk).update(ai_insight="processing")

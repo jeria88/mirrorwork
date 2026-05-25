@@ -1020,15 +1020,13 @@ def birth_insight_reveal(request, pk):
     except BirthProfile.DoesNotExist:
         return redirect('birth:profile')
 
-    try:
-        from tokens.models import TokenBalance
-        balance, _ = TokenBalance.objects.get_or_create(
-            user=request.user, defaults={'balance': 50}
-        )
-        label = _BIRTH_TYPE_LABELS.get(report.report_type, 'Lectura')
-        balance.spend(5, reason=f'Lectura endonauta — {label}')
-    except Exception:
-        pass
+    from tokens.service import spend, has_balance
+    if not has_balance(request.user, 'report'):
+        lectura_name = _BIRTH_LECTURA_NAMES.get(report.report_type, 'profile')
+        return redirect(f'birth:{lectura_name}', pk=pk)
+
+    label = _BIRTH_TYPE_LABELS.get(report.report_type, 'Lectura')
+    spend(request.user, 'report', reason=f'Lectura endonauta — {label}')
 
     BirthReport.objects.filter(pk=pk).update(
         interpretation='processing',

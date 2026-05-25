@@ -1,15 +1,18 @@
 import json
+import logging
 import math
 import os
 import re
 import threading
 import requests
+
+logger = logging.getLogger(__name__)
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
-from mirror.models import ConflictSession, MirrorChunk
+from mirror.models import ConflictSession, EspejoMemoria, MirrorChunk
 from psychometrics.models import TestResult
 from birth.models import BirthReport
 
@@ -81,8 +84,8 @@ def _retrieve_context(message, k=5):
                 input=message, model="text-embedding-3-small"
             )
             return _retrieve_chunks_embedding(resp.data[0].embedding, k=k)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("Embedding retrieval failed, falling back to keyword: %s", e)
     return _retrieve_chunks_keyword(message, k=k)
 
 
@@ -350,7 +353,6 @@ def _get_test_context(user):
 
 def _get_brain_context(user):
     """Returns active brain content as string for system prompt injection."""
-    from mirror.models import EspejoMemoria
     mem = EspejoMemoria.objects.filter(user=user, activa=True).first()
     if not mem or not mem.contenido.strip():
         return ""
@@ -359,7 +361,6 @@ def _get_brain_context(user):
 
 def _nueva_version_cerebro(user, contenido, fuente='sesion', sesion=None):
     """Deactivates current brain, saves new version."""
-    from mirror.models import EspejoMemoria
     from django.db import transaction
     with transaction.atomic():
         ultima = EspejoMemoria.objects.filter(user=user).order_by('-version').first()
@@ -377,12 +378,12 @@ def _nueva_version_cerebro(user, contenido, fuente='sesion', sesion=None):
 
 def _seed_initial_brain(user):
     """Creates first brain version from onboarding data if user has none."""
-    from mirror.models import EspejoMemoria
     if EspejoMemoria.objects.filter(user=user).exists():
         return
     try:
         p = user.profile
-    except Exception:
+    except Exception as e:
+        logger.warning("_seed_initial_brain: user %s has no profile: %s", user.pk, e)
         return
     # Delegate to _reseed_brain using the same logic (no existing brain yet, so defaults apply)
     _reseed_brain(user)
@@ -416,10 +417,10 @@ _LEARNED_SECTIONS = ['## Patrones que he notado', '## Lo que ha compartido', '##
 def _reseed_brain(user):
     """Rebuilds onboarding sections of the active brain with fresh profile data.
     Preserves learned sections (patterns, sessions, care zones) from the existing brain."""
-    from mirror.models import EspejoMemoria
     try:
         p = user.profile
-    except Exception:
+    except Exception as e:
+        logger.warning("_reseed_brain: user %s has no profile: %s", user.pk, e)
         return
 
     # Build fresh base sections
@@ -495,7 +496,8 @@ def _update_brain_async(session_pk, user_pk):
     try:
         session = ConflictSession.objects.get(pk=session_pk)
         user = User.objects.get(pk=user_pk)
-    except Exception:
+    except Exception as e:
+        logger.warning("_update_brain_async: session or user not found: %s", e)
         return
 
     current = EspejoMemoria.objects.filter(user=user, activa=True).first()
@@ -538,8 +540,8 @@ def _update_brain_async(session_pk, user_pk):
             if m_check and '(Aún sin' not in m_check.group(1) and m_check.group(1).strip():
                 from tokens.service import credit_mission
                 credit_mission(user, 'patron_nombrado')
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning("_update_brain_async failed for user %s: %s", user_pk, e)
 
 
 # ── DeepSeek call ─────────────────────────────────────────────────────────────
@@ -734,7 +736,9 @@ def espejo_send(request):
     test_rec = parsed.get("test_recomendado")
 
     # Deducir fractones solo si la API respondió correctamente
-    from tokens.service import spend, credit_mission
+    from tokens.service import spend, credit_mission, has_balance
+    if not has_balance(request.user, 'espejo_exchange'):
+        return JsonResponse({"error": "Fractones insuficientes."}, status=402)
     spend(request.user, 'espejo_exchange')
     if is_first_exchange:
         credit_mission(request.user, 'first_espejo')
@@ -833,7 +837,6 @@ def espejo_tarjetas(request):
 
 @login_required
 def espejo_cerebro(request):
-    from mirror.models import EspejoMemoria
     _seed_initial_brain(request.user)
     versiones = EspejoMemoria.objects.filter(user=request.user).order_by('-version')
     activa = versiones.filter(activa=True).first()
@@ -846,7 +849,6 @@ def espejo_cerebro(request):
 @login_required
 @require_POST
 def espejo_cerebro_restaurar(request, pk):
-    from mirror.models import EspejoMemoria
     from django.db import transaction
     mem = get_object_or_404(EspejoMemoria, pk=pk, user=request.user)
     with transaction.atomic():

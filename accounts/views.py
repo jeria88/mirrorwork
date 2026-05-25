@@ -701,6 +701,7 @@ def diario(request):
     return render(request, 'accounts/diario.html', {'grouped': grouped})
 
 
+@login_required
 @require_POST
 def toggle_profile_public(request):
     import json as _json
