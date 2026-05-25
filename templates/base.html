@@ -119,6 +119,42 @@
       transition: opacity 0.25s ease;
     }
 
+    /* ── BARRA CROSS-SITE ───────────────────────────────────────────── */
+    #cross-site-bar {
+      position: relative;
+      z-index: 99;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      padding: 0 2rem;
+      height: 34px;
+      background: rgba(0,0,0,0.95);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    #cross-site-bar a {
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #52525b;
+      text-decoration: none;
+      font-weight: 400;
+      transition: color 0.2s;
+    }
+    #cross-site-bar a:hover { color: #a1a1aa; }
+    #cross-site-bar .cs-home {
+      color: #a1a1aa;
+      font-family: var(--font-heading);
+      font-size: 0.8rem;
+      letter-spacing: 0.04em;
+      text-transform: none;
+      font-style: italic;
+    }
+    #cross-site-bar .cs-sep {
+      color: #2a2a3a;
+      font-size: 0.65rem;
+      user-select: none;
+    }
+
     /* ── NAVEGACIÓN ─────────────────────────────────────────────────── */
     nav {
       position: sticky;
@@ -614,6 +650,20 @@
 {% endif %}
 
 <!-- NAV ────────────────────────────────────────────────────────────── -->
+{% if not user.is_authenticated %}
+<div id="cross-site-bar">
+  <a href="https://endonautas.cl" class="cs-home">Endonautas</a>
+  <span class="cs-sep">·</span>
+  <a href="https://endonautas.cl/blog/">Blog</a>
+  <span class="cs-sep">·</span>
+  <a href="https://ebook.endonautas.cl" target="_blank">Ebook</a>
+  <span class="cs-sep">·</span>
+  <a href="/comunidad/">Comunidad</a>
+  <span class="cs-sep">·</span>
+  <a href="mailto:hola@endonautas.cl">Contacto</a>
+</div>
+{% endif %}
+
 <nav>
   <a class="nav-logo" href="{% if user.is_authenticated %}{% url 'mapa_interior' %}{% else %}{% url 'home' %}{% endif %}">Mirror<em>Work</em></a>
   <div class="nav-links">
