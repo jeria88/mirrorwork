@@ -568,6 +568,13 @@
           onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
           Compartir
         </button>
+        <button
+          onclick="openBlogModal('espejo', {{ active.pk }}, '{{ active.title|default:'Sesión del Espejo'|escapejs }}')"
+          style="background:none;border:1px solid rgba(212,168,83,0.25);border-radius:999px;padding:0.3rem 0.85rem;font-size:0.72rem;color:rgba(212,168,83,0.7);cursor:pointer;font-family:var(--font-ui);letter-spacing:0.06em;transition:all 0.2s;"
+          onmouseover="this.style.borderColor='rgba(212,168,83,0.5)';this.style.color='rgba(212,168,83,1)'"
+          onmouseout="this.style.borderColor='rgba(212,168,83,0.25)';this.style.color='rgba(212,168,83,0.7)'">
+          Postular al blog
+        </button>
         <form method="post" action="{% url 'mirror:archivar' active.pk %}" style="display:inline;">
           {% csrf_token %}
           <button type="submit"

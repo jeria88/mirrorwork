@@ -224,6 +224,16 @@
   </div>
   {% endif %}
 
+  <div style="margin-top:2rem;text-align:center;">
+    <button
+      onclick="openBlogModal('birth', {{ report.pk }}, '{{ label|escapejs }}')"
+      style="background:rgba(212,168,83,0.08);border:1px solid rgba(212,168,83,0.3);border-radius:999px;padding:0.55rem 1.25rem;font-size:0.8rem;color:rgba(212,168,83,0.8);font-family:var(--font-ui);cursor:pointer;transition:all 0.2s;letter-spacing:0.04em;"
+      onmouseover="this.style.background='rgba(212,168,83,0.15)';this.style.color='rgba(212,168,83,1)'"
+      onmouseout="this.style.background='rgba(212,168,83,0.08)';this.style.color='rgba(212,168,83,0.8)'">
+      ✦ Postular al blog
+    </button>
+  </div>
+
   {% else %}
   <!-- Pending -->
   <div class="lectura-pending">

@@ -674,6 +674,63 @@
 </div>
 {% endif %}
 
+<!-- MODAL POSTULAR AL BLOG ─────────────────────────────────────────── -->
+{% if user.is_authenticated %}
+<div id="blog-scrim" onclick="closeBlogModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:900;backdrop-filter:blur(4px);"></div>
+<div id="blog-modal" role="dialog" aria-label="Postular al blog" style="display:none;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(580px,100%);background:var(--surface);border:1px solid var(--border);border-top:1px solid rgba(212,168,83,0.25);border-radius:20px 20px 0 0;z-index:901;padding:1.75rem 1.5rem 2rem;max-height:92vh;overflow-y:auto;">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+    <div>
+      <div style="font-size:0.62rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(212,168,83,0.8);margin-bottom:0.25rem;">Postular al blog</div>
+      <div id="blog-modal-source" style="font-size:0.78rem;color:var(--muted);"></div>
+    </div>
+    <button onclick="closeBlogModal()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;padding:0.25rem;">✕</button>
+  </div>
+
+  <!-- Loading -->
+  <div id="blog-modal-loading" style="text-align:center;padding:2rem 0;color:var(--muted);font-size:0.88rem;">
+    Cargando…
+  </div>
+
+  <!-- Form -->
+  <div id="blog-modal-form" style="display:none;">
+    <div style="margin-bottom:1rem;">
+      <label style="display:block;font-size:0.65rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem;">Título</label>
+      <input id="blog-modal-title" type="text" maxlength="200"
+        style="width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;padding:0.7rem 0.9rem;font-size:0.95rem;color:var(--text);font-family:var(--font-ui);outline:none;box-sizing:border-box;transition:border-color 0.2s;"
+        onfocus="this.style.borderColor='rgba(212,168,83,0.4)'" onblur="this.style.borderColor='var(--border)'">
+    </div>
+    <div style="margin-bottom:1.25rem;">
+      <label style="display:block;font-size:0.65rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem;">Tu texto</label>
+      <textarea id="blog-modal-body" rows="10"
+        style="width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;padding:0.7rem 0.9rem;font-size:0.88rem;color:var(--text);font-family:var(--font-ui);resize:vertical;outline:none;box-sizing:border-box;line-height:1.65;transition:border-color 0.2s;"
+        onfocus="this.style.borderColor='rgba(212,168,83,0.4)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+      <div style="font-size:0.72rem;color:var(--muted);margin-top:0.35rem;">Puedes editar antes de enviar. Nadie lo verá hasta que sea aprobado.</div>
+    </div>
+    <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+      <button onclick="submitBlogModal('guardar')"
+        style="flex:1;padding:0.7rem 1rem;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;font-size:0.85rem;color:var(--muted);font-family:var(--font-ui);cursor:pointer;transition:all 0.2s;"
+        onmouseover="this.style.borderColor='var(--border)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+        Guardar borrador
+      </button>
+      <button onclick="submitBlogModal('enviar')"
+        style="flex:2;padding:0.7rem 1.25rem;background:rgba(212,168,83,0.15);border:1px solid rgba(212,168,83,0.4);border-radius:10px;font-size:0.85rem;color:rgba(212,168,83,0.9);font-weight:500;font-family:var(--font-ui);cursor:pointer;transition:all 0.2s;"
+        onmouseover="this.style.background='rgba(212,168,83,0.25)'" onmouseout="this.style.background='rgba(212,168,83,0.15)'">
+        Enviar para revisión →
+      </button>
+    </div>
+  </div>
+
+  <!-- Success -->
+  <div id="blog-modal-success" style="display:none;text-align:center;padding:2rem 0;">
+    <div style="font-size:1.5rem;margin-bottom:0.75rem;color:rgba(212,168,83,0.8);">✦</div>
+    <div id="blog-modal-success-msg" style="font-size:0.95rem;color:var(--text);margin-bottom:0.4rem;"></div>
+    <div style="font-size:0.78rem;color:var(--muted);">Puedes verlo en <a href="/blog/postulaciones/" style="color:rgba(212,168,83,0.8);text-decoration:none;">mis postulaciones</a>.</div>
+  </div>
+
+</div>
+{% endif %}
+
 <!-- VR FAB ─────────────────────────────────────────────────────────── -->
 {% if user.is_authenticated and user.is_staff %}
 <a id="vr-fab" href="{% url 'vr_home' %}" data-no-spa aria-label="Entrar a MirrorWork VR">
@@ -1990,6 +2047,66 @@ function showToast(msg) {
   t.textContent = msg;
   t.style.opacity = '1';
   setTimeout(() => { t.style.opacity = '0'; }, 2200);
+}
+
+// ── MODAL POSTULAR AL BLOG ────────────────────────────────────────────────────
+let _blogSource = {};
+
+function openBlogModal(sourceType, sourceId, sourceLabel) {
+  _blogSource = { type: sourceType, id: sourceId };
+  document.getElementById('blog-modal-source').textContent = sourceLabel || '';
+  document.getElementById('blog-modal-loading').style.display = 'block';
+  document.getElementById('blog-modal-form').style.display    = 'none';
+  document.getElementById('blog-modal-success').style.display = 'none';
+  document.getElementById('blog-scrim').style.display  = 'block';
+  document.getElementById('blog-modal').style.display  = 'block';
+
+  fetch(`/blog/postular/prefill/${sourceType}/${sourceId}/`, {
+    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  })
+    .then(r => r.json())
+    .then(d => {
+      document.getElementById('blog-modal-title').value = d.title || '';
+      document.getElementById('blog-modal-body').value  = d.body  || '';
+      document.getElementById('blog-modal-loading').style.display = 'none';
+      document.getElementById('blog-modal-form').style.display    = 'block';
+    })
+    .catch(() => {
+      document.getElementById('blog-modal-loading').textContent = 'Error al cargar. Intenta de nuevo.';
+    });
+}
+
+function closeBlogModal() {
+  document.getElementById('blog-scrim').style.display  = 'none';
+  document.getElementById('blog-modal').style.display  = 'none';
+}
+
+function submitBlogModal(action) {
+  const title = document.getElementById('blog-modal-title').value.trim();
+  const body  = document.getElementById('blog-modal-body').value.trim();
+  if (!title || !body) return;
+
+  const fd = new FormData();
+  fd.append('title', title);
+  fd.append('body', body);
+  fd.append(action, '1');
+  fd.append('csrfmiddlewaretoken', getCsrfToken());
+
+  fetch(`/blog/postular/${_blogSource.type}/${_blogSource.id}/`, {
+    method: 'POST',
+    body: fd,
+    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+  })
+    .then(r => r.json())
+    .then(d => {
+      if (d.ok) {
+        document.getElementById('blog-modal-form').style.display    = 'none';
+        document.getElementById('blog-modal-success').style.display = 'block';
+        document.getElementById('blog-modal-success-msg').textContent =
+          action === 'enviar' ? 'Postulación enviada a revisión.' : 'Borrador guardado.';
+        setTimeout(closeBlogModal, 2200);
+      }
+    });
 }
 </script>
 {% endif %}
