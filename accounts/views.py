@@ -716,3 +716,89 @@ def toggle_profile_public(request):
     profile.profile_public = bool(data.get('value', False))
     profile.save(update_fields=['profile_public'])
     return JsonResponse({'ok': True, 'profile_public': profile.profile_public})
+
+
+# ── Blog de endonautas.cl ──────────────────────────────────────────────────────
+
+@login_required
+def blog_prefill(request, source_type, source_id):
+    """Devuelve título y cuerpo pre-rellenado desde los modelos locales de mirrorwork."""
+    title = body = source_description = ''
+
+    if source_type == 'espejo':
+        from mirror.models import ConflictSession
+        from django.shortcuts import get_object_or_404
+        s = get_object_or_404(ConflictSession, pk=source_id, user=request.user)
+        title = s.title or s.conflict_description[:80]
+        parts = [s.conflict_description]
+        if s.pattern_revealed:
+            parts.append(f'\n\nPatrón revelado:\n{s.pattern_revealed}')
+        if s.pregunta_cierre:
+            parts.append(f'\n\nPregunta de cierre:\n{s.pregunta_cierre}')
+        body = ''.join(parts)
+        source_description = f'Sesión del Espejo — {title[:80]}'
+
+    elif source_type == 'test':
+        from psychometrics.models import TestResult
+        from django.shortcuts import get_object_or_404
+        r = get_object_or_404(TestResult, pk=source_id, user=request.user)
+        title = f'Mi experiencia con {r.test.name}'
+        body = r.ai_insight or ''
+        source_description = f'Test: {r.test.name}'
+
+    elif source_type == 'birth':
+        from birth.models import BirthReport
+        from django.shortcuts import get_object_or_404
+        r = get_object_or_404(BirthReport, pk=source_id, user=request.user)
+        title = f'Mi {r.get_report_type_display()}'
+        body = r.interpretation or ''
+        source_description = f'Lectura: {r.get_report_type_display()}'
+
+    return JsonResponse({'title': title, 'body': body, 'source_description': source_description})
+
+
+@login_required
+@require_POST
+def blog_submit(request):
+    """Proxy: valida, recopila datos y los envía a endonautas.cl/blog/api/submit/ server-side."""
+    import requests as _requests
+    from django.conf import settings as _settings
+
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'JSON inválido'}, status=400)
+
+    title = data.get('title', '').strip()
+    body  = data.get('body', '').strip()
+    if not title or not body:
+        return JsonResponse({'error': 'title y body son obligatorios'}, status=400)
+
+    token = getattr(_settings, 'BLOG_SUBMIT_TOKEN', '')
+    url   = getattr(_settings, 'BLOG_PLATFORM_URL', 'https://endonautas.cl') + '/blog/api/submit/'
+
+    if not token:
+        return JsonResponse({'error': 'Blog API no configurado'}, status=503)
+
+    user = request.user
+    payload = {
+        'title':              title,
+        'body':               body,
+        'author_email':       user.email,
+        'author_name':        user.get_full_name() or user.email.split('@')[0],
+        'source_type':        data.get('source_type', 'free'),
+        'source_description': data.get('source_description', ''),
+    }
+
+    try:
+        resp = _requests.post(
+            url,
+            json=payload,
+            headers={'Authorization': f'Bearer {token}'},
+            timeout=10,
+        )
+        if resp.status_code == 201:
+            return JsonResponse({'ok': True})
+        return JsonResponse({'error': 'Error del servidor del blog'}, status=502)
+    except _requests.RequestException:
+        return JsonResponse({'error': 'No se pudo conectar con el blog'}, status=503)

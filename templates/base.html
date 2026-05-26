@@ -758,13 +758,8 @@
       <div style="font-size:0.72rem;color:var(--muted);margin-top:0.35rem;">Puedes editar antes de enviar. Nadie lo verá hasta que sea aprobado.</div>
     </div>
     <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
-      <button onclick="submitBlogModal('guardar')"
-        style="flex:1;padding:0.7rem 1rem;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;font-size:0.85rem;color:var(--muted);font-family:var(--font-ui);cursor:pointer;transition:all 0.2s;"
-        onmouseover="this.style.borderColor='var(--border)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
-        Guardar borrador
-      </button>
-      <button onclick="submitBlogModal('enviar')"
-        style="flex:2;padding:0.7rem 1.25rem;background:rgba(212,168,83,0.15);border:1px solid rgba(212,168,83,0.4);border-radius:10px;font-size:0.85rem;color:rgba(212,168,83,0.9);font-weight:500;font-family:var(--font-ui);cursor:pointer;transition:all 0.2s;"
+      <button onclick="submitBlogModal()"
+        style="flex:1;padding:0.7rem 1.25rem;background:rgba(212,168,83,0.15);border:1px solid rgba(212,168,83,0.4);border-radius:10px;font-size:0.85rem;color:rgba(212,168,83,0.9);font-weight:500;font-family:var(--font-ui);cursor:pointer;transition:all 0.2s;"
         onmouseover="this.style.background='rgba(212,168,83,0.25)'" onmouseout="this.style.background='rgba(212,168,83,0.15)'">
         Enviar para revisión →
       </button>
@@ -775,7 +770,7 @@
   <div id="blog-modal-success" style="display:none;text-align:center;padding:2rem 0;">
     <div style="font-size:1.5rem;margin-bottom:0.75rem;color:rgba(212,168,83,0.8);">✦</div>
     <div id="blog-modal-success-msg" style="font-size:0.95rem;color:var(--text);margin-bottom:0.4rem;"></div>
-    <div style="font-size:0.78rem;color:var(--muted);">Puedes verlo en <a href="/blog/postulaciones/" style="color:rgba(212,168,83,0.8);text-decoration:none;">mis postulaciones</a>.</div>
+    <div style="font-size:0.78rem;color:var(--muted);">Quedará en revisión — Franco lo publica cuando esté listo.</div>
   </div>
 
 </div>
@@ -2101,9 +2096,11 @@ function showToast(msg) {
 
 // ── MODAL POSTULAR AL BLOG ────────────────────────────────────────────────────
 let _blogSource = {};
+let _blogSourceDescription = '';
 
 function openBlogModal(sourceType, sourceId, sourceLabel) {
   _blogSource = { type: sourceType, id: sourceId };
+  _blogSourceDescription = '';
   document.getElementById('blog-modal-source').textContent = sourceLabel || '';
   document.getElementById('blog-modal-loading').style.display = 'block';
   document.getElementById('blog-modal-form').style.display    = 'none';
@@ -2111,13 +2108,14 @@ function openBlogModal(sourceType, sourceId, sourceLabel) {
   document.getElementById('blog-scrim').style.display  = 'block';
   document.getElementById('blog-modal').style.display  = 'block';
 
-  fetch(`/blog/postular/prefill/${sourceType}/${sourceId}/`, {
+  fetch(`/accounts/blog/prefill/${sourceType}/${sourceId}/`, {
     headers: { 'X-Requested-With': 'XMLHttpRequest' }
   })
     .then(r => r.json())
     .then(d => {
       document.getElementById('blog-modal-title').value = d.title || '';
       document.getElementById('blog-modal-body').value  = d.body  || '';
+      _blogSourceDescription = d.source_description || '';
       document.getElementById('blog-modal-loading').style.display = 'none';
       document.getElementById('blog-modal-form').style.display    = 'block';
     })
@@ -2131,31 +2129,41 @@ function closeBlogModal() {
   document.getElementById('blog-modal').style.display  = 'none';
 }
 
-function submitBlogModal(action) {
+function submitBlogModal() {
   const title = document.getElementById('blog-modal-title').value.trim();
   const body  = document.getElementById('blog-modal-body').value.trim();
   if (!title || !body) return;
 
-  const fd = new FormData();
-  fd.append('title', title);
-  fd.append('body', body);
-  fd.append(action, '1');
-  fd.append('csrfmiddlewaretoken', getCsrfToken());
-
-  fetch(`/blog/postular/${_blogSource.type}/${_blogSource.id}/`, {
+  fetch('/accounts/blog/submit/', {
     method: 'POST',
-    body: fd,
-    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+    body: JSON.stringify({
+      title,
+      body,
+      source_type:        _blogSource.type,
+      source_description: _blogSourceDescription,
+    }),
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken':  getCsrfToken(),
+    },
   })
     .then(r => r.json())
     .then(d => {
       if (d.ok) {
         document.getElementById('blog-modal-form').style.display    = 'none';
         document.getElementById('blog-modal-success').style.display = 'block';
-        document.getElementById('blog-modal-success-msg').textContent =
-          action === 'enviar' ? 'Postulación enviada a revisión.' : 'Borrador guardado.';
+        document.getElementById('blog-modal-success-msg').textContent = 'Postulación enviada a revisión.';
         setTimeout(closeBlogModal, 2200);
+      } else {
+        document.getElementById('blog-modal-loading').textContent = d.error || 'Error al enviar.';
+        document.getElementById('blog-modal-loading').style.display = 'block';
+        document.getElementById('blog-modal-form').style.display    = 'none';
       }
+    })
+    .catch(() => {
+      document.getElementById('blog-modal-loading').textContent = 'No se pudo conectar. Intenta de nuevo.';
+      document.getElementById('blog-modal-loading').style.display = 'block';
+      document.getElementById('blog-modal-form').style.display    = 'none';
     });
 }
 </script>

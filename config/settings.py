@@ -151,6 +151,10 @@ HOTMART_CHECKOUT_URLS = {
 DEEPSEEK_BASE_URL = 'https://api.deepseek.com'
 DEEPSEEK_MODEL    = 'deepseek-chat'
 
+# Blog de endonautas.cl — API para postulaciones desde mirrorwork
+BLOG_PLATFORM_URL  = os.getenv('BLOG_PLATFORM_URL', 'https://endonautas.cl')
+BLOG_SUBMIT_TOKEN  = os.getenv('BLOG_SUBMIT_TOKEN', '')
+
 # Fractones mensuales por plan (se reemplazan cada ciclo, expiran)
 TOKEN_PLANS = {
     'free':        {'monthly_fractones': 100,  'client_profiles': 0},

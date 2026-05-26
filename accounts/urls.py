@@ -25,4 +25,7 @@ urlpatterns = [
         template_name='accounts/password_reset_complete.html',
     ), name='password_reset_complete'),
     path('perfil/toggle-public/', views.toggle_profile_public, name='toggle_profile_public'),
+    # Blog bridge — prefill desde modelos locales, submit vía API a endonautas.cl
+    path('blog/prefill/<str:source_type>/<int:source_id>/', views.blog_prefill, name='blog_prefill'),
+    path('blog/submit/', views.blog_submit, name='blog_submit'),
 ]
