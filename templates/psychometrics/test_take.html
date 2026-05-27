@@ -275,6 +275,16 @@
   <div class="take-desc">{{ test.description }}</div>
   {% endif %}
 
+  {% if test.instrument_type == 'clinical' %}
+  <div style="background:rgba(78,205,196,0.05);border:1px solid rgba(78,205,196,0.18);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1.5rem;font-size:0.8rem;color:var(--muted);line-height:1.65;">
+    <strong style="color:var(--text);">Instrumento clínico validado.</strong> Este cuestionario de auto-reporte sigue los ítems del instrumento original. Los resultados son orientativos y <strong>no reemplazan la evaluación de un profesional de salud mental.</strong> Si los resultados te generan preocupación, consulta con un especialista.
+  </div>
+  {% elif test.instrument_type == 'adapted' %}
+  <div style="background:rgba(244,160,53,0.05);border:1px solid rgba(244,160,53,0.18);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1.5rem;font-size:0.8rem;color:var(--muted);line-height:1.65;">
+    <strong style="color:var(--text);">Adaptación orientativa.</strong> Este test es una adaptación del instrumento original — el número o formato de ítems puede diferir. Los resultados son <strong>exploratorios</strong>, no equivalentes a la aplicación clínica del instrumento completo.
+  </div>
+  {% endif %}
+
   <form method="post" action="{% url 'psychometrics:test_submit' test.slug %}" id="test-form">
     {% csrf_token %}
 

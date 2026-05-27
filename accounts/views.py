@@ -52,6 +52,9 @@ def register_view(request):
             first_name=form.cleaned_data['first_name'],
             password=form.cleaned_data['password'],
         )
+        # Grant initial free-plan monthly allocation
+        from tokens.service import renew_monthly
+        renew_monthly(user)
         login(request, user)
         return redirect('onboarding_viaje')
     return render(request, 'accounts/register.html', {'form': form})

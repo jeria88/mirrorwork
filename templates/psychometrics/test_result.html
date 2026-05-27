@@ -104,6 +104,29 @@
 
 {% block content %}
 <div class="container" style="max-width:760px">
+
+  {% if crisis_alert == 'phq-9-cuestionario-de-salud-del-paciente' %}
+  <div style="background:rgba(224,80,80,0.08);border:1px solid rgba(224,80,80,0.35);border-radius:10px;padding:1.1rem 1.25rem;margin-bottom:1.5rem;line-height:1.65;">
+    <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.12em;color:#e05050;margin-bottom:0.5rem;font-weight:500;">Resultado con indicadores severos</div>
+    <p style="font-size:0.88rem;color:var(--text);margin:0 0 0.6rem;">Tus respuestas indican síntomas depresivos severos. El Espejo es un espacio de autoconocimiento, pero <strong style="color:var(--text)">no reemplaza el apoyo clínico</strong> cuando este nivel de malestar está presente.</p>
+    <p style="font-size:0.82rem;color:var(--muted);margin:0 0 0.75rem;">Si estás en Chile y necesitas hablar con alguien ahora:</p>
+    <div style="display:flex;flex-wrap:wrap;gap:0.6rem;">
+      <a href="tel:600360777" style="padding:0.4rem 0.85rem;border:1px solid rgba(224,80,80,0.4);border-radius:100px;font-size:0.78rem;color:#e05050;text-decoration:none;">MINSAL Salud Mental: 600 360 7777</a>
+      <a href="https://www.minsal.cl/salud-mental/" target="_blank" rel="noopener" style="padding:0.4rem 0.85rem;border:1px solid rgba(224,80,80,0.4);border-radius:100px;font-size:0.78rem;color:#e05050;text-decoration:none;">Recursos MINSAL →</a>
+    </div>
+  </div>
+  {% elif crisis_alert == 'gad-7-ansiedad-generalizada' %}
+  <div style="background:rgba(244,160,53,0.08);border:1px solid rgba(244,160,53,0.35);border-radius:10px;padding:1.1rem 1.25rem;margin-bottom:1.5rem;line-height:1.65;">
+    <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--transicion);margin-bottom:0.5rem;font-weight:500;">Resultado con ansiedad severa</div>
+    <p style="font-size:0.88rem;color:var(--text);margin:0 0 0.6rem;">Tus respuestas indican ansiedad severa. Es importante que este nivel de activación tenga apoyo profesional, <strong style="color:var(--text)">además del trabajo interior</strong> que puedes hacer aquí.</p>
+    <p style="font-size:0.82rem;color:var(--muted);margin:0 0 0.75rem;">Si estás en Chile y necesitas orientación:</p>
+    <div style="display:flex;flex-wrap:wrap;gap:0.6rem;">
+      <a href="tel:600360777" style="padding:0.4rem 0.85rem;border:1px solid rgba(244,160,53,0.4);border-radius:100px;font-size:0.78rem;color:var(--transicion);text-decoration:none;">MINSAL Salud Mental: 600 360 7777</a>
+      <a href="https://www.minsal.cl/salud-mental/" target="_blank" rel="noopener" style="padding:0.4rem 0.85rem;border:1px solid rgba(244,160,53,0.4);border-radius:100px;font-size:0.78rem;color:var(--transicion);text-decoration:none;">Recursos MINSAL →</a>
+    </div>
+  </div>
+  {% endif %}
+
   <div class="result-header">
     <div class="breadcrumb">
       <a href="{% url 'psychometrics:test_list' %}">← Tests</a>
@@ -226,6 +249,15 @@
   {% endif %}
 
   {% endwith %}
+
+  {% if is_onboarding_complete %}
+  <div style="background:rgba(78,205,196,0.07);border:1px solid rgba(78,205,196,0.28);border-radius:12px;padding:1.4rem 1.5rem;margin-bottom:2rem;text-align:center;">
+    <div style="font-size:1.8rem;margin-bottom:0.6rem;">◎</div>
+    <div style="font-size:1.05rem;color:var(--text);font-family:var(--font-heading);font-weight:400;margin-bottom:0.4rem;">Completaste tu primer viaje</div>
+    <div style="font-size:0.85rem;color:var(--muted);line-height:1.65;max-width:420px;margin:0 auto 1rem;">Ahora el Espejo tiene contexto sobre ti. Puedes comenzar una conversación sobre cualquier conflicto o patrón que quieras explorar.</div>
+    <a href="{% url 'mirror:home' %}" style="display:inline-block;background:var(--accent);color:#000;font-size:0.88rem;font-weight:500;padding:0.65rem 1.75rem;border-radius:100px;text-decoration:none;letter-spacing:0.04em;transition:opacity 0.2s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">Abrir el Espejo →</a>
+  </div>
+  {% endif %}
 
   <div class="action-row">
     <a href="{% url 'psychometrics:test_list' %}" class="btn btn-ghost">Explorar otros tests</a>

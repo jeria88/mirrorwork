@@ -53,16 +53,9 @@ def _generate_ai_insight(test_name, instrument_type, evaluation):
         return ""
 
 
-def _run_insight_thread(result_pk, user_pk, test_name, instrument_type, evaluation):
-    from django.contrib.auth import get_user_model
-    from tokens.service import spend
+def _run_insight_thread(result_pk, test_name, instrument_type, evaluation):
     insight = _generate_ai_insight(test_name, instrument_type, evaluation)
     if insight:
-        User = get_user_model()
-        try:
-            spend(User.objects.get(pk=user_pk), 'ai_insight')
-        except Exception as e:
-            logger.warning("insight spend failed for user %s: %s", user_pk, e)
         TestResult.objects.filter(pk=result_pk).update(ai_insight=insight)
     else:
         TestResult.objects.filter(pk=result_pk).update(ai_insight="—")
@@ -140,10 +133,47 @@ def test_submit(request, slug):
     return redirect("psychometrics:test_result", pk=result.pk)
 
 
+_ONBOARDING_SLUGS = [
+    'rueda-de-la-vida-integracion',
+    'big-five-inventario-de-personalidad',
+    'heridas-de-la-infancia-lise-bourbeau',
+]
+
+_CRISIS_THRESHOLDS = {
+    'phq-9-cuestionario-de-salud-del-paciente': 20,
+    'gad-7-ansiedad-generalizada': 15,
+}
+
+
 @login_required
 def test_result(request, pk):
     result = get_object_or_404(TestResult, pk=pk, user=request.user)
-    return render(request, "psychometrics/test_result.html", {"result": result})
+
+    # Onboarding completion: credit mission and flag for template
+    is_onboarding_complete = False
+    if result.test.slug in _ONBOARDING_SLUGS:
+        done = (
+            TestResult.objects.filter(user=request.user, test__slug__in=_ONBOARDING_SLUGS)
+            .values('test__slug').distinct().count()
+        )
+        if done >= len(_ONBOARDING_SLUGS):
+            is_onboarding_complete = True
+            from tokens.service import credit_mission
+            credit_mission(request.user, 'onboarding')
+
+    # Crisis safety check for PHQ-9 and GAD-7
+    crisis_alert = None
+    threshold = _CRISIS_THRESHOLDS.get(result.test.slug)
+    if threshold is not None:
+        dims = (result.evaluation or {}).get('dimensiones', [])
+        if dims and dims[0].get('puntos', 0) >= threshold:
+            crisis_alert = result.test.slug
+
+    return render(request, "psychometrics/test_result.html", {
+        "result": result,
+        "is_onboarding_complete": is_onboarding_complete,
+        "crisis_alert": crisis_alert,
+    })
 
 
 @login_required
@@ -176,16 +206,17 @@ def insight_reveal(request, pk):
     if result.ai_insight and result.ai_insight not in ("", "—"):
         return redirect("psychometrics:insight_view", pk=pk)
 
-    from tokens.service import has_balance
+    from tokens.service import has_balance, spend
     if not has_balance(request.user, 'ai_insight'):
         from django.contrib import messages
         messages.error(request, "Fractones insuficientes para generar el insight.")
         return redirect("psychometrics:insight_view", pk=pk)
 
+    spend(request.user, 'ai_insight')
     TestResult.objects.filter(pk=pk).update(ai_insight="processing")
     threading.Thread(
         target=_run_insight_thread,
-        args=(result.pk, request.user.pk, result.test.name, result.test.instrument_type, result.evaluation),
+        args=(result.pk, result.test.name, result.test.instrument_type, result.evaluation),
         daemon=True,
     ).start()
     return redirect("psychometrics:insight_view", pk=pk)
