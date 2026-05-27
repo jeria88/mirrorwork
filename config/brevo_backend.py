@@ -55,4 +55,4 @@ class BrevoEmailBackend(BaseEmailBackend):
         if '<' in address:
             name, email = address.split('<', 1)
             return email.strip().rstrip('>'), name.strip()
-        return address.strip(), 'MirrorWork'
+        return address.strip(), 'Endonautas'

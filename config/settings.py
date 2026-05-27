@@ -113,7 +113,7 @@ if not DEBUG:
 
 EMAIL_BACKEND = 'config.brevo_backend.BrevoEmailBackend'
 BREVO_API_KEY = os.getenv('BREVO_API_KEY', '')
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'MirrorWork <hola@endonautas.cl>')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'Endonautas <hola@endonautas.cl>')
 PASSWORD_RESET_TIMEOUT = 3600  # 1 hora
 
 DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY', '')

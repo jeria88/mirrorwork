@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Nacimiento — MirrorWork{% endblock %}
+{% block title %}Nacimiento — Endonautas{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -555,7 +555,7 @@
       dropdown.style.display = 'block';
       timer = setTimeout(() => {
         fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=6&addressdetails=1&accept-language=es`, {
-          headers: { 'User-Agent': 'MirrorWork/1.0' }
+          headers: { 'User-Agent': 'Endonautas/1.0' }
         })
         .then(r => r.json())
         .then(data => showDropdown(data))
