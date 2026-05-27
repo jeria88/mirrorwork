@@ -1082,7 +1082,7 @@ document.addEventListener('bg:preset', e => setPreset(e.detail));
     if (PROFILE_SECS.has(presetForPath(location.pathname))) setPreset('profile');
   }
   function fetchProfile() {
-    fetch('/accounts/fondo-perfil/', {credentials:'same-origin'})
+    fetch('/fondo-perfil/', {credentials:'same-origin'})
       .then(r => r.ok ? r.json() : null).then(d => { if(d) applyCosmosProfile(d); }).catch(()=>{});
   }
   fetchProfile();
@@ -1206,10 +1206,10 @@ if (!window.__customBgActive && !{ mandala: true, psychedelic: true }[_BH_AESTHE
         Object.assign(P, PRESETS.profile);
       }
     }
-    fetch('/accounts/fondo-perfil/', {credentials:'same-origin'})
+    fetch('/fondo-perfil/', {credentials:'same-origin'})
       .then(r => r.ok ? r.json() : null).then(d => { if(d) applyMandalaProfile(d); }).catch(()=>{});
     document.addEventListener('test:completed', function() {
-      fetch('/accounts/fondo-perfil/', {credentials:'same-origin'})
+      fetch('/fondo-perfil/', {credentials:'same-origin'})
         .then(r => r.ok ? r.json() : null).then(d => { if(d) applyMandalaProfile(d); }).catch(()=>{});
     });
   })();

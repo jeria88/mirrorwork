@@ -897,7 +897,18 @@ def fondo_perfil(request):
 # ── Páginas estáticas / legales ────────────────────────────────────────────────
 
 def precios(request):
-    return render(request, 'precios.html')
+    from django.conf import settings as _s
+    hotmart_urls = getattr(_s, 'HOTMART_CHECKOUT_URLS', {})
+    profile = None
+    if request.user.is_authenticated:
+        try:
+            profile = request.user.profile
+        except Exception:
+            pass
+    return render(request, 'precios.html', {
+        'hotmart_urls': hotmart_urls,
+        'profile': profile,
+    })
 
 def terminos(request):
     return render(request, 'terminos.html')
