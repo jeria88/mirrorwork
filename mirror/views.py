@@ -619,6 +619,31 @@ def _extract_closing_question(messages):
     return ""
 
 
+def _extract_pattern_revealed(messages):
+    """Extrae una frase que describe el patrón identificado en la sesión.
+    Busca en los mensajes del asistente frases que contengan palabras clave
+    de patrón/origen. Usa el último mensaje del asistente como fallback."""
+    pattern_keywords = ('patrón', 'origen', 'mecanismo', 'raíz', 'núcleo',
+                        'herida', 'sombra', 'máscara', 'evitación', 'vínculo')
+    for msg in reversed(messages):
+        if msg.get('role') != 'assistant':
+            continue
+        text = msg.get('content', '')
+        sentences = re.split(r'(?<=[.!?])\s+', text)
+        for s in sentences:
+            low = s.lower()
+            if any(kw in low for kw in pattern_keywords) and len(s) > 30:
+                return s.strip()
+    # fallback: primera oración del último mensaje del asistente
+    for msg in reversed(messages):
+        if msg.get('role') == 'assistant':
+            text = msg.get('content', '').strip()
+            sentences = re.split(r'(?<=[.!?])\s+', text)
+            if sentences:
+                return sentences[0].strip()
+    return ""
+
+
 # ── Views ─────────────────────────────────────────────────────────────────────
 
 @login_required
@@ -720,11 +745,15 @@ def espejo_send(request):
     brain_context = _get_brain_context(request.user)
     is_first_exchange = len(sesion.messages) <= 2
 
-    # Verificar y descontar fractones ANTES del API call
+    # Primera sesión del usuario = gratis (no descuenta fractones)
     from tokens.service import spend, credit_mission, has_balance
-    if not has_balance(request.user, 'espejo_exchange'):
-        return JsonResponse({"error": "Fractones insuficientes."}, status=402)
-    spend(request.user, 'espejo_exchange')
+    prior_sessions = ConflictSession.objects.filter(user=request.user).exclude(pk=sesion.pk).exists()
+    is_free_session = not prior_sessions
+
+    if not is_free_session:
+        if not has_balance(request.user, 'espejo_exchange'):
+            return JsonResponse({"error": "Fractones insuficientes."}, status=402)
+        spend(request.user, 'espejo_exchange')
 
     # Cerrar la conexión DB antes del API call largo — evita NO_SOCKET/TCP_ABORT en Railway
     # (Railway mata conexiones Postgres idle durante los 20-60s que tarda DeepSeek)
@@ -761,11 +790,16 @@ def espejo_send(request):
 def espejo_archivar(request, pk):
     sesion = get_object_or_404(ConflictSession, pk=pk, user=request.user)
     sesion.status = "archived"
+    msgs = sesion.messages or []
     if not sesion.pregunta_cierre:
-        q = _extract_closing_question(sesion.messages or [])
+        q = _extract_closing_question(msgs)
         if q:
             sesion.pregunta_cierre = q
-    sesion.save(update_fields=["status", "pregunta_cierre"])
+    if not sesion.pattern_revealed:
+        p = _extract_pattern_revealed(msgs)
+        if p:
+            sesion.pattern_revealed = p
+    sesion.save(update_fields=["status", "pregunta_cierre", "pattern_revealed"])
     threading.Thread(
         target=_update_brain_async,
         args=[sesion.pk, request.user.pk],
