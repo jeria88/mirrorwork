@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% block title %}Política de privacidad — Endonautas{% endblock %}
+
+{% block extra_head %}
+<style>
+  .legal-wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 6rem;
+  }
+  .legal-wrap h1 {
+    font-family: var(--font-heading);
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.01em;
+  }
+  .legal-fecha {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 3rem;
+  }
+  .legal-wrap h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 2.5rem;
+    margin-bottom: 0.75rem;
+    color: var(--text);
+  }
+  .legal-wrap p, .legal-wrap li {
+    font-size: 0.88rem;
+    color: rgba(255,255,255,0.65);
+    line-height: 1.85;
+  }
+  .legal-wrap ul {
+    list-style: disc;
+    padding-left: 1.5rem;
+    margin-top: 0.5rem;
+  }
+  .legal-wrap ul li { margin-bottom: 0.35rem; }
+  .legal-separator {
+    height: 1px;
+    background: rgba(255,255,255,0.09);
+    margin: 2rem 0;
+  }
+  .legal-contact {
+    background: rgba(0,0,0,0.88);
+    border: 1px solid rgba(255,255,255,0.13);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 3rem;
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+  .legal-highlight {
+    background: rgba(78,205,196,0.06);
+    border: 1px solid rgba(78,205,196,0.2);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.75;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="legal-wrap">
+  <h1>Política de privacidad</h1>
+  <div class="legal-fecha">Última actualización: mayo 2026 · Versión 1.0</div>
+
+  <p>
+    Esta política describe cómo Franco Jeria Castro, operador de la plataforma Endonautas (<strong>app.endonautas.cl</strong>), recopila, usa y protege los datos personales de sus usuarios, en cumplimiento con la Ley 19.628 sobre Protección de la Vida Privada de Chile.
+  </p>
+
+  <div class="legal-highlight">
+    Endonautas no vende ni cede datos personales a terceros con fines comerciales. Los datos que entregues permanecen en el sistema y se usan exclusivamente para la entrega del servicio que solicitaste.
+  </div>
+
+  <div class="legal-separator"></div>
+
+  <h2>1. Datos que recopilamos</h2>
+  <p>
+    Al registrarte y usar la plataforma, recopilamos los siguientes datos:
+  </p>
+  <ul>
+    <li><strong>Datos de cuenta:</strong> nombre, email, contraseña (almacenada con hash, nunca en texto plano).</li>
+    <li><strong>Datos de uso:</strong> respuestas a tests psicométricos, resultados de evaluaciones, historial de sesiones con el Espejo de Conflictos.</li>
+    <li><strong>Datos de perfil:</strong> preferencias visuales, información de onboarding (área de conflicto, orientación de viaje interior) que ingresas voluntariamente.</li>
+    <li><strong>Datos de transacción:</strong> estado del plan (free/navegante/practicante) y saldo de fractones. Los datos de pago son procesados directamente por Hotmart — Endonautas no almacena datos de tarjetas.</li>
+    <li><strong>Datos técnicos:</strong> dirección IP, tipo de navegador, páginas visitadas (solo para diagnóstico técnico y seguridad).</li>
+  </ul>
+
+  <h2>2. Cómo usamos los datos</h2>
+  <p>
+    Usamos los datos recopilados exclusivamente para:
+  </p>
+  <ul>
+    <li>Entregarte el servicio: generar resultados de tests, personalizar el fondo dinámico, procesar sesiones del Espejo.</li>
+    <li>Mantener tu cuenta activa y gestionar tu suscripción.</li>
+    <li>Enviarte emails transaccionales (restablecimiento de contraseña, confirmación de pago, alertas de seguridad).</li>
+    <li>Mejorar el servicio de forma agregada y anónima — nunca a nivel individual sin tu consentimiento.</li>
+  </ul>
+
+  <h2>3. Datos sensibles</h2>
+  <p>
+    Los tests psicométricos que completes pueden incluir información sobre tu estado emocional, psicológico o de salud mental. Estos datos se consideran sensibles conforme a la Ley 19.628.
+  </p>
+  <p>
+    Nos comprometemos a:
+  </p>
+  <ul>
+    <li>No compartir estos datos con terceros sin tu consentimiento expreso.</li>
+    <li>Almacenarlos con medidas de seguridad técnica razonables.</li>
+    <li>Permitirte eliminarlos si así lo solicitas (ver sección 6).</li>
+  </ul>
+  <p>
+    Si eres usuario del plan Practicante y gestionas perfiles de clientes, eres responsable de obtener el consentimiento informado de cada cliente antes de cargarle datos a la plataforma.
+  </p>
+
+  <h2>4. Inteligencia artificial y terceros</h2>
+  <p>
+    Endonautas usa la API de DeepSeek para generar insights y procesar sesiones del Espejo. Cuando usas estas funciones, fragmentos de tus resultados o mensajes pueden enviarse a la API de DeepSeek para procesamiento. Consulta la política de privacidad de DeepSeek en <strong>deepseek.com</strong> para conocer cómo manejan esos datos.
+  </p>
+  <p>
+    Usamos las siguientes herramientas externas:
+  </p>
+  <ul>
+    <li><strong>Hotmart</strong> — procesamiento de pagos.</li>
+    <li><strong>Railway</strong> — infraestructura y hosting.</li>
+    <li><strong>Brevo</strong> — envío de emails transaccionales.</li>
+    <li><strong>DeepSeek API</strong> — generación de insights con IA.</li>
+  </ul>
+  <p>
+    Cada uno de estos proveedores tiene sus propias políticas de privacidad y tratamos de elegir proveedores con estándares robustos. No compartimos datos de usuarios con ningún otro tercero.
+  </p>
+
+  <h2>5. Cookies y almacenamiento local</h2>
+  <p>
+    Usamos cookies de sesión estrictamente necesarias para mantener tu inicio de sesión activo. No usamos cookies de seguimiento ni publicidad. No instalamos scripts de análisis de comportamiento de terceros (como Google Analytics).
+  </p>
+
+  <h2>6. Tus derechos</h2>
+  <p>
+    Conforme a la Ley 19.628 tienes derecho a:
+  </p>
+  <ul>
+    <li><strong>Acceder</strong> a todos los datos que tenemos sobre ti.</li>
+    <li><strong>Rectificar</strong> datos incorrectos o desactualizados.</li>
+    <li><strong>Eliminar</strong> tu cuenta y todos tus datos personales.</li>
+    <li><strong>Oponerte</strong> al uso de tus datos para cualquier fin que no sea la entrega directa del servicio.</li>
+  </ul>
+  <p>
+    Para ejercer cualquiera de estos derechos, escríbenos a <strong>fjeriacastro@gmail.com</strong> indicando tu email de registro. Respondemos en un plazo máximo de 15 días hábiles.
+  </p>
+
+  <h2>7. Retención de datos</h2>
+  <p>
+    Conservamos tus datos mientras tu cuenta esté activa. Si solicitas la eliminación de tu cuenta, borramos todos los datos personales en un plazo de 30 días, excepto los que estemos obligados a conservar por ley (por ejemplo, registros de transacciones comerciales por el plazo que exige la normativa tributaria).
+  </p>
+
+  <h2>8. Seguridad</h2>
+  <p>
+    Aplicamos medidas de seguridad técnica razonables: cifrado HTTPS en todas las comunicaciones, contraseñas almacenadas con hash bcrypt, acceso a la base de datos restringido por roles. Sin embargo, ningún sistema es 100% seguro — si detectas alguna vulnerabilidad, repórtala a nuestro email.
+  </p>
+
+  <h2>9. Menores de edad</h2>
+  <p>
+    Endonautas está diseñado para adultos. No recopilamos intencionalmente datos de personas menores de 18 años. Si detectamos que una cuenta pertenece a un menor, la suspenderemos y eliminaremos los datos asociados.
+  </p>
+
+  <h2>10. Cambios a esta política</h2>
+  <p>
+    Podemos actualizar esta política para reflejar cambios en el servicio o en la normativa. Los cambios relevantes se notificarán por email con al menos 15 días de anticipación. La versión vigente siempre estará disponible en <strong>app.endonautas.cl/privacidad/</strong>.
+  </p>
+
+  <div class="legal-contact">
+    <strong>Responsable de datos</strong><br>
+    Franco Jeria Castro<br>
+    fjeriacastro@gmail.com<br>
+    Santiago, Chile
+  </div>
+</div>
+{% endblock %}

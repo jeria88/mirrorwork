@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% block title %}Términos de uso — Endonautas{% endblock %}
+
+{% block extra_head %}
+<style>
+  .legal-wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 6rem;
+  }
+  .legal-wrap h1 {
+    font-family: var(--font-heading);
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.01em;
+  }
+  .legal-fecha {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 3rem;
+  }
+  .legal-wrap h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 2.5rem;
+    margin-bottom: 0.75rem;
+    color: var(--text);
+  }
+  .legal-wrap p, .legal-wrap li {
+    font-size: 0.88rem;
+    color: rgba(255,255,255,0.65);
+    line-height: 1.85;
+  }
+  .legal-wrap ul {
+    list-style: disc;
+    padding-left: 1.5rem;
+    margin-top: 0.5rem;
+  }
+  .legal-wrap ul li { margin-bottom: 0.35rem; }
+  .legal-separator {
+    height: 1px;
+    background: rgba(255,255,255,0.09);
+    margin: 2rem 0;
+  }
+  .legal-contact {
+    background: rgba(0,0,0,0.88);
+    border: 1px solid rgba(255,255,255,0.13);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 3rem;
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="legal-wrap">
+  <h1>Términos de uso</h1>
+  <div class="legal-fecha">Última actualización: mayo 2026 · Versión 1.0</div>
+
+  <p>
+    Estos términos regulan el uso de la plataforma Endonautas, operada por Franco Jeria Castro, con domicilio en Chile. Al registrarte y usar la plataforma, aceptas estas condiciones en su totalidad.
+  </p>
+
+  <div class="legal-separator"></div>
+
+  <h2>1. Descripción del servicio</h2>
+  <p>
+    Endonautas es una plataforma digital de autoconocimiento que ofrece tests psicométricos, herramientas de reflexión asistida por inteligencia artificial, y recursos de exploración interior. El servicio se entrega íntegramente en línea a través de <strong>app.endonautas.cl</strong>.
+  </p>
+  <p>
+    <strong>Este servicio no constituye terapia psicológica ni asesoría clínica</strong>, y no reemplaza la atención de un profesional de salud mental. Si estás en una situación de crisis o riesgo para tu salud, contacta a un profesional o llama al Fono Salud Responde: <strong>600 360 7777</strong> (MINSAL Chile, disponible las 24 horas).
+  </p>
+
+  <h2>2. Registro y cuenta</h2>
+  <p>
+    Para acceder a las funciones de la plataforma debes registrarte con un email válido y una contraseña. Eres responsable de mantener la confidencialidad de tus credenciales. Una vez registrado, puedes gestionar tu cuenta desde la sección de perfil.
+  </p>
+  <p>
+    Endonautas se reserva el derecho de suspender o eliminar cuentas que violen estos términos.
+  </p>
+
+  <h2>3. Planes y pagos</h2>
+  <p>
+    La plataforma ofrece un plan gratuito y planes de suscripción mensual (Navegante, Practicante) que se procesan a través de Hotmart. Al suscribirte:
+  </p>
+  <ul>
+    <li>El cobro es mensual y se realiza automáticamente hasta que canceles.</li>
+    <li>Puedes cancelar en cualquier momento desde tu cuenta en Hotmart, sin penalización.</li>
+    <li>Al cancelar, tu plan vuelve a Libre al término del período pagado.</li>
+    <li>No se realizan reembolsos por fracciones del período en curso, salvo error del sistema.</li>
+  </ul>
+
+  <h2>4. Fractones</h2>
+  <p>
+    Los fractones son la unidad de uso interno de la plataforma. No tienen valor monetario ni son canjeables por dinero. Los fractones mensuales del plan expiran al renovarse cada ciclo; los fractones permanentes (ganados por actividad o packs comprados) no expiran mientras la cuenta esté activa.
+  </p>
+
+  <h2>5. Uso permitido</h2>
+  <p>
+    Al usar la plataforma, aceptas que no vas a:
+  </p>
+  <ul>
+    <li>Usar el servicio con fines ilegales o que violen derechos de terceros.</li>
+    <li>Intentar acceder a datos de otros usuarios sin autorización.</li>
+    <li>Automatizar o raspar datos de la plataforma mediante bots o scripts.</li>
+    <li>Reproducir o distribuir los instrumentos psicométricos sin autorización.</li>
+    <li>Compartir el acceso de tu cuenta con terceros (salvo funcionalidades expresamente diseñadas para ello).</li>
+  </ul>
+
+  <h2>6. Propiedad intelectual</h2>
+  <p>
+    El contenido generado por Endonautas — textos, lógica de evaluación, diseño visual, código fuente, textos de los tests adaptados y personalizados — es propiedad de Franco Jeria Castro y está protegido por la Ley 17.336 de Propiedad Intelectual de Chile. Los instrumentos de dominio público incluidos en la plataforma se citan con su fuente correspondiente.
+  </p>
+
+  <h2>7. Limitación de responsabilidad</h2>
+  <p>
+    Endonautas pone a disposición herramientas de autoexploración con fines educativos y de reflexión personal. La plataforma no garantiza resultados específicos ni asume responsabilidad por decisiones que el usuario tome basándose en sus resultados. El uso del servicio es responsabilidad exclusiva del usuario.
+  </p>
+  <p>
+    En ningún caso Endonautas será responsable por daños indirectos, pérdida de datos o interrupción del servicio por causas fuera de su control razonable.
+  </p>
+
+  <h2>8. Modificaciones</h2>
+  <p>
+    Endonautas puede modificar estos términos en cualquier momento. Los cambios se notificarán por email registrado con al menos 15 días de anticipación. Si continúas usando el servicio después de la fecha de vigencia, se entiende que aceptas los cambios.
+  </p>
+
+  <h2>9. Ley aplicable</h2>
+  <p>
+    Estos términos se rigen por las leyes de la República de Chile. Cualquier controversia se someterá a los tribunales ordinarios de justicia de la ciudad de Santiago.
+  </p>
+
+  <div class="legal-contact">
+    <strong>Contacto</strong><br>
+    Franco Jeria Castro · fjeriacastro@gmail.com<br>
+    Para consultas sobre tu cuenta, datos o suscripción, escríbenos al email indicado.
+  </div>
+</div>
+{% endblock %}

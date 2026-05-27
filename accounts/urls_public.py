@@ -16,4 +16,8 @@ urlpatterns = [
     path('vr/', views.vr_home, name='vr_home'),
     path('vr/test/<slug:slug>/', views.vr_test, name='vr_test'),
     path('perfil/aesthetic/', views.set_aesthetic, name='set_aesthetic'),
+    path('fondo-perfil/', views.fondo_perfil, name='fondo_perfil'),
+    path('precios/', views.precios, name='precios'),
+    path('terminos/', views.terminos, name='terminos'),
+    path('privacidad/', views.privacidad, name='privacidad'),
 ]

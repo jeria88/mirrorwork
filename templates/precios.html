@@ -1,0 +1,430 @@
+{% extends 'base.html' %}
+{% block title %}Planes — Endonautas{% endblock %}
+
+{% block extra_head %}
+<style>
+  .precios-wrap {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 6rem;
+  }
+
+  /* ── Hero ── */
+  .precios-hero {
+    text-align: center;
+    margin-bottom: 5rem;
+  }
+  .precios-eyebrow {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+  }
+  .precios-title {
+    font-family: var(--font-heading);
+    font-size: clamp(2.2rem, 6vw, 3.8rem);
+    font-weight: 400;
+    line-height: 1.15;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.01em;
+  }
+  .precios-title em { font-style: italic; color: var(--muted); }
+  .precios-sub {
+    font-size: 1rem;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.8;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  /* ── Grid de planes ── */
+  .planes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .plan-card {
+    background: rgba(0,0,0,0.88);
+    border: 1px solid rgba(255,255,255,0.13);
+    border-radius: 20px;
+    padding: 2.25rem 2rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  .plan-card:hover { border-color: rgba(255,255,255,0.22); }
+  .plan-card.destacado {
+    border-color: rgba(124,109,250,0.45);
+    background: linear-gradient(160deg, rgba(0,0,0,0.92), rgba(124,109,250,0.06));
+  }
+  .plan-card.destacado:hover { border-color: rgba(124,109,250,0.7); }
+
+  .plan-badge {
+    position: absolute;
+    top: -13px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent2);
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 0.22rem 0.9rem;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .plan-nombre {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+
+  .plan-descripcion {
+    font-size: 0.83rem;
+    color: var(--muted);
+    line-height: 1.65;
+    flex: 1;
+  }
+
+  .plan-precio {
+    font-size: 2.4rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .plan-precio sub {
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--muted);
+    vertical-align: baseline;
+  }
+  .plan-precio .moneda {
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: var(--muted);
+    vertical-align: super;
+    margin-right: 0.1em;
+  }
+
+  .plan-fractones {
+    font-size: 0.78rem;
+    color: var(--accent);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+
+  .plan-separador {
+    height: 1px;
+    background: rgba(255,255,255,0.09);
+    margin: 0.25rem 0;
+  }
+
+  .plan-items {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+  .plan-items li {
+    font-size: 0.83rem;
+    color: rgba(255,255,255,0.7);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    line-height: 1.5;
+  }
+  .plan-items li::before {
+    content: "✦";
+    color: var(--accent);
+    font-size: 0.6rem;
+    flex-shrink: 0;
+    margin-top: 0.3em;
+  }
+  .plan-items li.inactivo { color: rgba(255,255,255,0.25); }
+  .plan-items li.inactivo::before { color: rgba(255,255,255,0.15); content: "—"; }
+
+  .plan-cta {
+    display: block;
+    text-align: center;
+    padding: 0.85rem 1rem;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    transition: opacity 0.15s, background 0.15s;
+    text-decoration: none;
+    margin-top: auto;
+    letter-spacing: 0.02em;
+  }
+  .plan-cta:hover { opacity: 0.88; }
+  .plan-cta.libre {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: var(--text);
+  }
+  .plan-cta.navegante {
+    background: rgba(78,205,196,0.12);
+    border: 1px solid rgba(78,205,196,0.35);
+    color: var(--accent);
+  }
+  .plan-cta.practicante {
+    background: var(--accent2);
+    color: #fff;
+  }
+
+  /* ── Nota al pie ── */
+  .precios-nota {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-bottom: 5rem;
+    line-height: 1.8;
+  }
+
+  /* ── ¿Qué son los fractones? ── */
+  .fractones-explainer {
+    background: rgba(0,0,0,0.88);
+    border: 1px solid rgba(255,255,255,0.13);
+    border-radius: 20px;
+    padding: 2.5rem 2.25rem;
+    max-width: 720px;
+    margin: 0 auto 5rem;
+  }
+  .fractones-titulo {
+    font-family: var(--font-heading);
+    font-size: 1.55rem;
+    font-weight: 400;
+    margin-bottom: 1rem;
+    letter-spacing: -0.01em;
+  }
+  .fractones-texto {
+    font-size: 0.88rem;
+    color: rgba(255,255,255,0.65);
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+  }
+  .fractones-tabla {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+  @media (max-width: 540px) { .fractones-tabla { grid-template-columns: 1fr; } }
+  .fracton-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0.75rem;
+    background: rgba(255,255,255,0.04);
+    border-radius: 8px;
+    font-size: 0.8rem;
+  }
+  .fracton-accion { color: rgba(255,255,255,0.65); }
+  .fracton-costo { color: var(--accent); font-weight: 500; font-size: 0.75rem; }
+
+  /* ── FAQ ── */
+  .faq-section {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  .faq-titulo {
+    font-family: var(--font-heading);
+    font-size: 1.55rem;
+    font-weight: 400;
+    margin-bottom: 2rem;
+    letter-spacing: -0.01em;
+  }
+  .faq-item {
+    border-bottom: 1px solid rgba(255,255,255,0.09);
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .faq-item:last-child { border-bottom: none; }
+  .faq-q {
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+  }
+  .faq-a {
+    font-size: 0.83rem;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="precios-wrap">
+
+  <div class="precios-hero">
+    <div class="precios-eyebrow">Planes</div>
+    <h1 class="precios-title">
+      El mapa interior<br><em>no tiene precio fijo.</em>
+    </h1>
+    <p class="precios-sub">
+      Empieza gratis. Profundiza a tu ritmo. Cada plan da acceso al mismo sistema de autoconocimiento — lo que cambia es la energía disponible para el viaje.
+    </p>
+  </div>
+
+  <div class="planes-grid">
+
+    <!-- LIBRE -->
+    <div class="plan-card">
+      <div class="plan-nombre">Libre</div>
+      <p class="plan-descripcion">
+        Para explorar el sistema sin compromiso. Suficiente para hacer los tests del onboarding y tener una primera sesión con el Espejo.
+      </p>
+      <div class="plan-precio">
+        <span class="moneda">$</span>0<sub>/mes</sub>
+      </div>
+      <div class="plan-fractones">100 fractones al registrarte</div>
+      <div class="plan-separador"></div>
+      <ul class="plan-items">
+        <li>Todos los tests psicométricos disponibles</li>
+        <li>Fondo dinámico basado en tu perfil</li>
+        <li>Sesiones con el Espejo de Conflictos</li>
+        <li>Lecturas de insight con IA</li>
+        <li class="inactivo">Sin renovación mensual de fractones</li>
+        <li class="inactivo">Sin perfiles de clientes</li>
+      </ul>
+      {% if user.is_authenticated %}
+        <a href="{% url 'dashboard' %}" class="plan-cta libre">Ir al inicio</a>
+      {% else %}
+        <a href="{% url 'register' %}" class="plan-cta libre">Empezar gratis</a>
+      {% endif %}
+    </div>
+
+    <!-- NAVEGANTE -->
+    <div class="plan-card">
+      <div class="plan-nombre">Navegante</div>
+      <p class="plan-descripcion">
+        Para quienes ya saben que esto no se hace en una sesión. Cubre un proceso completo de exploración mes a mes.
+      </p>
+      <div class="plan-precio">
+        <span class="moneda">$</span>12<sub>USD/mes</sub>
+      </div>
+      <div class="plan-fractones">600 fractones cada mes</div>
+      <div class="plan-separador"></div>
+      <ul class="plan-items">
+        <li>Todo lo del plan Libre</li>
+        <li>600 fractones renovados cada mes</li>
+        <li>~150 sesiones del Espejo o ~30 lecturas de insight</li>
+        <li>El fondo evoluciona con cada test nuevo</li>
+        <li class="inactivo">Sin perfiles de clientes</li>
+      </ul>
+      {% if user.is_authenticated and profile.plan == 'navegante' %}
+        <span class="plan-cta navegante" style="cursor:default;opacity:0.6;">Plan actual</span>
+      {% else %}
+        <a href="{{ hotmart_urls.navegante }}" class="plan-cta navegante" target="_blank" rel="noopener">
+          Suscribirme →
+        </a>
+      {% endif %}
+    </div>
+
+    <!-- PRACTICANTE -->
+    <div class="plan-card destacado">
+      <span class="plan-badge">Para profesionales</span>
+      <div class="plan-nombre">Practicante</div>
+      <p class="plan-descripcion">
+        Para terapeutas, coaches y facilitadores que quieren integrar el sistema en su práctica. Incluye perfiles de clientes y fractones para acompañarlos.
+      </p>
+      <div class="plan-precio">
+        <span class="moneda">$</span>39<sub>USD/mes</sub>
+      </div>
+      <div class="plan-fractones">3.000 fractones cada mes</div>
+      <div class="plan-separador"></div>
+      <ul class="plan-items">
+        <li>Todo lo del plan Navegante</li>
+        <li>Hasta 10 perfiles de clientes</li>
+        <li>Acceso de clientes con enlace único</li>
+        <li>Ver resultados e insights de tus clientes</li>
+        <li>150 fractones adicionales por perfil de cliente</li>
+      </ul>
+      {% if user.is_authenticated and profile.plan == 'practicante' %}
+        <span class="plan-cta practicante" style="cursor:default;opacity:0.6;">Plan actual</span>
+      {% else %}
+        <a href="{{ hotmart_urls.practicante }}" class="plan-cta practicante" target="_blank" rel="noopener">
+          Suscribirme →
+        </a>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <p class="precios-nota">
+    Pago mensual por Hotmart — tarjeta, transferencia u otros métodos disponibles en tu país.<br>
+    Cancelación en cualquier momento desde tu cuenta Hotmart, sin penalización.<br>
+    Usa el mismo email con el que te registraste en Endonautas para activar el plan automáticamente.
+  </p>
+
+  <!-- ¿Qué son los fractones? -->
+  <div class="fractones-explainer">
+    <div class="fractones-titulo">¿Qué son los fractones?</div>
+    <p class="fractones-texto">
+      Los fractones son la unidad de energía del sistema. No son puntos de fidelidad ni créditos de consumo — son el registro de cuánto has invertido en el proceso. Se obtienen completando tests, usando el Espejo y avanzando en el mapa. Se gastan en las funciones que requieren más profundidad.
+    </p>
+    <div class="fractones-tabla">
+      <div class="fracton-row">
+        <span class="fracton-accion">Completar un test</span>
+        <span class="fracton-costo">+8 fractones</span>
+      </div>
+      <div class="fracton-row">
+        <span class="fracton-accion">Completar una dimensión completa</span>
+        <span class="fracton-costo">+25 fractones</span>
+      </div>
+      <div class="fracton-row">
+        <span class="fracton-accion">Sesión en el Espejo (1 intercambio)</span>
+        <span class="fracton-costo">−4 fractones</span>
+      </div>
+      <div class="fracton-row">
+        <span class="fracton-accion">Lectura de insight con IA</span>
+        <span class="fracton-costo">−20 fractones</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="faq-section">
+    <div class="faq-titulo">Preguntas frecuentes</div>
+
+    <div class="faq-item">
+      <div class="faq-q">¿El plan Libre tiene límite de tiempo?</div>
+      <div class="faq-a">No. Los 100 fractones iniciales son tuyos para siempre. El plan Libre no caduca — simplemente no se renueva. Cuando se agoten, puedes suscribirte o comprar un pack adicional.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">¿Los fractones no usados se acumulan mes a mes?</div>
+      <div class="faq-a">Los fractones mensuales del plan no se acumulan: se reemplazan cada ciclo. Los fractones ganados haciendo el proceso (por tests completados, misiones, etc.) son permanentes y no expiran.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">¿Qué pasa si cancelo la suscripción?</div>
+      <div class="faq-a">Tu cuenta vuelve al plan Libre. Conservas todo el historial de tests y resultados, y los fractones permanentes que hayas ganado. No se elimina ningún dato.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">¿Los packs de fractones son distintos a los planes?</div>
+      <div class="faq-a">Sí. Si prefieres no suscribirte, puedes comprar fractones permanentes en packs de 200, 600 o 2000. No caducan y funcionan igual que los del plan.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">¿Qué necesito para usar el plan Practicante con clientes?</div>
+      <div class="faq-a">Solo tu cuenta suscrita. Desde el panel de practicante creas un perfil para cada cliente y compartes el enlace de acceso. El cliente no necesita crear cuenta — entra directo al test o sesión que le asignes.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">¿Esto es terapia?</div>
+      <div class="faq-a">No. Endonautas es un sistema de autoconocimiento — una herramienta de cartografía interior, no un servicio clínico. Los tests incluyen instrumentos validados usados en contexto terapéutico, pero la plataforma no reemplaza un proceso terapéutico con un profesional.</div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

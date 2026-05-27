@@ -276,3 +276,12 @@
   </div>
 </div>
 {% endblock %}
+{% block extra_body %}
+{{ block.super }}
+<script>
+  // Notifica al fondo dinámico que hay un resultado nuevo
+  document.addEventListener('DOMContentLoaded', function() {
+    document.dispatchEvent(new CustomEvent('test:completed'));
+  });
+</script>
+{% endblock %}

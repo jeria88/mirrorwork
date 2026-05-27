@@ -805,3 +805,102 @@ def blog_submit(request):
         return JsonResponse({'error': 'Error del servidor del blog'}, status=502)
     except _requests.RequestException:
         return JsonResponse({'error': 'No se pudo conectar con el blog'}, status=503)
+
+
+# ── Fondo dinámico ─────────────────────────────────────────────────────────────
+
+@login_required
+def fondo_perfil(request):
+    """Calcula parámetros del fondo visual basados en el perfil psicométrico del usuario."""
+    from psychometrics.models import TestResult, Test
+
+    results = list(
+        TestResult.objects.filter(user=request.user)
+        .values('evaluation', 'test__id')
+        .distinct()
+    )
+    total_tests = Test.objects.filter(active=True).count()
+
+    pol = {'luz_intensa': 0, 'luz': 0, 'transicion': 0, 'sombra': 0, 'sombra_dominante': 0}
+    total_dims = 0
+    unique_tests = set()
+
+    for r in results:
+        unique_tests.add(r['test__id'])
+        ev = r['evaluation'] or {}
+        for dim in ev.get('dimensiones', []):
+            p = dim.get('polaridad')
+            if p and p in pol:
+                pol[p] += 1
+                total_dims += 1
+
+    if total_dims < 3:
+        return JsonResponse({'ready': False})
+
+    luz = (pol['luz_intensa'] + pol['luz']) / total_dims
+    sombra = (pol['sombra'] + pol['sombra_dominante']) / total_dims
+    transicion = pol['transicion'] / total_dims
+    profundidad = min(len(unique_tests) / max(total_tests, 1), 1.0)
+
+    # Paleta mandala según balance luz/sombra
+    if luz >= 0.45:
+        mandala_palette = 'aurora'
+    elif sombra >= 0.45:
+        mandala_palette = 'nebula'
+    else:
+        mandala_palette = 'arcano'
+
+    cosmos_desktop = {
+        'bhr':        round(4.0 + sombra * 2.5,          2),
+        'density':    round(0.32 + (sombra - luz) * 0.28, 3),
+        'sizeMult':   round(1.80 + luz * 0.90,            2),
+        'bloom':      round(6.0 + sombra * 5.0,           1),
+        'speedInner': round(2.5 + profundidad * 1.8,      2),
+        'speedOuter': 0.05,
+        'camZ':       149,
+        'camAng':     round(16 + profundidad * 22),
+    }
+    cosmos_mobile = {
+        'bhr':        round(12.4 + sombra * 3.5,          2),
+        'density':    round(1.00 + (sombra - luz) * 0.30, 3),
+        'sizeMult':   round(2.15 + luz * 0.70,            2),
+        'bloom':      round(6.0 + sombra * 4.0,           1),
+        'speedInner': round(1.95 + profundidad * 1.2,     2),
+        'speedOuter': 0.0,
+        'camZ':       116,
+        'camAng':     round(22 + profundidad * 18),
+    }
+    mandala_preset = {
+        'zoom':     1.84,
+        'symmetry': 6,
+        'layers':   5,
+        'speed':    round(1.20 + profundidad * 0.45, 2),
+        'alpha':    round(40 + luz * 12 - sombra * 8),
+        'detail':   5 if profundidad > 0.4 else 4,
+        'tilt':     0,
+        'palette':  mandala_palette,
+    }
+
+    return JsonResponse({
+        'ready':   True,
+        'cosmos':  {'desktop': cosmos_desktop, 'mobile': cosmos_mobile},
+        'mandala': mandala_preset,
+        'stats': {
+            'luz':        round(luz * 100),
+            'sombra':     round(sombra * 100),
+            'transicion': round(transicion * 100),
+            'profundidad': round(profundidad * 100),
+        },
+    })
+
+
+# ── Páginas estáticas / legales ────────────────────────────────────────────────
+
+def precios(request):
+    return render(request, 'precios.html')
+
+def terminos(request):
+    return render(request, 'terminos.html')
+
+def privacidad(request):
+    return render(request, 'privacidad.html')

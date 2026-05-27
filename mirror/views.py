@@ -720,6 +720,12 @@ def espejo_send(request):
     brain_context = _get_brain_context(request.user)
     is_first_exchange = len(sesion.messages) <= 2
 
+    # Verificar y descontar fractones ANTES del API call
+    from tokens.service import spend, credit_mission, has_balance
+    if not has_balance(request.user, 'espejo_exchange'):
+        return JsonResponse({"error": "Fractones insuficientes."}, status=402)
+    spend(request.user, 'espejo_exchange')
+
     # Cerrar la conexión DB antes del API call largo — evita NO_SOCKET/TCP_ABORT en Railway
     # (Railway mata conexiones Postgres idle durante los 20-60s que tarda DeepSeek)
     from django.db import connection as _db_conn
@@ -735,11 +741,6 @@ def espejo_send(request):
     enfoques = parsed.get("enfoques")
     test_rec = parsed.get("test_recomendado")
 
-    # Deducir fractones solo si la API respondió correctamente
-    from tokens.service import spend, credit_mission, has_balance
-    if not has_balance(request.user, 'espejo_exchange'):
-        return JsonResponse({"error": "Fractones insuficientes."}, status=402)
-    spend(request.user, 'espejo_exchange')
     if is_first_exchange:
         credit_mission(request.user, 'first_espejo')
 
