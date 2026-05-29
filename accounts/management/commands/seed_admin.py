@@ -29,6 +29,7 @@ class Command(BaseCommand):
 
         balance, _ = TokenBalance.objects.get_or_create(user=u)
         if balance.balance < 999999:
-            balance.balance = 999999
+            balance.permanent = 999999
+            balance.monthly = 0
             balance.save()
             TokenTransaction.objects.create(user=u, amount=999999, reason='Admin test — ilimitado')
