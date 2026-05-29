@@ -2,7 +2,7 @@
 
 App de autoconocimiento profundo. 35 tests psicométricos, Espejo de Conflictos (IA conversacional), lecturas de nacimiento (carta astral, Human Design, Saju), comunidad y sistema de fractones.
 
-**Producción:** https://app.endonautas.cl
+**Producción:** https://app.endonautas.cl — live ✅
 
 ---
 
@@ -154,9 +154,21 @@ HOTMART_CHECKOUT_PRACTICANTE=
 
 Procfile: `migrate → seed_tests → seed_missions → seed_mirror_kb → collectstatic → gunicorn`
 
+Procfile: `migrate → seed_tests → seed_missions → collectstatic → gunicorn`
+
 Webhook Hotmart: `https://app.endonautas.cl/tokens/hotmart-webhook/`
 
 Eventos: `PURCHASE_APPROVED`, `PURCHASE_CANCELED`, `PURCHASE_REFUNDED`, `PURCHASE_CHARGEBACK`, `SUBSCRIPTION_CANCELLATION`
+
+---
+
+## Cross-site
+
+La barra superior de `base.html` enlaza hacia el ecosistema editorial:
+- `endonautas.cl/endonautica/` — el libro fundacional
+- `endonautas.cl/equipo/` — misión, visión, comunidad
+
+Las rutas `/mision/` y `/comunidad/` ya no existen en platform — apuntar siempre a `/equipo/`.
 
 ---
 

@@ -1,5 +1,28 @@
 # MirrorWork — Registro de progreso
 
+## 2026-05-29 — Auditoría cross-site, copy ecosistema
+
+### ✅ Completado
+
+#### Cross-site links
+- `base.html` barra superior: "Ebook" → "Endonautica" → `endonautas.cl/endonautica/`
+- `base.html` barra superior: `/comunidad/` → `endonautas.cl/equipo/`
+- `home.html` (landing): ambos links `ebook.endonautas.cl` → `endonautas.cl/endonautica/`
+
+#### Copy
+- `register.html`: H1 "Empieza el viaje", sub "Cuenta gratuita. Sin tarjeta. Acceso inmediato al Mapa Interior.", botón "Comenzar →"
+- `login.html`: sub "Tu Mapa Interior y el Espejo te esperan."
+- `mapa_interior.html`: H1 "Tu territorio, en construcción.", sub "Cada test completa una capa. Haz clic en cualquier dimensión para ver tu avance."
+
+### 🔶 Pendiente
+- Conectar fractones en Espejo: `spend(user, 'espejo_exchange')` + `credit_mission(user, 'first_espejo')`
+- Conectar fractones en AI insights: `spend(user, 'ai_insight')` antes de DeepSeek
+- `credit_mission(user, 'onboarding')` al final de `onboarding_viaje`
+- Fondos árbol y archipiélago (mandala ✅ cosmos ✅)
+- Hotmart packs: crear 3 productos, vars `HOTMART_PACK_200/600/2000` en Railway
+
+---
+
 ## 2026-05-25 — Blog submission modal + postulaciones
 
 ### ✅ Completado
