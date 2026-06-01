@@ -112,6 +112,59 @@
   </div>
   {% endif %}
 
+  <!-- ── Educación en Autorregulación ── -->
+  <div class="edu-section reveal" style="margin-top:4rem;">
+    <div class="section-title">Entender tu regulación</div>
+    <p style="font-size:0.85rem;color:var(--muted);line-height:1.7;margin-bottom:2.5rem;">
+      Respirar es la herramienta. Pero saber <em>por qué</em> funciona cambia la relación que tenés con ella. Tres conceptos del método endonauta para profundizar.
+    </p>
+
+    <div class="edu-grid" style="display:grid;grid-template-columns:1fr;gap:1rem;">
+
+      <!-- Card 1: Ciclo de Zinker -->
+      <div class="edu-card" style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:16px;padding:1.75rem;">
+        <div style="font-family:var(--font-heading);font-size:1.05rem;font-weight:500;margin-bottom:0.4rem;">El ciclo de la emoción</div>
+        <div style="font-size:0.72rem;color:var(--dim);margin-bottom:0.75rem;letter-spacing:0.06em;text-transform:uppercase;">Joseph Zinker · 4 etapas</div>
+        <div style="font-size:0.85rem;color:var(--muted);line-height:1.65;">
+          <p>Toda emoción sigue un ciclo. Interrumpirlo es lo que la hace quedar atrapada.</p>
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin:0.75rem 0;">
+            <span style="font-size:0.72rem;padding:0.25rem 0.65rem;border-radius:100px;background:rgba(78,205,196,0.1);color:var(--accent);border:1px solid rgba(78,205,196,0.2);">1. Identificar</span>
+            <span style="font-size:0.72rem;padding:0.25rem 0.65rem;border-radius:100px;background:rgba(124,109,250,0.1);color:var(--accent2);border:1px solid rgba(124,109,250,0.2);">2. Expresar</span>
+            <span style="font-size:0.72rem;padding:0.25rem 0.65rem;border-radius:100px;background:rgba(244,160,53,0.1);color:var(--transicion);border:1px solid rgba(244,160,53,0.2);">3. Reflexionar</span>
+            <span style="font-size:0.72rem;padding:0.25rem 0.65rem;border-radius:100px;background:rgba(240,192,64,0.1);color:var(--luz-intensa);border:1px solid rgba(240,192,64,0.2);">4. Regular</span>
+          </div>
+          <p style="font-size:0.78rem;color:var(--dim);">Nombra la emoción cuando aparece. Sentirla sin actuarla inmediatamente. Preguntarte qué necesita. Elegir cómo responder — no reaccionar.</p>
+        </div>
+      </div>
+
+      <!-- Card 2: Ritmos Circadianos -->
+      <div class="edu-card" style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:16px;padding:1.75rem;">
+        <div style="font-family:var(--font-heading);font-size:1.05rem;font-weight:500;margin-bottom:0.4rem;">Tu reloj interno</div>
+        <div style="font-size:0.72rem;color:var(--dim);margin-bottom:0.75rem;letter-spacing:0.06em;text-transform:uppercase;">Ritmos circadianos · 24 horas</div>
+        <div style="font-size:0.85rem;color:var(--muted);line-height:1.65;">
+          <p>Tu cuerpo no funciona igual a las 8am que a las 10pm. Y sin embargo, le exigimos lo mismo en ambos horarios.</p>
+          <p style="margin-top:0.5rem;">El núcleo supraquiasmático en el hipotálamo dirige un "reloj biológico" que regula: temperatura, hormonas, actividad cerebral, descanso. Cuando este ritmo se desajasta (dormir mal, comer a horarios irregulares, luz artificial nocturna), todo el sistema nervioso se desregula.</p>
+          <p style="margin-top:0.5rem;font-size:0.78rem;color:var(--dim);">No se trata de "dormir 8 horas". De dormir cuando tu cuerpo necesita dormir. Observar tus propios ritmos antes de intentar cambiarlos.</p>
+        </div>
+      </div>
+
+      <!-- Card 3: Locus de Control -->
+      <div class="edu-card" style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:16px;padding:1.75rem;">
+        <div style="font-family:var(--font-heading);font-size:1.05rem;font-weight:500;margin-bottom:0.4rem;">¿Dónde está el control?</div>
+        <div style="font-size:0.72rem;color:var(--dim);margin-bottom:0.75rem;letter-spacing:0.06em;text-transform:uppercase;">Julian Rotter · Locus de control</div>
+        <div style="font-size:0.85rem;color:var(--muted);line-height:1.65;">
+          <p>La diferencia entre sentirte víctima de lo que pasa y sentirte autor de tu respuesta no es una actitud. Es una <em>localización</em>.</p>
+          <div style="margin:0.75rem 0;padding:0.75rem;background:rgba(255,255,255,0.02);border-radius:10px;font-size:0.78rem;">
+            <div style="color:var(--sombra-dom);margin-bottom:0.3rem;">● <strong>Externo:</strong> "Las cosas me pasan. No puedo hacer nada."</div>
+            <div style="color:var(--accent);">● <strong>Interno:</strong> "Puedo elegir cómo respondo. Soy mi propia autoridad."</div>
+          </div>
+          <p style="font-size:0.78rem;color:var(--dim);">El locus de control no es fijo. Se construye. Cada vez que elegís tu respuesta en lugar de reaccionar automáticamente, lo fortalecés.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <a href="{% url 'dashboard' %}" class="back-link">← Volver al inicio</a>
 </div>
 {% endblock %}
