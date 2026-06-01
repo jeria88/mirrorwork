@@ -777,11 +777,12 @@
 
     if (welcome) welcome.style.display = "none";
 
+    // Si el usuario escribió texto libre, limpiar el input y limpiar cualquier enfoque pendiente
     if (overrideText === undefined) {
-      // Solo mostrar el bubble y limpiar el input si viene del textarea (no de selectEnfoque)
       appendUserMsg(text);
       input.value = "";
       input.style.height = "auto";
+      pendingEnfoque = null; // limpiar enfoque si el usuario escribió texto libre
     }
 
     sendBtn.disabled = true;
@@ -813,7 +814,7 @@
     } finally {
       typing.classList.remove("visible");
       sendBtn.disabled = false;
-      if (overrideText === undefined) input.focus();
+      input.focus();
     }
   }
 
