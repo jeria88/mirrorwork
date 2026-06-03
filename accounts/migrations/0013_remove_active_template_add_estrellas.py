@@ -6,14 +6,10 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounts', '0012_alter_userprofile_map_aesthetic_and_more'),
+        ('accounts', '0010_userprofile_social_links'),
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='userprofile',
-            name='active_template',
-        ),
         migrations.AlterField(
             model_name='userprofile',
             name='map_aesthetic',
