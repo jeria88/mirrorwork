@@ -1,0 +1,533 @@
+{% extends 'base.html' %}
+{% block title %}Tu espacio — MirrorWork{% endblock %}
+
+{% block extra_head %}
+<style>
+  .dash {
+    max-width: 780px;
+    margin: 2rem auto;
+    padding: 3rem 2rem 5rem;
+    background: rgba(0,0,0,0.88);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 20px;
+  }
+
+  /* ── Saludo ── */
+  .dash-greeting {
+    margin-bottom: 4.5rem;
+  }
+  .dash-tag {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+  .dash-tag::before {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 1px;
+    background: var(--dim);
+  }
+  .dash-name {
+    font-family: var(--font-heading);
+    font-size: clamp(2.8rem, 7vw, 4.5rem);
+    font-weight: 400;
+    line-height: 1.1;
+    margin-bottom: 1.25rem;
+    letter-spacing: -0.01em;
+  }
+  .dash-name em { font-style: italic; color: var(--muted); }
+  .dash-sub {
+    font-size: 1rem;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.75;
+    max-width: 480px;
+    font-weight: 400;
+  }
+
+  /* ── Mapa hero ── */
+  /* ── Botón VR ── */
+  .vr-entry {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.85rem 1.4rem;
+    background: rgba(124,109,250,0.07);
+    border: 1px solid rgba(124,109,250,0.25);
+    border-radius: 14px;
+    margin-bottom: 1rem;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .vr-entry:hover { border-color: #7c6dfa; background: rgba(124,109,250,0.12); }
+  .vr-icon  { font-size: 1.4rem; color: #7c6dfa; line-height: 1; }
+  .vr-label { font-size: 0.88rem; font-weight: 500; color: var(--text); }
+  .vr-sub   { font-size: 0.72rem; color: var(--muted); margin-left: auto; letter-spacing: 0.05em; }
+
+  .mapa-hero {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    background: rgba(0,0,0,0.88);
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 20px;
+    margin-bottom: 1rem;
+    text-decoration: none;
+    color: inherit;
+    overflow: hidden;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 6px 28px rgba(0,0,0,0.28);
+    transition: transform 0.45s cubic-bezier(0.16,1,0.3,1),
+                box-shadow 0.45s cubic-bezier(0.16,1,0.3,1),
+                border-color 0.3s;
+  }
+  .mapa-hero:hover {
+    border-color: var(--border2);
+    transform: translateY(-5px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.22),
+                0 28px 70px rgba(0,0,0,0.5),
+                0 0 40px rgba(78,205,196,0.08);
+    opacity: 1;
+  }
+  .mapa-hero-body {
+    flex: 1;
+    padding: 1.75rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .mapa-hero-thumb {
+    width: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-left: 1px solid var(--border);
+    padding: 1rem;
+    opacity: 0.65;
+    flex-shrink: 0;
+  }
+  .mapa-hero-thumb svg { width: 100%; height: auto; max-height: 130px; }
+  .mapa-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+  .mapa-bar {
+    flex: 1;
+    height: 3px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .mapa-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 1.2s cubic-bezier(0.16,1,0.3,1);
+  }
+  .mapa-bar-pct {
+    font-size: 0.72rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* ── Accesos principales ── */
+  .entry-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 4rem;
+  }
+
+  .entry-card {
+    background: rgba(0,0,0,0.88);
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 20px;
+    padding: 1.75rem 1.5rem;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 6px 28px rgba(0,0,0,0.28);
+    transition: transform 0.45s cubic-bezier(0.16,1,0.3,1),
+                box-shadow 0.45s cubic-bezier(0.16,1,0.3,1),
+                border-color 0.3s;
+  }
+  .entry-card:hover {
+    border-color: var(--border2);
+    transform: translateY(-5px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.22),
+                0 24px 60px rgba(0,0,0,0.5),
+                0 0 30px rgba(78,205,196,0.06);
+    opacity: 1;
+  }
+
+  .entry-icon {
+    font-family: var(--font-heading);
+    font-size: 1.6rem;
+    line-height: 1;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+    opacity: 0.9;
+  }
+  .entry-label {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .entry-desc {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.55;
+    font-weight: 400;
+  }
+  .entry-arrow {
+    margin-top: auto;
+    padding-top: 1.25rem;
+    font-size: 0.8rem;
+    color: var(--dim);
+    transition: color 0.2s;
+  }
+  .entry-card:hover .entry-arrow { color: var(--accent); }
+
+  /* ── Recientes ── */
+  .section-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::before {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 1px;
+    background: var(--dim);
+  }
+
+  .reciente-item {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+    color: inherit;
+    font-size: 0.9rem;
+    transition: color 0.15s;
+  }
+  .reciente-item:first-of-type { border-top: 1px solid var(--border); }
+  .reciente-item:hover { color: var(--accent); opacity: 1; }
+  .reciente-nombre { font-weight: 400; }
+  .reciente-fecha { color: var(--muted); font-size: 0.75rem; font-weight: 300; }
+
+  /* ── Primer paso ── */
+  .primer-paso {
+    margin-bottom: 3rem;
+  }
+  .pp-tag {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .pp-tag::before { content: ''; display: block; width: 20px; height: 1px; background: var(--dim); }
+  .pp-text {
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.75;
+    font-weight: 300;
+    max-width: 520px;
+    margin-bottom: 1.25rem;
+  }
+  .pp-tests { display: flex; flex-direction: column; gap: 0.5rem; }
+  .pp-test {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    background: rgba(0,0,0,0.88);
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 12px rgba(0,0,0,0.2);
+    transition: transform 0.4s cubic-bezier(0.16,1,0.3,1),
+                box-shadow 0.4s cubic-bezier(0.16,1,0.3,1),
+                border-color 0.25s;
+  }
+  .pp-test:hover {
+    border-color: var(--accent);
+    transform: translateX(6px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 8px 32px rgba(0,0,0,0.35), 0 0 20px rgba(78,205,196,0.08);
+    opacity: 1;
+  }
+  .pp-test-num {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    color: var(--accent);
+    opacity: 0.6;
+    min-width: 28px;
+    font-style: italic;
+  }
+  .pp-test-name {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--text);
+    margin-bottom: 0.15rem;
+  }
+  .pp-test-desc {
+    font-size: 0.72rem;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.4;
+  }
+  .pp-arrow {
+    margin-left: auto;
+    color: var(--dim);
+    font-size: 0.85rem;
+    transition: color 0.15s;
+  }
+  .pp-test:hover .pp-arrow { color: var(--accent); }
+
+  /* ── Tokens ── */
+  .token-row {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .token-row strong { color: var(--text); font-weight: 500; }
+  .token-row a { color: var(--accent); font-size: 0.75rem; }
+
+  @media (max-width: 680px) {
+    .entry-grid { grid-template-columns: 1fr; }
+    .dash { padding: 3.5rem 1.25rem 6rem; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dash">
+
+  <div class="dash-greeting reveal">
+    <div class="dash-tag">Tu espacio</div>
+    <h1 class="dash-name">
+      Hola,<br><em>{{ user.first_name|default:user.email|truncatechars:22 }}</em>
+    </h1>
+    <p class="dash-sub">
+      {% if recent_results %}
+        Has completado {{ recent_results|length }} exploración{% if recent_results|length != 1 %}es{% endif %}. Tu mapa interior sigue creciendo.
+      {% else %}
+        Tu espacio está listo. Cada test que completes es una capa más de tu mapa interior.
+      {% endif %}
+    </p>
+  </div>
+
+  <!-- Acceso VR (solo staff) -->
+  {% if request.user.is_staff %}
+  <a href="{% url 'vr_home' %}" class="vr-entry reveal" title="Modo inmersivo Google Cardboard">
+    <span class="vr-icon">⬡</span>
+    <span class="vr-label">Entrar en VR</span>
+    <span class="vr-sub">Experimental · Admin</span>
+  </a>
+  {% endif %}
+
+  <!-- Mapa Interior hero card -->
+  <a href="{% url 'mapa_interior' %}" class="mapa-hero reveal">
+    <div class="mapa-hero-body">
+      <div class="entry-icon">◉</div>
+      <div class="entry-label">Mapa Interior</div>
+      <div class="entry-desc">Tu exploración integrada del ser</div>
+      <div class="mapa-bar-wrap">
+        <div class="mapa-bar">
+          <div class="mapa-bar-fill" id="dash-map-bar" style="width:0%"></div>
+        </div>
+        <span class="mapa-bar-pct">{{ map_pct }}% explorado</span>
+      </div>
+      <div class="entry-arrow" style="padding-top:0.75rem">Ver mi mapa →</div>
+    </div>
+    <div class="mapa-hero-thumb">
+      {% if map_aesthetic == 'cosmos' %}
+      <svg viewBox="0 0 260 170" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="130" cy="85" r="55" style="fill:var(--accent)" opacity="0.05"/>
+        <line x1="62" y1="66" x2="130" y2="76" stroke="white" stroke-width="0.5" opacity="0.2"/>
+        <line x1="130" y1="76" x2="167" y2="54" stroke="white" stroke-width="0.5" opacity="0.2"/>
+        <line x1="130" y1="76" x2="108" y2="112" stroke="white" stroke-width="0.5" opacity="0.18"/>
+        <line x1="167" y1="54" x2="202" y2="68" stroke="white" stroke-width="0.5" opacity="0.15"/>
+        <circle cx="62" cy="66" r="2" fill="white" opacity="0.4"/>
+        <circle cx="130" cy="76" r="5" style="fill:var(--accent)" opacity="0.9"/>
+        <circle cx="130" cy="76" r="10" style="fill:var(--accent)" opacity="0.12"/>
+        <circle cx="167" cy="54" r="3" fill="white" opacity="0.6"/>
+        <circle cx="202" cy="68" r="2" fill="white" opacity="0.45"/>
+        <circle cx="108" cy="112" r="2.5" fill="white" opacity="0.4"/>
+      </svg>
+      {% elif map_aesthetic == 'mandala' %}
+      <svg viewBox="0 0 260 170" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="130" cy="85" r="68" stroke="white" stroke-width="0.5" opacity="0.1"/>
+        <circle cx="130" cy="85" r="46" style="stroke:var(--accent)" stroke-width="0.8" opacity="0.35"/>
+        <circle cx="130" cy="85" r="24" stroke="white" stroke-width="0.5" opacity="0.18"/>
+        <circle cx="130" cy="85" r="6" style="fill:var(--accent)" opacity="0.9"/>
+        <line x1="130" y1="85" x2="130" y2="17" stroke="white" stroke-width="0.4" opacity="0.12"/>
+        <line x1="130" y1="85" x2="130" y2="153" stroke="white" stroke-width="0.4" opacity="0.12"/>
+        <line x1="130" y1="85" x2="62" y2="85" stroke="white" stroke-width="0.4" opacity="0.12"/>
+        <line x1="130" y1="85" x2="198" y2="85" stroke="white" stroke-width="0.4" opacity="0.12"/>
+        <circle cx="130" cy="39" r="3.5" style="fill:var(--accent)" opacity="0.75"/>
+        <circle cx="130" cy="131" r="3.5" style="fill:var(--accent)" opacity="0.75"/>
+        <circle cx="84" cy="85" r="3.5" style="fill:var(--accent)" opacity="0.75"/>
+        <circle cx="176" cy="85" r="3.5" style="fill:var(--accent)" opacity="0.75"/>
+      </svg>
+      {% elif map_aesthetic == 'archipielago' %}
+      <svg viewBox="0 0 260 170" xmlns="http://www.w3.org/2000/svg">
+        <path d="M38,100 C43,74 58,64 79,69 C96,73 107,67 117,77 C127,87 122,106 112,113 C100,121 81,119 65,116 C51,113 35,121 38,100Z"
+              style="fill:var(--accent)" opacity="0.22"/>
+        <path d="M38,100 C43,74 58,64 79,69 C96,73 107,67 117,77 C127,87 122,106 112,113 C100,121 81,119 65,116 C51,113 35,121 38,100Z"
+              fill="none" style="stroke:var(--accent)" stroke-width="0.8" opacity="0.45"/>
+        <path d="M153,76 C158,62 174,59 188,65 C201,71 203,85 196,93 C189,101 171,99 161,91 C153,84 150,87 153,76Z"
+              style="fill:var(--accent)" opacity="0.17"/>
+        <path d="M153,76 C158,62 174,59 188,65 C201,71 203,85 196,93 C189,101 171,99 161,91 C153,84 150,87 153,76Z"
+              fill="none" style="stroke:var(--accent)" stroke-width="0.7" opacity="0.38"/>
+        <ellipse cx="228" cy="42" rx="18" ry="12" transform="rotate(-12,228,42)" style="fill:var(--accent)" opacity="0.14"/>
+      </svg>
+      {% elif map_aesthetic == 'arbol' %}
+      <svg viewBox="0 0 260 170" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="55" y1="107" x2="205" y2="107" stroke="white" stroke-width="0.5" opacity="0.18"/>
+        <rect x="124" y="92" width="12" height="34" rx="4" fill="white" opacity="0.2"/>
+        <line x1="130" y1="96" x2="93" y2="72" stroke="white" stroke-width="1.8" opacity="0.28"/>
+        <line x1="93" y1="72" x2="68" y2="52" stroke="white" stroke-width="1.2" opacity="0.22"/>
+        <line x1="130" y1="96" x2="167" y2="72" stroke="white" stroke-width="1.8" opacity="0.28"/>
+        <line x1="167" y1="72" x2="192" y2="52" stroke="white" stroke-width="1.2" opacity="0.22"/>
+        <circle cx="68" cy="52" r="4" style="fill:var(--accent)" opacity="0.85"/>
+        <circle cx="192" cy="52" r="4" style="fill:var(--accent)" opacity="0.85"/>
+        <line x1="130" y1="114" x2="93" y2="130" stroke="white" stroke-width="1.8" opacity="0.18"/>
+        <line x1="93" y1="130" x2="68" y2="149" stroke="white" stroke-width="1.2" opacity="0.14"/>
+        <line x1="130" y1="114" x2="167" y2="130" stroke="white" stroke-width="1.8" opacity="0.18"/>
+        <line x1="167" y1="130" x2="192" y2="149" stroke="white" stroke-width="1.2" opacity="0.14"/>
+        <circle cx="68" cy="149" r="3.5" style="fill:var(--accent)" opacity="0.38"/>
+        <circle cx="192" cy="149" r="3.5" style="fill:var(--accent)" opacity="0.38"/>
+      </svg>
+      {% endif %}
+    </div>
+  </a>
+
+  <div class="entry-grid">
+    <a href="{% url 'psychometrics:test_list' %}" class="entry-card reveal">
+      <div class="entry-icon">◈</div>
+      <div class="entry-label">Tests</div>
+      <div class="entry-desc">35 instrumentos por dimensión del ser</div>
+      <div class="entry-arrow">Explorar →</div>
+    </a>
+    <a href="{% url 'mirror:home' %}" class="entry-card reveal" style="transition-delay:0.08s">
+      <div class="entry-icon">◎</div>
+      <div class="entry-label">Espejo</div>
+      <div class="entry-desc">Conversa con tu mundo interior</div>
+      <div class="entry-arrow">Entrar →</div>
+    </a>
+    <a href="{% url 'psychometrics:my_results' %}" class="entry-card reveal" style="transition-delay:0.16s">
+      <div class="entry-icon">◐</div>
+      <div class="entry-label">Resultados</div>
+      <div class="entry-desc">Tu historial de exploraciones</div>
+      <div class="entry-arrow">Ver →</div>
+    </a>
+    <a href="{% url 'birth:profile' %}" class="entry-card reveal" style="transition-delay:0.24s">
+      <div class="entry-icon">✦</div>
+      <div class="entry-label">Nacimiento</div>
+      <div class="entry-desc">Carta astral, Saju y Diseño Humano</div>
+      <div class="entry-arrow">Explorar →</div>
+    </a>
+    <a href="{% url 'sensorial:home' %}" class="entry-card reveal" style="transition-delay:0.32s">
+      <div class="entry-icon">◎</div>
+      <div class="entry-label">Regulación</div>
+      <div class="entry-desc">Respiración consciente para centrar el sistema nervioso</div>
+      <div class="entry-arrow">Respirar →</div>
+    </a>
+  </div>
+
+  {% if not recent_results %}
+  <!-- Primer paso del viaje — solo cuando no hay tests completados -->
+  <div class="primer-paso reveal">
+    <div class="pp-tag">Por donde empezar</div>
+    <p class="pp-text">
+      Tu mapa está en blanco. Estos tres tests son el punto de partida del viaje endonauta:
+      revelan el terreno, las raíces y los recursos con los que navegas.
+    </p>
+    <div class="pp-tests">
+      <a href="{% url 'psychometrics:test_take' 'rueda-de-la-vida-integracion' %}" class="pp-test">
+        <span class="pp-test-num">01</span>
+        <div>
+          <div class="pp-test-name">Rueda de la Vida</div>
+          <div class="pp-test-desc">Una mirada panorámica a las 8 áreas de tu vida hoy</div>
+        </div>
+        <span class="pp-arrow">→</span>
+      </a>
+      <a href="{% url 'psychometrics:test_take' 'big-five-inventario-de-personalidad' %}" class="pp-test">
+        <span class="pp-test-num">02</span>
+        <div>
+          <div class="pp-test-name">Big Five</div>
+          <div class="pp-test-desc">El perfil de personalidad que ancora todo lo demás</div>
+        </div>
+        <span class="pp-arrow">→</span>
+      </a>
+      <a href="{% url 'psychometrics:test_take' 'heridas-de-la-infancia-lise-bourbeau' %}" class="pp-test">
+        <span class="pp-test-num">03</span>
+        <div>
+          <div class="pp-test-name">Heridas de la Infancia</div>
+          <div class="pp-test-desc">Las raíces del patrón que sigues repitiendo</div>
+        </div>
+        <span class="pp-arrow">→</span>
+      </a>
+    </div>
+  </div>
+  {% else %}
+    <div class="section-label reveal">Últimas exploraciones</div>
+    {% for r in recent_results %}
+      <a href="{% url 'psychometrics:test_result' r.pk %}" class="reciente-item reveal" style="transition-delay:{{ forloop.counter0|add:'0' }}00ms">
+        <span class="reciente-nombre">{{ r.test.name }}</span>
+        <span class="reciente-fecha">{{ r.completed_at|date:"d M Y" }}</span>
+      </a>
+    {% endfor %}
+  {% endif %}
+
+  {% if token_balance %}
+    <div class="token-row reveal">
+      <span>Tokens disponibles</span>
+      <span><strong>{{ token_balance.balance }}</strong> &ensp; <a href="{% url 'tokens:planes' %}">Obtener más</a></span>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_body %}
+<script>
+  requestAnimationFrame(() => {
+    const bar = document.getElementById('dash-map-bar');
+    if (bar) setTimeout(() => bar.style.width = '{{ map_pct }}%', 300);
+  });
+</script>
+{% endblock %}

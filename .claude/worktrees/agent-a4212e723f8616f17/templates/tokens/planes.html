@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+{% block title %}Planes — MirrorWork{% endblock %}
+
+{% block content %}
+<style>
+  .planes-header { text-align: center; margin-bottom: 3rem; }
+  .planes-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem; }
+  .planes-sub { color: var(--muted); font-size: 0.95rem; }
+
+  .planes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.25rem;
+    max-width: 900px;
+    margin: 0 auto 3rem;
+  }
+
+  .plan-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 2rem 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  .plan-card.current { border-color: var(--accent); }
+  .plan-card.featured {
+    border-color: var(--accent2);
+    background: linear-gradient(160deg, var(--surface), rgba(124,109,250,0.06));
+  }
+
+  .plan-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent2);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.2rem 0.75rem;
+    border-radius: 20px;
+  }
+  .current-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: var(--bg);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.2rem 0.75rem;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .plan-name { font-size: 1.1rem; font-weight: 700; }
+  .plan-price {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+  }
+  .plan-price span { font-size: 1rem; font-weight: 400; color: var(--muted); }
+
+  .plan-features {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+  }
+  .plan-features li {
+    font-size: 0.85rem;
+    color: var(--muted);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .plan-features li::before { content: "✓"; color: var(--accent); flex-shrink: 0; }
+  .plan-features li.no::before { content: "–"; color: var(--border); }
+  .plan-features li.no { color: var(--border); }
+
+  .plan-cta {
+    display: block;
+    text-align: center;
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: opacity 0.15s;
+    text-decoration: none;
+  }
+  .plan-cta:hover { opacity: 0.85; }
+  .plan-cta.primary { background: var(--accent); color: var(--bg); }
+  .plan-cta.featured-cta { background: var(--accent2); color: #fff; }
+  .plan-cta.current-cta {
+    background: var(--surface2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    cursor: default;
+  }
+
+  .faq {
+    max-width: 640px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  .faq-item { border-bottom: 1px solid var(--border); padding-bottom: 1.25rem; }
+  .faq-q { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.4rem; }
+  .faq-a { font-size: 0.85rem; color: var(--muted); line-height: 1.7; }
+  .section-title-center {
+    text-align: center;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-bottom: 2rem;
+  }
+</style>
+
+<div class="container" style="max-width:960px">
+  <div class="planes-header">
+    <div class="planes-title">Elige tu plan</div>
+    <div class="planes-sub">Pago vía Hotmart — cancelación cuando quieras</div>
+  </div>
+
+  {% with current_plan=profile.plan|default:"free" %}
+  <div class="planes-grid">
+
+    <!-- FREE -->
+    <div class="plan-card {% if current_plan == 'free' %}current{% endif %}">
+      {% if current_plan == 'free' %}<span class="current-badge">Tu plan actual</span>{% endif %}
+      <div class="plan-name">Free</div>
+      <div class="plan-price">$0 <span>/mes</span></div>
+      <ul class="plan-features">
+        <li>50 tokens al registrarte</li>
+        <li>Todos los tests psicométricos</li>
+        <li>Lectura del Espejo (5 tokens c/u)</li>
+        <li>Sesiones Espejo de Conflictos (10 tkn)</li>
+        <li class="no">Sin perfiles de clientes</li>
+        <li class="no">Sin tokens mensuales</li>
+      </ul>
+      <span class="plan-cta current-cta">Plan actual</span>
+    </div>
+
+    <!-- NAVEGANTE -->
+    <div class="plan-card {% if current_plan == 'navegante' %}current{% endif %}">
+      {% if current_plan == 'navegante' %}<span class="current-badge">Tu plan actual</span>{% endif %}
+      <div class="plan-name">Navegante</div>
+      <div class="plan-price">$10 <span>USD/mes</span></div>
+      <ul class="plan-features">
+        <li>400 tokens cada mes</li>
+        <li>Todos los tests psicométricos</li>
+        <li>Lecturas del Espejo ilimitadas*</li>
+        <li>Sesiones Espejo de Conflictos*</li>
+        <li class="no">Sin perfiles de clientes</li>
+      </ul>
+      {% if current_plan == 'navegante' %}
+        <span class="plan-cta current-cta">Plan actual</span>
+      {% else %}
+        <a href="{{ hotmart_urls.navegante }}" class="plan-cta primary" target="_blank" rel="noopener">
+          Suscribirme →
+        </a>
+      {% endif %}
+    </div>
+
+    <!-- PRACTICANTE -->
+    <div class="plan-card featured {% if current_plan == 'practicante' %}current{% endif %}">
+      {% if current_plan == 'practicante' %}
+        <span class="current-badge">Tu plan actual</span>
+      {% else %}
+        <span class="plan-badge">Recomendado</span>
+      {% endif %}
+      <div class="plan-name">Practicante</div>
+      <div class="plan-price">$39 <span>USD/mes</span></div>
+      <ul class="plan-features">
+        <li>600 tokens cada mes</li>
+        <li>Todos los tests psicométricos</li>
+        <li>Lecturas del Espejo ilimitadas*</li>
+        <li>Sesiones Espejo de Conflictos*</li>
+        <li>Hasta 10 perfiles de clientes</li>
+        <li>150 tokens por perfil de cliente</li>
+      </ul>
+      {% if current_plan == 'practicante' %}
+        <span class="plan-cta current-cta">Plan actual</span>
+      {% else %}
+        <a href="{{ hotmart_urls.practicante }}" class="plan-cta featured-cta" target="_blank" rel="noopener">
+          Suscribirme →
+        </a>
+      {% endif %}
+    </div>
+
+  </div>
+  {% endwith %}
+
+  <p style="text-align:center;font-size:0.75rem;color:var(--muted);margin-bottom:3rem;">
+    * Hasta agotar tokens mensuales. Los tokens no utilizados no se acumulan al mes siguiente.
+  </p>
+
+  <div class="section-title-center">Preguntas frecuentes</div>
+  <div class="faq">
+    <div class="faq-item">
+      <div class="faq-q">¿Cómo funciona el pago?</div>
+      <div class="faq-a">El pago es mensual y se procesa por Hotmart con tarjeta de crédito, débito u otros métodos locales disponibles en tu país. Puedes cancelar en cualquier momento desde tu cuenta de Hotmart.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">¿Con qué email debo comprar?</div>
+      <div class="faq-a">Debes usar el mismo email con el que te registraste en MirrorWork. Así tu plan se activa automáticamente al confirmar el pago.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">¿Qué pasa si cancelo?</div>
+      <div class="faq-a">Tu plan vuelve a Free y conservas el saldo de tokens que te quede. No se cobra ningún costo adicional por cancelar.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">¿Los tokens se acumulan mes a mes?</div>
+      <div class="faq-a">No. Cada mes recibes tu asignación fresca. Los tokens no usados del mes anterior no se transfieren — si quieres más, puedes contactarnos para un plan personalizado.</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -28,8 +28,9 @@ class UserProfile(models.Model):
     tokens_last_renewed = models.DateField(null=True, blank=True)
     MAP_AESTHETIC_CHOICES = [
         ('cosmos',      'Cósmico'),
-        ('mandala',     'Geometría Sagrada'),
         ('psychedelic', 'Psicodélico'),
+        ('estrellas',   'Estrellas'),
+        ('mandala',     'Geometría Sagrada'),  # legacy, oculto en UI
     ]
     map_aesthetic = models.CharField(max_length=20, choices=MAP_AESTHETIC_CHOICES, blank=True, default='')
 
@@ -38,10 +39,6 @@ class UserProfile(models.Model):
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
     social_links = models.JSONField(default=dict, blank=True)
     profile_public = models.BooleanField(default=False)
-    active_template = models.ForeignKey(
-        'background.BackgroundTemplate', null=True, blank=True,
-        on_delete=models.SET_NULL, related_name='active_users'
-    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     onboarding_entry_point = models.CharField(max_length=80, blank=True)

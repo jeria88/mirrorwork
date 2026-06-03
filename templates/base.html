@@ -395,8 +395,8 @@
       touch-action: manipulation; font-family: var(--font-ui);
     }
     .dt-btn[data-t="cosmos"]      { --dt-c: #4ecdc4; }
-    .dt-btn[data-t="mandala"]     { --dt-c: #f0c040; }
     .dt-btn[data-t="psychedelic"] { --dt-c: #a878ff; }
+    .dt-btn[data-t="estrellas"]   { --dt-c: #e2c97e; }
     .dt-dot {
       width: 5px; height: 5px; border-radius: 50%;
       background: currentColor; flex-shrink: 0; transition: box-shadow 0.2s;
@@ -865,11 +865,11 @@
     <button class="dt-btn {% if map_aesthetic == 'cosmos' %}active{% endif %}" data-t="cosmos" type="button">
       <span class="dt-dot"></span><span>Cosmos</span>
     </button>
-    <button class="dt-btn {% if map_aesthetic == 'mandala' %}active{% endif %}" data-t="mandala" type="button">
-      <span class="dt-dot"></span><span>Mandala</span>
-    </button>
     <button class="dt-btn {% if map_aesthetic == 'psychedelic' %}active{% endif %}" data-t="psychedelic" type="button">
       <span class="dt-dot"></span><span>Psych</span>
+    </button>
+    <button class="dt-btn {% if map_aesthetic == 'estrellas' %}active{% endif %}" data-t="estrellas" type="button">
+      <span class="dt-dot"></span><span>Estrellas</span>
     </button>
   </div>
   <div id="dock-nav">
@@ -1165,7 +1165,7 @@ function animate() {
   animate();
 } // end _startThreeJS
 
-if (!window.__customBgActive && !{ mandala: true, psychedelic: true }[_BH_AESTHETIC]) {
+if (!window.__customBgActive && !{ mandala: true, psychedelic: true, estrellas: true }[_BH_AESTHETIC]) {
   _startThreeJS();
 } else {
   window.__initCosmos = _startThreeJS; // lazy para preview en perfil
@@ -1729,6 +1729,8 @@ window.__switchAesthetic = function (name) {
     mandalaC.style.display = 'block';
   } else if (name === 'psychedelic' && psychC) {
     psychC.style.display = 'block';
+  } else if (name === 'estrellas') {
+    // solo auroras CSS — no canvas necesario
   } else if (name === 'cosmos') {
     if (bhC) {
       bhC.style.display = 'block';

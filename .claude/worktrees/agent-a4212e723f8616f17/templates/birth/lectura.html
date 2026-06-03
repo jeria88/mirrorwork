@@ -1,0 +1,324 @@
+{% extends 'base.html' %}
+{% block title %}Lectura — {{ label }} — MirrorWork{% endblock %}
+
+{% block extra_head %}
+<style>
+  .lectura-wrap {
+    max-width: 680px;
+    margin: 2rem auto;
+    padding: 3rem 2rem 5rem;
+    background: rgba(0,0,0,0.88);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 20px;
+  }
+
+  .lectura-breadcrumb {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 2rem;
+  }
+  .lectura-breadcrumb a { color: var(--muted); text-decoration: none; }
+  .lectura-breadcrumb a:hover { color: var(--text); }
+
+  .lectura-header { margin-bottom: 2.5rem; }
+  .lectura-tag {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--accent2);
+    font-weight: 500;
+    margin-bottom: 0.6rem;
+  }
+  .lectura-title {
+    font-family: var(--font-heading);
+    font-size: clamp(1.5rem, 3.5vw, 2.1rem);
+    font-weight: 400;
+    line-height: 1.2;
+    margin-bottom: 0.4rem;
+  }
+  .lectura-meta { font-size: 0.78rem; color: var(--muted); }
+
+  /* Pending */
+  .lectura-pending {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+  .lectura-pending-symbol { font-size: 2rem; margin-bottom: 1.2rem; opacity: 0.5; }
+  .lectura-pending h2 {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    font-weight: 400;
+    margin-bottom: 0.6rem;
+  }
+  .lectura-pending p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 420px;
+    margin: 0 auto 2rem;
+  }
+  .btn-reveal {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.75rem;
+    background: var(--accent2);
+    color: #fff;
+    border: none;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    font-family: var(--font-ui);
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn-reveal:hover { opacity: 0.85; }
+
+  /* Loading */
+  .lectura-loading {
+    background: var(--surface);
+    border: 1px solid rgba(124,109,250,0.25);
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+  .loading-symbol {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    animation: pulse-lec 2s ease-in-out infinite;
+  }
+  @keyframes pulse-lec {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50%       { opacity: 1; transform: scale(1.06); }
+  }
+  .loading-msg { font-size: 0.9rem; color: var(--accent2); margin-bottom: 0.4rem; min-height: 1.4em; }
+  .loading-sub { font-size: 0.78rem; color: var(--muted); }
+
+  /* Revealed — section cards */
+  .lectura-revealed-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--accent2);
+    font-weight: 500;
+    margin-bottom: 1.25rem;
+  }
+  .sections-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .sections-grid.fade-in { animation: lec-fade 0.7s ease; }
+  .sec-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--card-color, var(--accent2));
+    border-radius: 0 14px 14px 0;
+    padding: 1.4rem 1.75rem 1.4rem 1.4rem;
+  }
+  .sec-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.8rem;
+  }
+  .sec-card-icon {
+    font-size: 0.95rem;
+    color: var(--card-color, var(--accent2));
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .sec-card-label {
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--card-color, var(--accent2));
+  }
+  .sec-card-body {
+    font-size: 0.92rem;
+    color: var(--text);
+    line-height: 1.82;
+    white-space: pre-wrap;
+  }
+  .question-card {
+    margin-top: 0.5rem;
+    padding: 1.5rem 2rem;
+    background: rgba(124,109,250,0.04);
+    border: 1px solid rgba(124,109,250,0.2);
+    border-radius: 14px;
+    text-align: center;
+  }
+  .question-card-label {
+    font-size: 0.58rem;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--muted);
+    margin-bottom: 0.85rem;
+  }
+  .question-card-text {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    color: var(--text);
+    line-height: 1.55;
+    font-style: italic;
+    font-weight: 400;
+  }
+  @keyframes lec-fade {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lectura-wrap">
+
+  <div class="lectura-breadcrumb">
+    <a href="{{ back_url }}">← {{ label }}</a>
+  </div>
+
+  <div class="lectura-header">
+    <div class="lectura-tag">Lectura endonauta</div>
+    <div class="lectura-title">{{ label }}</div>
+    <div class="lectura-meta">{{ report.updated_at|date:"d de F, Y" }}</div>
+  </div>
+
+  {% if not desbloqueado %}
+  <div style="background:rgba(78,205,196,0.06);border:1px solid rgba(78,205,196,0.2);border-radius:14px;padding:1.5rem;text-align:center;margin-bottom:1.5rem;">
+    <div style="font-size:0.82rem;color:var(--muted);margin-bottom:0.75rem;">Esta lectura se profundiza con el espejo interior.</div>
+    <a href="{% url 'mirror:home' %}" style="font-size:0.8rem;color:var(--accent);text-decoration:none;">Abrir el Espejo →</a>
+  </div>
+  {% endif %}
+
+  {% if is_processing %}
+  <!-- Loading -->
+  <div class="lectura-loading" id="loading-box"
+       data-poll-url="{{ poll_url }}">
+    <div class="loading-symbol">◎</div>
+    <div class="loading-msg" id="loading-msg">Buscando patrones…</div>
+    <div class="loading-sub">El Espejo está leyendo tu mapa</div>
+  </div>
+
+  {% elif is_revealed %}
+  <!-- Revealed — section cards -->
+  <div class="lectura-revealed-label">◎ El Espejo</div>
+  {% if sections %}
+  <div class="sections-grid">
+    {% for sec in sections %}
+      {% if sec.is_question %}
+      <div class="question-card">
+        <div class="question-card-label">◎ Pregunta de exploración</div>
+        <div class="question-card-text">{{ sec.text }}</div>
+      </div>
+      {% else %}
+      <div class="sec-card" style="--card-color:{{ sec.color }}">
+        <div class="sec-card-header">
+          <span class="sec-card-icon">{{ sec.icon }}</span>
+          <span class="sec-card-label">{{ sec.label }}</span>
+        </div>
+        <div class="sec-card-body">{{ sec.text }}</div>
+      </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="sec-card" style="--card-color:var(--accent2)">
+    <div class="sec-card-body">{{ report.interpretation }}</div>
+  </div>
+  {% endif %}
+
+  {% else %}
+  <!-- Pending -->
+  <div class="lectura-pending">
+    <div class="lectura-pending-symbol">◎</div>
+    <h2>Lectura por revelar</h2>
+    <p>El Espejo puede leer tu {{ label|lower }} y conectarla con tu viaje interior. Esta lectura queda guardada aquí, anclada a este reporte.</p>
+    <form method="post" action="{{ reveal_url }}">
+      {% csrf_token %}
+      <button type="submit" class="btn-reveal">Revelar lectura</button>
+    </form>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_body %}
+<script>
+(function () {
+  const box = document.getElementById('loading-box');
+  if (!box) return;
+
+  const pollUrl = box.dataset.pollUrl;
+  const msgEl   = document.getElementById('loading-msg');
+  const msgs    = [
+    'Buscando patrones…',
+    'Revisando repeticiones…',
+    'Escuchando lo que emerge…',
+    'Conectando dimensiones…',
+    'Tejiendo la lectura…',
+  ];
+  let idx = 0;
+  const rotate = setInterval(() => {
+    idx = (idx + 1) % msgs.length;
+    msgEl.textContent = msgs[idx];
+  }, 2800);
+
+  const SECTIONS_CONFIG = {{ sections_config_json|safe }};
+
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function buildCardsHtml(text, config) {
+    const paras = text.split(/\n{2,}/).filter(p => p.trim());
+    let html = '<div class="sections-grid fade-in">';
+    config.forEach((cfg, i) => {
+      if (i < paras.length) {
+        html += `<div class="sec-card" style="--card-color:${esc(cfg.color)}">
+          <div class="sec-card-header">
+            <span class="sec-card-icon">${esc(cfg.icon)}</span>
+            <span class="sec-card-label">${esc(cfg.label)}</span>
+          </div>
+          <div class="sec-card-body">${esc(paras[i])}</div>
+        </div>`;
+      }
+    });
+    paras.slice(config.length).forEach(extra => {
+      html += `<div class="question-card">
+        <div class="question-card-label">◎ Pregunta de exploración</div>
+        <div class="question-card-text">${esc(extra)}</div>
+      </div>`;
+    });
+    html += '</div>';
+    return html;
+  }
+
+  function poll() {
+    fetch(pollUrl)
+      .then(r => r.json())
+      .then(data => {
+        if (data.status === 'complete') {
+          clearInterval(rotate);
+          const wrapper = document.createElement('div');
+          wrapper.innerHTML = `<div class="lectura-revealed-label">◎ El Espejo</div>
+            ${buildCardsHtml(data.interpretation || '', SECTIONS_CONFIG)}`;
+          box.replaceWith(wrapper);
+        } else if (data.status === 'failed') {
+          clearInterval(rotate);
+          box.innerHTML = '<p style="color:var(--muted);font-size:0.85rem">No se pudo generar la lectura en este momento.</p>';
+        } else {
+          setTimeout(poll, 2500);
+        }
+      })
+      .catch(() => setTimeout(poll, 4000));
+  }
+
+  setTimeout(poll, 2500);
+})();
+</script>
+{% endblock %}

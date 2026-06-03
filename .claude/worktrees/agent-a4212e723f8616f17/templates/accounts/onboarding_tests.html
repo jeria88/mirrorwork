@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+{% block title %}Primeros pasos — MirrorWork{% endblock %}
+
+{% block extra_head %}
+<style>
+  .ob-wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 5rem 1.5rem 8rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .ob-symbol {
+    font-size: 2.2rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.6;
+  }
+
+  .ob-tag {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.1rem;
+  }
+
+  .ob-heading {
+    font-family: var(--font-heading);
+    font-size: clamp(1.9rem, 4.5vw, 2.8rem);
+    font-weight: 400;
+    line-height: 1.15;
+    margin-bottom: 1.1rem;
+    letter-spacing: -0.01em;
+  }
+
+  .ob-sub {
+    font-size: 0.95rem;
+    color: var(--muted);
+    line-height: 1.75;
+    max-width: 520px;
+    margin: 0 auto 3.5rem;
+  }
+
+  /* Progress bar */
+  .ob-progress {
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 3rem;
+  }
+  .ob-progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .ob-progress-bar-bg {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .ob-progress-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+    width: {% widthratio completed total 100 %}%;
+  }
+
+  /* Test cards */
+  .ob-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+    margin-bottom: 3rem;
+  }
+
+  .ob-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem 1.75rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    text-align: left;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+  }
+  .ob-card.done {
+    border-color: var(--accent);
+    background: rgba(78,205,196,0.04);
+    opacity: 0.7;
+  }
+
+  .ob-card-num {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+  .ob-card.done .ob-card-num {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+    font-size: 0.9rem;
+  }
+
+  .ob-card-body {
+    flex: 1;
+  }
+  .ob-card-name {
+    font-size: 0.98rem;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 0.2rem;
+  }
+  .ob-card-desc {
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .ob-card-action {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 100px;
+    padding: 0.4rem 1rem;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  .ob-card-action:hover { background: rgba(78,205,196,0.1); opacity: 1; }
+  .ob-card.done .ob-card-action {
+    color: var(--muted);
+    border-color: var(--border);
+    pointer-events: none;
+  }
+
+  .ob-skip {
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.15s;
+    border-bottom: 1px solid transparent;
+  }
+  .ob-skip:hover { color: var(--text); border-bottom-color: var(--border); opacity: 1; }
+
+  .ob-why {
+    margin-top: 3.5rem;
+    padding: 1.5rem 2rem;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    max-width: 540px;
+    text-align: left;
+  }
+  .ob-why-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+  }
+  .ob-why-text {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.75;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ob-wrap">
+
+  <div class="ob-symbol reveal">◎</div>
+  <div class="ob-tag reveal">Tu punto de partida</div>
+  <h1 class="ob-heading reveal">Tres espejos fundamentales</h1>
+  <p class="ob-sub reveal">
+    Antes de explorar el mapa completo, estos tres instrumentos darán al Espejo
+    el contexto esencial sobre cómo eres, qué te mueve y qué cargas llevas.
+    Puedes completarlos ahora o ir a uno por uno.
+  </p>
+
+  <div class="ob-progress reveal">
+    <div class="ob-progress-label">
+      <span>Progreso</span>
+      <span>{{ completed }} / {{ total }}</span>
+    </div>
+    <div class="ob-progress-bar-bg">
+      <div class="ob-progress-bar-fill"></div>
+    </div>
+  </div>
+
+  <div class="ob-cards">
+    {% for item in tests %}
+    <div class="ob-card {% if item.done %}done{% endif %} reveal">
+      <div class="ob-card-num">
+        {% if item.done %}✓{% else %}{{ forloop.counter }}{% endif %}
+      </div>
+      <div class="ob-card-body">
+        <div class="ob-card-name">{{ item.test.name }}</div>
+        <div class="ob-card-desc">
+          {% if item.test.slug == 'rueda-de-la-vida-integracion' %}
+            Mapea las 8 áreas vitales. Punto de partida para ver dónde estás ahora.
+          {% elif item.test.slug == 'big-five-inventario-de-personalidad' %}
+            El modelo de personalidad más validado: apertura, responsabilidad, extroversión, amabilidad y neuroticismo.
+          {% elif item.test.slug == 'heridas-de-la-infancia-lise-bourbeau' %}
+            Las 5 heridas emocionales de infancia según Lise Bourbeau: rechazo, abandono, humillación, traición, injusticia.
+          {% else %}
+            {{ item.test.description|default:"Instrumento de exploración endonauta." }}
+          {% endif %}
+        </div>
+      </div>
+      {% if item.done %}
+        <span class="ob-card-action">Completado</span>
+      {% else %}
+        <a href="{% url 'psychometrics:test_take' item.test.slug %}" class="ob-card-action">Comenzar →</a>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <a href="{% url 'dashboard' %}" class="ob-skip reveal">Explorar el mapa directamente</a>
+
+  <div class="ob-why reveal">
+    <div class="ob-why-title">¿Por qué estos tres?</div>
+    <p class="ob-why-text">
+      La <em>Rueda de la Vida</em> muestra tu terreno actual.
+      El <em>Big Five</em> revela tu arquitectura de carácter.
+      Las <em>Heridas de Bourbeau</em> iluminan los patrones que se repiten.
+      Con esos tres datos, el Espejo puede acompañarte con mucha más precisión.
+    </p>
+  </div>
+
+</div>
+{% endblock %}

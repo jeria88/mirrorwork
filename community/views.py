@@ -244,35 +244,54 @@ def perfil(request, username):
 @login_required
 @require_POST
 def compartir(request):
-    try:
-        data = json.loads(request.body)
-    except json.JSONDecodeError:
-        return JsonResponse({'error': 'JSON inválido'}, status=400)
+    # Detectar si es FormData (con imagen) o JSON
+    if request.content_type and 'multipart' in request.content_type:
+        data = request.POST
+        source_type  = data.get('source_type')
+        source_id    = data.get('source_id')
+        text         = (data.get('text') or '').strip()
+        reflection   = (data.get('reflection_text') or '').strip()
+        visibility   = data.get('visibility', SharedInsight.VISIBILITY_PUBLIC)
+        recipient_id = data.get('recipient_id')
+    else:
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'JSON inválido'}, status=400)
+        source_type  = data.get('source_type')
+        source_id    = data.get('source_id')
+        text         = (data.get('text') or '').strip()
+        reflection   = (data.get('reflection_text') or '').strip()
+        visibility   = data.get('visibility', SharedInsight.VISIBILITY_PUBLIC)
+        recipient_id = data.get('recipient_id')
 
-    source_type  = data.get('source_type')
-    source_id    = data.get('source_id')
-    reflection   = (data.get('reflection_text') or '').strip()
-    visibility   = data.get('visibility', SharedInsight.VISIBILITY_PUBLIC)
-    recipient_id = data.get('recipient_id')
-
-    if source_type not in (SharedInsight.SOURCE_TEST, SharedInsight.SOURCE_ESPEJO):
+    valid_types = [SharedInsight.SOURCE_TEST, SharedInsight.SOURCE_ESPEJO, SharedInsight.SOURCE_NATIVE]
+    if source_type not in valid_types:
         return JsonResponse({'error': 'source_type inválido'}, status=400)
 
     kwargs = {
         'user': request.user,
         'source_type': source_type,
-        'reflection_text': reflection,
         'visibility': visibility,
     }
 
-    if source_type == SharedInsight.SOURCE_TEST:
+    # Contenido nativo (texto + imagen)
+    if source_type == SharedInsight.SOURCE_NATIVE:
+        if not text and not request.FILES.get('image'):
+            return JsonResponse({'error': 'Falta texto o imagen'}, status=400)
+        kwargs['text'] = text
+        if request.FILES.get('image'):
+            kwargs['image'] = request.FILES['image']
+    elif source_type == SharedInsight.SOURCE_TEST:
         from psychometrics.models import TestResult
         tr = get_object_or_404(TestResult, pk=source_id, user=request.user)
         kwargs['test_result'] = tr
-    else:
+        kwargs['reflection_text'] = reflection
+    else:  # espejo
         from mirror.models import ConflictSession
         cs = get_object_or_404(ConflictSession, pk=source_id, user=request.user)
         kwargs['espejo_session'] = cs
+        kwargs['reflection_text'] = reflection
 
     if visibility == SharedInsight.VISIBILITY_DIRECT:
         if not recipient_id:

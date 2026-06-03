@@ -1,0 +1,607 @@
+{% extends "base.html" %}
+{% block title %}Nacimiento — MirrorWork{% endblock %}
+
+{% block extra_head %}
+<style>
+  .birth-wrap {
+    max-width: 640px;
+    margin: 2rem auto;
+    padding: 3rem 2rem 5rem;
+    background: rgba(0,0,0,0.88);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 20px;
+  }
+  .birth-tag {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1.25rem;
+  }
+  .birth-tag::before { content:''; display:block; width:20px; height:1px; background:var(--dim); }
+
+  .birth-heading {
+    font-family: var(--font-heading);
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    font-weight: 400;
+    line-height: 1.15;
+    margin-bottom: 0.75rem;
+  }
+  .birth-heading em { font-style: italic; color: var(--muted); }
+
+  .birth-sub {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 2.5rem;
+  }
+
+  .field-group { display: flex; flex-direction: column; gap: 1.1rem; }
+  .field { display: flex; flex-direction: column; gap: 0.4rem; }
+  .field label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .field .note { font-size: 0.72rem; color: var(--dim); margin-top: 0.2rem; }
+  .field input {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    color: var(--text);
+    font-family: var(--font-ui);
+    transition: border-color 0.2s;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .field input:focus { border-color: var(--accent); background: rgba(255,255,255,0.06); }
+  .field input::placeholder { color: var(--dim); }
+
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+  .btn-save {
+    margin-top: 1.75rem;
+    padding: 0.85rem 2.5rem;
+    border-radius: 100px;
+    background: var(--accent);
+    color: #000;
+    font-family: var(--font-ui);
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .btn-save:hover { opacity: 0.88; transform: scale(1.02); }
+
+  .error-msg {
+    background: rgba(224,80,80,0.1);
+    border: 1px solid rgba(224,80,80,0.3);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    color: #e05050;
+    margin-bottom: 1.5rem;
+  }
+
+  .data-card {
+    background: rgba(78,205,196,0.05);
+    border: 1px solid rgba(78,205,196,0.18);
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+  .data-card-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+  }
+  .data-card p { font-size: 0.88rem; color: var(--text); margin: 0.25rem 0; }
+  .data-card p small { color: var(--muted); font-size: 0.75rem; }
+
+  .reports-section { margin-top: 2.5rem; }
+  .section-title {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.1rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .report-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(176px, 1fr)); gap: 1rem; }
+  .report-card {
+    background: linear-gradient(160deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.025) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 1.5rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 4px 20px rgba(0,0,0,0.25);
+    transition: transform 0.45s cubic-bezier(0.16,1,0.3,1),
+                box-shadow 0.45s cubic-bezier(0.16,1,0.3,1),
+                border-color 0.3s;
+  }
+  .report-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--border2);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 20px 50px rgba(0,0,0,0.4);
+  }
+  .rc-icon { font-size: 1.5rem; line-height: 1; }
+  .rc-name { font-family: var(--font-heading); font-size: 1rem; font-weight: 400; }
+  .rc-desc { font-size: 0.75rem; color: var(--muted); line-height: 1.5; flex: 1; }
+  .rc-action { margin-top: 0.6rem; }
+
+  .btn-gen {
+    width: 100%;
+    padding: 0.55rem 0;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #000;
+    font-size: 0.78rem;
+    font-family: var(--font-ui);
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .btn-gen:hover { opacity: 0.85; }
+  .btn-gen-outline {
+    width: 100%;
+    padding: 0.5rem 0;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-family: var(--font-ui);
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .btn-gen-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+  .badge {
+    display: inline-block;
+    font-size: 0.68rem;
+    padding: 0.18rem 0.6rem;
+    border-radius: 100px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+  .badge-ok { background: rgba(78,205,196,0.12); color: var(--accent); }
+  .badge-working { background: rgba(244,160,53,0.12); color: var(--transicion); }
+  .badge-soon { background: rgba(255,255,255,0.05); color: var(--dim); }
+  .rc-locked-msg {
+    font-size: 0.72rem;
+    color: var(--dim);
+    margin-top: 0.5rem;
+    line-height: 1.4;
+  }
+
+  .edit-toggle {
+    display: inline-block;
+    margin-top: 2rem;
+    font-size: 0.78rem;
+    color: var(--muted);
+    cursor: pointer;
+    text-decoration: none;
+    border-bottom: 1px dotted var(--dim);
+    transition: color 0.15s;
+  }
+  .edit-toggle:hover { color: var(--accent); }
+
+  .edit-form {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+  .gender-row { display: flex; gap: 0.75rem; }
+  .gender-opt {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    gap: 0.5rem; padding: 0.6rem; border-radius: 8px; cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03);
+    font-size: 0.85rem; color: var(--muted); transition: all 0.15s;
+  }
+  .gender-opt input[type=radio] { display: none; }
+  .gender-opt:has(input:checked) {
+    border-color: var(--accent); color: var(--accent); background: rgba(78,205,196,0.07);
+  }
+
+  /* ── Autocomplete lugar ── */
+  .place-wrap { position: relative; }
+  .place-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: #1a1a26;
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    z-index: 100;
+    overflow: hidden;
+    display: none;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  .place-item {
+    padding: 0.65rem 1rem;
+    font-size: 0.85rem;
+    color: var(--text);
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    line-height: 1.4;
+    transition: background 0.1s;
+  }
+  .place-item:last-child { border-bottom: none; }
+  .place-item:hover, .place-item.active { background: rgba(78,205,196,0.1); color: var(--accent); }
+  .place-item small { display: block; font-size: 0.72rem; color: var(--muted); margin-top: 0.1rem; }
+  .place-searching {
+    padding: 0.65rem 1rem;
+    font-size: 0.8rem;
+    color: var(--dim);
+  }
+  .place-confirmed {
+    font-size: 0.72rem;
+    color: var(--accent);
+    margin-top: 0.3rem;
+    display: none;
+  }
+  .place-confirmed.visible { display: block; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="birth-wrap">
+
+  <div class="birth-tag reveal">Mapa celeste</div>
+  <h1 class="birth-heading reveal">Tu carta de<br><em>nacimiento</em></h1>
+  <p class="birth-sub reveal">
+    Ingresa tus datos para generar tu carta astral, Saju y Diseño Humano.
+    Cada sistema revela una capa distinta de tu arquitectura interior.
+  </p>
+
+  {% if error %}<div class="error-msg">{{ error }}</div>{% endif %}
+
+  {% if bp %}
+
+    <!-- Datos registrados -->
+    <div class="data-card reveal">
+      <div class="data-card-label">Datos registrados</div>
+      <p>{{ bp.birth_date }} <small>fecha</small></p>
+      {% if bp.birth_time %}<p>{{ bp.birth_time|time:"H:i" }} <small>hora</small></p>{% endif %}
+      <p>{{ bp.birth_place }} <small>lugar</small></p>
+    </div>
+
+  {% else %}
+
+    <!-- Primer ingreso -->
+    <form method="post" class="birth-form reveal">
+      {% csrf_token %}
+      <input type="hidden" name="latitude" class="f-lat" value="">
+      <input type="hidden" name="longitude" class="f-lng" value="">
+      <div class="field-group">
+        <div class="field">
+          <label>Lugar de nacimiento</label>
+          <div class="place-wrap">
+            <input type="text" name="birth_place" class="f-place" placeholder="Escribe tu ciudad…" autocomplete="off" required autofocus>
+            <div class="place-dropdown"></div>
+          </div>
+          <span class="place-confirmed">✓ Ubicación confirmada</span>
+        </div>
+        <div class="row-2">
+          <div class="field">
+            <label>Fecha de nacimiento</label>
+            <input type="date" name="birth_date" required>
+          </div>
+          <div class="field">
+            <label>Hora de nacimiento</label>
+            <input type="time" name="birth_time">
+            <span class="note">Opcional — mejora la precisión del Ascendente</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Género asignado al nacer <span style="font-weight:400;text-transform:none;letter-spacing:0">(para el Saju)</span></label>
+          <div class="gender-row">
+            <label class="gender-opt"><input type="radio" name="gender" value="M"> Masculino</label>
+            <label class="gender-opt"><input type="radio" name="gender" value="F"> Femenino</label>
+          </div>
+          <span class="note">Necesario para calcular los ciclos vitales del Saju</span>
+        </div>
+      </div>
+      <button type="submit" class="btn-save">Guardar y continuar</button>
+    </form>
+
+  {% endif %}
+
+  <!-- Lecturas — siempre visibles -->
+  <div class="reports-section reveal">
+    <div class="section-title">Lecturas disponibles</div>
+    <div class="report-cards">
+
+      <div class="report-card">
+        <div class="rc-icon">✦</div>
+        <div class="rc-name">Carta Astral</div>
+        <div class="rc-desc">Posiciones planetarias al momento de tu nacimiento.</div>
+        <div class="rc-action">
+          {% if not bp %}
+            <span class="badge badge-soon">Sin explorar</span>
+            <p class="rc-locked-msg">Ingresa tus datos para activar este módulo</p>
+          {% elif astral_report %}
+            {% if astral_report.status == 'complete' %}
+              <span class="badge badge-ok">Generado</span>
+              <div style="margin-top:0.6rem;display:flex;gap:0.5rem">
+                <a href="{% url 'birth:astral_detail' astral_report.pk %}" class="btn-gen" style="text-decoration:none;text-align:center">Ver →</a>
+              </div>
+              <form method="post" action="{% url 'birth:astral_generate' %}" style="margin-top:0.5rem">
+                {% csrf_token %}
+                <button type="submit" class="btn-gen-outline">Regenerar</button>
+              </form>
+            {% elif astral_report.status == 'processing' %}
+              <span class="badge badge-working">Procesando…</span>
+              <div style="margin-top:0.6rem">
+                <a href="{% url 'birth:astral_detail' astral_report.pk %}" style="font-size:0.78rem;color:var(--accent)">Ver progreso →</a>
+              </div>
+            {% else %}
+              <form method="post" action="{% url 'birth:astral_generate' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn-gen">Generar</button>
+              </form>
+            {% endif %}
+          {% else %}
+            <form method="post" action="{% url 'birth:astral_generate' %}">
+              {% csrf_token %}
+              <button type="submit" class="btn-gen">Generar</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="report-card">
+        <div class="rc-icon">⊕</div>
+        <div class="rc-name">Saju</div>
+        <div class="rc-desc">Los cuatro pilares del destino según la astrología oriental.</div>
+        <div class="rc-action">
+          {% if not bp %}
+            <span class="badge badge-soon">Sin explorar</span>
+            <p class="rc-locked-msg">Ingresa tus datos para activar este módulo</p>
+          {% elif saju_report %}
+            {% if saju_report.status == 'complete' %}
+              <span class="badge badge-ok">Generado</span>
+              <div style="margin-top:0.6rem;display:flex;gap:0.5rem">
+                <a href="{% url 'birth:saju_detail' saju_report.pk %}" class="btn-gen" style="text-decoration:none;text-align:center">Ver →</a>
+              </div>
+              <form method="post" action="{% url 'birth:saju_generate' %}" style="margin-top:0.5rem">
+                {% csrf_token %}
+                <button type="submit" class="btn-gen-outline">Regenerar</button>
+              </form>
+            {% elif saju_report.status == 'processing' %}
+              <span class="badge badge-working">Procesando…</span>
+              <div style="margin-top:0.6rem">
+                <a href="{% url 'birth:saju_detail' saju_report.pk %}" style="font-size:0.78rem;color:var(--accent)">Ver progreso →</a>
+              </div>
+            {% else %}
+              <form method="post" action="{% url 'birth:saju_generate' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn-gen">Generar</button>
+              </form>
+            {% endif %}
+          {% else %}
+            <form method="post" action="{% url 'birth:saju_generate' %}">
+              {% csrf_token %}
+              <button type="submit" class="btn-gen">Generar</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="report-card">
+        <div class="rc-icon">◈</div>
+        <div class="rc-name">Diseño Humano</div>
+        <div class="rc-desc">Tu tipo, estrategia y autoridad. Cómo tomas decisiones correctas.</div>
+        <div class="rc-action">
+          {% if not bp %}
+            <span class="badge badge-soon">Sin explorar</span>
+            <p class="rc-locked-msg">Ingresa tus datos para activar este módulo</p>
+          {% elif hd_report %}
+            {% if hd_report.status == 'complete' %}
+              <span class="badge badge-ok">Generado</span>
+              <div style="margin-top:0.6rem;display:flex;gap:0.5rem">
+                <a href="{% url 'birth:hd_detail' hd_report.pk %}" class="btn-gen" style="text-decoration:none;text-align:center">Ver →</a>
+              </div>
+              <form method="post" action="{% url 'birth:hd_generate' %}" style="margin-top:0.5rem">
+                {% csrf_token %}
+                <button type="submit" class="btn-gen-outline">Regenerar</button>
+              </form>
+            {% elif hd_report.status == 'processing' %}
+              <span class="badge badge-working">Procesando…</span>
+              <div style="margin-top:0.6rem">
+                <a href="{% url 'birth:hd_detail' hd_report.pk %}" style="font-size:0.78rem;color:var(--accent)">Ver progreso →</a>
+              </div>
+            {% else %}
+              <form method="post" action="{% url 'birth:hd_generate' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn-gen">Generar</button>
+              </form>
+            {% endif %}
+          {% else %}
+            <form method="post" action="{% url 'birth:hd_generate' %}">
+              {% csrf_token %}
+              <button type="submit" class="btn-gen">Generar</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Editar datos (solo si ya hay datos) -->
+  {% if bp %}
+  <details style="margin-top:2.5rem">
+    <summary class="edit-toggle">Actualizar datos de nacimiento</summary>
+    <div class="edit-form">
+      <form method="post" class="birth-form">
+        {% csrf_token %}
+        <input type="hidden" name="latitude" class="f-lat" value="{{ bp.latitude|default:'' }}">
+        <input type="hidden" name="longitude" class="f-lng" value="{{ bp.longitude|default:'' }}">
+        <div class="field-group">
+          <div class="field">
+            <label>Lugar de nacimiento</label>
+            <div class="place-wrap">
+              <input type="text" name="birth_place" class="f-place" value="{{ bp.birth_place }}" placeholder="Escribe tu ciudad…" autocomplete="off" required>
+              <div class="place-dropdown"></div>
+            </div>
+            <span class="place-confirmed {% if bp.latitude %}visible{% endif %}">
+              ✓ Ubicación confirmada{% if bp.latitude %} ({{ bp.latitude|floatformat:2 }}°, {{ bp.longitude|floatformat:2 }}°){% endif %}
+            </span>
+          </div>
+          <div class="row-2">
+            <div class="field">
+              <label>Fecha</label>
+              <input type="date" name="birth_date" value="{{ bp.birth_date|date:'Y-m-d' }}" required>
+            </div>
+            <div class="field">
+              <label>Hora</label>
+              <input type="time" name="birth_time" value="{% if bp.birth_time %}{{ bp.birth_time|time:'H:i' }}{% endif %}">
+              <span class="note">Opcional</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Género asignado al nacer</label>
+            <div class="gender-row">
+              <label class="gender-opt"><input type="radio" name="gender" value="M" {% if bp.gender == 'M' %}checked{% endif %}> Masculino</label>
+              <label class="gender-opt"><input type="radio" name="gender" value="F" {% if bp.gender == 'F' %}checked{% endif %}> Femenino</label>
+            </div>
+          </div>
+        </div>
+        <button type="submit" class="btn-save">Actualizar</button>
+      </form>
+    </div>
+  </details>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_body %}
+<script>
+(function() {
+  function initAutocomplete(form) {
+    const placeInput  = form.querySelector('.f-place');
+    const latInput    = form.querySelector('.f-lat');
+    const lngInput    = form.querySelector('.f-lng');
+    const dropdown    = form.querySelector('.place-dropdown');
+    const confirmed   = form.querySelector('.place-confirmed');
+
+    let timer, currentIdx = -1;
+
+    function showDropdown(items) {
+      dropdown.innerHTML = '';
+      if (!items.length) { dropdown.style.display = 'none'; return; }
+      items.forEach((place, i) => {
+        const parts = place.display_name.split(',');
+        const primary   = parts.slice(0, 2).join(',').trim();
+        const secondary = parts.slice(2, 4).join(',').trim();
+        const item = document.createElement('div');
+        item.className = 'place-item';
+        item.dataset.lat = place.lat;
+        item.dataset.lng = place.lon;
+        item.dataset.name = primary;
+        item.innerHTML = primary + (secondary ? `<small>${secondary}</small>` : '');
+        item.addEventListener('mousedown', e => {
+          e.preventDefault();
+          selectPlace(item);
+        });
+        dropdown.appendChild(item);
+      });
+      dropdown.style.display = 'block';
+      currentIdx = -1;
+    }
+
+    function selectPlace(item) {
+      placeInput.value = item.dataset.name;
+      latInput.value   = item.dataset.lat;
+      lngInput.value   = item.dataset.lng;
+      dropdown.style.display = 'none';
+      confirmed.textContent = `✓ Ubicación confirmada (${parseFloat(item.dataset.lat).toFixed(2)}°, ${parseFloat(item.dataset.lng).toFixed(2)}°)`;
+      confirmed.classList.add('visible');
+    }
+
+    placeInput.addEventListener('input', function() {
+      // Clear coords when user edits the field
+      latInput.value = '';
+      lngInput.value = '';
+      confirmed.classList.remove('visible');
+      clearTimeout(timer);
+      const q = this.value.trim();
+      if (q.length < 3) { dropdown.style.display = 'none'; return; }
+      dropdown.innerHTML = '<div class="place-searching">Buscando…</div>';
+      dropdown.style.display = 'block';
+      timer = setTimeout(() => {
+        fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=6&addressdetails=1&accept-language=es`, {
+          headers: { 'User-Agent': 'MirrorWork/1.0' }
+        })
+        .then(r => r.json())
+        .then(data => showDropdown(data))
+        .catch(() => { dropdown.style.display = 'none'; });
+      }, 380);
+    });
+
+    // Keyboard navigation
+    placeInput.addEventListener('keydown', function(e) {
+      const items = dropdown.querySelectorAll('.place-item');
+      if (!items.length) return;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        currentIdx = Math.min(currentIdx + 1, items.length - 1);
+        items.forEach((el, i) => el.classList.toggle('active', i === currentIdx));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        currentIdx = Math.max(currentIdx - 1, 0);
+        items.forEach((el, i) => el.classList.toggle('active', i === currentIdx));
+      } else if (e.key === 'Enter' && currentIdx >= 0) {
+        e.preventDefault();
+        selectPlace(items[currentIdx]);
+      } else if (e.key === 'Escape') {
+        dropdown.style.display = 'none';
+      }
+    });
+
+    // Validate coords on submit
+    form.addEventListener('submit', function(e) {
+      if (!latInput.value || !lngInput.value) {
+        e.preventDefault();
+        placeInput.style.borderColor = 'var(--transicion)';
+        placeInput.focus();
+        dropdown.innerHTML = '<div class="place-searching">Selecciona una opción de la lista para confirmar la ubicación.</div>';
+        dropdown.style.display = 'block';
+        return;
+      }
+      placeInput.style.borderColor = '';
+    });
+
+    document.addEventListener('click', function(e) {
+      if (!form.contains(e.target)) dropdown.style.display = 'none';
+    });
+  }
+
+  document.querySelectorAll('.birth-form').forEach(initAutocomplete);
+})();
+</script>
+{% endblock %}

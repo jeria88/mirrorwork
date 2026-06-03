@@ -35,7 +35,6 @@ INSTALLED_APPS = [
     'birth',
     'sensorial',
     'community',
-    'background',
 ]
 
 MIDDLEWARE = [

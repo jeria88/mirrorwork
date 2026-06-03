@@ -315,14 +315,6 @@
         </label>
 
         <label class="aesthetic-card">
-          <input type="radio" name="map_aesthetic" value="mandala"
-            {% if profile.map_aesthetic == 'mandala' %}checked{% endif %}>
-          <div class="aesthetic-icon">◎</div>
-          <div class="aesthetic-name">Geometría Sagrada</div>
-          <div class="aesthetic-desc">Mandala vivo</div>
-        </label>
-
-        <label class="aesthetic-card">
           <input type="radio" name="map_aesthetic" value="psychedelic"
             {% if profile.map_aesthetic == 'psychedelic' %}checked{% endif %}>
           <div class="aesthetic-icon">⬡</div>
@@ -330,6 +322,13 @@
           <div class="aesthetic-desc">Túnel chamánico</div>
         </label>
 
+        <label class="aesthetic-card">
+          <input type="radio" name="map_aesthetic" value="estrellas"
+            {% if profile.map_aesthetic == 'estrellas' %}checked{% endif %}>
+          <div class="aesthetic-icon">★</div>
+          <div class="aesthetic-name">Estrellas</div>
+          <div class="aesthetic-desc">Fondo de la web</div>
+        </label>
 
       </div>
     </div>

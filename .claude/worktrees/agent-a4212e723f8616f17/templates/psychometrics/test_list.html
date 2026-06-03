@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% block title %}Explorar — MirrorWork{% endblock %}
+
+{% block extra_head %}
+<style>
+  .list-wrap {
+    max-width: 720px;
+    margin: 2rem auto;
+    padding: 3rem 2rem 5rem;
+    background: rgba(0,0,0,0.88);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 20px;
+  }
+
+  .page-title {
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.5rem;
+  }
+  .page-sub {
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin-bottom: 3.5rem;
+    line-height: 1.7;
+  }
+
+  .dim-section { margin-bottom: 3rem; }
+
+  .dim-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0;
+  }
+
+  .test-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 0;
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+    color: inherit;
+    gap: 1rem;
+    transition: color 0.15s;
+  }
+  .test-row:hover { color: var(--accent); }
+  .test-row:hover .test-arrow { color: var(--accent); }
+
+  .test-main { flex: 1; min-width: 0; }
+  .test-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .test-desc {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+    line-height: 1.5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 480px;
+  }
+
+  .test-meta {
+    font-size: 0.78rem;
+    color: var(--muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .test-arrow {
+    color: var(--border);
+    font-size: 1rem;
+    flex-shrink: 0;
+    transition: color 0.15s;
+  }
+
+  .done-mark {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  .badge {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="list-wrap">
+  <div class="page-title">Explorar</div>
+  <p class="page-sub">Cada test es un mapa, no un juicio. Explora a tu ritmo.</p>
+
+  {% for key, tests in by_dimension.items %}
+  <div class="dim-section" id="dim-{{ key.0 }}">
+    <div class="dim-title">{{ key.1 }}</div>
+
+    {% for test in tests %}
+    <a href="{% url 'psychometrics:test_take' test.slug %}" class="test-row">
+      <div class="test-main">
+        <div class="test-name">
+          {% if test.id in completed_ids %}<span class="done-mark" title="Completado"></span>{% endif %}
+          {{ test.name }}
+          {% if test.instrument_type == 'clinical' %}
+            <span class="badge badge-validado">Validado</span>
+          {% elif test.instrument_type == 'adapted' %}
+            <span class="badge badge-adaptado">Adaptado</span>
+          {% else %}
+            <span class="badge badge-endonauta">Endonauta</span>
+          {% endif %}
+        </div>
+        <div class="test-desc">{{ test.description|truncatechars:90 }}</div>
+      </div>
+      <div class="test-meta">
+        {{ test.estimated_minutes }} min
+      </div>
+      <span class="test-arrow">→</span>
+    </a>
+    {% endfor %}
+  </div>
+  {% empty %}
+  <p style="color:var(--muted)">No hay tests disponibles.</p>
+  {% endfor %}
+
+</div>
+{% endblock %}

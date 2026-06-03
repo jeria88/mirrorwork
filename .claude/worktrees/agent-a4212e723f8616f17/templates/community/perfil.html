@@ -1,0 +1,288 @@
+{% extends 'base.html' %}
+{% block title %}{{ perfil_user.username|default:perfil_user.email }} — MirrorWork{% endblock %}
+
+{% block extra_head %}
+<style data-page-style>
+.perfil-com-wrap { max-width: 680px; margin: 0 auto; padding: 2rem 1.25rem 6rem; }
+
+/* ── Header ── */
+.perfil-header {
+  background: rgba(0,0,0,0.55); border: 1px solid var(--border);
+  border-radius: 20px; padding: 2rem 2rem 1.5rem; margin-bottom: 1.5rem;
+}
+.perfil-top { display: flex; align-items: flex-start; gap: 1.25rem; margin-bottom: 1.25rem; }
+.perfil-avatar-wrap { position: relative; flex-shrink: 0; }
+.perfil-avatar {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: var(--surface2); border: 2px solid var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; color: var(--accent); font-weight: 700; overflow: hidden;
+}
+.perfil-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.avatar-edit-btn {
+  position: absolute; bottom: 2px; right: 2px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--accent); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.6rem; color: #000; transition: opacity 0.2s;
+}
+.avatar-edit-btn:hover { opacity: 0.85; }
+
+.perfil-info { flex: 1; min-width: 0; }
+.perfil-name { font-size: 1.15rem; font-weight: 700; color: var(--text); margin-bottom: 0.2rem; }
+.perfil-profession { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.5rem; }
+.perfil-bio { font-size: 0.88rem; color: var(--muted); line-height: 1.6; }
+
+.perfil-stats { display: flex; gap: 2rem; margin-bottom: 1.25rem; }
+.perfil-stat-n { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+.perfil-stat-l { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+
+/* Social links */
+.social-links { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.social-link {
+  font-size: 0.72rem; color: var(--muted); text-decoration: none;
+  border: 1px solid var(--border); border-radius: 999px; padding: 0.2rem 0.65rem;
+  transition: all 0.2s;
+}
+.social-link:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Toggle público */
+.visibility-row {
+  display: flex; align-items: center; gap: 0.75rem;
+  font-size: 0.8rem; color: var(--muted);
+}
+.toggle-switch { position: relative; width: 40px; height: 22px; cursor: pointer; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute; inset: 0; background: var(--surface2);
+  border-radius: 999px; border: 1px solid var(--border); transition: background 0.2s;
+}
+.toggle-slider::before {
+  content: ''; position: absolute; width: 14px; height: 14px;
+  border-radius: 50%; background: var(--muted); top: 3px; left: 3px;
+  transition: transform 0.2s, background 0.2s;
+}
+.toggle-switch input:checked + .toggle-slider { background: rgba(78,205,196,0.12); border-color: var(--accent); }
+.toggle-switch input:checked + .toggle-slider::before { transform: translateX(18px); background: var(--accent); }
+
+/* Follow btn */
+.follow-btn {
+  padding: 0.5rem 1.4rem; border-radius: 999px; font-size: 0.82rem; font-weight: 500;
+  cursor: pointer; transition: all 0.2s; border: 1px solid var(--accent); font-family: var(--font-ui);
+}
+.follow-btn.following { background: transparent; color: var(--accent); }
+.follow-btn.following:hover { background: rgba(78,205,196,0.08); }
+.follow-btn.not-following { background: var(--accent); color: #000; }
+.follow-btn.not-following:hover { opacity: 0.85; }
+
+/* Edit form */
+.edit-form { margin-top: 1.25rem; border-top: 1px solid var(--border); padding-top: 1.25rem; display: none; }
+.edit-form.open { display: block; }
+.form-group { margin-bottom: 1rem; }
+.form-label { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.35rem; display: block; }
+.form-input, .form-textarea {
+  width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+  border-radius: 8px; padding: 0.55rem 0.75rem; font-size: 0.88rem; color: var(--text);
+  font-family: var(--font-ui); outline: none; box-sizing: border-box; transition: border-color 0.2s;
+}
+.form-input:focus, .form-textarea:focus { border-color: var(--accent); }
+.form-textarea { resize: vertical; min-height: 70px; }
+.social-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+.form-save-btn {
+  background: var(--accent); color: #000; border: none; border-radius: 8px;
+  padding: 0.6rem 1.5rem; font-size: 0.85rem; font-weight: 600; cursor: pointer;
+  font-family: var(--font-ui); transition: opacity 0.2s;
+}
+.form-save-btn:hover { opacity: 0.85; }
+
+/* Insights */
+.section-label { font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin: 0 0 0.85rem; }
+.insight-card {
+  background: rgba(0,0,0,0.55); border: 1px solid var(--border); border-radius: 14px;
+  padding: 1.1rem 1.25rem; margin-bottom: 0.75rem; transition: border-color 0.2s;
+}
+.insight-card:hover { border-color: rgba(78,205,196,0.18); }
+.insight-source-tag {
+  font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--accent2); border: 1px solid rgba(124,109,250,0.25);
+  border-radius: 999px; padding: 0.15rem 0.5rem;
+}
+.insight-title { font-size: 0.76rem; color: var(--muted); margin: 0.35rem 0 0.45rem; }
+.insight-reflection { font-size: 0.9rem; color: var(--text); line-height: 1.65; border-left: 2px solid var(--accent); padding-left: 0.75rem; }
+.del-btn { background: none; border: none; font-size: 0.68rem; color: rgba(255,255,255,0.18); cursor: pointer; float: right; transition: color 0.2s; padding: 0; }
+.del-btn:hover { color: #e05050; }
+
+.empty-state { text-align: center; padding: 2.5rem 1rem; color: var(--muted); font-size: 0.88rem; }
+
+@media(max-width:600px){
+  .social-grid { grid-template-columns: 1fr; }
+  .perfil-com-wrap { padding: 1rem 1rem 5rem; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="perfil-com-wrap">
+
+  <div class="perfil-header">
+    <div class="perfil-top">
+      <div class="perfil-avatar-wrap">
+        <div class="perfil-avatar">
+          {% if perfil_user.profile.avatar %}
+            <img src="{{ perfil_user.profile.avatar.url }}" alt="Avatar">
+          {% else %}
+            {{ perfil_user.email|first|upper }}
+          {% endif %}
+        </div>
+        {% if es_propio %}
+        <button class="avatar-edit-btn" onclick="document.getElementById('avatar-input').click()" title="Cambiar foto">✎</button>
+        {% endif %}
+      </div>
+      <div class="perfil-info">
+        <div class="perfil-name">{{ perfil_user.get_full_name|default:perfil_user.username|default:perfil_user.email|truncatechars:30 }}</div>
+        {% if perfil_user.profile.profession %}<div class="perfil-profession">{{ perfil_user.profile.profession }}</div>{% endif %}
+        {% if perfil_user.profile.bio %}<div class="perfil-bio">{{ perfil_user.profile.bio }}</div>{% endif %}
+      </div>
+    </div>
+
+    <div class="perfil-stats">
+      <div>
+        <div class="perfil-stat-n">{{ followers_count }}</div>
+        <div class="perfil-stat-l">Seguidores</div>
+      </div>
+      <div>
+        <div class="perfil-stat-n">{{ following_count }}</div>
+        <div class="perfil-stat-l">Siguiendo</div>
+      </div>
+      <div>
+        <div class="perfil-stat-n">{{ insights|length }}</div>
+        <div class="perfil-stat-l">Insights</div>
+      </div>
+    </div>
+
+    {% with links=perfil_user.profile.social_links %}
+    {% if links %}
+    <div class="social-links">
+      {% if links.instagram %}<a class="social-link" href="https://instagram.com/{{ links.instagram }}" target="_blank" rel="noopener">𝕀 {{ links.instagram }}</a>{% endif %}
+      {% if links.x %}<a class="social-link" href="https://x.com/{{ links.x }}" target="_blank" rel="noopener">𝕏 {{ links.x }}</a>{% endif %}
+      {% if links.linkedin %}<a class="social-link" href="{{ links.linkedin }}" target="_blank" rel="noopener">in LinkedIn</a>{% endif %}
+      {% if links.web %}<a class="social-link" href="{{ links.web }}" target="_blank" rel="noopener">↗ Web</a>{% endif %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    {% if es_propio %}
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
+        <div class="visibility-row">
+          <span>Perfil público</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggle-public"
+              {% if request.user.profile.profile_public %}checked{% endif %}
+              onchange="togglePublic(this)">
+            <span class="toggle-slider"></span>
+          </label>
+          <span id="public-label">{% if request.user.profile.profile_public %}Activado{% else %}Desactivado{% endif %}</span>
+        </div>
+        <button onclick="document.getElementById('edit-form').classList.toggle('open')"
+          style="background:none;border:1px solid var(--border);border-radius:999px;padding:0.3rem 0.85rem;font-size:0.72rem;color:var(--muted);cursor:pointer;font-family:var(--font-ui);transition:all 0.2s;"
+          onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
+          onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+          Editar perfil
+        </button>
+      </div>
+
+      <!-- Formulario edición -->
+      <form id="edit-form" class="edit-form" method="post" action="{% url 'perfil' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" id="avatar-input" name="avatar" accept="image/*" style="display:none" onchange="this.form.submit()">
+
+        <div class="form-group">
+          <label class="form-label">Nombre visible</label>
+          <input class="form-input" name="first_name" value="{{ request.user.first_name }}" placeholder="Tu nombre…">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Profesión / rol</label>
+          <input class="form-input" name="profession" value="{{ request.user.profile.profession }}" placeholder="Ej: Terapeuta, Coach, Psicólogo…">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Bio</label>
+          <textarea class="form-textarea" name="bio" placeholder="Cuéntale algo a la comunidad…">{{ request.user.profile.bio }}</textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Redes sociales</label>
+          <div class="social-grid">
+            {% with links=request.user.profile.social_links %}
+            <input class="form-input" name="social_instagram" placeholder="Instagram (sin @)" value="{{ links.instagram|default:'' }}">
+            <input class="form-input" name="social_x" placeholder="X / Twitter (sin @)" value="{{ links.x|default:'' }}">
+            <input class="form-input" name="social_linkedin" placeholder="URL LinkedIn" value="{{ links.linkedin|default:'' }}">
+            <input class="form-input" name="social_web" placeholder="Sitio web (URL)" value="{{ links.web|default:'' }}">
+            {% endwith %}
+          </div>
+        </div>
+        <button type="submit" class="form-save-btn">Guardar cambios</button>
+      </form>
+
+    {% else %}
+      <button class="follow-btn {% if is_following %}following{% else %}not-following{% endif %}"
+              id="follow-btn" onclick="toggleFollow('{{ perfil_user.username }}', this)">
+        {% if is_following %}Siguiendo{% else %}Seguir{% endif %}
+      </button>
+    {% endif %}
+  </div>
+
+  {% if insights %}
+    <p class="section-label">Insights compartidos</p>
+    {% for insight in insights %}
+    <div class="insight-card" id="insight-{{ insight.pk }}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;margin-bottom:0.3rem;">
+        <span class="insight-source-tag">{% if insight.source_type == 'test_result' %}Test{% else %}Espejo{% endif %}</span>
+        {% if es_propio %}<button class="del-btn" onclick="eliminarInsight({{ insight.pk }})">✕</button>{% endif %}
+      </div>
+      <div class="insight-title">{{ insight.source_title }} · {{ insight.created_at|date:"d M Y" }}</div>
+      {% if insight.reflection_text %}
+        <div class="insight-reflection">{{ insight.reflection_text }}</div>
+      {% else %}
+        <div class="insight-reflection" style="opacity:0.35;font-style:italic;">Sin reflexión adjunta.</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-state">
+      {% if es_propio %}Sin insights compartidos aún.{% else %}Este endonauta no ha compartido insights aún.{% endif %}
+    </div>
+  {% endif %}
+
+</div>
+
+<script>
+function togglePublic(cb) {
+  document.getElementById('public-label').textContent = cb.checked ? 'Activado' : 'Desactivado';
+  fetch('/accounts/perfil/toggle-public/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+    body: JSON.stringify({ value: cb.checked }),
+  });
+}
+
+function toggleFollow(username, btn) {
+  fetch(`/comunidad/seguir/${username}/`, {
+    method: 'POST', headers: { 'X-CSRFToken': getCsrfToken() },
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (!d.ok) return;
+    if (d.action === 'followed') { btn.textContent = 'Siguiendo'; btn.className = 'follow-btn following'; }
+    else { btn.textContent = 'Seguir'; btn.className = 'follow-btn not-following'; }
+  });
+}
+
+function eliminarInsight(pk) {
+  if (!confirm('¿Eliminar este insight?')) return;
+  fetch(`/comunidad/insight/${pk}/eliminar/`, {
+    method: 'POST', headers: { 'X-CSRFToken': getCsrfToken() },
+  })
+  .then(r => r.json())
+  .then(d => { if (d.ok) document.getElementById('insight-' + pk).remove(); });
+}
+</script>
+{% endblock %}

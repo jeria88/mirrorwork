@@ -1,0 +1,885 @@
+{% extends "base.html" %}
+{% block title %}Espejo — MirrorWork{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* ── Layout ────────────────────────────────────────────────────────── */
+  .espejo-wrap {
+    display: grid;
+    grid-template-columns: 260px 1fr 260px;
+    height: calc(100vh - 60px);
+    overflow: hidden;
+    transition: grid-template-columns 0.25s ease;
+  }
+  .espejo-wrap.panel-collapsed {
+    grid-template-columns: 260px 1fr 0px;
+  }
+
+  /* ── Sidebar ───────────────────────────────────────────────────────── */
+  .espejo-sidebar {
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .sidebar-header {
+    padding: 1.25rem 1rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+  .sidebar-title {
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .btn-nuevo {
+    width: 100%;
+    padding: 0.55rem;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    font-family: var(--font-ui);
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn-nuevo:hover { opacity: 0.85; }
+
+  .sessions-list { flex: 1; overflow-y: auto; padding: 0.5rem; }
+  .session-item {
+    padding: 0.7rem 0.85rem;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-bottom: 2px;
+    text-decoration: none;
+    display: block;
+    transition: background 0.15s, border-color 0.15s;
+    border: 1px solid transparent;
+  }
+  .session-item:hover { background: var(--surface); border-color: var(--border); opacity: 1; }
+  .session-item.active {
+    background: var(--surface2);
+    border-color: var(--border);
+    border-left-color: var(--accent);
+    border-left-width: 2px;
+  }
+  .session-item-title {
+    font-size: 0.78rem;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 400;
+  }
+  .session-item-date { font-size: 0.68rem; color: var(--muted); margin-top: 2px; font-weight: 300; }
+  .sessions-empty { padding: 1rem 0.85rem; font-size: 0.78rem; color: var(--muted); font-weight: 300; }
+
+  /* ── Área de chat ─────────────────────────────────────────────────── */
+  .espejo-chat {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: transparent;
+  }
+
+  .chat-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .chat-title {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    font-weight: 400;
+    color: var(--text);
+  }
+  .chat-hint { font-size: 0.72rem; color: var(--muted); font-style: italic; font-weight: 300; }
+
+  .messages-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    scroll-behavior: smooth;
+  }
+
+  /* ── Welcome ──────────────────────────────────────────────────────── */
+  .espejo-welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 1.25rem;
+    text-align: center;
+    padding: 2rem;
+  }
+  .welcome-symbol {
+    font-family: var(--font-heading);
+    font-size: 3.5rem;
+    color: var(--accent);
+    opacity: 0.7;
+    line-height: 1;
+    animation: breathe 4s ease-in-out infinite;
+  }
+  @keyframes breathe {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50%       { opacity: 0.9; transform: scale(1.06); }
+  }
+  .welcome-title {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    font-weight: 400;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .welcome-sub {
+    font-size: 0.9rem;
+    color: var(--muted);
+    max-width: 400px;
+    line-height: 1.75;
+    font-weight: 300;
+  }
+  .starter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-top: 0.5rem;
+    max-width: 500px;
+  }
+  .chip {
+    padding: 0.45rem 1rem;
+    border-radius: 100px;
+    background: var(--surface);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    font-size: 0.78rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 300;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--accent); background: var(--surface2); }
+
+  /* ── Mensajes ─────────────────────────────────────────────────────── */
+  .msg {
+    max-width: 76%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  .msg.user { align-self: flex-end; align-items: flex-end; }
+  .msg.assistant { align-self: flex-start; align-items: flex-start; }
+
+  .msg-bubble {
+    padding: 0.85rem 1.1rem;
+    border-radius: 14px;
+    font-size: 0.9rem;
+    line-height: 1.72;
+    white-space: pre-wrap;
+    font-weight: 300;
+  }
+  .msg.user .msg-bubble {
+    background: var(--accent);
+    color: #000;
+    border-bottom-right-radius: 4px;
+    font-weight: 400;
+  }
+  .msg.assistant .msg-bubble {
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+    color: var(--text);
+  }
+  .msg-label {
+    font-size: 0.65rem;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 500;
+  }
+
+  /* ── Enfoques de exploración ──────────────────────────────────────── */
+  .enfoques-wrap {
+    margin-top: 0.65rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    max-width: 400px;
+  }
+  .enfoques-header {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--dim);
+    margin-bottom: 0.15rem;
+    font-weight: 500;
+  }
+  .enfoque-card {
+    padding: 0.7rem 0.95rem;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.03);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, transform 0.25s cubic-bezier(0.16,1,0.3,1);
+    text-align: left;
+  }
+  .enfoque-card:hover {
+    background: rgba(255,255,255,0.06);
+    border-color: var(--accent);
+    transform: translateX(3px);
+  }
+  .enfoque-card.used {
+    opacity: 0.35;
+    pointer-events: none;
+  }
+  .enfoque-titulo {
+    font-size: 0.82rem;
+    color: var(--text);
+    font-weight: 400;
+    line-height: 1.3;
+  }
+  .enfoque-desc {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 2px;
+    font-weight: 300;
+    line-height: 1.4;
+  }
+
+  /* ── Test recomendado ─────────────────────────────────────────────── */
+  .test-rec-card {
+    margin-top: 0.65rem;
+    padding: 0.7rem 0.95rem;
+    border-radius: 10px;
+    background: rgba(78,205,196,0.04);
+    border: 1px solid rgba(78,205,196,0.2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: background 0.2s, border-color 0.2s;
+    max-width: 400px;
+    text-decoration: none;
+  }
+  .test-rec-card:hover {
+    background: rgba(78,205,196,0.08);
+    border-color: var(--accent);
+    opacity: 1;
+  }
+  .test-rec-icon { font-size: 1rem; color: var(--accent); flex-shrink: 0; }
+  .test-rec-body { min-width: 0; }
+  .test-rec-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); font-weight: 500; }
+  .test-rec-name { font-size: 0.8rem; color: var(--text); font-weight: 400; }
+  .test-rec-razon { font-size: 0.7rem; color: var(--muted); font-weight: 300; margin-top: 1px; }
+
+  /* ── Typing indicator ─────────────────────────────────────────────── */
+  .typing-indicator { display: none; align-self: flex-start; }
+  .typing-indicator.visible { display: flex; }
+  .typing-dots {
+    display: flex; gap: 5px; align-items: center;
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: 14px; border-bottom-left-radius: 4px;
+    padding: 0.8rem 1rem;
+  }
+  .typing-dots span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--muted);
+    animation: typingPulse 1.3s infinite ease-in-out;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typingPulse {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30%           { transform: translateY(-5px); opacity: 1; }
+  }
+
+  /* ── Input ────────────────────────────────────────────────────────── */
+  .chat-input-area {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border);
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    flex-shrink: 0;
+  }
+  .input-row { display: flex; gap: 0.65rem; align-items: flex-end; }
+  #msg-input {
+    flex: 1;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-size: 0.9rem;
+    font-family: var(--font-ui);
+    font-weight: 300;
+    padding: 0.7rem 0.95rem;
+    resize: none;
+    min-height: 44px;
+    max-height: 160px;
+    line-height: 1.5;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  #msg-input:focus { border-color: var(--accent); }
+  #msg-input::placeholder { color: var(--dim); }
+  #send-btn {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: var(--accent);
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: opacity 0.15s;
+  }
+  #send-btn:hover { opacity: 0.85; }
+  #send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  #send-btn svg { fill: #000; }
+  .input-hint { font-size: 0.67rem; color: var(--dim); margin-top: 0.4rem; padding-left: 2px; font-weight: 300; }
+
+  /* ── Toast error ──────────────────────────────────────────────────── */
+  #error-toast {
+    display: none;
+    position: fixed;
+    bottom: 5.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(224,80,80,0.9);
+    backdrop-filter: blur(12px);
+    color: #fff;
+    padding: 0.65rem 1.3rem;
+    border-radius: 100px;
+    font-size: 0.82rem;
+    z-index: 9000;
+    font-weight: 400;
+  }
+
+  /* ── Panel de lecturas ───────────────────────────────────────────── */
+  .lecturas-panel {
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: width 0.25s ease;
+    width: 260px;
+  }
+  .lecturas-panel.collapsed { width: 0; border-left: none; overflow: hidden; }
+
+  .lecturas-header {
+    padding: 1.1rem 1rem 0.9rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .lecturas-title {
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .lecturas-toggle-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0 0.2rem;
+    line-height: 1;
+    transition: color 0.15s;
+  }
+  .lecturas-toggle-btn:hover { color: var(--text); }
+
+  .lecturas-body { flex: 1; overflow-y: auto; padding: 0.75rem 0.65rem; }
+
+  .lec-section-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    padding: 0.4rem 0.5rem 0.3rem;
+    opacity: 0.7;
+  }
+
+  .lec-card {
+    display: block;
+    padding: 0.7rem 0.85rem;
+    border-radius: 10px;
+    margin-bottom: 3px;
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: background 0.15s, border-color 0.15s;
+    cursor: pointer;
+  }
+  .lec-card:hover { background: var(--surface); border-color: var(--border); opacity: 1; }
+  .lec-card-name {
+    font-size: 0.77rem;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 400;
+    margin-bottom: 3px;
+  }
+  .lec-card-meta { display: flex; align-items: center; gap: 0.4rem; }
+  .lec-card-date { font-size: 0.64rem; color: var(--muted); }
+  .lec-badge {
+    font-size: 0.55rem;
+    padding: 1px 6px;
+    border-radius: 100px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .lec-badge-pending { background: rgba(112,112,160,0.15); color: var(--muted); }
+  .lec-badge-revealed { background: rgba(124,109,250,0.15); color: var(--accent2); }
+  .lec-badge-processing {
+    background: rgba(124,109,250,0.12);
+    color: var(--accent2);
+    animation: badge-pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes badge-pulse { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+  .lec-empty {
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-align: center;
+    padding: 1.5rem 1rem;
+    line-height: 1.6;
+  }
+
+  /* Toggle button fixed on the right edge of the chat area */
+  .panel-open-btn {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+    padding: 0.55rem 0.45rem;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 0.7rem;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: background 0.15s, color 0.15s;
+    z-index: 10;
+    display: none;
+  }
+  .panel-open-btn.visible { display: flex; align-items: center; gap: 4px; }
+  .panel-open-btn:hover { background: var(--surface); color: var(--text); }
+
+  .espejo-chat { position: relative; }
+
+  /* ── Mobile ──────────────────────────────────────────────────────── */
+  @media (max-width: 660px) {
+    .espejo-wrap { grid-template-columns: 1fr; }
+    .espejo-sidebar { display: none; }
+    .lecturas-panel { display: none; }
+    .msg { max-width: 92%; }
+    .messages-area { padding: 1.25rem 1rem; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="espejo-wrap" id="espejo-wrap">
+
+  <!-- SIDEBAR ──────────────────────────────────────────────────────── -->
+  <aside class="espejo-sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-title">Conversaciones</span>
+      <form method="post" action="{% url 'mirror:nuevo' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn-nuevo">+ Nueva conversación</button>
+      </form>
+    </div>
+    <div class="sessions-list">
+      {% if sessions %}
+        {% for s in sessions %}
+          {% if s.status != 'archived' %}
+            <a href="/espejo/?sesion={{ s.pk }}"
+               class="session-item {% if active and active.pk == s.pk %}active{% endif %}">
+              <div class="session-item-title">{{ s.title|default:"Sin título" }}</div>
+              <div class="session-item-date">{{ s.updated_at|date:"d M, H:i" }}</div>
+            </a>
+          {% endif %}
+        {% endfor %}
+      {% else %}
+        <p class="sessions-empty">Aún no hay conversaciones.</p>
+      {% endif %}
+    </div>
+  </aside>
+
+  <!-- CHAT ─────────────────────────────────────────────────────────── -->
+  <section class="espejo-chat">
+
+    <div class="chat-header">
+      <span class="chat-title">
+        {% if active %}{{ active.title|default:"El Espejo" }}{% else %}El Espejo{% endif %}
+      </span>
+      <span class="chat-hint">Todo lo que emerge apunta hacia adentro.</span>
+      {% if active and active.messages %}
+      <div style="display:flex;gap:0.5rem;align-items:center;margin-left:auto;flex-shrink:0;">
+        <button onclick="openShareModal('espejo_exchange', {{ active.pk }}, '{{ active.title|default:'Sesión del Espejo'|escapejs }}')"
+          style="background:none;border:1px solid var(--border);border-radius:999px;padding:0.3rem 0.85rem;font-size:0.72rem;color:var(--muted);cursor:pointer;font-family:var(--font-ui);letter-spacing:0.06em;transition:all 0.2s;"
+          onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
+          onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+          Compartir
+        </button>
+        <form method="post" action="{% url 'mirror:archivar' active.pk %}" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit"
+            style="background:none;border:1px solid var(--border);border-radius:999px;padding:0.3rem 0.85rem;font-size:0.72rem;color:var(--muted);cursor:pointer;font-family:var(--font-ui);letter-spacing:0.06em;transition:all 0.2s;"
+            onmouseover="this.style.borderColor='rgba(240,192,64,0.4)';this.style.color='var(--luz-intensa)'"
+            onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'"
+            title="Cerrar y archivar esta sesión">
+            Archivar
+          </button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if pregunta_retorno %}
+    <div id="retorno-banner" style="background:rgba(78,205,196,0.08);border:1px solid rgba(78,205,196,0.25);border-radius:12px;padding:1rem 1.25rem;margin:0.75rem 1.5rem;cursor:pointer;" onclick="enviarPreguntaRetorno(this)">
+      <div style="font-size:0.62rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:0.4rem;">Hace un mes te preguntaste…</div>
+      <div style="font-size:0.88rem;color:var(--text);">{{ pregunta_retorno.pregunta_cierre }}</div>
+      <div style="font-size:0.68rem;color:var(--muted);margin-top:0.4rem;">Toca para explorar cómo lo ves hoy →</div>
+    </div>
+    {% endif %}
+
+    <div class="messages-area" id="messages-area">
+
+      {% if not active or not active.messages %}
+        <div class="espejo-welcome" id="welcome-state">
+          <div class="welcome-symbol">◎</div>
+          <p class="welcome-title">El Espejo está listo</p>
+          <p class="welcome-sub">
+            Cuéntame algo que esté presente para ti ahora — un conflicto, una emoción, un patrón que se repite. No hay forma incorrecta de comenzar.
+          </p>
+          <div class="starter-chips">
+            <span class="chip" onclick="useChip(this)">Tengo un conflicto con alguien</span>
+            <span class="chip" onclick="useChip(this)">Me siento atrapado/a en un patrón</span>
+            <span class="chip" onclick="useChip(this)">Hay algo en mi cuerpo que me preocupa</span>
+            <span class="chip" onclick="useChip(this)">Quiero explorar mis resultados de tests</span>
+          </div>
+        </div>
+      {% else %}
+        {% for msg in active.messages %}
+          <div class="msg {{ msg.role }}">
+            <span class="msg-label">{% if msg.role == 'user' %}Tú{% else %}Espejo{% endif %}</span>
+            <div class="msg-bubble">{{ msg.content }}</div>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <div class="typing-indicator" id="typing">
+        <div class="typing-dots"><span></span><span></span><span></span></div>
+      </div>
+
+    </div>
+
+    <!-- INPUT -->
+    <div class="chat-input-area">
+      <div class="input-row">
+        <textarea id="msg-input" placeholder="Escribe aquí…" rows="1" autocomplete="off"></textarea>
+        <button id="send-btn" title="Enviar">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+        </button>
+      </div>
+      <p class="input-hint">Enter para enviar · Shift+Enter para nueva línea</p>
+    </div>
+
+    <!-- OPEN BUTTON (visible when panel is collapsed) -->
+    <button class="panel-open-btn" id="panel-open-btn" title="Ver lecturas">
+      ◎ Lecturas
+    </button>
+  </section>
+
+  <!-- PANEL DE LECTURAS ─────────────────────────────────────────────── -->
+  <aside class="lecturas-panel" id="lecturas-panel">
+    <div class="lecturas-header">
+      <span class="lecturas-title">◎ Lecturas</span>
+      <button class="lecturas-toggle-btn" id="panel-close-btn" title="Cerrar panel">✕</button>
+    </div>
+    <div class="lecturas-body" id="lecturas-body">
+      <div class="lec-empty">Cargando…</div>
+    </div>
+  </aside>
+
+</div>
+
+<div id="error-toast"></div>
+{% endblock %}
+
+{% block extra_body %}
+<script>
+  const SEND_URL   = "{% url 'mirror:send' %}";
+  const CSRF_TOKEN = "{{ csrf_token }}";
+  const SESSION_ID = {% if active %}{{ active.pk }}{% else %}null{% endif %};
+
+  let currentSession = SESSION_ID;
+  let pendingEnfoque = null; // {id, titulo, descripcion} si el usuario eligió un camino
+
+  const input    = document.getElementById("msg-input");
+  const sendBtn  = document.getElementById("send-btn");
+  const area     = document.getElementById("messages-area");
+  const typing   = document.getElementById("typing");
+  const errToast = document.getElementById("error-toast");
+  const welcome  = document.getElementById("welcome-state");
+
+  // Auto-resize textarea
+  input.addEventListener("input", () => {
+    input.style.height = "auto";
+    input.style.height = Math.min(input.scrollHeight, 160) + "px";
+  });
+
+  input.addEventListener("keydown", e => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+  sendBtn.addEventListener("click", () => sendMessage());
+
+  function useChip(el) {
+    input.value = el.textContent;
+    input.dispatchEvent(new Event("input"));
+    input.focus();
+  }
+
+  function scrollBottom() { area.scrollTop = area.scrollHeight; }
+
+  function showError(msg) {
+    errToast.textContent = msg;
+    errToast.style.display = "block";
+    setTimeout(() => { errToast.style.display = "none"; }, 4500);
+  }
+
+  function appendUserMsg(text) {
+    const wrap = document.createElement("div");
+    wrap.className = "msg user";
+    wrap.innerHTML = `<span class="msg-label">Tú</span><div class="msg-bubble">${escHtml(text)}</div>`;
+    area.insertBefore(wrap, typing);
+    scrollBottom();
+  }
+
+  function appendAssistantMsg(texto, enfoques, testRec) {
+    const wrap = document.createElement("div");
+    wrap.className = "msg assistant";
+
+    let html = `<span class="msg-label">Espejo</span>
+                <div class="msg-bubble">${escHtml(texto)}</div>`;
+
+    if (enfoques && enfoques.length > 0) {
+      html += `<div class="enfoques-wrap">
+        <div class="enfoques-header">Explorar este conflicto desde…</div>`;
+      enfoques.forEach(e => {
+        html += `<button class="enfoque-card"
+          onclick="selectEnfoque(this, '${escAttr(e.id)}', '${escAttr(e.titulo)}', '${escAttr(e.descripcion || '')}')"
+          type="button">
+          <div class="enfoque-titulo">${escHtml(e.titulo)}</div>
+          ${e.descripcion ? `<div class="enfoque-desc">${escHtml(e.descripcion)}</div>` : ''}
+        </button>`;
+      });
+      html += `</div>`;
+    }
+
+    if (testRec && testRec.slug) {
+      html += `<a href="/tests/${escAttr(testRec.slug)}/tomar/" class="test-rec-card" target="_blank">
+        <div class="test-rec-icon">◈</div>
+        <div class="test-rec-body">
+          <div class="test-rec-label">Test recomendado</div>
+          <div class="test-rec-name">${escHtml(testRec.nombre || testRec.slug)}</div>
+          ${testRec.razon ? `<div class="test-rec-razon">${escHtml(testRec.razon)}</div>` : ''}
+        </div>
+      </a>`;
+    }
+
+    wrap.innerHTML = html;
+    area.insertBefore(wrap, typing);
+    scrollBottom();
+  }
+
+  function selectEnfoque(cardEl, enfoqueId, titulo, descripcion) {
+    // Marcar todas las tarjetas de ese grupo como usadas
+    cardEl.closest('.enfoques-wrap').querySelectorAll('.enfoque-card').forEach(c => c.classList.add('used'));
+
+    // Guardar el enfoque para enviarlo con el próximo mensaje
+    pendingEnfoque = { id: enfoqueId, titulo: titulo, descripcion: descripcion };
+
+    // Mostrar como burbuja de usuario: "Quiero explorar: {titulo}"
+    const userText = `Quiero explorar: ${titulo}`;
+    if (welcome) welcome.style.display = "none";
+    appendUserMsg(userText);
+
+    // Enviar inmediatamente con el enfoque seleccionado
+    sendMessage(userText);
+  }
+
+  async function sendMessage(overrideText) {
+    const text = (overrideText !== undefined) ? String(overrideText).trim() : input.value.trim();
+    if (!text) return;
+
+    if (welcome) welcome.style.display = "none";
+
+    if (overrideText === undefined) {
+      // Solo mostrar el bubble y limpiar el input si viene del textarea (no de selectEnfoque)
+      appendUserMsg(text);
+      input.value = "";
+      input.style.height = "auto";
+    }
+
+    sendBtn.disabled = true;
+    typing.classList.add("visible");
+    scrollBottom();
+
+    const enfoque = pendingEnfoque;
+    pendingEnfoque = null;
+
+    try {
+      const res = await fetch(SEND_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": CSRF_TOKEN },
+        body: JSON.stringify({ mensaje: text, sesion_id: currentSession, enfoque: enfoque }),
+      });
+      const data = await res.json();
+
+      if (!res.ok || data.error) { showError(data.error || "Error al conectar con el espejo."); return; }
+
+      if (data.sesion_id && !currentSession) {
+        currentSession = data.sesion_id;
+        history.replaceState(null, "", "/espejo/?sesion=" + currentSession);
+      }
+
+      appendAssistantMsg(data.respuesta, data.enfoques, data.test_recomendado);
+
+    } catch (err) {
+      showError("Error de conexión. Intenta de nuevo.");
+    } finally {
+      typing.classList.remove("visible");
+      sendBtn.disabled = false;
+      if (overrideText === undefined) input.focus();
+    }
+  }
+
+  // Helpers anti-XSS
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+  function escAttr(s) {
+    return String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;');
+  }
+
+  scrollBottom();
+  input.focus();
+
+  // ── Panel de lecturas ─────────────────────────────────────────────
+  const wrap        = document.getElementById('espejo-wrap');
+  const panel       = document.getElementById('lecturas-panel');
+  const body        = document.getElementById('lecturas-body');
+  const closeBtn    = document.getElementById('panel-close-btn');
+  const openBtn     = document.getElementById('panel-open-btn');
+
+  function collapsePanel() {
+    wrap.classList.add('panel-collapsed');
+    panel.classList.add('collapsed');
+    openBtn.classList.add('visible');
+  }
+  function expandPanel() {
+    wrap.classList.remove('panel-collapsed');
+    panel.classList.remove('collapsed');
+    openBtn.classList.remove('visible');
+  }
+
+  closeBtn.addEventListener('click', collapsePanel);
+  openBtn.addEventListener('click', expandPanel);
+
+  function badgeHtml(status) {
+    if (status === 'revealed')   return '<span class="lec-badge lec-badge-revealed">Revelada</span>';
+    if (status === 'processing') return '<span class="lec-badge lec-badge-processing">Generando…</span>';
+    return '<span class="lec-badge lec-badge-pending">Por revelar</span>';
+  }
+
+  function renderCards(data) {
+    const { pending, revealed } = data;
+    if (!pending.length && !revealed.length) {
+      body.innerHTML = '<div class="lec-empty">Aquí aparecerán las lecturas de tus tests y reportes de nacimiento.</div>';
+      return;
+    }
+    let html = '';
+    if (pending.length) {
+      html += '<div class="lec-section-label">Por revelar</div>';
+      pending.forEach(c => {
+        html += `<a href="${escHtml(c.url)}" class="lec-card">
+          <div class="lec-card-name">${escHtml(c.title)}</div>
+          <div class="lec-card-meta">
+            <span class="lec-card-date">${escHtml(c.date)}</span>
+            ${badgeHtml(c.status)}
+          </div>
+        </a>`;
+      });
+    }
+    if (revealed.length) {
+      html += '<div class="lec-section-label" style="margin-top:0.75rem">Reveladas</div>';
+      revealed.forEach(c => {
+        html += `<a href="${escHtml(c.url)}" class="lec-card">
+          <div class="lec-card-name">${escHtml(c.title)}</div>
+          <div class="lec-card-meta">
+            <span class="lec-card-date">${escHtml(c.date)}</span>
+            ${badgeHtml(c.status)}
+          </div>
+        </a>`;
+      });
+    }
+    body.innerHTML = html;
+  }
+
+  fetch('/espejo/tarjetas/')
+    .then(r => r.json())
+    .then(renderCards)
+    .catch(() => { body.innerHTML = '<div class="lec-empty">No se pudieron cargar las lecturas.</div>'; });
+
+  function enviarPreguntaRetorno(el) {
+    el.style.display = 'none';
+    const texto = el.querySelector('[style*="0.88rem"]').textContent;
+    if (welcome) welcome.style.display = 'none';
+    appendUserMsg(texto);
+    sendMessage(texto);
+  }
+</script>
+{% endblock %}

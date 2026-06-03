@@ -1,0 +1,370 @@
+{% extends "base.html" %}
+{% block title %}Saju — MirrorWork{% endblock %}
+
+{% block extra_head %}
+<style>
+  .saju-wrap { max-width: 720px; margin: 2rem auto; padding: 3rem 2rem 5rem; background: rgba(0,0,0,0.88); border: 1px solid rgba(255,255,255,0.14); border-radius: 20px; }
+  .saju-tag {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--muted);
+    display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem;
+  }
+  .saju-tag::before { content:''; display:block; width:20px; height:1px; background:var(--dim); }
+  .saju-heading {
+    font-family: var(--font-heading); font-size: clamp(1.8rem,4vw,2.5rem);
+    font-weight: 400; line-height: 1.15; margin-bottom: 0.5rem;
+  }
+  .saju-heading em { font-style: italic; color: var(--muted); }
+  .saju-meta { font-size: 0.82rem; color: var(--muted); margin-bottom: 3rem; }
+
+  /* Four pillars */
+  .pillars-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem; margin-bottom: 2.5rem;
+  }
+  .pillar {
+    background: rgba(0,0,0,0.88); border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 14px; padding: 1.25rem 1rem; text-align: center;
+    display: flex; flex-direction: column; gap: 0.5rem;
+  }
+  .pillar-label {
+    font-size: 0.68rem; font-weight: 500; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .pillar-char { font-size: 2rem; line-height: 1; }
+  .pillar-char-branch { font-size: 1.6rem; }
+  .pillar-rom { font-size: 0.78rem; color: var(--muted); }
+  .pillar-elem {
+    font-size: 0.72rem; padding: 0.15rem 0.5rem; border-radius: 100px;
+    display: inline-block; margin: 0 auto;
+  }
+  .elem-madera { background: rgba(100,180,100,0.12); color: #7cb87a; }
+  .elem-fuego  { background: rgba(244,128,74,0.12);  color: #f4804a; }
+  .elem-tierra { background: rgba(180,150,80,0.12);  color: #c8a855; }
+  .elem-metal  { background: rgba(180,180,200,0.12); color: #aaaacc; }
+  .elem-agua   { background: rgba(100,150,220,0.12); color: #88aaee; }
+  .pillar-animal { font-size: 0.82rem; color: var(--dim); }
+  .pillar-unknown { opacity: 0.45; border-style: dashed; justify-content: center; }
+
+  .section-title {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: 1rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border);
+  }
+
+  /* Elements balance */
+  .elem-balance { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2.5rem; }
+  .elem-chip {
+    display: flex; align-items: center; gap: 0.4rem;
+    padding: 0.35rem 0.8rem; border-radius: 100px; font-size: 0.8rem;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .elem-chip.absent { opacity: 0.4; }
+  .elem-chip .dots { display: flex; gap: 3px; }
+  .elem-chip .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* Summary */
+  .summary-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2.5rem; }
+  .sum-card {
+    background: rgba(0,0,0,0.88); border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 14px; padding: 1.25rem;
+  }
+  .sum-label { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); margin-bottom: 0.4rem; }
+  .sum-value { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 400; color: var(--text); }
+
+  /* 大運 table */
+  .daewoon-wrap { margin-bottom: 2.5rem; }
+  .daewoon-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(100px,1fr));
+    gap: 0.6rem;
+  }
+  .dw-cell {
+    background: rgba(0,0,0,0.88); border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 10px; padding: 0.75rem 0.6rem; text-align: center;
+    display: flex; flex-direction: column; gap: 0.3rem;
+  }
+  .dw-cell.current {
+    border-color: rgba(200,168,85,0.5); background: rgba(200,168,85,0.06);
+  }
+  .dw-ages { font-size: 0.65rem; color: var(--dim); }
+  .dw-chars { font-size: 1.2rem; line-height: 1.1; }
+  .dw-elem { font-size: 0.63rem; color: var(--muted); }
+  .dw-current-badge {
+    font-size: 0.6rem; font-weight: 500; letter-spacing: 0.05em;
+    color: var(--luz-intensa); text-transform: uppercase;
+  }
+  .daewoon-start { font-size: 0.78rem; color: var(--dim); margin-bottom: 0.75rem; }
+  .no-daewoon { font-size: 0.8rem; color: var(--dim); padding: 0.75rem 1rem;
+    background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+    border-radius: 10px; line-height: 1.6; }
+
+  /* Interpretation */
+  .interp-spinner {
+    display: flex; align-items: center; gap: 1rem; padding: 1.5rem;
+    background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 14px;
+  }
+  .spin-ring {
+    width: 28px; height: 28px; border: 2px solid rgba(200,168,85,0.2);
+    border-top-color: var(--luz-intensa); border-radius: 50%; animation: spin 1s linear infinite; flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .interp-spinner p { font-size: 0.88rem; color: var(--muted); margin: 0; line-height: 1.5; }
+  .interp-text { font-size: 0.92rem; line-height: 1.8; color: var(--text); white-space: pre-wrap; }
+  .interp-text.fade-in { animation: fadeUp 0.5s ease both; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  .no-tokens-note { font-size: 0.82rem; color: var(--dim); padding: 1rem 1.25rem; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px; line-height: 1.6; }
+  .no-tokens-note a { color: var(--accent); }
+  .back-link { display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 3rem; font-size: 0.8rem; color: var(--muted); text-decoration: none; transition: color 0.15s; }
+  .back-link:hover { color: var(--accent); }
+
+  .disclaimer { font-size: 0.75rem; color: var(--dim); line-height: 1.6; padding: 0.75rem 1rem; background: rgba(255,255,255,0.02); border-radius: 8px; margin-bottom: 2rem; }
+
+  /* Pillar description */
+  .pillar-pilar-desc {
+    font-size: 0.68rem; color: var(--dim); line-height: 1.4;
+    margin-top: 0.3rem; text-align: center;
+    border-top: 1px solid var(--border); padding-top: 0.4rem;
+  }
+
+  /* Element desc cards */
+  .elem-cards { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 2.5rem; }
+  .elem-desc-card {
+    display: grid; grid-template-columns: 90px 1fr;
+    gap: 0.5rem 1rem; align-items: start;
+    padding: 0.75rem 1rem; border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .elem-desc-label { font-size: 0.78rem; font-weight: 600; padding-top: 0.05rem; }
+  .elem-desc-text  { font-size: 0.78rem; color: var(--dim); line-height: 1.6; }
+
+  @media (max-width: 520px) {
+    .pillars-grid { grid-template-columns: repeat(2,1fr); }
+    .summary-cards { grid-template-columns: 1fr; }
+    .elem-desc-card { grid-template-columns: 1fr; }
+  }
+
+  @media print {
+    .saju-wrap { padding: 0 !important; max-width: 100% !important; }
+    .saju-tag { display: none; }
+    .saju-heading { font-size: 18pt !important; margin-bottom: 4pt !important; }
+    .saju-heading em { display: none; }
+    .saju-meta { font-size: 8pt !important; color: #6a6a8a !important; margin-bottom: 10pt !important; }
+
+    .pillars-grid { grid-template-columns: repeat(4,1fr) !important; gap: 6pt !important; margin-bottom: 12pt !important; }
+    .pillar {
+      background: #f5f5fa !important; border: 1pt solid #d4d4e0 !important;
+      border-radius: 6pt !important; padding: 8pt 6pt !important;
+    }
+    .pillar-char { font-size: 20pt !important; }
+    .pillar-char-branch { font-size: 16pt !important; }
+    .pillar-label { font-size: 6.5pt !important; }
+    .pillar-rom { font-size: 7pt !important; }
+    .pillar-elem { font-size: 6.5pt !important; padding: 1pt 4pt !important; }
+    .pillar-animal { font-size: 7.5pt !important; }
+
+    .elem-madera { background: rgba(100,180,100,0.15) !important; color: #2a7a2a !important; }
+    .elem-fuego  { background: rgba(244,128,74,0.15) !important;  color: #c04020 !important; }
+    .elem-tierra { background: rgba(180,150,80,0.15) !important;  color: #8a6a10 !important; }
+    .elem-metal  { background: rgba(120,120,160,0.15) !important; color: #5050a0 !important; }
+    .elem-agua   { background: rgba(80,120,200,0.15) !important;  color: #2050a0 !important; }
+
+    .summary-cards { grid-template-columns: repeat(2,1fr) !important; gap: 6pt !important; margin-bottom: 12pt !important; }
+    .sum-card { background: #f8f8fb !important; border: 1pt solid #d4d4e0 !important; border-radius: 6pt !important; padding: 8pt !important; }
+    .sum-label { font-size: 6.5pt !important; }
+    .sum-value { font-size: 11pt !important; }
+
+    .elem-balance { gap: 6pt !important; margin-bottom: 12pt !important; }
+    .elem-chip { font-size: 8pt !important; padding: 3pt 8pt !important; border-color: #d4d4e0 !important; }
+    .elem-chip.absent { opacity: 0.5 !important; }
+
+    .daewoon-wrap { margin-bottom: 12pt !important; }
+    .daewoon-grid { grid-template-columns: repeat(5,1fr) !important; gap: 5pt !important; }
+    .dw-cell { background: #f8f8fb !important; border: 1pt solid #d4d4e0 !important; border-radius: 5pt !important; padding: 5pt 4pt !important; }
+    .dw-cell.current { border-color: #c49a10 !important; background: rgba(196,154,16,0.08) !important; }
+    .dw-ages { font-size: 6.5pt !important; }
+    .dw-chars { font-size: 11pt !important; }
+    .dw-elem { font-size: 6pt !important; }
+    .dw-current-badge { font-size: 6pt !important; color: #c49a10 !important; }
+    .daewoon-start { font-size: 8pt !important; color: #6a6a8a !important; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="saju-wrap">
+
+  <!-- PRINT HEADER -->
+  <div class="print-header">
+    <div>
+      <div class="ph-brand-name">endonautas</div>
+      <div class="ph-brand-url">app.endonautas.cl</div>
+    </div>
+    <div class="ph-report">
+      <div class="ph-report-type">Saju — Cuatro Pilares del Destino</div>
+      <div class="ph-report-user">{{ request.user.first_name|default:request.user.email }}{% if bp %} · {{ bp.birth_place }}{% endif %}</div>
+      <div class="ph-report-date">{% if bp %}{{ bp.birth_date }}{% if bp.birth_time %} · {{ bp.birth_time|time:"H:i" }}{% endif %}{% endif %}</div>
+    </div>
+  </div>
+
+  <!-- PRINT FOOTER -->
+  <div class="print-footer">
+    <span>app.endonautas.cl</span>
+    <span>MirrorWork · Sistema de Autoconocimiento Endonauta</span>
+    <span>Generado el {% now "j \d\e N \d\e Y" %}</span>
+  </div>
+
+  <div class="saju-tag reveal">Saju — 사주</div>
+  <h1 class="saju-heading reveal">
+    {{ request.user.first_name|default:request.user.email }}<br>
+    <em>los cuatro pilares del destino</em>
+  </h1>
+  {% if bp %}
+  <p class="saju-meta reveal">
+    {{ bp.birth_date }}{% if bp.birth_time %} · {{ bp.birth_time|time:"H:i" }}{% endif %} · {{ bp.birth_place }}
+    {% with chart=report.chart_data %}
+    {% if chart.solar_correction_min and chart.solar_correction_min != 0 %}
+    · <span title="Corrección por longitud geográfica">Hora solar: {{ chart.solar_hour|stringformat:"02d" }}:{{ chart.solar_minute|stringformat:"02d" }} ({% if chart.solar_correction_min > 0 %}+{% endif %}{{ chart.solar_correction_min }}min)</span>
+    {% endif %}
+    {% endwith %}
+  </p>
+  {% endif %}
+
+  <p class="disclaimer reveal">
+    El Saju es la astrología oriental coreana basada en el calendario solar chino.
+    Calcula la energía de tu Año, Mes, Día y Hora de nacimiento como cuatro pilares que revelan tu naturaleza y ciclos vitales.
+    {% with chart=report.chart_data %}{% if chart and not chart.hour_known %}
+    <strong>Versión sin hora de nacimiento:</strong> se calcularon 3 de 4 pilares. El balance de elementos y la síntesis son parciales. Ingresa tu hora de nacimiento para el cuarto pilar.
+    {% endif %}{% endwith %}
+  </p>
+
+  {% with chart=report.chart_data %}
+  {% if chart %}
+
+  <!-- Cuatro pilares -->
+  <div class="section-title reveal">Los cuatro pilares</div>
+  <div class="pillars-grid reveal">
+    {% for p in annotated_pillars %}
+    <div class="pillar">
+      <div class="pillar-label">{{ p.label }}</div>
+      <div class="pillar-char">{{ p.stem }}</div>
+      <div class="pillar-char-branch">{{ p.branch }}</div>
+      <div class="pillar-rom">{{ p.rom_stem }} · {{ p.rom_branch }}</div>
+      <span class="pillar-elem elem-{{ p.elem_stem_name|lower }}">{{ p.elem_stem }}</span>
+      <div class="pillar-animal">{{ p.animal }}</div>
+      <span class="pillar-elem elem-{{ p.elem_branch|lower }}" style="margin-top:-0.25rem">{{ p.elem_branch }}</span>
+      {% if p.pilar_desc %}<div class="pillar-pilar-desc">{{ p.pilar_desc }}</div>{% endif %}
+    </div>
+    {% endfor %}
+    {% if not chart.hour_known %}
+    <div class="pillar pillar-unknown">
+      <div class="pillar-label">Hora</div>
+      <div class="pillar-char" style="font-size:1.4rem;color:var(--muted)">?</div>
+      <div class="pillar-char-branch" style="color:var(--muted)">?</div>
+      <div class="pillar-rom" style="color:var(--dim)">hora no ingresada</div>
+      <a href="{% url 'birth:profile' %}" style="font-size:0.72rem;color:var(--accent);margin-top:0.25rem">+ agregar hora</a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Resumen -->
+  <div class="section-title reveal">Síntesis energética</div>
+  <div class="summary-cards reveal">
+    <div class="sum-card">
+      <div class="sum-label">Maestro del Día</div>
+      <div class="sum-value">{{ chart.day_master }}</div>
+      <div style="font-size:0.78rem;color:var(--muted);margin-top:0.3rem">Tu identidad central — la energía desde la que navegás la vida</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-label">Animal del año</div>
+      <div class="sum-value">{{ chart.lunar_year_animal }}</div>
+      <div style="font-size:0.78rem;color:var(--muted);margin-top:0.3rem">El arquetipo del ciclo en que llegaste</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-label">Elemento dominante</div>
+      <div class="sum-value">{{ chart.dominant_element }}</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-label">Elemento ausente o mínimo</div>
+      <div class="sum-value">{{ chart.weakest_element|default:"Equilibrado" }}</div>
+    </div>
+  </div>
+
+  <!-- Balance de elementos — siempre los 5 -->
+  <div class="section-title reveal">Balance de los 5 elementos</div>
+  <div class="elem-balance reveal">
+    {% for elem, count in chart.element_count.items %}
+    <div class="elem-chip elem-{{ elem|lower }}{% if count == 0 %} absent{% endif %}">
+      <span>{{ elem }}</span>
+      <span class="dots">
+        {% for i in "12345"|make_list %}
+          {% if forloop.counter <= count %}
+            <span class="dot" style="background:currentColor"></span>
+          {% else %}
+            <span class="dot" style="background:rgba(255,255,255,0.1)"></span>
+          {% endif %}
+        {% endfor %}
+      </span>
+      <span>{{ count }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% if saju_elem_descs %}
+  <div class="elem-cards reveal">
+    {% for elem, count in chart.element_count.items %}
+    {% with desc=saju_elem_descs|default_if_none:'' %}
+    <div class="elem-desc-card elem-{{ elem|lower }}" style="background:rgba(255,255,255,0.02);">
+      <div class="elem-desc-label elem-{{ elem|lower }}">{{ elem }}{% if count == 0 %} <span style="font-size:0.62rem;opacity:0.5">(ausente)</span>{% else %} ×{{ count }}{% endif %}</div>
+      <div class="elem-desc-text">
+        {% if elem == 'Madera' %}{{ saju_elem_descs.Madera }}
+        {% elif elem == 'Fuego' %}{{ saju_elem_descs.Fuego }}
+        {% elif elem == 'Tierra' %}{{ saju_elem_descs.Tierra }}
+        {% elif elem == 'Metal' %}{{ saju_elem_descs.Metal }}
+        {% elif elem == 'Agua' %}{{ saju_elem_descs.Agua }}
+        {% endif %}
+      </div>
+    </div>
+    {% endwith %}
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- 大運 ciclos vitales -->
+  <div class="section-title reveal">Ciclos vitales — 大運</div>
+  <div class="daewoon-wrap reveal">
+    {% if chart.daewoon %}
+      <p class="daewoon-start">Los grandes ciclos de 10 años comienzan a los {{ chart.daewoon.start_age }} años.</p>
+      <div class="daewoon-grid">
+        {% for c in chart.daewoon.cycles %}
+        <div class="dw-cell {% if c.is_current %}current{% endif %}">
+          {% if c.is_current %}<div class="dw-current-badge">Ahora</div>{% endif %}
+          <div class="dw-ages">{{ c.age_start }}–{{ c.age_end }}</div>
+          <div class="dw-chars">{{ c.stem }}{{ c.branch }}</div>
+          <div class="dw-elem elem-{{ c.elem_stem|lower|truncatechars:7|cut:'…' }}">{{ c.elem_stem|truncatewords:1 }}</div>
+          <div style="font-size:0.62rem;color:var(--dim)">{{ c.year_start }}–{{ c.year_end }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    {% elif not bp.gender %}
+      <p class="no-daewoon">Para calcular los ciclos vitales se necesita el género asignado al nacer. <a href="{% url 'birth:profile' %}" style="color:var(--accent)">Actualizar datos →</a></p>
+    {% else %}
+      <p class="no-daewoon">Los ciclos vitales se calcularán al regenerar el reporte.</p>
+    {% endif %}
+  </div>
+
+  {% endif %}
+  {% endwith %}
+
+  <div style="display:flex;align-items:center;gap:1rem;margin-top:3rem;flex-wrap:wrap;">
+    <a href="{% url 'birth:profile' %}" class="back-link" style="margin-top:0">← Volver a nacimiento</a>
+    <form method="post" action="{% url 'birth:saju_generate' %}" style="display:inline;">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-ghost" style="font-size:0.78rem;">↺ Recalcular</button>
+    </form>
+    <a href="/nacimiento/reporte/{{ report.pk }}/saju/lectura/"
+       style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.55rem 1.1rem;background:rgba(124,109,250,0.1);border:1px solid rgba(124,109,250,0.3);border-radius:100px;font-size:0.82rem;color:var(--accent2);text-decoration:none;">
+      ◎ {% if report.interpretation and report.interpretation != 'processing' %}Ver lectura endonauta{% else %}Lectura pendiente{% endif %}
+    </a>
+    <button class="print-btn" onclick="window.print()">↓ Imprimir como PDF</button>
+  </div>
+</div>
+{% endblock %}

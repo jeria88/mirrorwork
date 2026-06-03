@@ -118,6 +118,40 @@
     <a href="{% url 'community:perfil_propio' %}" class="com-tab">Mi perfil</a>
   </nav>
 
+  {# Botón de nueva publicación #}
+  <div style="margin-bottom: 1.5rem;">
+    <button class="btn btn-primary" onclick="openNativePost()" style="width:100%;padding:0.75rem;font-size:0.85rem;">
+      ✦ Nueva publicación
+    </button>
+  </div>
+
+  {# Modal para post nativo #}
+  <div id="nativePostModal" style="display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;max-width:500px;width:90%;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <h3 style="color:var(--text);font-size:1rem;margin:0;">Nueva publicación</h3>
+        <button onclick="closeNativePost()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;">×</button>
+      </div>
+      <form id="nativePostForm" enctype="multipart/form-data">
+        <textarea id="nativeText" placeholder="¿Qué estás compartiendo?" style="width:100%;min-height:120px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:0.75rem;color:var(--text);font-size:0.85rem;resize:vertical;margin-bottom:0.75rem;"></textarea>
+        <div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:1rem;">
+          <label style="color:var(--muted);font-size:0.8rem;cursor:pointer;">
+            📷 Subir foto
+            <input type="file" id="nativeImage" accept="image/*" style="display:none;">
+          </label>
+          <span id="nativeImageName" style="color:var(--muted);font-size:0.75rem;"></span>
+        </div>
+        <div id="nativePreview" style="margin-bottom:1rem;display:none;">
+          <img id="nativePreviewImg" style="max-width:100%;border-radius:8px;max-height:300px;object-fit:cover;">
+        </div>
+        <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
+          <button type="button" onclick="closeNativePost()" class="btn btn-sm">Cancelar</button>
+          <button type="submit" class="btn btn-primary btn-sm">Publicar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   {% if not insights %}
     <div class="empty-state">
       {% if tab == 'feed' %}
@@ -183,12 +217,23 @@
           </div>
           <div class="insight-date">{{ insight.created_at|date:"d M Y" }}</div>
         </div>
-        <span class="insight-source-tag">{% if insight.source_type == 'test_result' %}Test{% else %}Espejo{% endif %}</span>
+        <span class="insight-source-tag">
+          {% if insight.source_type == 'test_result' %}Test{% elif insight.source_type == 'espejo_exchange' %}Espejo{% else %}Publicación{% endif %}
+        </span>
       </div>
 
       <div class="insight-title">{{ insight.source_title }}</div>
-      {% if insight.reflection_text %}
-        <div class="insight-reflection">{{ insight.reflection_text }}</div>
+
+      {# Imagen del post (nativo o repost) #}
+      {% if insight.image %}
+        <div style="margin: 0.8rem 0; border-radius: 12px; overflow: hidden;">
+          <img src="{{ insight.image.url }}" style="width:100%; max-height: 480px; object-fit: cover; display: block;">
+        </div>
+      {% endif %}
+
+      {# Texto del post #}
+      {% if insight.display_text %}
+        <div class="insight-reflection">{{ insight.display_text }}</div>
       {% endif %}
 
       <div class="insight-actions">
@@ -290,6 +335,64 @@ function comentar(pk) {
     const ccount = document.getElementById('ccount-' + pk);
     if (ccount) ccount.textContent = parseInt(ccount.textContent || 0) + 1;
   });
+});
+</script>
+
+{# ── JS: Post nativo ── #}
+<script>
+function openNativePost() {
+document.getElementById('nativePostModal').style.display = 'flex';
 }
+function closeNativePost() {
+document.getElementById('nativePostModal').style.display = 'none';
+document.getElementById('nativePostForm').reset();
+document.getElementById('nativePreview').style.display = 'none';
+document.getElementById('nativeImageName').textContent = '';
+}
+
+// Preview de imagen
+document.getElementById('nativeImage').addEventListener('change', function(e) {
+const file = e.target.files[0];
+if (file) {
+  document.getElementById('nativeImageName').textContent = file.name;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    document.getElementById('nativePreviewImg').src = ev.target.result;
+    document.getElementById('nativePreview').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+});
+
+// Envío del formulario
+document.getElementById('nativePostForm').addEventListener('submit', function(e) {
+e.preventDefault();
+const text = document.getElementById('nativeText').value.trim();
+const imageInput = document.getElementById('nativeImage');
+if (!text && !imageInput.files.length) return;
+
+const formData = new FormData();
+formData.append('source_type', 'native');
+formData.append('text', text);
+if (imageInput.files.length) {
+  formData.append('image', imageInput.files[0]);
+}
+
+fetch('/comunidad/compartir/', {
+  method: 'POST',
+  headers: { 'X-CSRFToken': getCsrfToken() },
+  body: formData,
+})
+.then(r => r.json())
+.then(d => {
+  if (d.ok) {
+    closeNativePost();
+    location.reload();
+  } else {
+    alert(d.error || 'Error al publicar');
+  }
+})
+.catch(err => alert('Error de red: ' + err));
+});
 </script>
 {% endblock %}

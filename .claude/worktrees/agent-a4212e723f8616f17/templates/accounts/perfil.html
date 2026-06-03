@@ -1,0 +1,491 @@
+{% extends "base.html" %}
+{% block title %}Mi perfil — MirrorWork{% endblock %}
+
+{% block extra_head %}
+<style>
+  .perfil-wrap {
+    max-width: 680px;
+    margin: 2rem auto;
+    padding: 3rem 2rem 5rem;
+    background: rgba(0,0,0,0.88);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 20px;
+  }
+
+  .perfil-tag {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1.25rem;
+  }
+  .perfil-tag::before { content: ''; display: block; width: 20px; height: 1px; background: var(--dim); }
+
+  .perfil-heading {
+    font-family: var(--font-heading);
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    font-weight: 400;
+    line-height: 1.15;
+    margin-bottom: 2.5rem;
+    letter-spacing: -0.01em;
+  }
+  .perfil-heading em { font-style: italic; color: var(--muted); }
+
+  /* ── Secciones ── */
+  .perfil-section {
+    margin-bottom: 2.5rem;
+  }
+  .perfil-section-title {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.1rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── Campos ── */
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .field label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .field input,
+  .field textarea {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+    font-size: 0.9rem;
+    color: var(--text);
+    font-family: var(--font-ui);
+    transition: border-color 0.2s, background 0.2s;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .field input:focus,
+  .field textarea:focus {
+    border-color: var(--accent);
+    background: rgba(255,255,255,0.06);
+  }
+  .field input[readonly] {
+    color: var(--muted);
+    cursor: default;
+    background: rgba(255,255,255,0.02);
+    border-color: rgba(255,255,255,0.05);
+  }
+  .field textarea { resize: vertical; min-height: 90px; line-height: 1.65; }
+
+  /* ── Aesthetic picker ── */
+  .aesthetic-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+    gap: 0.7rem;
+  }
+  .aesthetic-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 1rem 0.65rem 0.85rem;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    background: rgba(255,255,255,0.02);
+    cursor: pointer;
+    transition: border-color 0.18s, background 0.18s;
+    text-align: center;
+    user-select: none;
+  }
+  .aesthetic-card:has(input:checked) {
+    border-color: var(--accent);
+    background: rgba(78,205,196,0.08);
+  }
+  .aesthetic-card input { display: none; }
+  .aesthetic-icon {
+    font-size: 1.45rem;
+    color: var(--muted);
+    line-height: 1;
+    transition: color 0.18s;
+  }
+  .aesthetic-card:has(input:checked) .aesthetic-icon { color: var(--accent); }
+  .aesthetic-name {
+    font-size: 0.76rem;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.25;
+  }
+  .aesthetic-desc {
+    font-size: 0.67rem;
+    color: var(--muted);
+    line-height: 1.3;
+  }
+  .aesthetic-card--soon {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+  .aesthetic-soon {
+    font-size: 0.62rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 0.1rem;
+  }
+
+  /* ── Botón guardar ── */
+  .perfil-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-top: 2rem;
+    padding-top: 1.75rem;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .btn-save {
+    padding: 0.8rem 2.25rem;
+    border-radius: 100px;
+    background: var(--accent);
+    color: #000;
+    font-family: var(--font-ui);
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .btn-save:hover { opacity: 0.88; transform: scale(1.02); }
+
+  .saved-msg {
+    font-size: 0.78rem;
+    color: var(--accent);
+    font-weight: 400;
+    {% if not saved %}display: none;{% endif %}
+  }
+
+  .perfil-link {
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-decoration: none;
+    margin-top: 0.5rem;
+    display: inline-block;
+    transition: color 0.15s;
+  }
+  .perfil-link:hover { color: var(--accent); }
+
+  /* ── Sección viaje interior ── */
+  .viaje-select {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+    font-size: 0.9rem;
+    color: var(--text);
+    font-family: var(--font-ui);
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237070a0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.9rem center;
+    padding-right: 2.5rem;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .viaje-select:focus { border-color: var(--accent); }
+  .viaje-select option { background: #1a1a26; color: var(--text); }
+  .viaje-otro-input {
+    margin-top: 0.5rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+    font-size: 0.9rem;
+    color: var(--text);
+    font-family: var(--font-ui);
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+  }
+  .viaje-otro-input:focus { border-color: var(--accent); }
+
+  .viaje-checks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.1rem;
+  }
+  .viaje-check-label {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 100px;
+    padding: 0.35rem 0.85rem;
+    font-size: 0.8rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color 0.18s, background 0.18s, color 0.18s;
+    user-select: none;
+  }
+  .viaje-check-label:has(input:checked) {
+    border-color: var(--accent);
+    background: rgba(78,205,196,0.09);
+    color: var(--accent);
+  }
+  .viaje-check-label input { display: none; }
+
+  .nucleo-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .nucleo-row { display: flex; flex-direction: column; gap: 0.35rem; }
+  .nucleo-q-label { font-size: 0.82rem; color: var(--muted); }
+  .nucleo-pills { display: flex; gap: 0.4rem; }
+  .nucleo-pill-label {
+    flex: 1;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 100px;
+    padding: 0.4rem 0.5rem;
+    font-size: 0.78rem;
+    font-family: var(--font-ui);
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color 0.18s, background 0.18s, color 0.18s;
+    user-select: none;
+  }
+  .nucleo-pill-label:has(input:checked) {
+    border-color: var(--accent);
+    background: rgba(78,205,196,0.09);
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .nucleo-pill-label input { display: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="perfil-wrap">
+
+  <div class="perfil-tag reveal">Mi espacio</div>
+  <h1 class="perfil-heading reveal">
+    {{ user.first_name|default:"Explorador" }}<br>
+    <em>{{ user.email }}</em>
+  </h1>
+
+  <!-- ── Datos personales + mapa ── -->
+  <form method="post">
+    {% csrf_token %}
+
+    <!-- ── Forma del mapa ── -->
+    <div class="perfil-section reveal">
+      <div class="perfil-section-title">Forma del mapa</div>
+      <div class="aesthetic-grid">
+
+        <label class="aesthetic-card">
+          <input type="radio" name="map_aesthetic" value="cosmos"
+            {% if profile.map_aesthetic == 'cosmos' or not profile.map_aesthetic %}checked{% endif %}>
+          <div class="aesthetic-icon">✦</div>
+          <div class="aesthetic-name">Cosmos</div>
+          <div class="aesthetic-desc">Agujero negro kepleriano</div>
+        </label>
+
+        <label class="aesthetic-card">
+          <input type="radio" name="map_aesthetic" value="mandala"
+            {% if profile.map_aesthetic == 'mandala' %}checked{% endif %}>
+          <div class="aesthetic-icon">◎</div>
+          <div class="aesthetic-name">Geometría Sagrada</div>
+          <div class="aesthetic-desc">Mandala vivo</div>
+        </label>
+
+        <label class="aesthetic-card">
+          <input type="radio" name="map_aesthetic" value="psychedelic"
+            {% if profile.map_aesthetic == 'psychedelic' %}checked{% endif %}>
+          <div class="aesthetic-icon">⬡</div>
+          <div class="aesthetic-name">Psicodélico</div>
+          <div class="aesthetic-desc">Túnel chamánico</div>
+        </label>
+
+        <label class="aesthetic-card aesthetic-card--soon">
+          <input type="radio" name="map_aesthetic" value="archipielago" disabled>
+          <div class="aesthetic-icon">◫</div>
+          <div class="aesthetic-name">Archipiélago</div>
+          <div class="aesthetic-soon">próximamente</div>
+        </label>
+
+        <label class="aesthetic-card aesthetic-card--soon">
+          <input type="radio" name="map_aesthetic" value="arbol" disabled>
+          <div class="aesthetic-icon">⟁</div>
+          <div class="aesthetic-name">Árbol</div>
+          <div class="aesthetic-soon">próximamente</div>
+        </label>
+
+      </div>
+    </div>
+
+    <div class="perfil-section reveal">
+      <div class="perfil-section-title">Sobre ti</div>
+      <div class="field-group">
+        <div class="field">
+          <label>Nombre</label>
+          <input type="text" name="first_name" value="{{ user.first_name }}" placeholder="Tu nombre">
+        </div>
+        <div class="field">
+          <label>Correo</label>
+          <input type="email" value="{{ user.email }}" readonly>
+        </div>
+        <div class="field">
+          <label>Profesión u ocupación</label>
+          <input type="text" name="profession" value="{{ profile.profession }}" placeholder="Ej. Terapeuta, Diseñador, Estudiante…">
+        </div>
+        <div class="field">
+          <label>Bio</label>
+          <textarea name="bio" placeholder="Unas palabras sobre tu camino interior…">{{ profile.bio }}</textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Viaje interior ── -->
+    <div class="perfil-section reveal">
+      <div class="perfil-section-title">Tu viaje interior</div>
+      <div class="field-group">
+
+        <div class="field">
+          <label>¿Cómo llegaste aquí?</label>
+          <select name="onboarding_entry_point" id="selectEntry" class="viaje-select" onchange="onSelectChange('selectEntry','entryOtro')">
+            <option value="">— Sin responder —</option>
+            <option value="cambio"      {% if profile.onboarding_entry_point == 'cambio' %}selected{% endif %}>En medio de un cambio que no pedí</option>
+            <option value="ciclos"      {% if profile.onboarding_entry_point == 'ciclos' %}selected{% endif %}>Repitiendo ciclos que no entiendo</option>
+            <option value="busqueda"    {% if profile.onboarding_entry_point == 'busqueda' %}selected{% endif %}>Buscando algo que no sé nombrar</option>
+            <option value="algo-mas"    {% if profile.onboarding_entry_point == 'algo-mas' %}selected{% endif %}>Sintiendo que hay algo más de lo que veo</option>
+            <option value="entenderme"  {% if profile.onboarding_entry_point == 'entenderme' %}selected{% endif %}>Queriendo entenderme de verdad</option>
+            <option value="otro" {% if entry_is_custom %}selected{% endif %}>Otra respuesta (escribirla)</option>
+          </select>
+          <input type="text" name="onboarding_entry_point_texto" id="entryOtro"
+            class="viaje-otro-input"
+            placeholder="Describe cómo llegaste aquí…"
+            value="{% if entry_is_custom %}{{ profile.onboarding_entry_point }}{% endif %}"
+            style="display:{% if entry_is_custom %}block{% else %}none{% endif %};">
+        </div>
+
+        <div class="field">
+          <label>¿Dónde sientes más el ruido?</label>
+          <select name="onboarding_noise_area" id="selectNoise" class="viaje-select" onchange="onSelectChange('selectNoise','noiseOtro')">
+            <option value="">— Sin responder —</option>
+            <option value="trabajo"    {% if profile.onboarding_noise_area == 'trabajo' %}selected{% endif %}>Trabajo o dirección</option>
+            <option value="relaciones" {% if profile.onboarding_noise_area == 'relaciones' %}selected{% endif %}>Relaciones</option>
+            <option value="cuerpo"     {% if profile.onboarding_noise_area == 'cuerpo' %}selected{% endif %}>Cuerpo o salud</option>
+            <option value="identidad"  {% if profile.onboarding_noise_area == 'identidad' %}selected{% endif %}>Quién soy</option>
+            <option value="proposito"  {% if profile.onboarding_noise_area == 'proposito' %}selected{% endif %}>Para qué estoy aquí</option>
+            <option value="todo"       {% if profile.onboarding_noise_area == 'todo' %}selected{% endif %}>En todo al mismo tiempo</option>
+            <option value="otro" {% if noise_is_custom %}selected{% endif %}>Otra respuesta (escribirla)</option>
+          </select>
+          <input type="text" name="onboarding_noise_area_texto" id="noiseOtro"
+            class="viaje-otro-input"
+            placeholder="Describe dónde sientes el ruido…"
+            value="{% if noise_is_custom %}{{ profile.onboarding_noise_area }}{% endif %}"
+            style="display:{% if noise_is_custom %}block{% else %}none{% endif %};">
+        </div>
+
+        <div class="field">
+          <label>Camino recorrido</label>
+          {% with prev=profile.onboarding_prior_exploration|default:'' %}
+          <div class="viaje-checks">
+            {% for val, lbl in prior_opts %}
+            <label class="viaje-check-label">
+              <input type="checkbox" name="onboarding_prior_exploration" value="{{ val }}"
+                {% if prev and val in prev %}checked{% endif %}>
+              {{ lbl }}
+            </label>
+            {% endfor %}
+          </div>
+          {% endwith %}
+        </div>
+
+        <div class="field">
+          <label>Tu pregunta guía</label>
+          <textarea name="onboarding_question" placeholder="La pregunta que guía tu viaje interior…" style="min-height:80px;">{{ profile.onboarding_question }}</textarea>
+        </div>
+
+        <div class="field">
+          <label>Tu núcleo de creencias</label>
+          <div class="nucleo-list" style="margin-top:0.4rem;">
+            {% for key, lbl, opts, cur_val in nucleo_fields %}
+            <div class="nucleo-row">
+              <div class="nucleo-q-label">{{ lbl }}</div>
+              <div class="nucleo-pills">
+                {% for oval, olbl in opts %}
+                <label class="nucleo-pill-label">
+                  <input type="radio" name="nucleo_{{ key }}" value="{{ oval }}"
+                    {% if oval == cur_val %}checked{% endif %}>
+                  {{ olbl }}
+                </label>
+                {% endfor %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="perfil-actions reveal">
+      <button type="submit" class="btn-save">Guardar cambios</button>
+      <span class="saved-msg">✓ Guardado</span>
+    </div>
+  </form>
+
+  <!-- ── Links útiles ── -->
+  <div class="perfil-section reveal" style="margin-top:2.5rem">
+    <div class="perfil-section-title">Accesos rápidos</div>
+    <a href="{% url 'mapa_interior' %}" class="perfil-link">◉ Ver mi mapa interior →</a><br>
+    <a href="{% url 'psychometrics:my_results' %}" class="perfil-link">◐ Mis resultados →</a><br>
+    <a href="{% url 'accounts:logout' %}" class="perfil-link" style="margin-top:1rem;color:var(--dim)">Cerrar sesión</a>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_body %}
+<script>
+  function onSelectChange(selectId, inputId) {
+    const sel = document.getElementById(selectId);
+    const inp = document.getElementById(inputId);
+    inp.style.display = sel.value === 'otro' ? 'block' : 'none';
+    if (sel.value === 'otro') inp.focus();
+  }
+
+  document.querySelectorAll('.aesthetic-card input[type=radio]').forEach(function (radio) {
+    radio.addEventListener('change', function () {
+      if (typeof window.__switchAesthetic === 'function') {
+        window.__switchAesthetic(this.value);
+      }
+    });
+  });
+</script>
+{% endblock %}

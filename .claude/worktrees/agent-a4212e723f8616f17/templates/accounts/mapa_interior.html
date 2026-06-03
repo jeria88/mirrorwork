@@ -1,0 +1,964 @@
+{% extends "base.html" %}
+{% block title %}Mapa Interior — MirrorWork{% endblock %}
+
+{% block extra_head %}
+<style>
+  .mapa-page {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 3rem 2rem 5rem;
+    background: rgba(0,0,0,0.88);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 20px;
+  }
+
+  /* ── Header ── */
+  .mapa-header {
+    margin-bottom: 2.5rem;
+  }
+  .mapa-tag {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1.25rem;
+  }
+  .mapa-tag::before { content: ''; display: block; width: 20px; height: 1px; background: var(--dim); }
+  .mapa-heading {
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 400;
+    line-height: 1.15;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.01em;
+  }
+  .mapa-heading em { font-style: italic; color: var(--muted); }
+  .mapa-sub {
+    font-size: 0.9rem;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+    max-width: 480px;
+  }
+
+  /* ── Progress bar ── */
+  .global-progress {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .gp-bar {
+    flex: 1;
+    height: 4px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .gp-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 1.4s cubic-bezier(0.16,1,0.3,1);
+  }
+  .gp-label {
+    font-size: 0.78rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .gp-pct {
+    font-size: 0.78rem;
+    color: var(--accent);
+    font-weight: 500;
+    white-space: nowrap;
+    min-width: 36px;
+    text-align: right;
+  }
+
+  /* ── SVG Canvas ── */
+  .mapa-canvas {
+    background: rgba(0,0,0,0.88);
+    border: 1px solid rgba(255,255,255,0.16);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 8px 40px rgba(0,0,0,0.5);
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 2rem;
+  }
+  .mapa-canvas svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .mapa-aesthetic-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1.25rem;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  /* ── SVG node interactivity ── */
+  .map-node { cursor: pointer; }
+  .map-node .n-glow { transition: opacity 0.9s ease; }
+  .map-node .n-base { transition: opacity 0.7s ease; }
+  .map-node .n-accent { transition: opacity 0.7s ease; }
+  .map-node:hover .n-base { opacity: 0.9 !important; }
+  .map-node:hover .n-glow { opacity: 0.45 !important; }
+
+  /* ── Exploration level glow animations ── */
+  .explored-mid .n-glow  { opacity: 0.06 !important; animation: nodeGlow 3s ease-in-out infinite; }
+  .explored-high .n-glow { opacity: 0.12 !important; animation: nodeGlow 2s ease-in-out infinite; }
+  .explored-full .n-glow { opacity: 0.2  !important; animation: nodeGlow 1.5s ease-in-out infinite; }
+  @keyframes nodeGlow {
+    0%, 100% { opacity: var(--glow-base, 0.06); }
+    50%       { opacity: calc(var(--glow-base, 0.06) * 2.5); }
+  }
+
+  /* ── Dimension legend grid ── */
+  .dim-legend {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+  }
+  .dim-pill {
+    background: rgba(0,0,0,0.88);
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 14px;
+    padding: 0.8rem 0.9rem;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 10px rgba(0,0,0,0.2);
+    transition: transform 0.4s cubic-bezier(0.16,1,0.3,1),
+                box-shadow 0.4s cubic-bezier(0.16,1,0.3,1),
+                border-color 0.25s;
+    cursor: pointer;
+  }
+  .dim-pill:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 10px 30px rgba(0,0,0,0.35), 0 0 20px rgba(78,205,196,0.07);
+    opacity: 1;
+  }
+  .dim-pill.active {
+    border-color: var(--accent);
+    background: rgba(0,0,0,0.88);
+    box-shadow: inset 0 1px 0 rgba(78,205,196,0.2), 0 4px 20px rgba(0,0,0,0.25);
+  }
+  .dp-label {
+    font-size: 0.72rem;
+    font-weight: 400;
+    color: var(--muted);
+    line-height: 1.2;
+  }
+  .dp-bar {
+    height: 2px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+  .dp-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 1px;
+    width: 0%;
+    transition: width 1.2s cubic-bezier(0.16,1,0.3,1);
+  }
+  .dp-pct {
+    font-size: 0.68rem;
+    color: var(--dim);
+    font-weight: 300;
+  }
+  .dim-pill.explored .dp-label { color: var(--text); }
+  .dim-pill.explored .dp-pct { color: var(--accent); }
+
+  @media (max-width: 680px) {
+    .dim-legend { grid-template-columns: repeat(2, 1fr); }
+    .mapa-canvas { border-radius: 14px; }
+  }
+  @media (max-width: 400px) {
+    .dim-legend { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* ── Panel deslizable ── */
+  #dim-panel-scrim {
+    position: fixed; inset: 0; z-index: 210;
+    background: rgba(0,0,0,0.45);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.28s;
+  }
+  #dim-panel-scrim.open { opacity: 1; pointer-events: auto; }
+
+  #dim-panel {
+    position: fixed; top: 0; right: 0; bottom: 0;
+    width: min(400px, 92vw);
+    z-index: 220;
+    background: rgba(6,4,18,0.97);
+    backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+    border-left: 1px solid rgba(255,255,255,0.1);
+    display: flex; flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.32s cubic-bezier(0.16,1,0.3,1);
+    overflow: hidden;
+  }
+  #dim-panel.open { transform: translateX(0); }
+
+  #dim-panel-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    padding: 1.6rem 1.4rem 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    flex-shrink: 0;
+  }
+  #dp-tag {
+    font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--accent); font-weight: 500; margin-bottom: 0.35rem;
+  }
+  #dp-title {
+    font-family: var(--font-heading);
+    font-size: 1.55rem; font-weight: 400; color: var(--text); line-height: 1.2;
+  }
+  #dp-close {
+    background: none; border: none; color: var(--muted); cursor: pointer;
+    font-size: 0.85rem; padding: 0.3rem; margin-top: 0.1rem;
+    transition: color 0.15s; flex-shrink: 0;
+  }
+  #dp-close:hover { color: var(--text); }
+
+  #dp-progress {
+    padding: 0.9rem 1.4rem;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    flex-shrink: 0;
+  }
+  #dp-bar-wrap { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem; }
+  #dp-bar-track { flex: 1; height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+  #dp-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; width: 0%; transition: width 0.6s cubic-bezier(0.16,1,0.3,1); }
+  #dp-pct { font-size: 0.72rem; color: var(--accent); font-weight: 500; white-space: nowrap; }
+  #dp-count { font-size: 0.7rem; color: var(--muted); font-weight: 300; }
+
+  #dp-tests {
+    flex: 1; overflow-y: auto; padding: 0.8rem 1rem 2rem;
+    display: flex; flex-direction: column; gap: 0.5rem;
+  }
+  #dp-tests::-webkit-scrollbar { width: 4px; }
+  #dp-tests::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 2px; }
+
+  .dp-test-item {
+    display: flex; align-items: center; gap: 0.85rem;
+    padding: 0.85rem 1rem;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .dp-test-item.done { border-color: rgba(78,205,196,0.25); }
+  .dp-test-done-icon {
+    font-size: 0.85rem; color: var(--accent); flex-shrink: 0; width: 16px; text-align: center;
+  }
+  .dp-test-info { flex: 1; min-width: 0; }
+  .dp-test-name { font-size: 0.82rem; font-weight: 400; color: var(--text); margin-bottom: 0.15rem; line-height: 1.3; }
+  .dp-test-meta { font-size: 0.65rem; color: var(--muted); font-weight: 300; }
+  .dp-test-actions { display: flex; gap: 0.35rem; flex-shrink: 0; }
+  .dp-btn {
+    padding: 0.28rem 0.6rem; border-radius: 100px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04);
+    color: var(--muted); font-size: 0.62rem;
+    letter-spacing: 0.06em; cursor: pointer;
+    text-decoration: none; transition: border-color 0.2s, color 0.2s;
+    white-space: nowrap;
+  }
+  .dp-btn:hover { border-color: var(--accent); color: var(--accent); opacity: 1; }
+  .dp-btn-vr { border-color: rgba(124,109,250,0.3); color: rgba(124,109,250,0.7); }
+  .dp-btn-vr:hover { border-color: #7c6dfa; color: #7c6dfa; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mapa-page">
+
+  <div class="mapa-header reveal">
+    <div class="mapa-tag">Mapa Interior</div>
+    <h1 class="mapa-heading">
+      Tu viaje<br><em>hacia adentro</em>
+    </h1>
+    <p class="mapa-sub">
+      Cada dimensión explorada ilumina una parte de tu mapa.
+      Haz clic en cualquier nodo para ver tu avance.
+    </p>
+    <div class="global-progress">
+      <span class="gp-label">{{ completed_tests }} de {{ total_tests }} tests</span>
+      <div class="gp-bar"><div class="gp-fill" id="gp-fill"></div></div>
+      <span class="gp-pct" id="gp-pct">0%</span>
+    </div>
+  </div>
+
+  <!-- ── SVG MAP ── -->
+  <div class="mapa-canvas reveal">
+    <div class="mapa-aesthetic-badge">
+      {% if aesthetic == 'cosmos' %}Cósmico
+      {% elif aesthetic == 'mandala' %}Mandala
+      {% elif aesthetic == 'archipielago' %}Archipiélago
+      {% elif aesthetic == 'arbol' %}Árbol
+      {% endif %}
+    </div>
+
+    {% if aesthetic == 'cosmos' %}
+    <!-- ═══════════ COSMOS ═══════════ -->
+    <svg viewBox="0 0 560 360" xmlns="http://www.w3.org/2000/svg" fill="none">
+      <!-- Background nebula -->
+      <circle cx="280" cy="185" r="130" style="fill:var(--accent)" opacity="0.025"/>
+      <circle cx="280" cy="185" r="80" style="fill:var(--accent)" opacity="0.02"/>
+      <!-- Background stars -->
+      <circle cx="22" cy="18" r="1" fill="white" opacity="0.3"/>
+      <circle cx="55" cy="8" r="1.2" fill="white" opacity="0.4"/>
+      <circle cx="98" cy="22" r="1" fill="white" opacity="0.28"/>
+      <circle cx="155" cy="14" r="1" fill="white" opacity="0.35"/>
+      <circle cx="340" cy="10" r="1.2" fill="white" opacity="0.4"/>
+      <circle cx="412" cy="18" r="1" fill="white" opacity="0.32"/>
+      <circle cx="485" cy="9" r="1.2" fill="white" opacity="0.45"/>
+      <circle cx="540" cy="28" r="1" fill="white" opacity="0.3"/>
+      <circle cx="18" cy="82" r="1" fill="white" opacity="0.25"/>
+      <circle cx="30" cy="145" r="1" fill="white" opacity="0.3"/>
+      <circle cx="15" cy="270" r="1.2" fill="white" opacity="0.35"/>
+      <circle cx="42" cy="340" r="1" fill="white" opacity="0.28"/>
+      <circle cx="520" cy="340" r="1.2" fill="white" opacity="0.3"/>
+      <circle cx="545" cy="295" r="1" fill="white" opacity="0.35"/>
+      <circle cx="543" cy="155" r="1" fill="white" opacity="0.28"/>
+      <circle cx="210" cy="345" r="1" fill="white" opacity="0.32"/>
+      <circle cx="365" cy="348" r="1.2" fill="white" opacity="0.35"/>
+      <!-- Constellation lines (always visible, dim) -->
+      <line x1="280" y1="185" x2="165" y2="90" stroke="white" stroke-width="0.5" opacity="0.16"/>
+      <line x1="280" y1="185" x2="145" y2="222" stroke="white" stroke-width="0.5" opacity="0.14"/>
+      <line x1="280" y1="185" x2="425" y2="92" stroke="white" stroke-width="0.5" opacity="0.16"/>
+      <line x1="280" y1="185" x2="85" y2="163" stroke="white" stroke-width="0.5" opacity="0.14"/>
+      <line x1="280" y1="185" x2="292" y2="308" stroke="white" stroke-width="0.5" opacity="0.14"/>
+      <line x1="280" y1="185" x2="398" y2="272" stroke="white" stroke-width="0.5" opacity="0.16"/>
+      <line x1="165" y1="90" x2="318" y2="38" stroke="white" stroke-width="0.5" opacity="0.13"/>
+      <line x1="165" y1="90" x2="85" y2="163" stroke="white" stroke-width="0.5" opacity="0.15"/>
+      <line x1="425" y1="92" x2="318" y2="38" stroke="white" stroke-width="0.5" opacity="0.13"/>
+      <line x1="425" y1="92" x2="462" y2="192" stroke="white" stroke-width="0.5" opacity="0.15"/>
+      <line x1="462" y1="192" x2="518" y2="262" stroke="white" stroke-width="0.5" opacity="0.13"/>
+      <line x1="398" y1="272" x2="292" y2="308" stroke="white" stroke-width="0.5" opacity="0.13"/>
+      <line x1="398" y1="272" x2="518" y2="262" stroke="white" stroke-width="0.5" opacity="0.12"/>
+      <line x1="72" y1="298" x2="145" y2="222" stroke="white" stroke-width="0.5" opacity="0.12"/>
+      <line x1="432" y1="338" x2="292" y2="308" stroke="white" stroke-width="0.5" opacity="0.12"/>
+      <!-- NODES -->
+      <!-- identidad: (280, 185) — center anchor -->
+      <g class="map-node" data-dim="identidad" onclick="selectNode('identidad')">
+        <circle cx="280" cy="185" r="26" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="280" cy="185" r="8" fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="280" cy="185" r="8" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- emociones: (165, 90) -->
+      <g class="map-node" data-dim="emociones" onclick="selectNode('emociones')">
+        <circle cx="165" cy="90" r="18" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="165" cy="90" r="5.5" fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="165" cy="90" r="5.5" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- sombra: (398, 272) -->
+      <g class="map-node" data-dim="sombra" onclick="selectNode('sombra')">
+        <circle cx="398" cy="272" r="18" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="398" cy="272" r="5.5" fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="398" cy="272" r="5.5" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- cuerpo: (145, 222) -->
+      <g class="map-node" data-dim="cuerpo" onclick="selectNode('cuerpo')">
+        <circle cx="145" cy="222" r="16" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="145" cy="222" r="5" fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="145" cy="222" r="5" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- mente: (425, 92) -->
+      <g class="map-node" data-dim="mente" onclick="selectNode('mente')">
+        <circle cx="425" cy="92" r="16" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="425" cy="92" r="5" fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="425" cy="92" r="5" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- proposito: (462, 192) -->
+      <g class="map-node" data-dim="proposito" onclick="selectNode('proposito')">
+        <circle cx="462" cy="192" r="18" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="462" cy="192" r="6" fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="462" cy="192" r="6" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- espiritualidad: (318, 38) -->
+      <g class="map-node" data-dim="espiritualidad" onclick="selectNode('espiritualidad')">
+        <circle cx="318" cy="38" r="17" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="318" cy="38" r="5.5" fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="318" cy="38" r="5.5" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- vinculos: (85, 163) -->
+      <g class="map-node" data-dim="vinculos" onclick="selectNode('vinculos')">
+        <circle cx="85" cy="163" r="16" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="85" cy="163" r="5" fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="85" cy="163" r="5" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- creatividad: (292, 308) -->
+      <g class="map-node" data-dim="creatividad" onclick="selectNode('creatividad')">
+        <circle cx="292" cy="308" r="17" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="292" cy="308" r="5.5" fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="292" cy="308" r="5.5" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- comunidad: (72, 298) -->
+      <g class="map-node" data-dim="comunidad" onclick="selectNode('comunidad')">
+        <circle cx="72" cy="298" r="15" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="72" cy="298" r="4.5" fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="72" cy="298" r="4.5" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- suenos: (432, 338) -->
+      <g class="map-node" data-dim="suenos" onclick="selectNode('suenos')">
+        <circle cx="432" cy="338" r="15" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="432" cy="338" r="4.5" fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="432" cy="338" r="4.5" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- abundancia: (518, 262) -->
+      <g class="map-node" data-dim="abundancia" onclick="selectNode('abundancia')">
+        <circle cx="518" cy="262" r="17" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="518" cy="262" r="5.5" fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="518" cy="262" r="5.5" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+    </svg>
+
+    {% elif aesthetic == 'mandala' %}
+    <!-- ═══════════ MANDALA ═══════════ -->
+    <!-- viewBox center at (280, 260), r_nodes=170 -->
+    <!-- viewBox 560×400 — centro (280,200), r=170 → nodos entre y=30 y y=370 -->
+    <svg viewBox="0 0 560 400" xmlns="http://www.w3.org/2000/svg" fill="none">
+      <!-- Decorative concentric rings -->
+      <circle cx="280" cy="200" r="190" stroke="white" stroke-width="0.5" opacity="0.05"/>
+      <circle cx="280" cy="200" r="170" stroke="white" stroke-width="0.4" opacity="0.08"/>
+      <circle cx="280" cy="200" r="130" style="stroke:var(--accent)" stroke-width="0.6" opacity="0.15"/>
+      <circle cx="280" cy="200" r="90" stroke="white" stroke-width="0.4" opacity="0.1"/>
+      <circle cx="280" cy="200" r="50" style="stroke:var(--accent)" stroke-width="0.6" opacity="0.2"/>
+      <!-- Center dot -->
+      <circle cx="280" cy="200" r="7" style="fill:var(--accent)" opacity="0.8"/>
+      <circle cx="280" cy="200" r="14" style="fill:var(--accent)" opacity="0.1"/>
+      <!-- 12 radial spokes (ángulos cada 30° desde arriba, horario) -->
+      <line x1="280" y1="200" x2="280" y2="30"  stroke="white" stroke-width="0.4" opacity="0.1"/>
+      <line x1="280" y1="200" x2="365" y2="53"  stroke="white" stroke-width="0.4" opacity="0.1"/>
+      <line x1="280" y1="200" x2="427" y2="115" stroke="white" stroke-width="0.4" opacity="0.1"/>
+      <line x1="280" y1="200" x2="450" y2="200" stroke="white" stroke-width="0.4" opacity="0.1"/>
+      <line x1="280" y1="200" x2="427" y2="285" stroke="white" stroke-width="0.4" opacity="0.1"/>
+      <line x1="280" y1="200" x2="365" y2="347" stroke="white" stroke-width="0.4" opacity="0.1"/>
+      <line x1="280" y1="200" x2="280" y2="370" stroke="white" stroke-width="0.4" opacity="0.1"/>
+      <line x1="280" y1="200" x2="195" y2="347" stroke="white" stroke-width="0.4" opacity="0.1"/>
+      <line x1="280" y1="200" x2="133" y2="285" stroke="white" stroke-width="0.4" opacity="0.1"/>
+      <line x1="280" y1="200" x2="110" y2="200" stroke="white" stroke-width="0.4" opacity="0.1"/>
+      <line x1="280" y1="200" x2="133" y2="115" stroke="white" stroke-width="0.4" opacity="0.1"/>
+      <line x1="280" y1="200" x2="195" y2="53"  stroke="white" stroke-width="0.4" opacity="0.1"/>
+      <!-- NODES (r=170 desde centro 280,200) -->
+      <!-- creatividad: (280, 30) — 0° -->
+      <g class="map-node" data-dim="creatividad" onclick="selectNode('creatividad')">
+        <circle cx="280" cy="30"  r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="280" cy="30"  r="6"  fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="280" cy="30"  r="6"  class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- espiritualidad: (365, 53) — 30° -->
+      <g class="map-node" data-dim="espiritualidad" onclick="selectNode('espiritualidad')">
+        <circle cx="365" cy="53"  r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="365" cy="53"  r="6"  fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="365" cy="53"  r="6"  class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- proposito: (427, 115) — 60° -->
+      <g class="map-node" data-dim="proposito" onclick="selectNode('proposito')">
+        <circle cx="427" cy="115" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="427" cy="115" r="6"  fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="427" cy="115" r="6"  class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- identidad: (450, 200) — 90° -->
+      <g class="map-node" data-dim="identidad" onclick="selectNode('identidad')">
+        <circle cx="450" cy="200" r="22" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="450" cy="200" r="7"  fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="450" cy="200" r="7"  class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- mente: (427, 285) — 120° -->
+      <g class="map-node" data-dim="mente" onclick="selectNode('mente')">
+        <circle cx="427" cy="285" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="427" cy="285" r="6"  fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="427" cy="285" r="6"  class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- comunidad: (365, 347) — 150° -->
+      <g class="map-node" data-dim="comunidad" onclick="selectNode('comunidad')">
+        <circle cx="365" cy="347" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="365" cy="347" r="6"  fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="365" cy="347" r="6"  class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- abundancia: (280, 370) — 180° -->
+      <g class="map-node" data-dim="abundancia" onclick="selectNode('abundancia')">
+        <circle cx="280" cy="370" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="280" cy="370" r="6"  fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="280" cy="370" r="6"  class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- suenos: (195, 347) — 210° -->
+      <g class="map-node" data-dim="suenos" onclick="selectNode('suenos')">
+        <circle cx="195" cy="347" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="195" cy="347" r="6"  fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="195" cy="347" r="6"  class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- vinculos: (133, 285) — 240° -->
+      <g class="map-node" data-dim="vinculos" onclick="selectNode('vinculos')">
+        <circle cx="133" cy="285" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="133" cy="285" r="6"  fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="133" cy="285" r="6"  class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- cuerpo: (110, 200) — 270° -->
+      <g class="map-node" data-dim="cuerpo" onclick="selectNode('cuerpo')">
+        <circle cx="110" cy="200" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="110" cy="200" r="6"  fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="110" cy="200" r="6"  class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- emociones: (133, 115) — 300° -->
+      <g class="map-node" data-dim="emociones" onclick="selectNode('emociones')">
+        <circle cx="133" cy="115" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="133" cy="115" r="6"  fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="133" cy="115" r="6"  class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- sombra: (195, 53) — 330° -->
+      <g class="map-node" data-dim="sombra" onclick="selectNode('sombra')">
+        <circle cx="195" cy="53"  r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="195" cy="53"  r="6"  fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="195" cy="53"  r="6"  class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+    </svg>
+
+    {% elif aesthetic == 'archipielago' %}
+    <!-- ═══════════ ARCHIPIÉLAGO ═══════════ -->
+    <svg viewBox="0 0 560 360" xmlns="http://www.w3.org/2000/svg">
+      <!-- Ocean wave lines -->
+      <line x1="10" y1="48" x2="90" y2="48" stroke="white" stroke-width="0.5" opacity="0.05"/>
+      <line x1="125" y1="38" x2="220" y2="38" stroke="white" stroke-width="0.5" opacity="0.05"/>
+      <line x1="340" y1="44" x2="555" y2="44" stroke="white" stroke-width="0.5" opacity="0.05"/>
+      <line x1="10" y1="310" x2="105" y2="310" stroke="white" stroke-width="0.5" opacity="0.05"/>
+      <line x1="445" y1="328" x2="556" y2="328" stroke="white" stroke-width="0.5" opacity="0.05"/>
+      <line x1="175" y1="348" x2="430" y2="348" stroke="white" stroke-width="0.5" opacity="0.05"/>
+      <!-- Sky dots -->
+      <circle cx="18" cy="18" r="1" fill="white" opacity="0.35"/>
+      <circle cx="65" cy="10" r="1.2" fill="white" opacity="0.42"/>
+      <circle cx="300" cy="12" r="1" fill="white" opacity="0.35"/>
+      <circle cx="498" cy="8" r="1.2" fill="white" opacity="0.42"/>
+      <circle cx="542" cy="26" r="1" fill="white" opacity="0.3"/>
+      <!-- ISLANDS as interactive nodes -->
+      <!-- identidad: central large island (255,155) rx=68 ry=48 -->
+      <g class="map-node" data-dim="identidad" onclick="selectNode('identidad')">
+        <ellipse cx="255" cy="155" rx="75" ry="52" class="n-glow" style="fill:var(--accent)" opacity="0.03"/>
+        <path d="M188,155 C192,120 215,110 255,112 C295,114 322,128 328,155 C334,182 315,198 275,202 C235,206 188,192 188,155Z"
+              class="n-base" style="fill:var(--accent)" opacity="0.18" stroke="none"/>
+        <path d="M188,155 C192,120 215,110 255,112 C295,114 322,128 328,155 C334,182 315,198 275,202 C235,206 188,192 188,155Z"
+              class="n-accent" fill="none" style="stroke:var(--accent)" stroke-width="1" opacity="0"/>
+        <!-- Mountain on island -->
+        <path d="M240,138 L255,118 L270,138Z" fill="white" opacity="0.1"/>
+        <path d="M260,140 L272,125 L284,140Z" fill="white" opacity="0.08"/>
+      </g>
+      <!-- cuerpo: (110,168) rx=50 ry=36 -->
+      <g class="map-node" data-dim="cuerpo" onclick="selectNode('cuerpo')">
+        <ellipse cx="110" cy="168" rx="55" ry="40" class="n-glow" style="fill:var(--accent)" opacity="0.03"/>
+        <path d="M62,168 C65,142 82,132 110,134 C138,136 158,150 158,168 C158,186 140,202 110,202 C80,202 62,194 62,168Z"
+              class="n-base" style="fill:var(--accent)" opacity="0.16" stroke="none"/>
+        <path d="M62,168 C65,142 82,132 110,134 C138,136 158,150 158,168 C158,186 140,202 110,202 C80,202 62,194 62,168Z"
+              class="n-accent" fill="none" style="stroke:var(--accent)" stroke-width="0.8" opacity="0"/>
+        <path d="M98,150 L110,132 L122,150Z" fill="white" opacity="0.1"/>
+      </g>
+      <!-- emociones: (185,248) -->
+      <g class="map-node" data-dim="emociones" onclick="selectNode('emociones')">
+        <ellipse cx="185" cy="248" rx="48" ry="34" class="n-glow" style="fill:var(--accent)" opacity="0.03"/>
+        <path d="M140,248 C143,224 160,215 185,217 C210,219 228,232 228,248 C228,264 213,278 185,278 C157,278 140,268 140,248Z"
+              class="n-base" style="fill:var(--accent)" opacity="0.14" stroke="none"/>
+        <path d="M140,248 C143,224 160,215 185,217 C210,219 228,232 228,248 C228,264 213,278 185,278 C157,278 140,268 140,248Z"
+              class="n-accent" fill="none" style="stroke:var(--accent)" stroke-width="0.8" opacity="0"/>
+      </g>
+      <!-- espiritualidad: (390,82) rx=42 ry=28 -->
+      <g class="map-node" data-dim="espiritualidad" onclick="selectNode('espiritualidad')">
+        <ellipse cx="390" cy="82" rx="46" ry="32" class="n-glow" style="fill:var(--accent)" opacity="0.03"/>
+        <ellipse cx="390" cy="82" rx="38" ry="26" class="n-base" style="fill:var(--accent)" opacity="0.16"/>
+        <ellipse cx="390" cy="82" rx="38" ry="26" class="n-accent" fill="none" style="stroke:var(--accent)" stroke-width="0.8" opacity="0"/>
+        <path d="M378,70 L390,54 L402,70Z" fill="white" opacity="0.1"/>
+      </g>
+      <!-- proposito: (445,162) rx=46 ry=33 -->
+      <g class="map-node" data-dim="proposito" onclick="selectNode('proposito')">
+        <ellipse cx="445" cy="162" rx="50" ry="37" class="n-glow" style="fill:var(--accent)" opacity="0.03"/>
+        <path d="M400,162 C402,140 420,130 445,132 C470,134 488,148 488,162 C488,176 472,192 445,192 C418,192 400,182 400,162Z"
+              class="n-base" style="fill:var(--accent)" opacity="0.16" stroke="none"/>
+        <path d="M400,162 C402,140 420,130 445,132 C470,134 488,148 488,162 C488,176 472,192 445,192 C418,192 400,182 400,162Z"
+              class="n-accent" fill="none" style="stroke:var(--accent)" stroke-width="0.8" opacity="0"/>
+        <path d="M435,148 L445,130 L455,148Z" fill="white" opacity="0.1"/>
+      </g>
+      <!-- mente: (162,92) rx=36 ry=26 -->
+      <g class="map-node" data-dim="mente" onclick="selectNode('mente')">
+        <ellipse cx="162" cy="92" rx="40" ry="30" class="n-glow" style="fill:var(--accent)" opacity="0.03"/>
+        <ellipse cx="162" cy="92" rx="32" ry="24" class="n-base" style="fill:var(--accent)" opacity="0.14"/>
+        <ellipse cx="162" cy="92" rx="32" ry="24" class="n-accent" fill="none" style="stroke:var(--accent)" stroke-width="0.7" opacity="0"/>
+      </g>
+      <!-- sombra: (378,272) rx=50 ry=35 -->
+      <g class="map-node" data-dim="sombra" onclick="selectNode('sombra')">
+        <ellipse cx="378" cy="272" rx="55" ry="39" class="n-glow" style="fill:var(--accent)" opacity="0.03"/>
+        <path d="M330,272 C332,248 352,236 378,238 C404,240 425,256 425,272 C425,288 406,304 378,304 C350,304 330,294 330,272Z"
+              class="n-base" style="fill:var(--accent)" opacity="0.14" stroke="none"/>
+        <path d="M330,272 C332,248 352,236 378,238 C404,240 425,256 425,272 C425,288 406,304 378,304 C350,304 330,294 330,272Z"
+              class="n-accent" fill="none" style="stroke:var(--accent)" stroke-width="0.8" opacity="0"/>
+      </g>
+      <!-- creatividad: (472,248) rx=32 ry=23 -->
+      <g class="map-node" data-dim="creatividad" onclick="selectNode('creatividad')">
+        <ellipse cx="472" cy="248" rx="36" ry="27" class="n-glow" style="fill:var(--accent)" opacity="0.03"/>
+        <ellipse cx="472" cy="248" rx="28" ry="21" class="n-base" style="fill:var(--accent)" opacity="0.13"/>
+        <ellipse cx="472" cy="248" rx="28" ry="21" class="n-accent" fill="none" style="stroke:var(--accent)" stroke-width="0.7" opacity="0"/>
+      </g>
+      <!-- comunidad: (498,318) rx=26 ry=18 -->
+      <g class="map-node" data-dim="comunidad" onclick="selectNode('comunidad')">
+        <ellipse cx="498" cy="318" rx="30" ry="22" class="n-glow" style="fill:var(--accent)" opacity="0.03"/>
+        <ellipse cx="498" cy="318" rx="22" ry="16" class="n-base" style="fill:var(--accent)" opacity="0.12"/>
+        <ellipse cx="498" cy="318" rx="22" ry="16" class="n-accent" fill="none" style="stroke:var(--accent)" stroke-width="0.7" opacity="0"/>
+      </g>
+      <!-- vinculos: (70,298) rx=38 ry=27 -->
+      <g class="map-node" data-dim="vinculos" onclick="selectNode('vinculos')">
+        <ellipse cx="70" cy="298" rx="42" ry="31" class="n-glow" style="fill:var(--accent)" opacity="0.03"/>
+        <ellipse cx="70" cy="298" rx="34" ry="25" class="n-base" style="fill:var(--accent)" opacity="0.13"/>
+        <ellipse cx="70" cy="298" rx="34" ry="25" class="n-accent" fill="none" style="stroke:var(--accent)" stroke-width="0.7" opacity="0"/>
+      </g>
+      <!-- suenos: (152,332) rx=30 ry=21 -->
+      <g class="map-node" data-dim="suenos" onclick="selectNode('suenos')">
+        <ellipse cx="152" cy="332" rx="34" ry="25" class="n-glow" style="fill:var(--accent)" opacity="0.03"/>
+        <ellipse cx="152" cy="332" rx="26" ry="19" class="n-base" style="fill:var(--accent)" opacity="0.12"/>
+        <ellipse cx="152" cy="332" rx="26" ry="19" class="n-accent" fill="none" style="stroke:var(--accent)" stroke-width="0.7" opacity="0"/>
+      </g>
+      <!-- abundancia: (524,188) rx=24 ry=17 -->
+      <g class="map-node" data-dim="abundancia" onclick="selectNode('abundancia')">
+        <ellipse cx="524" cy="188" rx="28" ry="21" class="n-glow" style="fill:var(--accent)" opacity="0.03"/>
+        <ellipse cx="524" cy="188" rx="20" ry="15" class="n-base" style="fill:var(--accent)" opacity="0.12"/>
+        <ellipse cx="524" cy="188" rx="20" ry="15" class="n-accent" fill="none" style="stroke:var(--accent)" stroke-width="0.6" opacity="0"/>
+      </g>
+    </svg>
+
+    {% elif aesthetic == 'arbol' %}
+    <!-- ═══════════ ÁRBOL ═══════════ -->
+    <!-- viewBox 560x410, trunk at x=280, y=168 to y=232 -->
+    <svg viewBox="0 0 560 410" xmlns="http://www.w3.org/2000/svg" fill="none">
+      <!-- Background stars -->
+      <circle cx="22" cy="22" r="1" fill="white" opacity="0.3"/>
+      <circle cx="55" cy="12" r="1.2" fill="white" opacity="0.38"/>
+      <circle cx="488" cy="18" r="1" fill="white" opacity="0.3"/>
+      <circle cx="535" cy="10" r="1.2" fill="white" opacity="0.38"/>
+      <circle cx="15" cy="55" r="1" fill="white" opacity="0.25"/>
+      <circle cx="545" cy="60" r="1" fill="white" opacity="0.25"/>
+      <!-- Ground line -->
+      <line x1="48" y1="200" x2="512" y2="200" stroke="white" stroke-width="0.5" opacity="0.15"/>
+      <!-- Trunk -->
+      <rect x="272" y="168" width="16" height="64" rx="5" fill="white" opacity="0.18"/>
+      <!-- BRANCH CURVES (Quadratic bezier, branches upward) -->
+      <!-- comunidad: (115, 82) — far left -->
+      <path d="M280,168 Q198,128 115,82" stroke="white" stroke-width="2" opacity="0.2" stroke-linecap="round"/>
+      <path d="M115,82 Q90,70 80,58" stroke="white" stroke-width="1.2" opacity="0.14" stroke-linecap="round"/>
+      <!-- creatividad: (188, 52) -->
+      <path d="M280,168 Q232,108 188,52" stroke="white" stroke-width="1.8" opacity="0.2" stroke-linecap="round"/>
+      <!-- identidad: (248, 40) -->
+      <path d="M280,168 Q264,100 248,40" stroke="white" stroke-width="1.5" opacity="0.18" stroke-linecap="round"/>
+      <!-- espiritualidad: (312, 40) -->
+      <path d="M280,168 Q296,100 312,40" stroke="white" stroke-width="1.5" opacity="0.18" stroke-linecap="round"/>
+      <!-- proposito: (372, 52) -->
+      <path d="M280,168 Q328,108 372,52" stroke="white" stroke-width="1.8" opacity="0.2" stroke-linecap="round"/>
+      <!-- mente: (445, 82) — far right -->
+      <path d="M280,168 Q362,128 445,82" stroke="white" stroke-width="2" opacity="0.2" stroke-linecap="round"/>
+      <path d="M445,82 Q470,70 480,58" stroke="white" stroke-width="1.2" opacity="0.14" stroke-linecap="round"/>
+      <!-- ROOT CURVES (downward) -->
+      <!-- vinculos: (115, 318) — far left -->
+      <path d="M280,232 Q198,272 115,318" stroke="white" stroke-width="2" opacity="0.14" stroke-linecap="round"/>
+      <path d="M115,318 Q90,330 80,342" stroke="white" stroke-width="1.2" opacity="0.1" stroke-linecap="round"/>
+      <!-- emociones: (188, 348) -->
+      <path d="M280,232 Q232,292 188,348" stroke="white" stroke-width="1.8" opacity="0.14" stroke-linecap="round"/>
+      <!-- cuerpo: (248, 360) -->
+      <path d="M280,232 Q264,300 248,360" stroke="white" stroke-width="1.5" opacity="0.13" stroke-linecap="round"/>
+      <!-- sombra: (312, 360) -->
+      <path d="M280,232 Q296,300 312,360" stroke="white" stroke-width="1.5" opacity="0.13" stroke-linecap="round"/>
+      <!-- suenos: (372, 348) -->
+      <path d="M280,232 Q328,292 372,348" stroke="white" stroke-width="1.8" opacity="0.14" stroke-linecap="round"/>
+      <!-- abundancia: (445, 318) — far right -->
+      <path d="M280,232 Q362,272 445,318" stroke="white" stroke-width="2" opacity="0.14" stroke-linecap="round"/>
+      <path d="M445,318 Q470,330 480,342" stroke="white" stroke-width="1.2" opacity="0.1" stroke-linecap="round"/>
+      <!-- BRANCH LEAF NODES -->
+      <!-- comunidad: (115, 82) -->
+      <g class="map-node" data-dim="comunidad" onclick="selectNode('comunidad')">
+        <circle cx="115" cy="82" r="18" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="115" cy="82" r="5.5" fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="115" cy="82" r="5.5" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- creatividad: (188, 52) -->
+      <g class="map-node" data-dim="creatividad" onclick="selectNode('creatividad')">
+        <circle cx="188" cy="52" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="188" cy="52" r="6" fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="188" cy="52" r="6" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- identidad: (248, 40) -->
+      <g class="map-node" data-dim="identidad" onclick="selectNode('identidad')">
+        <circle cx="248" cy="40" r="22" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="248" cy="40" r="7" fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="248" cy="40" r="7" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- espiritualidad: (312, 40) -->
+      <g class="map-node" data-dim="espiritualidad" onclick="selectNode('espiritualidad')">
+        <circle cx="312" cy="40" r="22" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="312" cy="40" r="7" fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="312" cy="40" r="7" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- proposito: (372, 52) -->
+      <g class="map-node" data-dim="proposito" onclick="selectNode('proposito')">
+        <circle cx="372" cy="52" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="372" cy="52" r="6" fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="372" cy="52" r="6" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- mente: (445, 82) -->
+      <g class="map-node" data-dim="mente" onclick="selectNode('mente')">
+        <circle cx="445" cy="82" r="18" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="445" cy="82" r="5.5" fill="white" class="n-base" opacity="0.2"/>
+        <circle cx="445" cy="82" r="5.5" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- ROOT NODES -->
+      <!-- vinculos: (115, 318) -->
+      <g class="map-node" data-dim="vinculos" onclick="selectNode('vinculos')">
+        <circle cx="115" cy="318" r="18" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="115" cy="318" r="5.5" fill="white" class="n-base" opacity="0.15"/>
+        <circle cx="115" cy="318" r="5.5" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- emociones: (188, 348) -->
+      <g class="map-node" data-dim="emociones" onclick="selectNode('emociones')">
+        <circle cx="188" cy="348" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="188" cy="348" r="6" fill="white" class="n-base" opacity="0.15"/>
+        <circle cx="188" cy="348" r="6" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- cuerpo: (248, 360) -->
+      <g class="map-node" data-dim="cuerpo" onclick="selectNode('cuerpo')">
+        <circle cx="248" cy="360" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="248" cy="360" r="6" fill="white" class="n-base" opacity="0.15"/>
+        <circle cx="248" cy="360" r="6" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- sombra: (312, 360) -->
+      <g class="map-node" data-dim="sombra" onclick="selectNode('sombra')">
+        <circle cx="312" cy="360" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="312" cy="360" r="6" fill="white" class="n-base" opacity="0.15"/>
+        <circle cx="312" cy="360" r="6" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- suenos: (372, 348) -->
+      <g class="map-node" data-dim="suenos" onclick="selectNode('suenos')">
+        <circle cx="372" cy="348" r="20" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="372" cy="348" r="6" fill="white" class="n-base" opacity="0.15"/>
+        <circle cx="372" cy="348" r="6" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+      <!-- abundancia: (445, 318) -->
+      <g class="map-node" data-dim="abundancia" onclick="selectNode('abundancia')">
+        <circle cx="445" cy="318" r="18" class="n-glow" style="fill:var(--accent)" opacity="0"/>
+        <circle cx="445" cy="318" r="5.5" fill="white" class="n-base" opacity="0.15"/>
+        <circle cx="445" cy="318" r="5.5" class="n-accent" style="fill:var(--accent)" opacity="0"/>
+      </g>
+    </svg>
+    {% endif %}
+  </div><!-- /mapa-canvas -->
+
+  <!-- ── Dimension legend ── -->
+  <div class="dim-legend reveal">
+    {% for dim, data in dim_data.items %}
+    <div class="dim-pill {% if data.pct > 0 %}explored{% endif %}"
+         data-dim="{{ dim }}"
+         onclick="selectNode('{{ dim }}')">
+      <div class="dp-label">{{ data.label }}</div>
+      <div class="dp-bar">
+        <div class="dp-fill" style="width:0%" data-pct="{{ data.pct }}"></div>
+      </div>
+      <div class="dp-pct">{{ data.completed }}/{{ data.total }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if patrones %}
+  <!-- ── Patrones detectados ── -->
+  <div class="mapa-patrones reveal" style="margin-top:2rem;">
+    <div class="mapa-tag" style="margin-bottom:1rem;">Patrones detectados</div>
+    <div style="display:flex;flex-direction:column;gap:0.5rem;">
+      {% for patron in patrones %}
+      <div style="display:flex;align-items:flex-start;gap:0.75rem;padding:0.85rem 1rem;background:rgba(78,205,196,0.04);border:1px solid rgba(78,205,196,0.15);border-radius:12px;">
+        <span style="color:var(--accent);font-size:0.9rem;flex-shrink:0;margin-top:0.05rem;">◈</span>
+        <span style="font-size:0.85rem;color:var(--text);line-height:1.6;font-weight:300;">{{ patron }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if resonancias %}
+  <!-- ── Campo colectivo esta semana ── -->
+  <div class="mapa-resonancias reveal" style="margin-top:2rem;">
+    <div class="mapa-tag" style="margin-bottom:0.75rem;">Campo colectivo esta semana</div>
+    <p style="font-size:0.78rem;color:var(--muted);margin-bottom:1rem;font-weight:300;">
+      {{ total_activos }} endonauta{{ total_activos|pluralize:"s" }} activo{{ total_activos|pluralize:"s" }} esta semana. Palabras que resuenan en el campo:
+    </p>
+    <div style="display:flex;flex-wrap:wrap;gap:0.5rem;">
+      {% for r in resonancias %}
+      <span style="padding:0.3rem 0.85rem;border-radius:100px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);font-size:0.78rem;color:var(--muted);font-weight:300;">
+        {{ r.palabra }}
+        <span style="color:var(--accent);font-size:0.68rem;margin-left:0.3rem;">×{{ r.count }}</span>
+      </span>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</div><!-- /mapa-page -->
+
+<!-- ── Panel deslizable de dimensión ── -->
+<div id="dim-panel">
+  <div id="dim-panel-header">
+    <div>
+      <div id="dp-tag">Dimensión</div>
+      <div id="dp-title">Cargando…</div>
+    </div>
+    <button id="dp-close" onclick="closeDimPanel()" aria-label="Cerrar">✕</button>
+  </div>
+  <div id="dp-progress">
+    <div id="dp-bar-wrap">
+      <div id="dp-bar-track"><div id="dp-bar-fill"></div></div>
+      <span id="dp-pct">0%</span>
+    </div>
+    <span id="dp-count">0 de 0 tests</span>
+  </div>
+  <div id="dp-tests"></div>
+</div>
+<div id="dim-panel-scrim" onclick="closeDimPanel()"></div>
+{% endblock %}
+
+{% block extra_body %}
+<script>
+const DIM_DATA = {{ dim_data_json|safe }};
+const TOTAL_PCT = {{ total_pct }};
+const TEST_TAKE_URL_TMPL = "{% url 'psychometrics:test_take' '__slug__' %}";
+const VR_TEST_URL_TMPL   = {% if request.user.is_staff %}"{% url 'vr_test' '__slug__' %}"{% else %}null{% endif %};
+const USER_IS_STAFF      = {{ request.user.is_staff|yesno:"true,false" }};
+let activeNode = null;
+
+function updateMap() {
+  document.querySelectorAll('.map-node').forEach(g => {
+    const dim = g.dataset.dim;
+    const data = DIM_DATA[dim];
+    if (!data) return;
+    const t = data.pct / 100;
+    const glow   = g.querySelector('.n-glow');
+    const base   = g.querySelector('.n-base');
+    const accent = g.querySelector('.n-accent');
+    if (glow)   glow.style.opacity   = (t * 0.38).toFixed(3);
+    if (base)   base.style.opacity   = (0.16 + t * 0.65).toFixed(3);
+    if (accent) accent.style.opacity = t.toFixed(3);
+    if (t > 0)  g.classList.add('explored');
+    if (t >= 1) g.classList.add('complete');
+  });
+}
+
+function updateLegendBars() {
+  document.querySelectorAll('.dp-fill[data-pct]').forEach(bar => {
+    setTimeout(() => { bar.style.width = bar.dataset.pct + '%'; }, 600);
+  });
+}
+
+function updateGlobalBar() {
+  const fill = document.getElementById('gp-fill');
+  const pct  = document.getElementById('gp-pct');
+  if (fill) setTimeout(() => { fill.style.width = TOTAL_PCT + '%'; }, 400);
+  if (pct)  pct.textContent = TOTAL_PCT + '%';
+}
+
+function selectNode(dim) {
+  const data = DIM_DATA[dim];
+  if (!data) return;
+
+  document.querySelectorAll('.dim-pill').forEach(p => p.classList.remove('active'));
+  const pill = document.querySelector(`.dim-pill[data-dim="${dim}"]`);
+  if (pill) { pill.classList.add('active'); pill.scrollIntoView({behavior:'smooth', block:'nearest'}); }
+
+  document.querySelectorAll('.map-node').forEach(n => n.style.filter = '');
+  document.querySelectorAll(`.map-node[data-dim="${dim}"]`).forEach(n => {
+    n.style.filter = 'drop-shadow(0 0 8px var(--accent))';
+  });
+  activeNode = dim;
+
+  openDimPanel(dim);
+}
+
+function openDimPanel(dim) {
+  const data = DIM_DATA[dim];
+  document.getElementById('dp-title').textContent = data.label;
+  document.getElementById('dp-pct').textContent   = data.pct + '%';
+  document.getElementById('dp-count').textContent = data.completed + ' de ' + data.total + ' tests';
+  document.getElementById('dp-bar-fill').style.width = data.pct + '%';
+
+  const list = document.getElementById('dp-tests');
+  list.innerHTML = '';
+  (data.tests || []).forEach(test => {
+    const item = document.createElement('div');
+    item.className = 'dp-test-item' + (test.done ? ' done' : '');
+    const takeUrl = TEST_TAKE_URL_TMPL.replace('__slug__', test.slug);
+    const vrUrl   = VR_TEST_URL_TMPL.replace('__slug__', test.slug);
+    const meta    = test.estimated_minutes ? test.estimated_minutes + ' min' : '';
+    item.innerHTML =
+      '<div class="dp-test-done-icon">' + (test.done ? '✓' : '○') + '</div>' +
+      '<div class="dp-test-info">' +
+        '<div class="dp-test-name">' + test.name + '</div>' +
+        (meta ? '<div class="dp-test-meta">' + meta + '</div>' : '') +
+      '</div>' +
+      '<div class="dp-test-actions">' +
+        '<a href="' + takeUrl + '" class="dp-btn">' + (test.done ? 'Ver' : 'Hacer') + '</a>' +
+        (USER_IS_STAFF ? '<a href="' + vrUrl + '" class="dp-btn dp-btn-vr" data-no-spa>⬡ VR</a>' : '') +
+      '</div>';
+    list.appendChild(item);
+  });
+
+  document.getElementById('dim-panel').classList.add('open');
+  document.getElementById('dim-panel-scrim').classList.add('open');
+}
+
+function closeDimPanel() {
+  document.getElementById('dim-panel').classList.remove('open');
+  document.getElementById('dim-panel-scrim').classList.remove('open');
+  document.querySelectorAll('.map-node').forEach(n => n.style.filter = '');
+  document.querySelectorAll('.dim-pill').forEach(p => p.classList.remove('active'));
+  activeNode = null;
+}
+
+function updateNodeAnimations() {
+  document.querySelectorAll('.map-node[data-dim]').forEach(g => {
+    const dim = g.dataset.dim;
+    const data = DIM_DATA[dim];
+    if (!data) return;
+    const pct = data.pct;
+    const base = g.querySelector('.n-base');
+    // Remove all exploration classes first
+    g.classList.remove('explored-mid', 'explored-high', 'explored-full');
+    if (pct === 0) {
+      if (base) base.style.opacity = '0.15';
+    } else if (pct <= 33) {
+      if (base) base.style.opacity = '0.35';
+    } else if (pct <= 66) {
+      if (base) base.style.opacity = '0.55';
+      g.classList.add('explored-mid');
+    } else if (pct <= 99) {
+      if (base) base.style.opacity = '0.75';
+      g.classList.add('explored-high');
+    } else {
+      if (base) base.style.opacity = '0.95';
+      g.classList.add('explored-full');
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  updateMap();
+  updateGlobalBar();
+  updateLegendBars();
+  updateNodeAnimations();
+});
+</script>
+{% endblock %}

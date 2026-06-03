@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% block title %}¡Bienvenido a MirrorWork!{% endblock %}
+
+{% block extra_head %}
+<style>
+  .bienvenido-wrap {
+    min-height: calc(100vh - 60px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+  }
+
+  .bienvenido-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 3rem 2.5rem;
+    max-width: 560px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .bienvenido-icon {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .bienvenido-card h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+  }
+
+  .bienvenido-card .subtitulo {
+    color: var(--accent);
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+  }
+
+  .paso {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+    text-align: left;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .paso-numero {
+    background: var(--accent);
+    color: var(--bg);
+    font-weight: 800;
+    font-size: 0.85rem;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .paso-texto {
+    color: var(--text);
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  .paso-texto strong {
+    color: var(--accent);
+  }
+
+  .aviso {
+    background: rgba(78, 205, 196, 0.08);
+    border: 1px solid rgba(78, 205, 196, 0.25);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin: 1.5rem 0;
+    font-size: 0.875rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .aviso strong {
+    color: var(--text);
+  }
+
+  .btn-registro {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--bg);
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 0.85rem 2.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    margin-top: 1rem;
+    transition: opacity 0.2s;
+  }
+
+  .btn-registro:hover {
+    opacity: 0.85;
+  }
+
+  .ya-registrado {
+    margin-top: 1.25rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .ya-registrado a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bienvenido-wrap">
+  <div class="bienvenido-card">
+
+    <div class="bienvenido-icon">🪞</div>
+    <p class="subtitulo">Tu compra fue exitosa</p>
+    <h1>Bienvenido a MirrorWork</h1>
+
+    <p style="color: var(--muted); margin-bottom: 2rem; line-height: 1.6;">
+      Para activar tu plan, completa estos dos pasos:
+    </p>
+
+    <div class="paso">
+      <div class="paso-numero">1</div>
+      <div class="paso-texto">
+        Regístrate en la app usando <strong>exactamente el mismo email</strong> con que realizaste tu compra en Hotmart.
+      </div>
+    </div>
+
+    <div class="paso">
+      <div class="paso-numero">2</div>
+      <div class="paso-texto">
+        Tu plan se activará <strong>automáticamente</strong> en los próximos minutos. Verás tus tokens disponibles en el panel.
+      </div>
+    </div>
+
+    <div class="aviso">
+      <strong>Importante:</strong> Si usas un email distinto al de tu compra, tu plan no se activará. En ese caso escríbenos a <strong>hola@endonautas.cl</strong> y lo resolvemos.
+    </div>
+
+    <a href="/accounts/register/" class="btn-registro">Crear mi cuenta</a>
+
+    <p class="ya-registrado">
+      ¿Ya tienes cuenta? <a href="/accounts/login/">Inicia sesión aquí</a>
+    </p>
+
+  </div>
+</div>
+{% endblock %}

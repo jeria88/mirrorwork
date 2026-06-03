@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>{{ test.name }} — VR</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#000; overflow:hidden; font-family:system-ui,sans-serif; }
+
+    #overlay {
+      position:fixed; inset:0; z-index:200; display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      background:#000; color:#fff; text-align:center; padding:2rem;
+    }
+    .ov-tag  { font-size:.7rem; letter-spacing:.35em; text-transform:uppercase; color:#4ecdc4; margin-bottom:.5rem; }
+    .ov-name { font-size:1.6rem; font-weight:300; margin-bottom:.5rem; }
+    .ov-sub  { font-size:.85rem; color:#7070a0; margin-bottom:1.5rem; line-height:1.8; }
+    #btn-vr  { padding:.9rem 2.5rem; border:1px solid #4ecdc4; border-radius:100px; background:transparent; color:#4ecdc4; font-size:.95rem; letter-spacing:.08em; cursor:pointer; touch-action:manipulation; }
+    #btn-preview { margin-top:.8rem; padding:.5rem 1.4rem; border:1px solid rgba(255,255,255,.2); border-radius:100px; background:transparent; color:rgba(255,255,255,.4); font-size:.75rem; letter-spacing:.08em; cursor:pointer; touch-action:manipulation; }
+
+    #btn-back {
+      position:fixed; top:1rem; left:1rem; z-index:100; display:none;
+      font-size:.7rem; letter-spacing:.12em; text-transform:uppercase;
+      color:rgba(255,255,255,.4); text-decoration:none;
+      padding:.4rem .8rem; border:1px solid rgba(255,255,255,.1); border-radius:100px;
+    }
+    #btn-back:hover { color:#4ecdc4; border-color:#4ecdc4; }
+
+    #reticle {
+      position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
+      pointer-events:none; z-index:50; display:none;
+    }
+
+    #completion {
+      position:fixed; inset:0; z-index:300; display:none; flex-direction:column;
+      align-items:center; justify-content:center;
+      background:rgba(0,0,0,.94); color:#fff; text-align:center; padding:2rem;
+    }
+    .co-icon  { font-size:3rem; margin-bottom:1rem; color:#4ecdc4; }
+    .co-title { font-size:1.8rem; font-weight:300; margin-bottom:.5rem; }
+    .co-sub   { font-size:.9rem; color:#7070a0; margin-bottom:2rem; }
+    .co-btn   { display:inline-block; padding:.9rem 2.5rem; border:1px solid #4ecdc4; border-radius:100px; color:#4ecdc4; font-size:.95rem; letter-spacing:.08em; text-decoration:none; }
+  </style>
+</head>
+<body>
+
+<div id="overlay">
+  <p class="ov-tag">MirrorWork VR — Test</p>
+  <h1 class="ov-name">{{ test.name }}</h1>
+  <p class="ov-sub">
+    {{ question_count }} preguntas · {{ test.estimated_minutes }} min estimados<br>
+    <span style="font-size:.75rem;color:#4a4a7a">Mira una opción 1.2 s para responder</span>
+  </p>
+  <button id="btn-vr">✦ Comenzar en VR</button>
+  <button id="btn-preview">Vista plana (desktop)</button>
+</div>
+
+<a href="{% url 'vr_home' %}" id="btn-back">← Volver</a>
+
+<svg id="reticle" viewBox="0 0 44 44" width="44" height="44">
+  <circle cx="22" cy="22" r="5"  fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1.2"/>
+  <circle cx="22" cy="22" r="1.8" fill="rgba(255,255,255,.45)"/>
+  <circle id="gaze-ring" cx="22" cy="22" r="14" fill="none"
+    stroke="#4ecdc4" stroke-width="2.5"
+    stroke-dasharray="87.96" stroke-dashoffset="87.96"
+    transform="rotate(-90 22 22)" style="transition:stroke-dashoffset .05s linear"/>
+</svg>
+
+<div id="completion">
+  <p class="co-icon">◉</p>
+  <h2 class="co-title">Test completado</h2>
+  <p class="co-sub" id="co-sub">Procesando resultados…</p>
+  <a class="co-btn" id="co-link" href="{% url 'psychometrics:my_results' %}">Ver resultados</a>
+</div>
+
+<script>
+const VR = {
+  aesthetic:  "{{ aesthetic }}",
+  initScene:  {{ initial_scene }},
+  testSlug:   "{{ test.slug }}",
+  testName:   "{{ test.name|escapejs }}",
+  questions:  {{ questions_json|safe }},
+};
+const CSRF = "{{ csrf_token }}";
+</script>
+
+<script type="importmap">{"imports":{
+  "three":"https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"
+}}</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { StereoEffect } from 'three/addons/effects/StereoEffect.js';
+
+const PHI=1.61803398875, PI=Math.PI, E=Math.E, SQ7=Math.sqrt(7);
+const _aes=(VR.aesthetic==='arbol'||VR.aesthetic==='archipielago')?'cosmos':VR.aesthetic;
+
+// ── Renderer ──────────────────────────────────────────────────────────────
+const renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+renderer.setSize(innerWidth,innerHeight);
+document.body.appendChild(renderer.domElement);
+const effect=new StereoEffect(renderer);
+effect.eyeSeparation=0.064; effect.setSize(innerWidth,innerHeight);
+window.addEventListener('resize',()=>{
+  camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+  effect.setSize(innerWidth,innerHeight);
+});
+
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x000000);
+const camera=new THREE.PerspectiveCamera(90,innerWidth/innerHeight,0.1,600);
+const VERT=`varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`;
+const VERT_SPHVR=`varying vec3 vPos;void main(){vPos=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`;
+const VERT_SPHY=`varying vec2 vUv;void main(){vec3 n=normalize(position);float phi=atan(n.z,n.x);float theta=acos(clamp(n.y,-1.,1.));vUv=vec2((phi+3.14159265)/6.28318530,theta/3.14159265);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`;
+const MAND_FRAG=`
+uniform float uT,uSpeed,uSym;
+uniform vec3 uC1,uC2,uC3;
+uniform vec4 uCamQ;
+varying vec3 vPos;
+const float PI=3.14159265,TAU=6.28318530,PHI=1.61803398875;
+vec3 rotQ(vec4 q,vec3 v){vec3 t=2.*cross(q.xyz,v);return v+q.w*t+cross(q.xyz,t);}
+float pgon(vec2 p,float n,float R,float rot){
+  float a=atan(p.y,p.x)-rot,s=TAU/n,h=s*.5;
+  float fa=mod(a+h,s)-h;
+  return abs(length(p)-R*cos(PI/n)/max(cos(fa),.02));
+}
+float starD(vec2 p,float n,float R,float sk,float rot){
+  float a=atan(p.y,p.x)-rot,s=PI/n;
+  float t=mod(a,s*2.)/s; t=t<1.?t:2.-t;
+  return abs(length(p)-mix(R,R*sk,t));
+}
+float stk(float d,float w){return exp(-d*d/(w*w));}
+void main(){
+  vec4 qi=vec4(-uCamQ.xyz,uCamQ.w);
+  vec3 d=rotQ(qi,vPos);
+  float bf=max(0.08,0.5-d.z*.5);
+  vec2 p=d.xy;
+  float r=length(p),phi=atan(p.y,p.x);
+  float rot=uT*uSpeed,sym=max(uSym,3.);
+  float total=0.;
+  total+=stk(pgon(p,sym,.11, rot),.026)*.55;
+  total+=stk(pgon(p,sym,.23,-rot),.026)*.63;
+  total+=stk(pgon(p,sym,.39, rot),.026)*.71;
+  total+=stk(pgon(p,sym,.57,-rot),.026)*.79;
+  total+=stk(pgon(p,sym,.75, rot),.026)*.87;
+  total+=stk(starD(p,sym,.88,.42,-rot*.65),.032)*.78;
+  total+=stk(starD(p,sym,.58,.50, rot*.44+PI/sym),.028)*.64;
+  total+=stk(starD(p,sym*2.,.37,.55,-rot*.82),.022)*.48;
+  float nuc=exp(-r*22.)*(0.85+.15*sin(uT*2.8));
+  total+=nuc*3.2; total*=bf;
+  if(total<.003)discard;
+  float tc=r+uT*.015,fa=mod(phi+rot,TAU/sym);
+  vec3 col=mix(uC1,uC2,sin(tc*PHI)*.5+.5);
+  col=mix(col,uC3,sin(fa*sym*2.+uT*.3)*.5+.5);
+  col=mix(col,vec3(1.),nuc*.75);
+  gl_FragColor=vec4(col*total*3.2,total*.98);
+}`;
+function lerp(a,b,t){return a+(b-a)*t;}
+
+let bgUnis={uT:{value:0},uFade:{value:1}};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// COSMOS
+// ═══════════════════════════════════════════════════════════════════════════
+let vrField=null;
+let vrCosCur={speedInner:2.6,sizeMult:3.5,diskTilt:35};
+let vrCosTgt={speedInner:2.6,sizeMult:3.5,diskTilt:35};
+let _vrLerpBoost=0;
+
+if(_aes==='cosmos'){
+  const BH_R=7,N=110000,R_MIN=1.5,R_MAX=140;
+  const pGeo=new THREE.BufferGeometry();
+  const pPos=new Float32Array(N*3),pCol=new Float32Array(N*3);
+  const pAng=new Float32Array(N),pRad=new Float32Array(N),pSpd=new Float32Array(N),pSz=new Float32Array(N);
+  for(let i=0;i<N;i++){
+    let r;const roll=Math.random();
+    if(roll<0.65)r=R_MIN+Math.pow(Math.random(),1.8)*38;
+    else if(roll<0.85)r=38+Math.random()*42;
+    else r=80+Math.random()*(R_MAX-80);
+    const a=Math.random()*PI*2,norm=r/R_MAX;
+    const thick=r<40?0.04+norm*0.3:0.3+norm*0.7;
+    pPos[i*3]=Math.cos(a)*r; pPos[i*3+1]=(Math.random()-.5)*r*thick; pPos[i*3+2]=Math.sin(a)*r;
+    if(r<20){pCol[i*3]=0.95+Math.random()*.05;pCol[i*3+1]=0.88+Math.random()*.12;pCol[i*3+2]=0.70+Math.random()*.25;}
+    else if(r<55){pCol[i*3]=0.30+Math.random()*.50;pCol[i*3+1]=0.75+Math.random()*.25;pCol[i*3+2]=0.80+Math.random()*.20;}
+    else{pCol[i*3]=0.20+Math.random()*.30;pCol[i*3+1]=0.40+Math.random()*.30;pCol[i*3+2]=0.75+Math.random()*.25;}
+    pAng[i]=a; pRad[i]=r;
+    pSpd[i]=(1.0/Math.sqrt(r))*2.8*(0.80+Math.random()*.40);
+    pSz[i]=r<20?1.2+Math.random()*1.8:0.4+norm*norm*3.0+Math.random()*.6;
+  }
+  pGeo.setAttribute('position',new THREE.BufferAttribute(pPos,3));
+  pGeo.setAttribute('color',   new THREE.BufferAttribute(pCol,3));
+  pGeo.setAttribute('aAngle',  new THREE.BufferAttribute(pAng,1));
+  pGeo.setAttribute('aRadius', new THREE.BufferAttribute(pRad,1));
+  pGeo.setAttribute('aSpeed',  new THREE.BufferAttribute(pSpd,1));
+  pGeo.setAttribute('aSize',   new THREE.BufferAttribute(pSz, 1));
+  const cosmosMat=new THREE.ShaderMaterial({
+    uniforms:{uT:{value:0},uFade:{value:1},uSpeedInner:{value:2.6},uSpeedOuter:{value:0.05},uSizeMult:{value:3.5}},
+    vertexShader:`uniform float uT,uSpeedInner,uSpeedOuter,uSizeMult;attribute float aAngle,aRadius,aSpeed,aSize;varying vec3 vCol;varying float vNorm;void main(){float spd=mix(uSpeedInner,uSpeedOuter,aRadius/140.0)*aSpeed;float ang=aAngle+uT*spd;vec3 pos=vec3(cos(ang)*aRadius,position.y,sin(ang)*aRadius);vCol=color;vNorm=aRadius/140.0;vec4 mv=modelViewMatrix*vec4(pos,1.0);gl_Position=projectionMatrix*mv;gl_PointSize=clamp(aSize*uSizeMult*(110.0/-mv.z),0.5,28.0);}`,
+    fragmentShader:`varying vec3 vCol;varying float vNorm;uniform float uFade;void main(){vec2 c=gl_PointCoord-.5;float d=length(c);if(d>.5)discard;float core=smoothstep(.50,.00,d);float halo=smoothstep(.50,.18,d)*.55;float ring=smoothstep(.28,.12,d)*smoothstep(.04,.12,d)*.35;gl_FragColor=vec4(vCol*(1.0+(1.0-vNorm)*.8),(core+halo+ring)*uFade);}`,
+    transparent:true,vertexColors:true,blending:THREE.AdditiveBlending,depthWrite:false,
+  });
+  bgUnis=cosmosMat.uniforms;
+  vrField=new THREE.Points(pGeo,cosmosMat);
+  vrField.rotation.x=35*PI/180;
+  scene.add(vrField);
+  const ringMat=new THREE.ShaderMaterial({
+    uniforms:{uT:bgUnis.uT},vertexShader:VERT,
+    fragmentShader:`varying vec2 vUv;uniform float uT;void main(){float ang=atan(vUv.y-.5,vUv.x-.5);float r=length(vUv-.5)*2.;if(r<.35||r>1.)discard;float pulse=.6+.4*sin(ang*3.+uT*1.8);float fade=smoothstep(1.,.55,r)*smoothstep(.35,.5,r);vec3 col=mix(vec3(1.,.6,.2),vec3(.3,.9,1.),(r-.35)*2.);gl_FragColor=vec4(col*pulse,fade*.7);}`,
+    transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide,
+  });
+  const ring=new THREE.Mesh(new THREE.PlaneGeometry(18,18),ringMat);
+  ring.rotation.x=-PI*.5; scene.add(ring);
+  scene.add(new THREE.Mesh(new THREE.SphereGeometry(BH_R,32,32),new THREE.MeshBasicMaterial({color:0x000000})));
+  camera.position.set(0,22,95);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MANDALA
+// ═══════════════════════════════════════════════════════════════════════════
+let _mandalaMat=null;
+const _MPALS={arcano:[35,15,50],blanco:[210,240,220],nebula:[280,320,200],aurora:[45,175,270],tiempo:[140,160,120]};
+const _MPAL_CYCLE=[_MPALS.arcano,_MPALS.blanco,_MPALS.nebula,_MPALS.aurora,_MPALS.tiempo];
+const _MP={sym:6,speed:0.09,pal:_MPALS.arcano};
+
+if(_aes==='mandala'){
+  function _hsl2rgb(h,s,l){return new THREE.Color().setHSL(h/360,s,l);}
+  _mandalaMat=new THREE.ShaderMaterial({
+    uniforms:{
+      uT:bgUnis.uT,
+      uSpeed:{value:_MP.speed},
+      uSym:{value:parseFloat(_MP.sym)},
+      uC1:{value:_hsl2rgb(_MP.pal[0],1,.58)},
+      uC2:{value:_hsl2rgb(_MP.pal[1],1,.58)},
+      uC3:{value:_hsl2rgb(_MP.pal[2],1,.58)},
+      uCamQ:{value:new THREE.Quaternion()},
+    },
+    vertexShader:VERT_SPHVR,
+    fragmentShader:MAND_FRAG,
+    side:THREE.BackSide,
+    transparent:true,
+    blending:THREE.AdditiveBlending,
+    depthWrite:false,
+  });
+  scene.add(new THREE.Mesh(new THREE.SphereGeometry(100,64,64),_mandalaMat));
+  camera.position.set(0,0,0);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PSYCHEDELIC
+// ═══════════════════════════════════════════════════════════════════════════
+let _psychMats=null,_psychSpeeds=null,curPsychScene=VR.initScene,fadeDoing=false;
+let _psychSpeedMult=1.0,_psychSpeedMultTgt=1.0,_psychMesh=null;
+
+if(_aes==='psychedelic'){
+  const HSL=`vec3 hsl(float h,float s,float l){float h6=fract(h)*6.,x=1.-abs(mod(h6,2.)-1.);vec3 r=h6<1.?vec3(1,x,0):h6<2.?vec3(x,1,0):h6<3.?vec3(0,1,x):h6<4.?vec3(0,x,1):h6<5.?vec3(x,0,1):vec3(1,0,x);return r*s*(.5+l*.5)+(1.-s)*l;}`;
+  const PSYCH_FRAGS=[
+    `uniform float uT,uFade;varying vec3 vPos;const float PHI=1.61803398875,SQ3=1.73205080;${HSL}
+void main(){vec3 p=vPos;float t=uT;float w=(sin(p.x*3.+p.y*2.+t*1.1)+sin(p.y*4.+p.z*2.5+t*.9*PHI)+sin(p.z*3.+p.x*3.5+t*SQ3*.8)+sin((p.x+p.y+p.z)*5.5+t*1.7))*.25;gl_FragColor=vec4(hsl(.50+w*.15,.90,.65)*max(0.,.25+w*.75)*uFade*2.2,1.);}`,
+    `uniform float uT,uFade;varying vec3 vPos;const float SQ2=1.41421356,SQ3=1.73205080;
+void main(){vec3 p=vPos;float t=uT;float f=3.5+sin(t*SQ3*.3)*1.5,a=t*SQ2*.12;float ca=cos(a),sa=sin(a);vec3 q=vec3(ca*p.x-sa*p.z,p.y,sa*p.x+ca*p.z);float w=cos(f*(q.x+q.y)+t*2.)*cos(f*(q.y+q.z)-t*2.5)*cos(f*(q.z+q.x)+t*1.5);float li=pow(max(0.,w),3.);vec3 c=li<.5?mix(vec3(.02,0.,.05),vec3(.5,0.,.8),li*2.):mix(vec3(.5,0.,.8),vec3(1.,.95,1.),(li-.5)*2.);gl_FragColor=vec4(c*uFade*2.2,1.);}`,
+    `uniform float uT,uFade;varying vec3 vPos;const float PHI=1.61803398875,SQ7=2.64575131;${HSL}
+void main(){vec3 p=vPos;float t=uT;float A=t*PHI*.18,f=5.+sin(t*SQ7*.4)*2.5;float ca=cos(A),sa=sin(A);vec3 pp=vec3(ca*p.x-sa*p.y,sa*p.x+ca*p.y,p.z);float act=(cos(f*dot(pp,normalize(vec3(1.,0.,0.)))+t*1.5)+cos(f*dot(pp,normalize(vec3(-.5,.866,0.)))-t*1.5)+cos(f*dot(pp,normalize(vec3(-.5,-.866,0.)))+t*.75))/3.;gl_FragColor=vec4(hsl(fract(act*.5+t*.04+dot(p,vec3(1.,PHI,PHI*.5))*.1),.95,.62)*(max(0.,act)*.88+.07)*uFade*2.0,1.);}`,
+    `uniform float uT,uFade;varying vec3 vPos;const float PI=3.14159265,PHI=1.61803398875;${HSL}
+void main(){vec3 p=vPos;float lat=asin(clamp(p.y,-1.,1.)),lon=atan(p.z,p.x);float theta=lon+lat*PHI*3.+uT*.8,rho=lat+lon*PHI*.5-uT*.3;float fib=(sin(theta*8.+rho*5.-uT*1.3)*sin(theta*13.-rho*8.+uT*.9)+sin(theta*5.+rho*3.+uT*PHI*.4))*.5;gl_FragColor=vec4(hsl(fract(fib*.4+lon/(PI*2.)*.2+uT*.03),.92,.64)*(pow(max(0.,fib*.5+.5),1.3)*.92+.04)*uFade*2.0,1.);}`
+  ];
+  _psychSpeeds=[1.0,2.2,1.5,1.9];
+  _psychMats=PSYCH_FRAGS.map(f=>new THREE.ShaderMaterial({
+    uniforms:bgUnis, vertexShader:VERT_SPHVR, fragmentShader:f,
+    side:THREE.BackSide, blending:THREE.AdditiveBlending, depthWrite:false,
+  }));
+  _psychMesh=new THREE.Mesh(new THREE.SphereGeometry(100,64,32),_psychMats[curPsychScene]);
+  scene.add(_psychMesh); camera.position.set(0,0,0);
+}
+
+function triggerFade(to){
+  if(!_psychMesh||!_psychMats||fadeDoing||to===curPsychScene)return;
+  fadeDoing=true; let f=1;
+  const out=()=>{f-=.07;bgUnis.uFade.value=Math.max(0,f);if(f>0){requestAnimationFrame(out);return;}
+    curPsychScene=to;_psychMesh.material=_psychMats[to];
+    const inn=()=>{f+=.05;bgUnis.uFade.value=Math.min(1,f);if(f<1){requestAnimationFrame(inn);return;}fadeDoing=false;};
+    requestAnimationFrame(inn);};
+  requestAnimationFrame(out);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PANEL
+// ═══════════════════════════════════════════════════════════════════════════
+const PW=1024,PH=512;
+const panelCanvas=document.createElement('canvas'); panelCanvas.width=PW; panelCanvas.height=PH;
+const panelTex=new THREE.CanvasTexture(panelCanvas);
+const PANEL_FRAG=`uniform sampler2D uTex;uniform float uReveal,uT;varying vec2 vUv;const float PI=3.14159265,PHI=1.61803398875,LOGPHI=0.48121182506;void main(){vec2 c=vUv-.5;float r=length(c),ang=atan(c.y,c.x);float pulse=.38*sin(uT*PI*.3731)+.26*sin(uT*PHI*.6247)+.19*sin(uT*2.71828*.4153);float fibVar=.12*sin(log(max(.001,r*5.))/LOGPHI*3.-ang*2.);float revR=uReveal+pulse*.07*uReveal*(1.-uReveal)+fibVar*uReveal*(1.-uReveal);float mask=smoothstep(revR+.04,revR-.02,r*1.2);float edge=smoothstep(revR-.10,revR,r*1.2)*smoothstep(revR+.04,revR,r*1.2);vec4 tex=texture2D(uTex,vUv);vec3 glow=vec3(.30,.85,.78);vec3 col=tex.rgb*mask+glow*edge*(.7+pulse*.3);gl_FragColor=vec4(col,max(mask*tex.a,edge*.9)*min(1.,uReveal*3.));}`;
+const panelUnis={uTex:{value:panelTex},uReveal:{value:0.0},uT:{value:0.0}};
+const panelMat=new THREE.ShaderMaterial({uniforms:panelUnis,vertexShader:VERT,fragmentShader:PANEL_FRAG,transparent:true,side:THREE.DoubleSide});
+const panelMesh=new THREE.Mesh(new THREE.PlaneGeometry(3.8,1.9),panelMat);
+const panelRig=new THREE.Object3D();
+scene.add(panelRig); panelRig.add(panelMesh);
+panelMesh.position.set(0,0.1,-3.0);
+
+let revealProgress=0,revealActive=false,revealFading=false;
+function startReveal(from=0){revealProgress=from;revealActive=true;}
+function fadePanel(cb){
+  revealFading=true;revealActive=false;let f=revealProgress;
+  const out=()=>{f-=.06;panelUnis.uReveal.value=Math.max(0,f);
+    if(f>0){requestAnimationFrame(out);return;}
+    cb();panelTex.needsUpdate=true;revealFading=false;startReveal(0);};
+  requestAnimationFrame(out);
+}
+
+function _rr(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
+function wrapText(ctx,text,x,y,maxW,lineH,maxLines){
+  const words=text.split(' ');let line='';
+  for(let i=0;i<words.length;i++){const t=line+words[i]+' ';if(ctx.measureText(t).width>maxW&&line){ctx.fillText(line.trim(),x,y);line=words[i]+' ';y+=lineH;if(maxLines&&--maxLines<=0){ctx.fillText('…',x,y);return y;}}else line=t;}
+  if(line.trim())ctx.fillText(line.trim(),x,y);return y+lineH;
+}
+
+function drawQuestion(qIdx){
+  const c=panelCanvas.getContext('2d'); c.clearRect(0,0,PW,PH);
+  c.fillStyle='rgba(0,0,0,0.90)'; _rr(c,0,0,PW,PH,32); c.fill();
+  c.strokeStyle='rgba(78,205,196,0.28)'; c.lineWidth=2; _rr(c,1,1,PW-2,PH-2,31); c.stroke();
+
+  // Barra de progreso — más gruesa y legible
+  const pct=qIdx/VR.questions.length;
+  c.fillStyle='rgba(255,255,255,.07)'; _rr(c,40,12,PW-80,10,5); c.fill();
+  if(pct>0){
+    const grd=c.createLinearGradient(40,0,40+(PW-80)*pct,0);
+    grd.addColorStop(0,'#7c6dfa'); grd.addColorStop(1,'#4ecdc4');
+    c.fillStyle=grd; _rr(c,40,12,Math.max(10,(PW-80)*pct),10,5); c.fill();
+  }
+
+  // Header
+  c.fillStyle='#4ecdc4'; c.font='500 20px system-ui'; c.fillText(VR.testName,44,48);
+  c.fillStyle='rgba(255,255,255,.45)'; c.font='400 20px system-ui'; c.textAlign='right';
+  c.fillText(`${qIdx+1} / ${VR.questions.length}`,PW-44,48); c.textAlign='left';
+  c.fillStyle='rgba(78,205,196,0.18)'; c.fillRect(40,60,PW-80,1);
+
+  // Texto pregunta — mayor y más espacio
+  const q=VR.questions[qIdx];
+  c.fillStyle='#e8e8f4'; c.font='300 36px system-ui';
+  const textEnd=wrapText(c,q.text,48,100,PW-96,50,5);
+
+  // Hint escala — solo para escalas con 3+ opciones
+  const opts=q.options;
+  if(opts.length>=3&&textEnd<PH-50){
+    const first=opts[0].label.replace(/\n/g,' ');
+    const last=opts[opts.length-1].label.replace(/\n/g,' ');
+    c.fillStyle='rgba(255,255,255,.18)'; c.font='italic 400 18px system-ui';
+    c.fillText(`${first}  ←·····→  ${last}`,48,PH-22);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BOTONES DE RESPUESTA — arco 3D, hijos del dockGroup
+// ═══════════════════════════════════════════════════════════════════════════
+const dockGroup=new THREE.Group();
+dockGroup.position.set(0,-0.65,0); // 15° abajo del centro — cómodo sin agachar la cabeza
+panelRig.add(dockGroup);
+
+const BTN_W=240,BTN_H=120;
+let answerBtns=[];
+
+function buildAnswerBtns(opts){
+  answerBtns.forEach(b=>{dockGroup.remove(b.mesh);b.mat.dispose();b.tex.dispose();});
+  answerBtns=[];
+  const N=opts.length;
+  const SPREAD=Math.min(2.0,Math.max(1.2,0.40*N));
+  const R=2.4; // radio reducido: botones más cerca = se ven más grandes
+  opts.forEach((opt,i)=>{
+    const cv=document.createElement('canvas'); cv.width=BTN_W; cv.height=BTN_H;
+    const tex=new THREE.CanvasTexture(cv);
+    const mat=new THREE.MeshBasicMaterial({map:tex,transparent:true,side:THREE.DoubleSide,depthWrite:false});
+    const mesh=new THREE.Mesh(new THREE.PlaneGeometry(.50,.25),mat);
+    const angle=-SPREAD/2+(i/(Math.max(N-1,1)))*SPREAD;
+    mesh.position.set(Math.sin(angle)*R,0,-Math.cos(angle)*R);
+    mesh.rotation.y=-angle; // cada botón rota para enfrentar el centro del arco
+    mesh.userData.answerIdx=i;
+    dockGroup.add(mesh);
+    answerBtns.push({opt,mesh,mat,tex,cv});
+    drawAnswerBtn(i,0,false);
+  });
+}
+
+function drawAnswerBtn(idx,progress,isHovered){
+  const b=answerBtns[idx];
+  const ctx=b.cv.getContext('2d'),W=BTN_W,H=BTN_H;
+  ctx.clearRect(0,0,W,H);
+  const isBinary=answerBtns.length<=2;
+  ctx.fillStyle=isHovered?'rgba(78,205,196,.22)':'rgba(0,0,8,.88)';
+  _rr(ctx,3,3,W-6,H-6,18); ctx.fill();
+  ctx.strokeStyle=isHovered?'rgba(78,205,196,.95)':'rgba(255,255,255,.28)';
+  ctx.lineWidth=isHovered?3:1.5; _rr(ctx,3,3,W-6,H-6,18); ctx.stroke();
+  ctx.textAlign='center';
+  if(isBinary){
+    // Escala binaria: el label es el contenido principal
+    ctx.fillStyle=isHovered?'#4ecdc4':'#e2e2f0';
+    ctx.font=`500 ${H*.30}px system-ui`;
+    ctx.fillText(b.opt.label.replace(/\n/g,' '),W/2,H*.62);
+  }else{
+    // Likert: número grande + label completo
+    ctx.fillStyle=isHovered?'#4ecdc4':'#e2e2f0';
+    ctx.font=`600 ${H*.40}px system-ui`;
+    ctx.fillText(String(b.opt.value),W/2,H*.54);
+    const label=b.opt.label.replace(/\n/g,' ');
+    ctx.fillStyle=isHovered?'rgba(78,205,196,.9)':'rgba(160,160,200,.75)';
+    ctx.font=`400 ${H*.155}px system-ui`;
+    ctx.fillText(label.length>16?label.substring(0,15)+'…':label,W/2,H*.84);
+  }
+  if(progress>0){
+    const cx=W/2,cy=H/2,r=Math.min(W,H)*.44;
+    ctx.beginPath(); ctx.arc(cx,cy,r,-PI/2,-PI/2+PI*2*progress);
+    ctx.strokeStyle='#4ecdc4'; ctx.lineWidth=5; ctx.stroke();
+  }
+  ctx.textAlign='left';
+  b.tex.needsUpdate=true;
+}
+
+function drawAnswerBtnConfirmed(idx){
+  const b=answerBtns[idx];
+  const ctx=b.cv.getContext('2d'),W=BTN_W,H=BTN_H;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='rgba(78,205,196,.30)'; _rr(ctx,3,3,W-6,H-6,18); ctx.fill();
+  ctx.strokeStyle='#4ecdc4'; ctx.lineWidth=3; _rr(ctx,3,3,W-6,H-6,18); ctx.stroke();
+  ctx.fillStyle='#4ecdc4'; ctx.font=`700 ${H*.48}px system-ui`; ctx.textAlign='center';
+  ctx.fillText('✓',W/2,H*.66);
+  ctx.textAlign='left';
+  b.tex.needsUpdate=true;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MATRIZ VISUAL: respuesta → parámetro de fondo
+//
+//   cosmos      → diskTilt  5°→70°       inclinación del disco kepleriano
+//   mandala     → sym       3→12         pliegues de simetría radial
+//   psychedelic → speedMult 0.3×→2.5×   intensidad sobre la escena actual
+//
+// Hover = preview (lerp suave)
+// Dwell 1.2s = confirmar (fija el parámetro) + transición de pregunta
+// Sin hover = vuelve al neutral (opción central de la escala)
+// Transición de pregunta = cambio de nivel mayor (speed spike / palette / scene fade)
+// ═══════════════════════════════════════════════════════════════════════════
+function answerParam(answerIdx,totalOptions){
+  const t=answerIdx/Math.max(totalOptions-1,1);
+  if(_aes==='cosmos')    return 5+t*65;
+  if(_aes==='mandala')   return Math.round(3+t*9);
+  return 0.3+t*2.2;
+}
+
+function neutralParam(qIdx){
+  const N=VR.questions[qIdx].options.length;
+  return answerParam(Math.floor(N/2),N);
+}
+
+function applyParam(val,fast=false){
+  if(_aes==='cosmos'){vrCosTgt.diskTilt=val;if(fast)_vrLerpBoost=1;}
+  else if(_aes==='mandala'&&_mandalaMat){_mandalaMat.uniforms.uSym.value=parseFloat(val);}
+  else{_psychSpeedMultTgt=val;}
+}
+
+function questionTransition(toQIdx,cb){
+  if(_aes==='cosmos'){
+    vrCosTgt.speedInner=9.0;vrCosTgt.sizeMult=5.8;_vrLerpBoost=1;
+    setTimeout(()=>{vrCosTgt.speedInner=2.6;vrCosTgt.sizeMult=3.5;_vrLerpBoost=1;},380);
+  } else if(_aes==='mandala'&&_mandalaMat){
+    const pal=_MPAL_CYCLE[toQIdx%_MPAL_CYCLE.length];
+    function _h2c(h){return new THREE.Color().setHSL(h/360,1,.58);}
+    _mandalaMat.uniforms.uC1.value=_h2c(pal[0]);
+    _mandalaMat.uniforms.uC2.value=_h2c(pal[1]);
+    _mandalaMat.uniforms.uC3.value=_h2c(pal[2]);
+  } else {
+    triggerFade((curPsychScene+1)%4);
+  }
+  fadePanel(cb);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ESTADO DEL TEST
+// ═══════════════════════════════════════════════════════════════════════════
+let curQIdx=0;
+const answers={};
+let locked=false;
+
+function goToQuestion(qIdx){
+  locked=false; curQIdx=qIdx;
+  buildAnswerBtns(VR.questions[qIdx].options);
+  applyParam(neutralParam(qIdx),true);
+  drawQuestion(qIdx);
+  panelTex.needsUpdate=true;
+  startReveal(0);
+}
+
+async function submitAnswers(){
+  locked=true;
+  answerBtns.forEach(b=>dockGroup.remove(b.mesh));
+  const body=new URLSearchParams();
+  body.append('csrfmiddlewaretoken',CSRF);
+  VR.questions.forEach(q=>{if(answers[q.id]!==undefined)body.append(`q_${q.id}`,answers[q.id]);});
+  try{
+    const res=await fetch(`/psicometria/${VR.testSlug}/enviar/`,{
+      method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body,credentials:'same-origin',redirect:'follow'
+    });
+    const m=res.url.match(/\/resultado\/(\d+)\//);
+    if(m)document.getElementById('co-link').href=`/psicometria/resultado/${m[1]}/`;
+    document.getElementById('co-sub').textContent='Resultados procesados correctamente.';
+  }catch(e){
+    document.getElementById('co-sub').textContent='Resultados guardados.';
+  }
+  document.getElementById('completion').style.display='flex';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// GAZE — dwell puro 1.2 s
+// ═══════════════════════════════════════════════════════════════════════════
+const raycaster=new THREE.Raycaster();
+const _gazeDir=new THREE.Vector3();
+const DWELL_MS=1200;
+let gazeTarget=-1,gazeStart=0;
+const gazeRing=document.getElementById('gaze-ring');
+const GAZE_CIRC=87.96;
+
+function updateGaze(ts){
+  if(locked)return;
+  const meshes=answerBtns.map(b=>b.mesh);
+  if(!meshes.length)return;
+  camera.getWorldDirection(_gazeDir);
+  raycaster.set(camera.position,_gazeDir);
+  const hits=raycaster.intersectObjects(meshes,false);
+
+  if(hits.length>0){
+    const idx=hits[0].object.userData.answerIdx;
+    const N=answerBtns.length;
+    if(idx===gazeTarget){
+      const progress=Math.min(1,(ts-gazeStart)/DWELL_MS);
+      drawAnswerBtn(idx,progress,true);
+      gazeRing.style.strokeDashoffset=GAZE_CIRC*(1-progress);
+      if(progress>=1){
+        gazeTarget=-1;
+        const q=VR.questions[curQIdx];
+        answers[q.id]=answerBtns[idx].opt.value;
+        drawAnswerBtnConfirmed(idx); // flash visual de confirmación
+        const next=curQIdx+1;
+        if(next>=VR.questions.length){setTimeout(submitAnswers,320);}
+        else{questionTransition(next,()=>goToQuestion(next));}
+      }
+    } else {
+      if(gazeTarget>=0)drawAnswerBtn(gazeTarget,0,false);
+      gazeTarget=idx; gazeStart=ts;
+      applyParam(answerParam(idx,N),false);
+    }
+  } else {
+    if(gazeTarget>=0)drawAnswerBtn(gazeTarget,0,false);
+    gazeTarget=-1;
+    gazeRing.style.strokeDashoffset=GAZE_CIRC;
+    applyParam(neutralParam(curQIdx),false);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TIEMPO + GYRO + LOOP
+// ═══════════════════════════════════════════════════════════════════════════
+let T=0,lastTs=0;
+function tickTime(ts){
+  const dt=Math.min((ts-lastTs)/1000,.05);lastTs=ts;
+  if(_aes==='psychedelic'&&_psychSpeeds){
+    const speed=_psychSpeeds[curPsychScene]*_psychSpeedMult;
+    const pulse=Math.max(.3,1+.40*Math.sin(T*PI*.3731)+.25*Math.sin(T*PHI*.6247)+.18*Math.sin(T*E*.4153)+.10*Math.sin(T*SQ7*.5289));
+    T+=dt*speed*pulse;
+  }else{T+=dt;}
+  return dt;
+}
+
+let dA=0,dB=90,dG=0,gyroOK=false;
+const Q_SCR=new THREE.Quaternion(-Math.sqrt(.5),0,0,Math.sqrt(.5));
+const _eu=new THREE.Euler(),_qO=new THREE.Quaternion();
+window.addEventListener('deviceorientation',e=>{if(e.alpha==null)return;gyroOK=true;dA=e.alpha||0;dB=e.beta||90;dG=e.gamma||0;},true);
+function applyGyro(){
+  const ori=Number(window.screen?.orientation?.angle??window.orientation??0);
+  _eu.set(THREE.MathUtils.degToRad(dB),THREE.MathUtils.degToRad(dA),THREE.MathUtils.degToRad(-dG),'YXZ');
+  camera.quaternion.setFromEuler(_eu);camera.quaternion.multiply(Q_SCR);
+  _qO.setFromAxisAngle(new THREE.Vector3(0,0,1),-THREE.MathUtils.degToRad(ori));
+  camera.quaternion.multiply(_qO);
+}
+let drag=false,px=0,py=0,yaw=0,pitch=0;
+let _tapDownX=0,_tapDownY=0,_tapDownTs=0;
+renderer.domElement.addEventListener('pointerdown',e=>{drag=true;px=e.clientX;py=e.clientY;_tapDownX=e.clientX;_tapDownY=e.clientY;_tapDownTs=performance.now();},{passive:true});
+window.addEventListener('pointerup',e=>{
+  drag=false;
+  // tap = finger up within 300 ms and <12 px movement → immediate answer
+  const moved=Math.hypot(e.clientX-_tapDownX,e.clientY-_tapDownY);
+  if(!locked&&gazeTarget>=0&&moved<12&&(performance.now()-_tapDownTs)<300){
+    const q=VR.questions[curQIdx];
+    answers[q.id]=answerBtns[gazeTarget].opt.value;
+    const confirmedIdx=gazeTarget;
+    gazeTarget=-1;
+    drawAnswerBtnConfirmed(confirmedIdx); // flash visual de confirmación
+    const next=curQIdx+1;
+    if(next>=VR.questions.length){setTimeout(submitAnswers,320);}
+    else{questionTransition(next,()=>goToQuestion(next));}
+  }
+});
+window.addEventListener('pointermove',e=>{if(!drag||gyroOK)return;yaw-=(e.clientX-px)*.003;pitch-=(e.clientY-py)*.003;pitch=Math.max(-PI/2,Math.min(PI/2,pitch));px=e.clientX;py=e.clientY;});
+
+let previewMode=false;
+
+document.getElementById('btn-vr').addEventListener('click',async()=>{
+  if(typeof DeviceOrientationEvent?.requestPermission==='function'){
+    try{const r=await DeviceOrientationEvent.requestPermission();if(r!=='granted'){alert('Permiso denegado.');return;}}catch(e){}
+  }
+  document.getElementById('overlay').style.display='none';
+  document.getElementById('btn-back').style.display='block';
+  document.getElementById('reticle').style.display='block';
+  goToQuestion(0);
+  requestAnimationFrame(loop);
+});
+
+document.getElementById('btn-preview').addEventListener('click',()=>{
+  previewMode=true;
+  document.getElementById('overlay').style.display='none';
+  document.getElementById('btn-back').style.display='block';
+  document.getElementById('reticle').style.display='none';
+  goToQuestion(0);
+  requestAnimationFrame(loop);
+});
+
+const _rigQ=new THREE.Quaternion();
+function loop(ts){
+  requestAnimationFrame(loop);
+  const dt=tickTime(ts);
+
+  if(_aes==='cosmos'&&vrField){
+    _vrLerpBoost=Math.max(0,_vrLerpBoost-.008);
+    const VL=0.018+(0.12-0.018)*_vrLerpBoost;
+    vrCosCur.speedInner=lerp(vrCosCur.speedInner,vrCosTgt.speedInner,VL);
+    vrCosCur.sizeMult  =lerp(vrCosCur.sizeMult,  vrCosTgt.sizeMult,  VL);
+    vrCosCur.diskTilt  =lerp(vrCosCur.diskTilt,  vrCosTgt.diskTilt,  VL);
+    bgUnis.uSpeedInner.value=vrCosCur.speedInner;
+    bgUnis.uSizeMult.value  =vrCosCur.sizeMult;
+    vrField.rotation.x      =vrCosCur.diskTilt*PI/180;
+  }
+  if(_aes==='psychedelic'){
+    _psychSpeedMult=lerp(_psychSpeedMult,_psychSpeedMultTgt,0.04);
+  }
+
+  bgUnis.uT.value=T;
+  if(_mandalaMat)_mandalaMat.uniforms.uCamQ.value.copy(camera.quaternion);
+  panelUnis.uT.value=T;
+
+  if(revealActive&&revealProgress<1&&!revealFading){
+    const pulse=.38*Math.sin(T*PI*.3731)+.26*Math.sin(T*PHI*.6247);
+    revealProgress=Math.min(1,revealProgress+dt*(.28+Math.abs(pulse)*.18));
+    panelUnis.uReveal.value=revealProgress;
+  }
+
+  // en preview mode el reticle está oculto pero el gaze debe correr igual (tap trigger lo necesita)
+  if(!locked&&answerBtns.length)updateGaze(ts);
+
+  if(gyroOK)applyGyro();
+  else{_eu.set(pitch,yaw,0,'YXZ');camera.quaternion.setFromEuler(_eu);}
+
+  panelRig.position.copy(camera.position);
+  _rigQ.copy(camera.quaternion);
+  panelRig.quaternion.slerp(_rigQ,.03);
+
+  if(previewMode)renderer.render(scene,camera);
+  else effect.render(scene,camera);
+}
+</script>
+</body>
+</html>

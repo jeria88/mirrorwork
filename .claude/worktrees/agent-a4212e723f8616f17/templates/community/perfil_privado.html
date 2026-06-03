@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Perfil privado — MirrorWork{% endblock %}
+{% block content %}
+<div style="max-width:480px;margin:6rem auto;text-align:center;padding:0 1.5rem;">
+  <div style="font-size:2rem;margin-bottom:1rem;">◎</div>
+  <h2 style="font-size:1.2rem;color:var(--text);margin-bottom:0.75rem;">Perfil privado</h2>
+  <p style="color:var(--muted);font-size:0.9rem;line-height:1.7;">
+    Este endonauta no comparte su exploración públicamente aún.<br>
+    Solo sus seguidores pueden ver su perfil.
+  </p>
+  <a href="{% url 'community:explorar' %}" class="btn btn-ghost" style="margin-top:2rem;display:inline-block;">
+    Explorar otros perfiles
+  </a>
+</div>
+{% endblock %}
