@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Mis tokens — Endonautas{% endblock %}
+{% block title %}Mis Fractones — Endonautas{% endblock %}
 
 {% block content %}
 <style>
@@ -18,6 +18,7 @@
   }
   .balance-number { font-size: 3rem; font-weight: 800; color: var(--accent); line-height: 1; }
   .balance-label { font-size: 0.85rem; color: var(--muted); margin-top: 0.25rem; }
+  .balance-breakdown { font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem; }
   .costs-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -36,7 +37,6 @@
   .cost-name { font-size: 0.82rem; color: var(--muted); }
   .cost-amount { font-size: 0.9rem; font-weight: 700; color: var(--text); }
   .cost-amount.free { color: var(--luz); }
-
   .section-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 1rem; }
   .tx-list { display: flex; flex-direction: column; gap: 0.5rem; }
   .tx-row {
@@ -55,66 +55,86 @@
   .tx-amount.positive { color: var(--luz); }
   .tx-amount.negative { color: var(--sombra-dom); }
   .empty-tx { padding: 1.5rem; text-align: center; color: var(--muted); font-size: 0.9rem; }
+  .buy-btn {
+    display: inline-block;
+    padding: 0.6rem 1.25rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-decoration: none;
+    background: var(--accent);
+    color: var(--bg);
+    transition: opacity 0.15s;
+  }
+  .buy-btn:hover { opacity: 0.85; }
 </style>
 
 <div class="container" style="max-width:760px">
   <div class="tokens-header">
-    <div class="tokens-title">Mis tokens</div>
+    <div class="tokens-title">Mis Fractones</div>
   </div>
-
-  {% if profile %}
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0.75rem 1.25rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
-    <div>
-      <span style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;">Plan actual</span>
-      <div style="font-weight:700;font-size:1rem;margin-top:0.15rem;">
-        {% if profile.plan == 'free' %}Free
-        {% elif profile.plan == 'navegante' %}Navegante
-        {% elif profile.plan == 'practicante' %}Facilitador
-        {% else %}{{ profile.plan|capfirst }}{% endif %}
-      </div>
-    </div>
-    {% if profile.plan == 'free' %}
-      <a href="{% url 'tokens:planes' %}" class="btn btn-primary" style="font-size:0.82rem;padding:0.45rem 1rem;">Mejorar plan →</a>
-    {% else %}
-      <a href="{% url 'tokens:planes' %}" class="btn btn-ghost" style="font-size:0.82rem;padding:0.45rem 1rem;">Ver planes</a>
-    {% endif %}
-  </div>
-  {% endif %}
 
   <div class="balance-card">
     <div>
       <div class="balance-number">{{ balance.balance }}</div>
-      <div class="balance-label">tokens disponibles</div>
+      <div class="balance-label">fractones disponibles</div>
+      <div class="balance-breakdown">
+        {{ balance.permanent }} permanentes + {{ balance.monthly }} mensuales
+      </div>
     </div>
     <div style="font-size:0.82rem;color:var(--muted);line-height:1.7;">
-      Los tokens se consumen al usar features premium.<br>
-      {% if profile and profile.plan != 'free' %}
-        Recibes {{ profile.plan_config.monthly_tokens }} tokens cada mes con tu plan.
-      {% else %}
-        <a href="{% url 'tokens:planes' %}" style="color:var(--accent);">Suscríbete</a> para recibir tokens mensuales.
-      {% endif %}
+      Los fractones se usan para desbloquear<br>
+      lecturas profundas de IA.<br>
+      <span style="color:var(--accent);">No expiran nunca.</span>
     </div>
   </div>
 
-  <div class="section-title" style="margin-bottom:0.75rem;">Costo por feature</div>
-  <div class="costs-grid" style="margin-bottom:2rem;">
+  <div style="margin-bottom: 2rem;">
+    <a href="{% url 'tokens:tienda' %}" class="buy-btn">Comprar fractones →</a>
+  </div>
+
+  <div class="section-title" style="margin-bottom:0.75rem;">Costo por uso</div>
+  <div class="costs-grid" style="margin-bottom: 2rem;">
     <div class="cost-card">
       <span class="cost-name">Tests psicométricos</span>
       <span class="cost-amount free">Gratis</span>
     </div>
     <div class="cost-card">
-      <span class="cost-name">Lectura del Espejo (AI)</span>
-      <span class="cost-amount">5 tokens</span>
+      <span class="cost-name">Lectura profunda IA</span>
+      <span class="cost-amount">3 fractones</span>
     </div>
     <div class="cost-card">
-      <span class="cost-name">Sesión Espejo de Conflictos</span>
-      <span class="cost-amount">10 tokens</span>
+      <span class="cost-name">Pregunta al Espejo</span>
+      <span class="cost-amount">1 fractón</span>
     </div>
     <div class="cost-card">
-      <span class="cost-name">Generar reporte</span>
-      <span class="cost-amount">3 tokens</span>
+      <span class="cost-name">Sesión Espejo (inicio)</span>
+      <span class="cost-amount">3 fractones</span>
+    </div>
+    <div class="cost-card">
+      <span class="cost-name">Carta astral completa</span>
+      <span class="cost-amount">5 fractones</span>
+    </div>
+    <div class="cost-card">
+      <span class="cost-name">Informe herida + espejo</span>
+      <span class="cost-amount">4 fractones</span>
     </div>
   </div>
+
+  {% if purchases %}
+  <div class="section-title">Compras recientes</div>
+  <div class="tx-list" style="margin-bottom: 2.5rem;">
+    {% for p in purchases %}
+    <div class="tx-row">
+      <div>
+        <div class="tx-reason">Pack {{ p.get_pack_display|default:p.pack_slug }} — {{ p.fractones }} fractones</div>
+        <div class="tx-date">{{ p.created_at|date:"d M Y, H:i" }} · ${{ p.amount_clp }} CLP · {{ p.get_status_display }}</div>
+      </div>
+      <div class="tx-amount positive">+{{ p.fractones }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
 
   <div class="section-title">Historial de movimientos</div>
   {% if transactions %}
@@ -132,7 +152,7 @@
     {% endfor %}
   </div>
   {% else %}
-  <div class="empty-tx">Aún no hay movimientos de tokens.</div>
+  <div class="empty-tx">Aún no hay movimientos.</div>
   {% endif %}
 </div>
 {% endblock %}

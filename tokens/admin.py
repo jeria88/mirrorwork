@@ -1,36 +1,44 @@
 from django.contrib import admin
 
-from .models import Mission, MissionCompletion, TokenBalance, TokenTransaction
+from .models import MpPurchase, Mission, MissionCompletion, TokenBalance, TokenPack, TokenTransaction
+
+
+@admin.register(TokenPack)
+class TokenPackAdmin(admin.ModelAdmin):
+    list_display = ("name", "slug", "fractones", "price_clp", "active", "order")
+    list_editable = ("active", "order")
+    prepopulated_fields = {"slug": ("name",)}
 
 
 @admin.register(TokenBalance)
 class TokenBalanceAdmin(admin.ModelAdmin):
-    list_display   = ('user', 'permanent', 'monthly', 'balance_total', 'monthly_last_renewed', 'updated_at')
-    search_fields  = ('user__email',)
-    readonly_fields = ('balance_total', 'updated_at')
-
-    def balance_total(self, obj):
-        return obj.balance
-    balance_total.short_description = 'Total'
+    list_display = ("user", "permanent", "monthly", "balance", "monthly_last_renewed")
+    readonly_fields = ("balance",)
 
 
 @admin.register(TokenTransaction)
 class TokenTransactionAdmin(admin.ModelAdmin):
-    list_display  = ('user', 'amount', 'source', 'reason', 'created_at')
-    list_filter   = ('source',)
-    search_fields = ('user__email', 'reason')
-    readonly_fields = ('created_at',)
+    list_display = ("user", "amount", "reason", "source", "created_at")
+    list_filter = ("source",)
+    search_fields = ("user__email", "reason")
+
+
+@admin.register(MpPurchase)
+class MpPurchaseAdmin(admin.ModelAdmin):
+    list_display = ("user", "pack_slug", "fractones", "amount_clp", "status", "created_at")
+    list_filter = ("status",)
+    search_fields = ("user__email", "pack_slug", "mp_payment_id")
+    readonly_fields = ("mp_raw",)
 
 
 @admin.register(Mission)
 class MissionAdmin(admin.ModelAdmin):
-    list_display   = ('name', 'slug', 'fracton_reward', 'order', 'active')
-    list_editable  = ('order', 'active', 'fracton_reward')
-    prepopulated_fields = {'slug': ('name',)}
+    list_display = ("name", "slug", "fracton_reward", "prerequisite_slug", "active", "order")
+    list_editable = ("active", "order")
+    prepopulated_fields = {"slug": ("name",)}
 
 
 @admin.register(MissionCompletion)
 class MissionCompletionAdmin(admin.ModelAdmin):
-    list_display  = ('user', 'mission', 'completed_at')
-    search_fields = ('user__email', 'mission__slug')
-    readonly_fields = ('completed_at',)
+    list_display = ("user", "mission", "completed_at")
+    search_fields = ("user__email",)

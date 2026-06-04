@@ -63,6 +63,7 @@ class TokenTransaction(models.Model):
         ('permanent', 'Permanente'),
         ('monthly',   'Mensual'),
         ('spend',     'Gasto'),
+        ('mp_pack',   'Pack MP'),
     ]
     user       = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='token_transactions'
@@ -114,11 +115,47 @@ class MissionCompletion(models.Model):
 
 
 class TokenPack(models.Model):
-    """Producto Hotmart de pago único → recarga permanente."""
+    """Pack de fractones disponible para compra."""
+    slug      = models.CharField(max_length=30, unique=True, default='pack')
     name      = models.CharField(max_length=60)
     fractones = models.IntegerField(default=0)
-    price_usd = models.DecimalField(max_digits=6, decimal_places=2)
+    price_clp = models.IntegerField(default=0)
     active    = models.BooleanField(default=True)
+    order     = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order']
+        verbose_name = 'Pack de Fractones'
 
     def __str__(self):
-        return f'{self.name}: {self.fractones} fractones — ${self.price_usd}'
+        return f'{self.name}: {self.fractones} fractones — ${self.price_clp:,} CLP'
+
+
+class MpPurchase(models.Model):
+    """Registro de compra vía Mercado Pago."""
+    STATUS_CHOICES = [
+        ('pending',    'Pendiente'),
+        ('approved',   'Aprobada'),
+        ('rejected',   'Rechazada'),
+        ('refunded',   'Reembolsada'),
+    ]
+    user         = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='mp_purchases'
+    )
+    pack         = models.ForeignKey(TokenPack, on_delete=models.SET_NULL, null=True, blank=True)
+    mp_preference_id = models.CharField(max_length=100, blank=True)
+    mp_payment_id    = models.CharField(max_length=100, blank=True)
+    pack_slug    = models.CharField(max_length=30, blank=True)  # backup si no hay FK
+    fractones    = models.IntegerField(default=0)
+    amount_clp   = models.IntegerField(default=0)
+    status       = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    mp_raw       = models.JSONField(default=dict, blank=True)  # payload completo de MP
+    created_at   = models.DateTimeField(auto_now_add=True)
+    updated_at   = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Compra Mercado Pago'
+
+    def __str__(self):
+        return f'{self.user.email} — {self.pack_slug} — {self.status} — ${self.amount_clp:,} CLP'

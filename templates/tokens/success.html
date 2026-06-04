@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}
+  {% if status == 'success' %}¡Pago exitoso!
+  {% elif status == 'pending' %}Pago pendiente
+  {% else %}Pago no completado
+  {% endif %}
+  — Endonautas
+{% endblock %}
+
+{% block content %}
+<style>
+  .result-box {
+    max-width: 480px;
+    margin: 4rem auto;
+    text-align: center;
+    padding: 3rem 2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+  }
+  .result-icon { font-size: 3rem; margin-bottom: 1rem; }
+  .result-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 0.75rem; }
+  .result-msg { color: var(--muted); font-size: 0.95rem; line-height: 1.7; margin-bottom: 2rem; }
+  .result-btn {
+    display: inline-block;
+    padding: 0.85rem 2rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-decoration: none;
+    background: var(--accent);
+    color: var(--bg);
+    transition: opacity 0.15s;
+  }
+  .result-btn:hover { opacity: 0.85; }
+  .result-btn.outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    margin-left: 0.5rem;
+  }
+</style>
+
+<div class="container">
+  <div class="result-box">
+    {% if status == 'success' %}
+      <div class="result-icon">✦</div>
+      <div class="result-title">¡Fractones acreditados!</div>
+      <div class="result-msg">
+        Tu pago fue procesado exitosamente. Tus fractones ya están disponibles en tu cuenta.
+        Ve a la app y desbloquea una lectura profunda.
+      </div>
+      <a href="/espejo/" class="result-btn">Ir al Espejo →</a>
+      <a href="/tokens/fractones/" class="result-btn outline">Ver mi saldo</a>
+
+    {% elif status == 'pending' %}
+      <div class="result-icon">⏳</div>
+      <div class="result-title">Pago en proceso</div>
+      <div class="result-msg">
+        Tu pago está siendo procesado. Te notificaremos cuando se confirme.
+        Esto puede tomar unos minutos dependiendo del método de pago.
+      </div>
+      <a href="/tokens/fractones/" class="result-btn">Ver mi saldo</a>
+
+    {% else %}
+      <div class="result-icon">✕</div>
+      <div class="result-title">Pago no completado</div>
+      <div class="result-msg">
+        Hubo un problema con tu pago. No te preocupes, no se realizó ningún cobro.
+        Puedes intentar de nuevo o contactarnos si el problema persiste.
+      </div>
+      <a href="/tokens/" class="result-btn">Intentar de nuevo</a>
+      <a href="/tokens/fractones/" class="result-btn outline">Ver mi saldo</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

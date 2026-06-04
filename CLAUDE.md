@@ -22,7 +22,7 @@ python3 manage.py migrate
 | `accounts` | ✅ activa | User (AbstractUser, email como USERNAME_FIELD), login/register/dashboard, mapa interior |
 | `psychometrics` | ✅ activa | Tests, preguntas, resultados, evaluador, seed |
 | `mirror` | 🔶 en progreso | KB lista (40 docs, 97 chunks, 43 autores). Falta: views AJAX, template conversación, burbuja flotante |
-| `tokens` | ✅ activa | Fractones: earn/burn automático, misiones, arquitectura Hotmart packs |
+- `tokens` | ✅ activa | Fractones: earn/burn automático, misiones, packs Mercado Pago, compras MpPurchase |
 | `practitioners` | 🔶 parcial | Vistas básicas para perfiles temporales de clientes |
 | `reports` | ⬜ vacía | Reportes agregados por usuario / perfil |
 

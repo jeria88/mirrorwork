@@ -117,34 +117,21 @@ PASSWORD_RESET_TIMEOUT = 3600  # 1 hora
 
 DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY', '')
 
-# ── Hotmart ────────────────────────────────────────────────────────────────────
+# ── Mercado Pago ───────────────────────────────────────────────────────────────
 # Variables de entorno a configurar en Railway / .env:
-#   HOTMART_WEBHOOK_TOKEN       → "Seguridad del webhook" en Hotmart > Herramientas
-#   HOTMART_OFFER_BASIC         → offer code del plan Navegante
-#   HOTMART_OFFER_SEED          → offer code del plan Practicante
-#   HOTMART_PACK_200/600/2000   → offer codes de los packs de fractones
-HOTMART_WEBHOOK_TOKEN = os.getenv('HOTMART_WEBHOOK_TOKEN', '')
+#   MP_ACCESS_TOKEN    → Access Token de Mercado Pago (developers.mercadopago.com)
+#   MP_PUBLIC_KEY      → Public Key (para el checkout en el frontend, si se usa)
+#   MP_WEBHOOK_SECRET  → Secret para validar webhooks (opcional pero recomendado)
+MP_ACCESS_TOKEN  = os.getenv('MP_ACCESS_TOKEN', '')
+MP_PUBLIC_KEY    = os.getenv('MP_PUBLIC_KEY', '')
+MP_WEBHOOK_SECRET = os.getenv('MP_WEBHOOK_SECRET', '')
 
-# Suscripciones: offer_code → plan interno
-HOTMART_OFFER_PLAN_MAP = {
-    os.getenv('HOTMART_OFFER_BASIC', ''):  'navegante',
-    os.getenv('HOTMART_OFFER_SEED',  ''):  'practicante',
-}
-
-# Packs de fractones (pago único): offer_code → cantidad de fractones
-HOTMART_PACK_MAP = {
-    os.getenv('HOTMART_PACK_200',  ''): 200,
-    os.getenv('HOTMART_PACK_600',  ''): 600,
-    os.getenv('HOTMART_PACK_2000', ''): 2000,
-}
-
-# URLs de checkout
-HOTMART_CHECKOUT_URLS = {
-    'navegante':   os.getenv('HOTMART_CHECKOUT_BASIC',    '#'),
-    'practicante': os.getenv('HOTMART_CHECKOUT_SEED',     '#'),
-    'pack_200':    os.getenv('HOTMART_CHECKOUT_PACK_200',  '#'),
-    'pack_600':    os.getenv('HOTMART_CHECKOUT_PACK_600',  '#'),
-    'pack_2000':   os.getenv('HOTMART_CHECKOUT_PACK_2000', '#'),
+# Packs de fractones: slug → {fractones, precio CLP, nombre}
+# El slug se usa como referencia interna para identificar la compra
+MP_PACKS = {
+    'starter':    {'fractones': 10,  'price': 1990,  'name': 'Starter'},
+    'explorador': {'fractones': 25,  'price': 3990,  'name': 'Explorador'},
+    'viajero':    {'fractones': 60,  'price': 7990,  'name': 'Viajero'},
 }
 
 DEEPSEEK_BASE_URL = 'https://api.deepseek.com'

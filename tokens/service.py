@@ -51,8 +51,8 @@ def credit_mission(user, slug):
 
 
 def credit_pack(user, fractones, offer_code=''):
-    """Acredita fractones de un pack Hotmart (pago único → permanente)."""
-    _balance(user).credit_permanent(fractones, reason=f'Pack Hotmart {offer_code}')
+    """Acredita fractones de un pack comprado (pago único → permanente)."""
+    _balance(user).credit_permanent(fractones, reason=f'Pack {offer_code}')
 
 
 def renew_monthly(user):

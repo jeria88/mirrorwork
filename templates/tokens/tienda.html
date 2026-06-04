@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Tienda de Fractones — Endonautas{% endblock %}
+
+{% block content %}
+<style>
+  .store-header { text-align: center; margin-bottom: 2.5rem; }
+  .store-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem; }
+  .store-sub { color: var(--muted); font-size: 0.95rem; }
+  .store-balance {
+    display: inline-block;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.4rem 1.2rem;
+    font-size: 0.85rem;
+    color: var(--accent);
+    margin-top: 0.75rem;
+  }
+  .packs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem;
+    max-width: 860px;
+    margin: 0 auto 3rem;
+  }
+  .pack-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 2rem 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    position: relative;
+    transition: border-color 0.2s, transform 0.15s;
+    text-align: center;
+  }
+  .pack-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .pack-card.featured {
+    border-color: var(--accent2);
+    background: linear-gradient(160deg, var(--surface), rgba(124,109,250,0.06));
+  }
+  .pack-badge {
+    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    background: var(--accent2); color: #fff; font-size: 0.7rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    padding: 0.2rem 0.75rem; border-radius: 20px;
+  }
+  .pack-name { font-size: 1.1rem; font-weight: 700; }
+  .pack-fractones { font-size: 2.5rem; font-weight: 800; color: var(--accent); line-height: 1; }
+  .pack-fractones-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .pack-price { font-size: 1.4rem; font-weight: 700; color: var(--text); }
+  .pack-price small { font-size: 0.85rem; font-weight: 400; color: var(--muted); }
+  .pack-buy-btn {
+    display: block; width: 100%; padding: 0.85rem; border: none; border-radius: 8px;
+    font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: opacity 0.15s;
+    background: var(--accent); color: var(--bg);
+  }
+  .pack-buy-btn:hover { opacity: 0.85; }
+  .pack-buy-btn.featured-btn { background: var(--accent2); color: #fff; }
+  .store-error {
+    max-width: 400px; margin: 0 auto 2rem; padding: 1rem;
+    background: rgba(224,80,80,0.1); border: 1px solid rgba(224,80,80,0.3);
+    border-radius: 8px; color: #e05050; text-align: center; font-size: 0.9rem;
+  }
+  .store-faq { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.25rem; }
+  .faq-item { border-bottom: 1px solid var(--border); padding-bottom: 1.25rem; }
+  .faq-q { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.4rem; }
+  .faq-a { font-size: 0.85rem; color: var(--muted); line-height: 1.7; }
+  .section-title-center {
+    text-align: center; font-size: 0.75rem; text-transform: uppercase;
+    letter-spacing: 0.12em; color: var(--muted); margin-bottom: 2rem;
+  }
+</style>
+
+<div class="container" style="max-width:960px">
+  <div class="store-header">
+    <div class="store-title">Tienda de Fractones</div>
+    <div class="store-sub">Compra fractones para desbloquear lecturas profundas con IA</div>
+    <div class="store-balance">
+      ✦ Tienes {{ balance.balance }} fractones disponibles
+    </div>
+  </div>
+
+  {% if error %}
+  <div class="store-error">{{ error }}</div>
+  {% endif %}
+
+  <div class="packs-grid">
+    {% for pack in packs %}
+    <div class="pack-card {% if pack.slug == 'explorador' %}featured{% endif %}">
+      {% if pack.slug == 'explorador' %}
+        <span class="pack-badge">Popular</span>
+      {% endif %}
+      <div class="pack-name">{{ pack.name }}</div>
+      <div>
+        <div class="pack-fractones">{{ pack.fractones }}</div>
+        <div class="pack-fractones-label">fractones</div>
+      </div>
+      <div class="pack-price">${{ pack.price_clp }} <small>CLP</small></div>
+      <form method="post" action="{% url 'tokens:crear_compra' %}">
+        {% csrf_token %}
+        <input type="hidden" name="pack_slug" value="{{ pack.slug }}">
+        <button type="submit" class="pack-buy-btn {% if pack.slug == 'explorador' %}featured-btn{% endif %}">
+          Comprar →
+        </button>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="section-title-center">Preguntas frecuentes</div>
+  <div class="store-faq">
+    <div class="faq-item">
+      <div class="faq-q">¿Qué son los fractones?</div>
+      <div class="faq-a">Son la moneda dentro de Endonautas. Los usas para desbloquear lecturas profundas de IA sobre tus tests, sesiones del Espejo y cartas astrales. No expiran nunca.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">¿Cómo funciona el pago?</div>
+      <div class="faq-a">El pago es único y se procesa por Mercado Pago. Tus fractones se acreditan automáticamente al confirmar el pago.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">¿Los fractones expiran?</div>
+      <div class="faq-a">No. Los fractones comprados son permanentes. Los que ganas por misiones o completar tests tampoco expiran.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">¿Puedo comprar desde fuera de Chile?</div>
+      <div class="faq-a">Mercado Pago procesa pagos en varios países de Latinoamérica. Si tu país no está soportado, escríbenos a hola@endonautas.cl</div>
+    </div>
+  </div>
+</div>
+{% endblock %}
