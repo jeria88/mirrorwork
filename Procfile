@@ -1,1 +1,1 @@
-web: python manage.py migrate && python manage.py seed_missions && python manage.py seed_tests && python manage.py seed_mirror_kb && python manage.py seed_admin && python manage.py collectstatic --noinput && gunicorn config.wsgi --workers 1 --timeout 300 --log-file -
+web: python manage.py migrate && python manage.py seed_missions && python manage.py seed_tests && python manage.py seed_mirror_kb && python manage.py seed_admin && python manage.py seed_packs && python manage.py collectstatic --noinput && gunicorn config.wsgi --workers 1 --timeout 300 --log-file -
