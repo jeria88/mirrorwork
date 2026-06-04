@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import MpPurchase, Mission, MissionCompletion, TokenBalance, TokenPack, TokenTransaction
+from .models import MpPurchase, Mission, MissionCompletion, PayPalPurchase, TokenBalance, TokenPack, TokenTransaction
 
 
 @admin.register(TokenPack)
@@ -29,6 +29,14 @@ class MpPurchaseAdmin(admin.ModelAdmin):
     list_filter = ("status",)
     search_fields = ("user__email", "pack_slug", "mp_payment_id")
     readonly_fields = ("mp_raw",)
+
+
+@admin.register(PayPalPurchase)
+class PayPalPurchaseAdmin(admin.ModelAdmin):
+    list_display = ("user", "pack_slug", "fractones", "amount_usd", "status", "created_at")
+    list_filter = ("status",)
+    search_fields = ("user__email", "pack_slug", "pp_order_id")
+    readonly_fields = ("pp_raw",)
 
 
 @admin.register(Mission)

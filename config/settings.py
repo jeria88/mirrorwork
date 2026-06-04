@@ -134,6 +134,15 @@ MP_PACKS = {
     'viajero':    {'fractones': 60,  'price': 7990,  'name': 'Viajero'},
 }
 
+# ── PayPal ─────────────────────────────────────────────────────────────────────
+# Variables de entorno a configurar en Railway / .env:
+#   PAYPAL_CLIENT_ID     → Client ID de tu app en developer.paypal.com
+#   PAYPAL_SECRET        → Secret de tu app
+#   PAYPAL_WEBHOOK_ID    → ID del webhook configurado en PayPal
+PAYPAL_CLIENT_ID  = os.getenv('PAYPAL_CLIENT_ID', '')
+PAYPAL_SECRET     = os.getenv('PAYPAL_SECRET', '')
+PAYPAL_WEBHOOK_ID = os.getenv('PAYPAL_WEBHOOK_ID', '')
+
 DEEPSEEK_BASE_URL = 'https://api.deepseek.com'
 DEEPSEEK_MODEL    = 'deepseek-chat'
 

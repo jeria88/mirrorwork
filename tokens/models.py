@@ -64,6 +64,7 @@ class TokenTransaction(models.Model):
         ('monthly',   'Mensual'),
         ('spend',     'Gasto'),
         ('mp_pack',   'Pack MP'),
+        ('pp_pack',   'Pack PayPal'),
     ]
     user       = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='token_transactions'
@@ -119,7 +120,8 @@ class TokenPack(models.Model):
     slug      = models.CharField(max_length=30, unique=True, default='pack')
     name      = models.CharField(max_length=60)
     fractones = models.IntegerField(default=0)
-    price_clp = models.IntegerField(default=0)
+    price_clp = models.IntegerField(default=0)  # precio CLP (Mercado Pago)
+    price_usd = models.DecimalField(max_digits=6, decimal_places=2, default=0)  # precio USD (PayPal)
     active    = models.BooleanField(default=True)
     order     = models.IntegerField(default=0)
 
@@ -128,7 +130,7 @@ class TokenPack(models.Model):
         verbose_name = 'Pack de Fractones'
 
     def __str__(self):
-        return f'{self.name}: {self.fractones} fractones — ${self.price_clp:,} CLP'
+        return f'{self.name}: {self.fractones} fractones — ${self.price_clp:,} CLP / ${self.price_usd} USD'
 
 
 class MpPurchase(models.Model):
@@ -159,3 +161,33 @@ class MpPurchase(models.Model):
 
     def __str__(self):
         return f'{self.user.email} — {self.pack_slug} — {self.status} — ${self.amount_clp:,} CLP'
+
+
+class PayPalPurchase(models.Model):
+    """Registro de compra vía PayPal (internacional)."""
+    STATUS_CHOICES = [
+        ('pending',    'Pendiente'),
+        ('approved',   'Aprobada'),
+        ('rejected',   'Rechazada'),
+        ('refunded',   'Reembolsada'),
+    ]
+    user         = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='pp_purchases'
+    )
+    pack         = models.ForeignKey(TokenPack, on_delete=models.SET_NULL, null=True, blank=True)
+    pp_order_id  = models.CharField(max_length=100, blank=True)  # PayPal order ID
+    pp_payer_id  = models.CharField(max_length=100, blank=True)
+    pack_slug    = models.CharField(max_length=30, blank=True)
+    fractones    = models.IntegerField(default=0)
+    amount_usd   = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    status       = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    pp_raw       = models.JSONField(default=dict, blank=True)
+    created_at   = models.DateTimeField(auto_now_add=True)
+    updated_at   = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Compra PayPal'
+
+    def __str__(self):
+        return f'{self.user.email} — {self.pack_slug} — {self.status} — ${self.amount_usd} USD'

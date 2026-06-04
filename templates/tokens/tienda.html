@@ -18,9 +18,9 @@
   }
   .packs-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 1.25rem;
-    max-width: 860px;
+    max-width: 900px;
     margin: 0 auto 3rem;
   }
   .pack-card {
@@ -49,15 +49,19 @@
   .pack-name { font-size: 1.1rem; font-weight: 700; }
   .pack-fractones { font-size: 2.5rem; font-weight: 800; color: var(--accent); line-height: 1; }
   .pack-fractones-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
-  .pack-price { font-size: 1.4rem; font-weight: 700; color: var(--text); }
-  .pack-price small { font-size: 0.85rem; font-weight: 400; color: var(--muted); }
-  .pack-buy-btn {
-    display: block; width: 100%; padding: 0.85rem; border: none; border-radius: 8px;
-    font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: opacity 0.15s;
-    background: var(--accent); color: var(--bg);
+  .pack-prices { display: flex; flex-direction: column; gap: 0.25rem; }
+  .pack-price-clp { font-size: 1.2rem; font-weight: 700; color: var(--text); }
+  .pack-price-usd { font-size: 0.85rem; color: var(--muted); }
+  .pack-actions { display: flex; flex-direction: column; gap: 0.5rem; margin-top: auto; }
+  .pack-btn {
+    display: block; width: 100%; padding: 0.75rem; border: none; border-radius: 8px;
+    font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: opacity 0.15s;
+    text-align: center;
   }
-  .pack-buy-btn:hover { opacity: 0.85; }
-  .pack-buy-btn.featured-btn { background: var(--accent2); color: #fff; }
+  .pack-btn:hover { opacity: 0.85; }
+  .pack-btn.mp { background: var(--accent); color: var(--bg); }
+  .pack-btn.pp { background: #003087; color: #fff; }
+  .pack-btn .btn-sub { font-size: 0.7rem; font-weight: 400; opacity: 0.8; }
   .store-error {
     max-width: 400px; margin: 0 auto 2rem; padding: 1rem;
     background: rgba(224,80,80,0.1); border: 1px solid rgba(224,80,80,0.3);
@@ -71,6 +75,7 @@
     text-align: center; font-size: 0.75rem; text-transform: uppercase;
     letter-spacing: 0.12em; color: var(--muted); margin-bottom: 2rem;
   }
+  .divider { max-width: 900px; margin: 0 auto 1.5rem; text-align: center; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
 </style>
 
 <div class="container" style="max-width:960px">
@@ -97,14 +102,32 @@
         <div class="pack-fractones">{{ pack.fractones }}</div>
         <div class="pack-fractones-label">fractones</div>
       </div>
-      <div class="pack-price">${{ pack.price_clp }} <small>CLP</small></div>
-      <form method="post" action="{% url 'tokens:crear_compra' %}">
-        {% csrf_token %}
-        <input type="hidden" name="pack_slug" value="{{ pack.slug }}">
-        <button type="submit" class="pack-buy-btn {% if pack.slug == 'explorador' %}featured-btn{% endif %}">
-          Comprar →
-        </button>
-      </form>
+      <div class="pack-prices">
+        <div class="pack-price-clp">${{ pack.price_clp }} CLP</div>
+        {% if pack.price_usd > 0 %}
+        <div class="pack-price-usd">o ${{ pack.price_usd }} USD</div>
+        {% endif %}
+      </div>
+      <div class="pack-actions">
+        <form method="post" action="{% url 'tokens:crear_compra_mp' %}">
+          {% csrf_token %}
+          <input type="hidden" name="pack_slug" value="{{ pack.slug }}">
+          <button type="submit" class="pack-btn mp">
+            Pagar con Mercado Pago
+            <div class="btn-sub">Chile · Tarjeta, débito, transferencia</div>
+          </button>
+        </form>
+        {% if pack.price_usd > 0 %}
+        <form method="post" action="{% url 'tokens:crear_compra_pp' %}">
+          {% csrf_token %}
+          <input type="hidden" name="pack_slug" value="{{ pack.slug }}">
+          <button type="submit" class="pack-btn pp">
+            Pagar con PayPal
+            <div class="btn-sub">Internacional · Tarjeta o saldo PayPal</div>
+          </button>
+        </form>
+        {% endif %}
+      </div>
     </div>
     {% endfor %}
   </div>
@@ -116,16 +139,16 @@
       <div class="faq-a">Son la moneda dentro de Endonautas. Los usas para desbloquear lecturas profundas de IA sobre tus tests, sesiones del Espejo y cartas astrales. No expiran nunca.</div>
     </div>
     <div class="faq-item">
-      <div class="faq-q">¿Cómo funciona el pago?</div>
-      <div class="faq-a">El pago es único y se procesa por Mercado Pago. Tus fractones se acreditan automáticamente al confirmar el pago.</div>
+      <div class="faq-q">¿Qué método de pago puedo usar?</div>
+      <div class="faq-a">En Chile usa Mercado Pago (tarjeta, débito, transferencia). Desde el exterior usa PayPal con tarjeta de crédito o saldo PayPal.</div>
     </div>
     <div class="faq-item">
       <div class="faq-q">¿Los fractones expiran?</div>
       <div class="faq-a">No. Los fractones comprados son permanentes. Los que ganas por misiones o completar tests tampoco expiran.</div>
     </div>
     <div class="faq-item">
-      <div class="faq-q">¿Puedo comprar desde fuera de Chile?</div>
-      <div class="faq-a">Mercado Pago procesa pagos en varios países de Latinoamérica. Si tu país no está soportado, escríbenos a hola@endonautas.cl</div>
+      <div class="faq-q">¿Es seguro?</div>
+      <div class="faq-a">Sí. Los pagos se procesan por Mercado Pago y PayPal. Nosotros nunca vemos los datos de tu tarjeta.</div>
     </div>
   </div>
 </div>
