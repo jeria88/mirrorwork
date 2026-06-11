@@ -1,5 +1,5 @@
 Django==6.0.4
-Pillow==10.2.0
+Pillow>=10.2.0
 gunicorn==25.3.0
 psycopg2-binary==2.9.11
 dj-database-url==3.1.2
@@ -9,3 +9,15 @@ requests>=2.32.3
 kerykeion==5.12.8
 timezonefinder==8.2.4
 sxtwl==2.0.7
+
+# Wagtail & Editorial
+wagtail==7.4.1
+wagtail-seo==3.1.1
+django-taggit==6.1.0
+django-modelcluster==6.5
+django-post-office==3.9.1
+
+# Celery
+django-celery-beat>=2.8.0
+celery==5.4.0
+django-celery-results==2.5.1

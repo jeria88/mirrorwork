@@ -1,0 +1,42 @@
+{% extends "crm/crm_base.html" %}
+{% block crm_title %}Listas{% endblock %}
+
+{% block crm_content %}
+<div class="crm-page-header">
+  <h1>Listas</h1>
+  <a href="{% url 'crm:list_create' %}" class="btn btn-primary">+ Nueva lista</a>
+</div>
+
+{% if lists %}
+<table class="crm-table">
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Slug</th>
+      <th>Suscriptores</th>
+      <th>Secuencias</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for lst in lists %}
+    <tr>
+      <td><a href="{% url 'crm:list_detail' lst.id %}" style="color:var(--accent);text-decoration:none;font-weight:500;">{{ lst.name }}</a></td>
+      <td class="text-sm text-muted">{{ lst.slug }}</td>
+      <td><span class="pill pill-accent">{{ lst.sub_count }}</span></td>
+      <td><span class="pill pill-blue">{{ lst.sequences.count }}</span></td>
+      <td>
+        <a href="{% url 'crm:list_edit' lst.id %}" class="btn btn-sm">Editar</a>
+        <a href="{% url 'crm:list_delete' lst.id %}" class="btn btn-sm btn-danger">Eliminar</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div class="crm-card crm-empty">
+  <p>Sin listas creadas.</p>
+  <a href="{% url 'crm:list_create' %}" class="btn btn-primary" style="margin-top:12px;">Crear primera lista</a>
+</div>
+{% endif %}
+{% endblock %}

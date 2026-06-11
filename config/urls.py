@@ -2,9 +2,17 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from wagtail import urls as wagtail_urls
+from wagtail.admin import urls as wagtailadmin_urls
+from wagtail.documents import urls as wagtaildocs_urls
+from wagtail.images import urls as wagtailimages_urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('cms/', include(wagtailadmin_urls)),
+    path('documents/', include(wagtaildocs_urls)),
+    path('images/', include(wagtailimages_urls)),
+
     path('accounts/', include('accounts.urls')),
     path('tokens/', include('tokens.urls')),
     path('psicometria/', include('psychometrics.urls')),
@@ -14,5 +22,18 @@ urlpatterns = [
     path('nacimiento/', include('birth.urls')),
     path('regulacion/', include('sensorial.urls')),
     path('comunidad/', include('community.urls')),
+
+    # Editorial & Marketing
+    path('centro/', include('centro.urls', namespace='centro')),
+    path('crm/', include('crm.urls')),
+    path('cgm/', include('blog.urls_cgm', namespace='cgm')),
+    path('blog/api/', include('blog.urls')),
+    path('search/', include('search.urls')),
+    path('contacto/', include('home.urls')),
+
+    # Wagtail pages — debe ir último (captura slug suelto)
+    path('', include(wagtail_urls)),
+
+    # Público (landing sin prefijo)
     path('', include('accounts.urls_public')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

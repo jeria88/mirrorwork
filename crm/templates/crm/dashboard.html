@@ -1,0 +1,122 @@
+{% extends "crm/crm_base.html" %}
+{% block crm_title %}Dashboard{% endblock %}
+
+{% block crm_content %}
+<div class="crm-page-header">
+  <h1>Dashboard</h1>
+  <a href="{% url 'crm:run_scheduler' %}" class="btn btn-sm" onclick="return confirm('¿Ejecutar flywheel ahora?')">▶ Forzar scheduler</a>
+</div>
+
+<!-- Stats principales -->
+<div class="crm-stats">
+  <div class="crm-stat accent">
+    <div class="crm-stat-n">{{ total_subscribers }}</div>
+    <div class="crm-stat-l">Suscriptores activos</div>
+  </div>
+  <div class="crm-stat green">
+    <div class="crm-stat-n">{{ sent_total }}</div>
+    <div class="crm-stat-l">Emails enviados</div>
+  </div>
+  <div class="crm-stat">
+    <div class="crm-stat-n">{{ total_sequences }}</div>
+    <div class="crm-stat-l">Secuencias activas</div>
+  </div>
+  <div class="crm-stat">
+    <div class="crm-stat-n">{{ total_templates }}</div>
+    <div class="crm-stat-l">Plantillas</div>
+  </div>
+  <div class="crm-stat red">
+    <div class="crm-stat-n">{{ failed_total }}</div>
+    <div class="crm-stat-l">Fallidos</div>
+  </div>
+</div>
+
+<!-- Métricas de engagement (Capa 3) -->
+{% if engagement %}
+<div class="crm-card">
+  <div class="crm-card-title">📊 Engagement (últimos 30 días)</div>
+  <div class="crm-stats">
+    <div class="crm-stat">
+      <div class="crm-stat-n">{{ engagement.open_rate|default:"—" }}{% if engagement.open_rate %}%{% endif %}</div>
+      <div class="crm-stat-l">Tasa de apertura</div>
+    </div>
+    <div class="crm-stat">
+      <div class="crm-stat-n">{{ engagement.click_rate|default:"—" }}{% if engagement.click_rate %}%{% endif %}</div>
+      <div class="crm-stat-l">Tasa de click</div>
+    </div>
+    <div class="crm-stat">
+      <div class="crm-stat-n">{{ engagement.total_opens|default:"0" }}</div>
+      <div class="crm-stat-l">Aperturas totales</div>
+    </div>
+    <div class="crm-stat">
+      <div class="crm-stat-n">{{ engagement.total_clicks|default:"0" }}</div>
+      <div class="crm-stat-l">Clicks totales</div>
+    </div>
+    <div class="crm-stat red">
+      <div class="crm-stat-n">{{ engagement.total_bounces|default:"0" }}</div>
+      <div class="crm-stat-l">Rebotes</div>
+    </div>
+    <div class="crm-stat warn">
+      <div class="crm-stat-n">{{ engagement.total_unsubscribes|default:"0" }}</div>
+      <div class="crm-stat-l">Desuscripciones</div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Listas del flywheel -->
+<div class="crm-card">
+  <div class="crm-card-title">🔄 Flywheel — Listas y secuencias</div>
+  <div class="crm-grid-2">
+    {% for item in lists_data %}
+    <div style="background: var(--surface-alt); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <strong style="color:var(--text);font-size:0.9rem;">{{ item.list.name }}</strong>
+        <span class="pill pill-accent">{{ item.count }} subs</span>
+      </div>
+      {% if item.sequences %}
+      <div style="display:flex;flex-wrap:wrap;gap:4px;">
+        {% for seq in item.sequences %}
+        <span class="pill pill-blue" style="font-size:0.65rem;">{{ seq.name }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+      <a href="/{{ item.list.slug }}/" target="_blank" class="text-xs text-muted" style="margin-top:8px;display:block;">↗ Ver landing /{{ item.list.slug }}/</a>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Actividad reciente -->
+<div class="crm-card">
+  <div class="crm-card-title">🕐 Actividad reciente</div>
+  <table class="crm-table">
+    <thead>
+      <tr>
+        <th>Suscriptor</th>
+        <th>Plantilla</th>
+        <th>Secuencia</th>
+        <th>Estado</th>
+        <th>Fecha</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for e in recent_emails %}
+      <tr>
+        <td><a href="{% url 'crm:subscriber_detail' e.subscriber.id %}" style="color:var(--accent);text-decoration:none;">{{ e.subscriber.email }}</a></td>
+        <td class="text-sm text-muted">{{ e.template.name }}</td>
+        <td class="text-sm text-muted">{{ e.sequence.name|default:"—" }}</td>
+        <td>
+          <span class="pill {% if e.status == 'sent' %}pill-green{% elif e.status == 'failed' %}pill-red{% else %}pill-warn{% endif %}">
+            {{ e.get_status_display }}
+          </span>
+        </td>
+        <td class="text-sm text-muted">{{ e.sent_at|date:"d/m H:i" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="crm-empty">Sin actividad todavía</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "crm/crm_base.html" %}
+{% block crm_title %}Broadcasts{% endblock %}
+
+{% block crm_content %}
+<div class="crm-page-header">
+  <h1>Broadcasts</h1>
+  <a href="{% url 'crm:broadcast_create' %}" class="btn btn-primary">+ Nuevo broadcast</a>
+</div>
+
+{% if broadcasts %}
+<table class="crm-table">
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Destino</th>
+      <th>Estado</th>
+      <th>Enviados</th>
+      <th>Fallidos</th>
+      <th>Creado</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for b in broadcasts %}
+    <tr>
+      <td><a href="{% url 'crm:broadcast_detail' b.id %}" style="color:var(--accent);text-decoration:none;font-weight:500;">{{ b.name }}</a></td>
+      <td class="text-sm text-muted">
+        {% if b.target_list %}Lista: {{ b.target_list.name }}{% elif b.target_segment %}Segmento: {{ b.target_segment.name }}{% else %}—{% endif %}
+      </td>
+      <td>
+        <span class="pill {% if b.status == 'sent' %}pill-green{% elif b.status == 'sending' %}pill-warn{% elif b.status == 'failed' %}pill-red{% else %}pill-blue{% endif %}">
+          {{ b.get_status_display }}
+        </span>
+      </td>
+      <td class="text-green">{{ b.total_sent }}</td>
+      <td class="text-red">{{ b.total_failed }}</td>
+      <td class="text-sm text-muted">{{ b.created_at|date:"d/m/Y H:i" }}</td>
+      <td><a href="{% url 'crm:broadcast_detail' b.id %}" class="btn btn-sm">Ver</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div class="crm-card crm-empty">
+  <p>Sin broadcasts todavía.</p>
+  <a href="{% url 'crm:broadcast_create' %}" class="btn btn-primary" style="margin-top:12px;">Crear primer broadcast</a>
+</div>
+{% endif %}
+{% endblock %}

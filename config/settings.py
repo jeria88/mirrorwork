@@ -26,6 +26,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
+
+    # Core Endonautas apps
     'accounts',
     'tokens',
     'psychometrics',
@@ -35,6 +38,34 @@ INSTALLED_APPS = [
     'birth',
     'sensorial',
     'community',
+
+    # Editorial & Marketing apps
+    'home',
+    'blog',
+    'search',
+    'centro',
+    'crm',
+    'post_office',
+    'django_celery_results',
+    'django_celery_beat',
+
+    # Wagtail CMS
+    'wagtail.contrib.forms',
+    'wagtail.contrib.redirects',
+    'wagtail.contrib.settings',
+    'wagtail.contrib.sitemaps',
+    'wagtail.embeds',
+    'wagtail.sites',
+    'wagtail.users',
+    'wagtail.snippets',
+    'wagtail.documents',
+    'wagtail.images',
+    'wagtail.search',
+    'wagtail.admin',
+    'wagtail',
+    'modelcluster',
+    'taggit',
+    'wagtailseo',
 ]
 
 MIDDLEWARE = [
@@ -46,6 +77,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'wagtail.contrib.redirects.middleware.RedirectMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -110,7 +142,7 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
 
-EMAIL_BACKEND = 'config.brevo_backend.BrevoEmailBackend'
+EMAIL_BACKEND = 'post_office.EmailBackend'
 BREVO_API_KEY = os.getenv('BREVO_API_KEY', '')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'Endonautas <hola@endonautas.cl>')
 PASSWORD_RESET_TIMEOUT = 3600  # 1 hora
@@ -171,3 +203,36 @@ FRACTON_REWARDS = {
     'dimension_completed': 25,
     'streak_weekly':       15,
 }
+
+# ── Dynamic Postgres Support ───────────────────────────────────────────────
+if DATABASES['default']['ENGINE'] == 'django.db.backends.postgresql':
+    INSTALLED_APPS.append('django.contrib.postgres')
+
+# ── Wagtail CMS settings ───────────────────────────────────────────────────
+WAGTAIL_SITE_NAME = 'Endonautas'
+WAGTAILADMIN_BASE_URL = os.getenv('WAGTAILADMIN_BASE_URL', 'https://endonautas.cl')
+WAGTAILSEARCH_BACKENDS = {
+    'default': {'BACKEND': 'wagtail.search.backends.database'}
+}
+WAGTAILDOCS_EXTENSIONS = ['csv', 'docx', 'pdf', 'pptx', 'txt', 'xlsx']
+WAGTAILDOCS_MAX_UPLOAD_SIZE = 10 * 1024 * 1024
+
+# ── django-post-office (Email queue manager) ───────────────────────────────
+POST_OFFICE = {
+    'BACKENDS': {
+        'default': 'django.core.mail.backends.console.EmailBackend' if DEBUG else 'config.brevo_backend.BrevoEmailBackend',
+    },
+    'DEFAULT_PRIORITY': 'medium',
+    'BATCH_SIZE': 20,
+    'LOG_LEVEL': 1,
+    'CELERY_ENABLED': True,
+    'DEFAULT_FROM_EMAIL': DEFAULT_FROM_EMAIL,
+}
+
+# ── Celery Config ──────────────────────────────────────────────────────────
+CELERY_BROKER_URL = os.getenv("REDIS_URL", "django-db://")
+CELERY_RESULT_BACKEND = "django-db"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "America/Santiago"

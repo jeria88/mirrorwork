@@ -1,0 +1,113 @@
+{% extends "blog/cgm/base.html" %}
+
+{% block cgm_back %}{% endblock %}
+
+{% block cgm_content %}
+<!-- Stats -->
+<div class="cgm-stats">
+  <div class="cgm-stat"><div class="cgm-stat-n">{{ total_articles }}</div><div class="cgm-stat-l">Artículos</div></div>
+  <div class="cgm-stat"><div class="cgm-stat-n">{{ total_social }}</div><div class="cgm-stat-l">Posts RRSS</div></div>
+  <div class="cgm-stat"><div class="cgm-stat-n">{{ total_published }}</div><div class="cgm-stat-l">Publicados</div></div>
+  <div class="cgm-stat"><div class="cgm-stat-n">{{ topics_count }}</div><div class="cgm-stat-l">Temas SEO</div></div>
+</div>
+
+<!-- Quick actions -->
+<div style="display:flex;gap:12px;margin-bottom:2rem;flex-wrap:wrap;">
+  <button class="cgm-btn cgm-btn-primary" onclick="openModal('articleModal')">+ Nuevo Artículo</button>
+  <a href="{% url 'cgm:articles' %}" class="cgm-btn">📝 Ver artículos</a>
+  <a href="{% url 'cgm:rrss' %}" class="cgm-btn">📱 Generar RRSS</a>
+</div>
+
+<!-- Recent articles -->
+<h2 style="font-size:1.1rem;font-weight:600;color:var(--cgm-text);margin-bottom:1rem;">Últimos artículos</h2>
+{% if recent_articles %}
+<div class="cgm-grid">
+  {% for article in recent_articles %}
+  <div class="cgm-card">
+    <div class="cgm-card-title">{{ article.title|truncatechars:60 }}</div>
+    <div class="cgm-card-meta">
+      <span class="cgm-badge cgm-badge-{{ article.status }}">{{ article.get_status_display }}</span>
+      <span style="margin-left:8px;">{{ article.source_type }}</span>
+    </div>
+    <div class="cgm-card-body">{{ article.intro|truncatechars:120|default:"Sin introducción" }}</div>
+    <div class="cgm-card-actions">
+      <a href="{% url 'cgm:article_edit' article.pk %}" class="cgm-btn cgm-btn-sm">✏️ Editar</a>
+      <a href="{% url 'cgm:rrss' %}?article={{ article.pk }}" class="cgm-btn cgm-btn-sm">📱 RRSS</a>
+      {% if article.status == 'approved' %}
+      <button class="cgm-btn cgm-btn-sm cgm-btn-green" onclick="publishToBlog('{{ article.pk }}')">📤 Publicar</button>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="cgm-empty">
+  <div class="cgm-empty-icon">📝</div>
+  <h3>Sin artículos todavía</h3>
+  <p>Creá tu primer artículo con IA</p>
+  <button class="cgm-btn cgm-btn-primary" onclick="openModal('articleModal')">+ Crear artículo</button>
+</div>
+{% endif %}
+
+<!-- Article Modal -->
+<div class="cgm-modal-overlay" id="articleModal">
+  <div class="cgm-modal">
+    <div class="cgm-modal-header">
+      <h2>Nuevo Artículo</h2>
+      <button class="cgm-modal-close" onclick="closeModal('articleModal')">&times;</button>
+    </div>
+    <div class="cgm-modal-body">
+      <div class="cgm-form-group">
+        <label>Tema del artículo</label>
+        <input type="text" id="articleTopic" class="cgm-input" placeholder="Escribí un tema o elegí uno sugerido...">
+      </div>
+      <div class="cgm-form-group">
+        <label>Temas SEO sugeridos</label>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">
+          {% for topic in suggested_topics %}
+          <button class="cgm-btn cgm-btn-sm" onclick="document.getElementById('articleTopic').value='{{ topic.title|escapejs }}'">{{ topic.title|truncatechars:25 }}</button>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="cgm-loading" id="articleLoading">
+        <div class="cgm-spinner"></div>
+        <p style="margin-top:1rem;color:var(--cgm-text-2);">Generando artículo con IA...</p>
+      </div>
+    </div>
+    <div class="cgm-modal-footer">
+      <button class="cgm-btn" onclick="closeModal('articleModal')">Cancelar</button>
+      <button class="cgm-btn cgm-btn-primary" onclick="generateArticle()">⚡ Generar con IA</button>
+    </div>
+  </div>
+</div>
+
+<script>
+async function generateArticle() {
+  const topic = document.getElementById('articleTopic').value.trim();
+  if (!topic) return showToast('Escribí un tema', 'error');
+  document.getElementById('articleLoading').classList.add('active');
+  try {
+    const resp = await fetch('/cgm/api/generate-article/', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
+      body: JSON.stringify({topic})
+    });
+    const data = await resp.json();
+    if (data.ok) {
+      showToast('Artículo generado!', 'success');
+      location.href = '/cgm/article/' + data.article_id + '/edit/';
+    } else { showToast('Error: ' + (data.error || ''), 'error'); }
+  } catch(e) { showToast('Error de red', 'error'); }
+  document.getElementById('articleLoading').classList.remove('active');
+}
+function publishToBlog(id) {
+  if (!confirm('¿Publicar en el blog?')) return;
+  fetch('/cgm/api/publish-article/' + id + '/', {
+    method: 'POST', headers: {'X-CSRFToken': '{{ csrf_token }}'}
+  }).then(r => r.json()).then(data => {
+    if (data.ok) { showToast('Publicado!', 'success'); location.reload(); }
+    else showToast('Error: ' + (data.error || ''), 'error');
+  });
+}
+</script>
+{% endblock %}
