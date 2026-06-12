@@ -80,6 +80,20 @@ El modal se abre inline, pre-rellena el contenido desde la fuente, el usuario ed
 
 ---
 
+## Integraciones con platform y n8n
+
+### 1. Integración con n8n / Make.com
+El **Content Studio** (CGM) cuenta con un módulo de exportación automática para publicar o distribuir los contenidos generados.
+- **Funcionamiento**: Envía los copys (gancho, cuerpo, CTA y hashtags para Instagram, TikTok y LinkedIn) y los archivos multimedia generados (`.mp4` y `.png`) mediante un payload `multipart/form-data` a la URL del Webhook.
+- **Configuración**: La URL del webhook se define dentro del panel de Configuración de la aplicación en la interfaz gráfica del Studio y se almacena persistente en `studio/data/config.json`.
+
+### 2. Integraciones con platform (sitio editorial endonautas.cl)
+- **Postulación de Contenidos al Blog**: La aplicación `mirrorwork` permite a los usuarios postular sus sesiones del Espejo, lecturas y resultados de tests al Wagtail CMS que reside en `platform`. Al enviarse, se registra una postulación en base de datos que al ser aprobada desde el Django Admin, crea un borrador de `BlogPost` listo para su publicación final en el CMS.
+- **Navegación Cruzada**: La cabecera y enlaces están unificados para conectar de forma fluida el ecosistema de la aplicación (`app.endonautas.cl` / `mirrorwork`) con el sitio web principal (`endonautas.cl` / `platform`).
+- **Sincronización Django-Node**: El comando `python manage.py sync_cgm_to_studio` sincroniza y convierte registros de Django (`GeneratedArticle` y `SocialPost`) a las bases de datos JSON que alimentan al editor de Node.js en tiempo real.
+
+---
+
 ## Design system
 
 Paleta "Espejo" (dark):
