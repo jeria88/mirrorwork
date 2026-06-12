@@ -23,23 +23,16 @@ class Command(BaseCommand):
             created = True
             self.stdout.write(self.style.SUCCESS(f'Admin creado: {email}'))
         else:
-            # Ensure admin attributes are correct
-            changed = False
-            if not u.is_staff:
-                u.is_staff = True
-                changed = True
-            if not u.is_superuser:
-                u.is_superuser = True
-                changed = True
+            # Ensure admin attributes and password are correct
+            u.set_password(password)
+            u.is_staff = True
+            u.is_superuser = True
             if u.email != email:
                 u.email = email
-                changed = True
             if u.username != 'admin':
                 u.username = 'admin'
-                changed = True
-            if changed:
-                u.save()
-            self.stdout.write(f'Admin ya existe: {u.email} (id={u.id})')
+            u.save()
+            self.stdout.write(f'Admin ya existe: {u.email} (id={u.id}) — password sincronizado')
 
         profile, _ = UserProfile.objects.get_or_create(user=u)
         if profile.plan != 'empresa':
