@@ -41,7 +41,7 @@ def _etapa_progress(etapa_key):
     return total, done, pct
 
 
-@staff_member_required(login_url='/django-admin/login/')
+@staff_member_required(login_url='/admin/login/')
 def index(request):
     today = date.today()
     weekday = today.weekday()  # 0=Monday … 6=Sunday
@@ -122,7 +122,7 @@ def index(request):
     })
 
 
-@staff_member_required(login_url='/django-admin/login/')
+@staff_member_required(login_url='/admin/login/')
 def hoja_de_ruta(request):
     if request.method == 'POST':
         titulo = request.POST.get('titulo', '').strip()
@@ -162,7 +162,7 @@ def hoja_de_ruta(request):
     })
 
 
-@staff_member_required(login_url='/django-admin/login/')
+@staff_member_required(login_url='/admin/login/')
 @require_POST
 def tarea_mover(request, tarea_id):
     tarea = get_object_or_404(Tarea, pk=tarea_id)
@@ -177,7 +177,7 @@ def tarea_mover(request, tarea_id):
     return JsonResponse({'ok': True})
 
 
-@staff_member_required(login_url='/django-admin/login/')
+@staff_member_required(login_url='/admin/login/')
 @require_POST
 def tarea_eliminar(request, tarea_id):
     tarea = get_object_or_404(Tarea, pk=tarea_id)
@@ -185,7 +185,7 @@ def tarea_eliminar(request, tarea_id):
     return JsonResponse({'ok': True})
 
 
-@staff_member_required(login_url='/django-admin/login/')
+@staff_member_required(login_url='/admin/login/')
 def setup(request):
     items = SetupItem.objects.all()
     by_cat = {}
@@ -206,7 +206,7 @@ def setup(request):
     })
 
 
-@staff_member_required(login_url='/django-admin/login/')
+@staff_member_required(login_url='/admin/login/')
 @require_POST
 def setup_toggle(request, item_id):
     item = get_object_or_404(SetupItem, pk=item_id)
@@ -215,7 +215,7 @@ def setup_toggle(request, item_id):
     return JsonResponse({'ok': True, 'completado': item.completado, 'pct': pct, 'done': done})
 
 
-@staff_member_required(login_url='/django-admin/login/')
+@staff_member_required(login_url='/admin/login/')
 def chequeo_semanal(request):
     if request.method == 'POST':
         notas = request.POST.get('notas', '')
@@ -240,7 +240,7 @@ def chequeo_semanal(request):
     return render(request, 'centro/chequeo_semanal.html', {})
 
 
-@staff_member_required(login_url='/django-admin/login/')
+@staff_member_required(login_url='/admin/login/')
 def sesion_quincenal(request):
     if request.method == 'POST':
         notas = request.POST.get('notas', '')
@@ -254,7 +254,7 @@ def sesion_quincenal(request):
     })
 
 
-@staff_member_required(login_url='/django-admin/login/')
+@staff_member_required(login_url='/admin/login/')
 def metricas(request):
     if request.method == 'POST':
         semana_str = request.POST.get('semana', '')
@@ -297,7 +297,7 @@ def metricas(request):
     })
 
 
-@staff_member_required(login_url='/django-admin/login/')
+@staff_member_required(login_url='/admin/login/')
 def ideas(request):
     if request.method == 'POST':
         texto = request.POST.get('texto', '').strip()
@@ -313,7 +313,7 @@ def ideas(request):
     })
 
 
-@staff_member_required(login_url='/django-admin/login/')
+@staff_member_required(login_url='/admin/login/')
 @require_POST
 def idea_revisar(request, idea_id):
     idea = get_object_or_404(IdeaCongelada, pk=idea_id)
@@ -322,7 +322,7 @@ def idea_revisar(request, idea_id):
     return JsonResponse({'ok': True, 'revisada': idea.revisada})
 
 
-@staff_member_required(login_url='/django-admin/login/')
+@staff_member_required(login_url='/admin/login/')
 @require_POST
 def idea_eliminar(request, idea_id):
     idea = get_object_or_404(IdeaCongelada, pk=idea_id)
@@ -330,7 +330,7 @@ def idea_eliminar(request, idea_id):
     return JsonResponse({'ok': True})
 
 
-@staff_member_required(login_url='/django-admin/login/')
+@staff_member_required(login_url='/admin/login/')
 def calendario(request):
     today = date.today()
     year = int(request.GET.get('year', today.year))
@@ -387,7 +387,7 @@ def calendario(request):
     })
 
 
-@staff_member_required(login_url='/django-admin/login/')
+@staff_member_required(login_url='/admin/login/')
 @require_POST
 def post_crear(request):
     fecha_str = request.POST.get('fecha_programada', '')
@@ -412,7 +412,7 @@ def post_crear(request):
     return redirect('centro:calendario')
 
 
-@staff_member_required(login_url='/django-admin/login/')
+@staff_member_required(login_url='/admin/login/')
 @require_POST
 def post_estado(request, post_id):
     post = get_object_or_404(PostContenido, pk=post_id)
