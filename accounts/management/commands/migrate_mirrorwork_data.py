@@ -14,6 +14,20 @@ class Command(BaseCommand):
         parser.add_argument('old_db_url', type=str, nargs='?', default=None, help='DATABASE_URL o ruta al archivo sqlite de la BD vieja')
 
     def handle(self, *args, **options):
+        # Disconnect signals to prevent side effects and unique constraint violations during data migration
+        from django.db.models.signals import post_save
+        from accounts.signals import create_user_profile
+        from tokens.signals import on_test_completed, on_session_archived
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        from psychometrics.models import TestResult
+        from mirror.models import ConflictSession
+
+        post_save.disconnect(create_user_profile, sender=User)
+        post_save.disconnect(on_test_completed, sender=TestResult)
+        post_save.disconnect(on_session_archived, sender=ConflictSession)
+        self.stdout.write("Señales de Django desconectadas temporalmente para la migración.")
+
         old_db_url = options['old_db_url'] or os.getenv('OLD_DATABASE_URL')
         if not old_db_url:
             self.stdout.write("Variable de entorno 'OLD_DATABASE_URL' no configurada. Omitiendo migración de datos.")
