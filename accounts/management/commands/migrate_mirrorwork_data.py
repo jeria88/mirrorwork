@@ -49,9 +49,9 @@ class Command(BaseCommand):
             sessions = get_data('mirror_conflictsession')
             memorias = get_data('mirror_espejomemoria')
             results = get_data('psychometrics_testresult')
-            posts = get_data('community_post')
-            likes = get_data('community_postlike')
-            comments = get_data('community_postcomment')
+            posts = get_data('community_sharedinsight') or get_data('community_post')
+            likes = get_data('community_reaction') or get_data('community_postlike')
+            comments = get_data('community_comment') or get_data('community_postcomment')
 
             self.stdout.write(f"Encontrados: {len(users)} usuarios, {len(sessions)} sesiones, {len(memorias)} memorias, {len(results)} resultados.")
 
@@ -63,7 +63,7 @@ class Command(BaseCommand):
                 from tokens.models import TokenBalance, TokenTransaction
                 from mirror.models import ConflictSession, EspejoMemoria
                 from psychometrics.models import TestResult
-                from community.models import Post, PostLike, PostComment
+                from community.models import SharedInsight, Reaction, Comment
 
                 # 1. Usuarios
                 for u in users:
@@ -162,36 +162,57 @@ class Command(BaseCommand):
                     obj = TestResult(**r)
                     obj.save(force_insert=True)
 
-                # 8. Posts de comunidad
+                # 8. Posts de comunidad (SharedInsight)
                 for po in posts:
-                    if Post.objects.filter(id=po['id']).exists():
+                    if SharedInsight.objects.filter(id=po['id']).exists():
                         continue
-                    if not User.objects.filter(id=po['author_id']).exists():
+                    user_id = po.get('user_id') or po.get('author_id')
+                    if not user_id or not User.objects.filter(id=user_id).exists():
                         continue
-                    po['is_free'] = bool(po.get('is_free', True))
-                    obj = Post(**po)
+                    
+                    # Map legacy fields if necessary
+                    if 'author_id' in po and 'user_id' not in po:
+                        po['user_id'] = po.pop('author_id')
+                    if 'is_free' in po:
+                        po.pop('is_free')
+                        
+                    # Filter keys to match model fields
+                    valid_keys = {f.name for f in SharedInsight._meta.get_fields()}
+                    filtered_po = {k: v for k, v in po.items() if k in valid_keys or k + '_id' in valid_keys}
+                    
+                    obj = SharedInsight(**filtered_po)
                     obj.save(force_insert=True)
 
-                # 9. Likes
+                # 9. Likes (Reaction)
                 for l in likes:
-                    if PostLike.objects.filter(id=l['id']).exists():
+                    if Reaction.objects.filter(id=l['id']).exists():
                         continue
-                    if not User.objects.filter(id=l['user_id']).exists():
+                    if not User.objects.filter(id=l.get('user_id')).exists():
                         continue
-                    if not Post.objects.filter(id=l['post_id']).exists():
-                        continue
-                    obj = PostLike(**l)
+                    if 'post_id' in l and 'insight_id' not in l:
+                        l['insight_id'] = l.pop('post_id')
+                    if 'type' not in l:
+                        l['type'] = 'resonó'
+                        
+                    valid_keys = {f.name for f in Reaction._meta.get_fields()}
+                    filtered_l = {k: v for k, v in l.items() if k in valid_keys or k + '_id' in valid_keys}
+                    
+                    obj = Reaction(**filtered_l)
                     obj.save(force_insert=True)
 
-                # 10. Comentarios
+                # 10. Comentarios (Comment)
                 for c_item in comments:
-                    if PostComment.objects.filter(id=c_item['id']).exists():
+                    if Comment.objects.filter(id=c_item['id']).exists():
                         continue
-                    if not User.objects.filter(id=c_item['user_id']).exists():
+                    if not User.objects.filter(id=c_item.get('user_id')).exists():
                         continue
-                    if not Post.objects.filter(id=c_item['post_id']).exists():
-                        continue
-                    obj = PostComment(**c_item)
+                    if 'post_id' in c_item and 'insight_id' not in c_item:
+                        c_item['insight_id'] = c_item.pop('post_id')
+                        
+                    valid_keys = {f.name for f in Comment._meta.get_fields()}
+                    filtered_c = {k: v for k, v in c_item.items() if k in valid_keys or k + '_id' in valid_keys}
+                    
+                    obj = Comment(**filtered_c)
                     obj.save(force_insert=True)
 
             self.stdout.write(self.style.SUCCESS("Migración finalizada con éxito."))
