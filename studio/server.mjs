@@ -5,10 +5,75 @@ import fs from 'fs';
 import { spawn, execSync } from 'child_process';
 import Anthropic from '@anthropic-ai/sdk';
 import multer from 'multer';
+import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// ── Cloudflare R2 Client Configuration ──────────────────────────
+const s3Client = process.env.AWS_ACCESS_KEY_ID ? new S3Client({
+  endpoint: process.env.AWS_S3_ENDPOINT_URL,
+  region: 'auto',
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  }
+}) : null;
+
+async function uploadFileToR2(filePath, key, contentType) {
+  if (!s3Client) {
+    console.log(`[R2] Skip upload of ${filePath} because R2 is not configured.`);
+    return null;
+  }
+  try {
+    const fileStream = fs.createReadStream(filePath);
+    const bucket = process.env.AWS_STORAGE_BUCKET_NAME || 'app-mirrorwork';
+    const uploadParams = {
+      Bucket: bucket,
+      Key: key,
+      Body: fileStream,
+      ContentType: contentType
+    };
+    await s3Client.send(new PutObjectCommand(uploadParams));
+    console.log(`[R2] Uploaded successfully: ${key}`);
+    const publicUrl = `https://${process.env.AWS_S3_CUSTOM_DOMAIN}/${key}`;
+    return publicUrl;
+  } catch (err) {
+    console.error(`[R2] Error uploading ${filePath} to key ${key}:`, err);
+    return null;
+  }
+}
+
+async function downloadDataFromR2(key, localPath) {
+  if (!s3Client) return;
+  try {
+    const bucket = process.env.AWS_STORAGE_BUCKET_NAME || 'app-mirrorwork';
+    const response = await s3Client.send(new GetObjectCommand({
+      Bucket: bucket,
+      Key: key
+    }));
+    
+    // Convert readable stream to file
+    const fileStream = fs.createWriteStream(localPath);
+    
+    await new Promise((resolve, reject) => {
+      response.Body.pipe(fileStream);
+      response.Body.on('error', reject);
+      fileStream.on('finish', resolve);
+    });
+    
+    console.log(`[R2] Successfully downloaded ${key} to ${localPath}`);
+  } catch (err) {
+    if (err.name !== 'NoSuchKey') {
+      console.error(`[R2] Error downloading ${key} to ${localPath}:`, err);
+    } else {
+      console.log(`[R2] File ${key} not found in R2 (first run fallback).`);
+    }
+  }
+}
+
 const app = express();
 const PORT = 3847;
+
 
 function getChromeExecutable() {
   const possiblePaths = [
@@ -69,6 +134,9 @@ function loadCarousels() {
 }
 function saveCarousels(data) {
   fs.writeFileSync(CAROUSELS_DATA_F, JSON.stringify(data, null, 2));
+  uploadFileToR2(CAROUSELS_DATA_F, 'cgm/data/carruseles_data.json', 'application/json').catch(err => {
+    console.error('Error uploading carruseles_data.json to R2:', err);
+  });
 }
 function loadReels() {
   try { return JSON.parse(fs.readFileSync(REELS_DATA_F, 'utf8')); }
@@ -81,7 +149,23 @@ function saveReels(data) {
   } catch (err) {
     console.error('Error syncing Remotion reels_data.json:', err);
   }
+  uploadFileToR2(REELS_DATA_F, 'cgm/data/reels_data.json', 'application/json').catch(err => {
+    console.error('Error uploading reels_data.json to R2:', err);
+  });
 }
+
+// Download data from R2 on start if available
+if (process.env.AWS_ACCESS_KEY_ID) {
+  console.log("[R2] Restoring JSON databases from Cloudflare R2...");
+  try {
+    await downloadDataFromR2('cgm/data/carruseles_data.json', CAROUSELS_DATA_F);
+    await downloadDataFromR2('cgm/data/reels_data.json', REELS_DATA_F);
+    await downloadDataFromR2('cgm/data/reels_data.json', REMOTION_REELS_DATA_F);
+  } catch (err) {
+    console.error("[R2] Error restoring JSON databases on startup:", err);
+  }
+}
+
 
 async function callAI(apiKey, systemPrompt, userMessage) {
   if (apiKey.startsWith('sk-or-')) {
@@ -287,6 +371,12 @@ app.get('/preview/png/:id/:slide', (req, res) => {
   const carousels = loadCarousels();
   const c = carousels.find(x => x.id === id);
   if (!c) return res.status(404).send('Not found');
+
+  if (process.env.AWS_S3_CUSTOM_DOMAIN) {
+    const publicUrl = `https://${process.env.AWS_S3_CUSTOM_DOMAIN}/cgm/carruseles/pngs/${c.id}-${c.file}/${req.params.slide}`;
+    return res.redirect(publicUrl);
+  }
+
   const f = path.join(CONTENIDO, 'carruseles', 'pngs', `${c.id}-${c.file}`, req.params.slide);
   if (!fs.existsSync(f)) return res.status(404).send('PNG no encontrado');
   res.sendFile(f);
@@ -325,6 +415,11 @@ app.get('/preview/script/:id', (req, res) => {
   res.send(lines.join('\n'));
 });
 app.get('/preview/video/:id', (req, res) => {
+  if (process.env.AWS_S3_CUSTOM_DOMAIN) {
+    const publicUrl = `https://${process.env.AWS_S3_CUSTOM_DOMAIN}/cgm/reels/mp4/${req.params.id.toUpperCase()}.mp4`;
+    return res.redirect(publicUrl);
+  }
+
   const f = path.join(CONTENIDO, 'reels', 'mp4', `${req.params.id.toUpperCase()}.mp4`);
   if (!fs.existsSync(f)) return res.status(404).send('Video no renderizado');
   res.sendFile(f);
@@ -362,14 +457,24 @@ app.get('/api/carousel-data/:id', (req, res) => {
 });
 
 // ── Image upload ──────────────────────────────────────────────────
-app.post('/api/upload/:carouselId', upload.array('images', 10), (req, res) => {
-  const files = req.files.map(f => ({
-    name: f.filename,
-    url: `/assets/${req.params.carouselId}/${f.filename}`,
-    size: f.size,
-  }));
-  broadcast('state-update', { id: req.params.carouselId });
-  res.json({ ok: true, files });
+app.post('/api/upload/:carouselId', upload.array('images', 10), async (req, res) => {
+  try {
+    const files = [];
+    for (const f of req.files) {
+      const r2Key = `cgm/assets/${req.params.carouselId}/${f.filename}`;
+      const r2Url = await uploadFileToR2(f.path, r2Key, f.mimetype);
+      files.push({
+        name: f.filename,
+        url: r2Url || `/assets/${req.params.carouselId}/${f.filename}`,
+        size: f.size,
+      });
+    }
+    broadcast('state-update', { id: req.params.carouselId });
+    res.json({ ok: true, files });
+  } catch (err) {
+    console.error('Error in /api/upload/:carouselId:', err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ── Repository ────────────────────────────────────────────────────
@@ -1302,9 +1407,34 @@ app.post('/api/generate-pngs', (req, res) => {
   activeProcess = child;
   child.stdout.on('data', d => broadcast('log', { text: d.toString() }));
   child.stderr.on('data', d => broadcast('log', { text: d.toString(), type: 'error' }));
-  child.on('close', code => {
+  child.on('close', async code => {
     activeProcess = null;
-    broadcast('log', { text: `\n${code===0?'✓':'✗'} Proceso finalizado (${code})\n`, type: code===0?'success':'error' });
+    broadcast('log', { text: `\n${code===0?'✓':'✗'} Proceso de generación de PNGs finalizado (${code})\n`, type: code===0?'success':'error' });
+    
+    if (code === 0) {
+      broadcast('log', { text: `[R2] Iniciando subida de PNGs a Cloudflare R2...\n`, type: 'info' });
+      try {
+        const pngDir = path.join(CONTENIDO, 'carruseles', 'pngs');
+        if (fs.existsSync(pngDir)) {
+          const folders = fs.readdirSync(pngDir).filter(f => fs.statSync(path.join(pngDir, f)).isDirectory());
+          let count = 0;
+          for (const folder of folders) {
+            const folderPath = path.join(pngDir, folder);
+            const files = fs.readdirSync(folderPath).filter(f => f.endsWith('.png'));
+            for (const file of files) {
+              const filePath = path.join(folderPath, file);
+              const r2Key = `cgm/carruseles/pngs/${folder}/${file}`;
+              await uploadFileToR2(filePath, r2Key, 'image/png');
+              count++;
+            }
+          }
+          broadcast('log', { text: `[R2] ✓ Se subieron ${count} PNGs con éxito a R2.\n`, type: 'success' });
+        }
+      } catch (err) {
+        broadcast('log', { text: `[R2] ✗ Error subiendo PNGs a R2: ${err.message}\n`, type: 'error' });
+      }
+    }
+    
     broadcast('action-done', { action: 'pngs', code });
   });
 });
@@ -1344,9 +1474,24 @@ console.log('DONE');`;
     else broadcast('log', { text: t });
   });
   child.stderr.on('data', d => broadcast('log', { text: d.toString(), type: 'error' }));
-  child.on('close', code => {
+  child.on('close', async code => {
     activeProcess = null;
     fs.rmSync(tmp, { force: true });
+
+    if (code === 0) {
+      broadcast('log', { text: `[R2] Iniciando subida del Reel renderizado a Cloudflare R2...\n`, type: 'info' });
+      const mp4Path = path.join(BASE, 'contenido', 'reels', 'mp4', `${id}.mp4`);
+      if (fs.existsSync(mp4Path)) {
+        const r2Key = `cgm/reels/mp4/${id}.mp4`;
+        const r2Url = await uploadFileToR2(mp4Path, r2Key, 'video/mp4');
+        if (r2Url) {
+          broadcast('log', { text: `[R2] ✓ Reel subido con éxito a R2: ${r2Url}\n`, type: 'success' });
+        } else {
+          broadcast('log', { text: `[R2] ✗ Error al subir el Reel a R2.\n`, type: 'error' });
+        }
+      }
+    }
+
     broadcast('action-done', { action: 'render', id, code });
     broadcast('log', { text: `\n${code===0?'✓':'✗'} ${id}.mp4\n`, type: code===0?'success':'error' });
   });
