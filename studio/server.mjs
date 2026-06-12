@@ -318,7 +318,6 @@ app.get('/api/status', (req, res) => {
     }
     const voiceDir  = path.join(BASE, 'voice');
     const hasVoice  = fs.existsSync(voiceDir) && fs.readdirSync(voiceDir).some(f=>f.toLowerCase().startsWith(r.id.toLowerCase()));
-    const s = state[r.id] || {};
     return {
       id: r.id,
       title: r.title,
