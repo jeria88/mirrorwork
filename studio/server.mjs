@@ -1209,7 +1209,7 @@ app.post('/api/make/publish', async (req, res) => {
   const config = loadConfig();
 
   if (!config.makeWebhookUrl) {
-    return res.status(400).json({ error: 'Webhook de Make.com no configurado. Configúralo en Configuración.' });
+    return res.status(400).json({ error: 'Webhook de Make.com / n8n no configurado. Configúralo en Configuración.' });
   }
 
   let mediaFiles = [];
@@ -1245,7 +1245,7 @@ app.post('/api/make/publish', async (req, res) => {
   // Upload to Make in background
   (async () => {
     try {
-      broadcast('log', { text: `▶ Iniciando envío de ${id} a Make.com...\n`, type: 'info' });
+      broadcast('log', { text: `▶ Iniciando envío de ${id} a Make.com / n8n...\n`, type: 'info' });
       
       const form = new FormData();
       form.append('id', id);
@@ -1262,7 +1262,7 @@ app.post('/api/make/publish', async (req, res) => {
         form.append(`file_${i}`, blob, fileName);
       }
 
-      broadcast('log', { text: `   Enviando payload multipart a Make.com...\n` });
+      broadcast('log', { text: `   Enviando payload multipart a Make.com / n8n...\n` });
 
       const response = await fetch(config.makeWebhookUrl, {
         method: 'POST',
@@ -1271,7 +1271,7 @@ app.post('/api/make/publish', async (req, res) => {
 
       if (!response.ok) {
         const errText = await response.text();
-        throw new Error(`Error en el Webhook de Make: ${response.statusText} (${errText})`);
+        throw new Error(`Error en el Webhook de Make / n8n: ${response.statusText} (${errText})`);
       }
 
       // Mark as published locally in state
@@ -1280,12 +1280,12 @@ app.post('/api/make/publish', async (req, res) => {
       state[id] = { ...prev, published: true, publishedAt: new Date().toISOString() };
       saveState(state);
 
-      broadcast('log', { text: `✓ ¡Enviado con éxito a Make.com para ${id}!\n`, type: 'success' });
+      broadcast('log', { text: `✓ ¡Enviado con éxito a Make.com / n8n para ${id}!\n`, type: 'success' });
       broadcast('state-update', { id });
       broadcast('action-done', { action: 'make-publish', code: 0 });
 
     } catch (err) {
-      broadcast('log', { text: `✗ Error al enviar a Make.com: ${err.message}\n`, type: 'error' });
+      broadcast('log', { text: `✗ Error al enviar a Make.com / n8n: ${err.message}\n`, type: 'error' });
       broadcast('action-done', { action: 'make-publish', code: 1 });
     }
   })();

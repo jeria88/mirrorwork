@@ -1674,11 +1674,11 @@ body {
 
   <div class="drawer-divider"></div>
 
-  <h3 class="drawer-title" style="font-size: 14px; margin-top: 10px; margin-bottom: 10px; border:none; padding:0;">Integración Make.com</h3>
+  <h3 class="drawer-title" style="font-size: 14px; margin-top: 10px; margin-bottom: 10px; border:none; padding:0;">Integración Make.com / n8n</h3>
   
   <div class="form-group" style="margin-bottom: 15px;">
-    <span class="form-label">Webhook URL de Make</span>
-    <input class="input-styled" type="text" id="drawerMakeWebhookUrl" placeholder="https://hook.us1.make.com/...">
+    <span class="form-label">Webhook URL de Make / n8n</span>
+    <input class="input-styled" type="text" id="drawerMakeWebhookUrl" placeholder="https://hook.make.com/... o https://n8n.tu-servidor/...">
   </div>
 
   <button class="btn btn-solid" style="width: 100%" onclick="saveDrawerConfig()">Guardar Configuración</button>
@@ -1722,7 +1722,7 @@ body {
         <span class="form-label">Destino / Canal de envío</span>
         <select class="select-styled" id="publishDest" onchange="togglePublishDest()">
           <option value="postiz">Postiz (Nativo)</option>
-          <option value="make">Make.com (Webhook)</option>
+          <option value="make">Make.com / n8n (Webhook)</option>
           <option value="local">Solo registrar localmente (Sin publicar)</option>
         </select>
       </div>
@@ -2325,7 +2325,7 @@ async function submitToMake() {
   
   isBusy = true;
   setConsoleIndicator(`Publicando ${id}...`);
-  appendLog(`▶ Preparando envío de ${id} a Make.com...\n`, 'info');
+  appendLog(`▶ Preparando envío de ${id} a Make.com / n8n...\n`, 'info');
   
   try {
     const res = await fetch('/api/make/publish', {
@@ -2341,7 +2341,7 @@ async function submitToMake() {
       setConsoleIndicator('Inactivo');
       appendLog(`✗ Error al enviar: ${data.error}\n`, 'error');
     } else {
-      showToast('✓ Envío a Make.com iniciado', 'success');
+      showToast('✓ Envío a Make.com / n8n iniciado', 'success');
     }
   } catch (err) {
     isBusy = false;

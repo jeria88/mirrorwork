@@ -7,12 +7,15 @@ from django.contrib.admin.views.decorators import staff_member_required
 @staff_member_required(login_url='/admin/login/')
 def studio_proxy(request, path=''):
     req_path = request.path
-    if req_path.startswith('/centro/studio/'):
-        target_path = req_path[len('/centro/studio/'):]
-        if not target_path.startswith('/'):
-            target_path = '/' + target_path
-    else:
-        target_path = req_path
+    target_path = req_path
+    for prefix in ['/centro/studio/', '/cgm/']:
+        if req_path.startswith(prefix):
+            target_path = req_path[len(prefix):]
+            break
+    if req_path == '/centro/studio' or req_path == '/cgm':
+        target_path = '/'
+    if not target_path.startswith('/'):
+        target_path = '/' + target_path
 
     url = f"http://127.0.0.1:3847{target_path}"
     if request.META.get('QUERY_STRING'):

@@ -28,7 +28,8 @@ urlpatterns = [
 
     # Editorial & Marketing
     path('centro/', include('centro.urls', namespace='centro')),
-    path('centro/studio/', include('centro.urls_studio', namespace='studio')),
+    path('centro/studio/', RedirectView.as_view(url='/cgm/', permanent=True)),
+    re_path(r'^centro/studio/(?P<path>.*)$', RedirectView.as_view(url='/cgm/%(path)s', permanent=True)),
     
     # Root proxies for Content Studio assets and API (no duplicate namespaces)
     re_path(r'^api/(?P<path>.*)$', studio_proxy),
@@ -38,8 +39,7 @@ urlpatterns = [
     re_path(r'^brand-assets/(?P<path>.*)$', studio_proxy),
 
     path('crm/', include('crm.urls')),
-    path('cgm/', RedirectView.as_view(url='/centro/studio/', permanent=True)),
-    re_path(r'^cgm/(?P<path>.*)$', RedirectView.as_view(url='/centro/studio/%(path)s', permanent=True)),
+    path('cgm/', include('centro.urls_studio', namespace='studio')),
     path('blog/api/', include('blog.urls')),
     path('search/', include('search.urls')),
     path('', include('home.urls')),
