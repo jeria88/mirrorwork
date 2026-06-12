@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Endonautas — Paletas v3: Inconsciente y Emoción</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0A0808;
+    color: #E8E0D8;
+    font-family: 'Georgia', serif;
+    padding: 48px 32px;
+    min-height: 100vh;
+  }
+  header {
+    max-width: 720px;
+    margin: 0 auto 64px;
+  }
+  header h1 {
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 12px;
+  }
+  header p {
+    font-size: 15px;
+    color: #AAA;
+    line-height: 1.6;
+  }
+
+  .paleta {
+    max-width: 720px;
+    margin: 0 auto 80px;
+  }
+  .paleta-header {
+    margin-bottom: 24px;
+  }
+  .paleta-numero {
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: #555;
+    margin-bottom: 6px;
+  }
+  .paleta-nombre {
+    font-size: 28px;
+    font-weight: normal;
+    color: #E8E0D8;
+    margin-bottom: 8px;
+  }
+  .paleta-concepto {
+    font-size: 14px;
+    color: #888;
+    line-height: 1.5;
+    font-style: italic;
+    max-width: 480px;
+  }
+
+  .swatches {
+    display: flex;
+    gap: 0;
+    height: 120px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .swatch {
+    flex: 1;
+    position: relative;
+    cursor: default;
+  }
+  .swatch-info {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+  }
+  .swatch-hex {
+    font-size: 11px;
+    font-family: monospace;
+    opacity: 0.6;
+    display: block;
+  }
+  .swatch-label {
+    font-size: 11px;
+    opacity: 0.8;
+    display: block;
+    margin-top: 2px;
+  }
+
+  .paleta-uso {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    font-size: 11px;
+    color: #666;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .divider {
+    max-width: 720px;
+    margin: 0 auto 80px;
+    border: none;
+    border-top: 1px solid #1A1A1A;
+  }
+
+  /* Paleta preview en texto sobre fondo */
+  .preview {
+    max-width: 720px;
+    margin: -48px auto 80px;
+    padding: 32px;
+    border-radius: 4px;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .preview blockquote {
+    font-style: italic;
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 12px;
+  }
+  .preview span {
+    font-size: 12px;
+    opacity: 0.6;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Endonautas · Paletas v3</h1>
+  <p>Construidas desde adentro. No desde paisajes ni referencias culturales —<br>desde estados internos: el inconsciente, la emoción antes de ser nombrada.</p>
+</header>
+
+<!-- PALETA 1 -->
+<div class="paleta">
+  <div class="paleta-header">
+    <div class="paleta-numero">01</div>
+    <div class="paleta-nombre">Ojos cerrados</div>
+    <div class="paleta-concepto">El color que existe detrás de los párpados en la oscuridad. No vacío — lleno de presencia interna. Lo que aparece cuando te vuelves hacia adentro.</div>
+  </div>
+  <div class="swatches">
+    <div class="swatch" style="background:#100818;">
+      <div class="swatch-info">
+        <span class="swatch-hex">#100818</span>
+        <span class="swatch-label" style="color:#E8E0D8;">Base</span>
+      </div>
+    </div>
+    <div class="swatch" style="background:#281545;">
+      <div class="swatch-info">
+        <span class="swatch-hex">#281545</span>
+        <span class="swatch-label" style="color:#E8E0D8;">Profundo</span>
+      </div>
+    </div>
+    <div class="swatch" style="background:#5A2E6A;">
+      <div class="swatch-info">
+        <span class="swatch-hex">#5A2E6A</span>
+        <span class="swatch-label" style="color:#E8E0D8;">Medio</span>
+      </div>
+    </div>
+    <div class="swatch" style="background:#C48060;">
+      <div class="swatch-info">
+        <span class="swatch-hex">#C48060</span>
+        <span class="swatch-label" style="color:#1A1A1A;">Calor</span>
+      </div>
+    </div>
+    <div class="swatch" style="background:#F0E8DC;">
+      <div class="swatch-info">
+        <span class="swatch-hex">#F0E8DC</span>
+        <span class="swatch-label" style="color:#1A1A1A;">Luz</span>
+      </div>
+    </div>
+  </div>
+  <div class="paleta-uso">
+    <span>Fondo</span><span>Sombra</span><span>Cuerpo</span><span>Acento</span><span>Texto</span>
+  </div>
+</div>
+
+<!-- PREVIEW 1 -->
+<div class="preview" style="background:#100818; color:#F0E8DC;">
+  <blockquote>"Hay un lugar al que no llegas viajando. Solo cerrando los ojos."</blockquote>
+  <span>Endonautas · Mapa del mundo interior</span>
+</div>
+
+<hr class="divider">
+
+<!-- PALETA 2 -->
+<div class="paleta">
+  <div class="paleta-header">
+    <div class="paleta-numero">02</div>
+    <div class="paleta-nombre">Peso emocional</div>
+    <div class="paleta-concepto">La densidad de lo que todavía no tiene nombre. Emoción antes de ser comprendida — presente en el cuerpo, oscura, cargada, viva.</div>
+  </div>
+  <div class="swatches">
+    <div class="swatch" style="background:#0E0C10;">
+      <div class="swatch-info">
+        <span class="swatch-hex">#0E0C10</span>
+        <span class="swatch-label" style="color:#E8E0D8;">Base</span>
+      </div>
+    </div>
+    <div class="swatch" style="background:#2A1830;">
+      <div class="swatch-info">
+        <span class="swatch-hex">#2A1830</span>
+        <span class="swatch-label" style="color:#E8E0D8;">Profundo</span>
+      </div>
+    </div>
+    <div class="swatch" style="background:#6B3050;">
+      <div class="swatch-info">
+        <span class="swatch-hex">#6B3050</span>
+        <span class="swatch-label" style="color:#E8E0D8;">Medio</span>
+      </div>
+    </div>
+    <div class="swatch" style="background:#B05840;">
+      <div class="swatch-info">
+        <span class="swatch-hex">#B05840</span>
+        <span class="swatch-label" style="color:#F0E8DC;">Calor</span>
+      </div>
+    </div>
+    <div class="swatch" style="background:#E8D4C0;">
+      <div class="swatch-info">
+        <span class="swatch-hex">#E8D4C0</span>
+        <span class="swatch-label" style="color:#1A1A1A;">Luz</span>
+      </div>
+    </div>
+  </div>
+  <div class="paleta-uso">
+    <span>Fondo</span><span>Sombra</span><span>Cuerpo</span><span>Acento</span><span>Texto</span>
+  </div>
+</div>
+
+<div class="preview" style="background:#0E0C10; color:#E8D4C0;">
+  <blockquote>"No toda emoción necesita ser resuelta. Algunas solo piden ser habitadas."</blockquote>
+  <span>Endonautas · Mapa del mundo interior</span>
+</div>
+
+<hr class="divider">
+
+<!-- PALETA 3 -->
+<div class="paleta">
+  <div class="paleta-header">
+    <div class="paleta-numero">03</div>
+    <div class="paleta-nombre">Umbral</div>
+    <div class="paleta-concepto">El instante entre dormido y despierto. Entre lo que sabes de ti y lo que todavía no. La frontera donde el inconsciente toca la consciencia.</div>
+  </div>
+  <div class="swatches">
+    <div class="swatch" style="background:#080812;">
+      <div class="swatch-info">
+        <span class="swatch-hex">#080812</span>
+        <span class="swatch-label" style="color:#E8E0D8;">Base</span>
+      </div>
+    </div>
+    <div class="swatch" style="background:#141828;">
+      <div class="swatch-info">
+        <span class="swatch-hex">#141828</span>
+        <span class="swatch-label" style="color:#E8E0D8;">Profundo</span>
+      </div>
+    </div>
+    <div class="swatch" style="background:#303870;">
+      <div class="swatch-info">
+        <span class="swatch-hex">#303870</span>
+        <span class="swatch-label" style="color:#E8E0D8;">Umbral</span>
+      </div>
+    </div>
+    <div class="swatch" style="background:#9880A0;">
+      <div class="swatch-info">
+        <span class="swatch-hex">#9880A0</span>
+        <span class="swatch-label" style="color:#1A1A1A;">Emergente</span>
+      </div>
+    </div>
+    <div class="swatch" style="background:#DCD8E8;">
+      <div class="swatch-info">
+        <span class="swatch-hex">#DCD8E8</span>
+        <span class="swatch-label" style="color:#1A1A1A;">Luz</span>
+      </div>
+    </div>
+  </div>
+  <div class="paleta-uso">
+    <span>Fondo</span><span>Sombra</span><span>Umbral</span><span>Emergente</span><span>Texto</span>
+  </div>
+</div>
+
+<div class="preview" style="background:#080812; color:#DCD8E8;">
+  <blockquote>"El umbral no es un lugar de paso. Es donde ocurre todo lo importante."</blockquote>
+  <span>Endonautas · Mapa del mundo interior</span>
+</div>
+
+<hr class="divider">
+
+<!-- PALETA 4 -->
+<div class="paleta">
+  <div class="paleta-header">
+    <div class="paleta-numero">04</div>
+    <div class="paleta-nombre">Sombra viva</div>
+    <div class="paleta-concepto">La sombra junguiana: no ausencia de luz sino presencia de lo no integrado. Oscuridad cálida, terrosa, con oro adentro. Lo que se esconde contiene lo más valioso.</div>
+  </div>
+  <div class="swatches">
+    <div class="swatch" style="background:#100C08;">
+      <div class="swatch-info">
+        <span class="swatch-hex">#100C08</span>
+        <span class="swatch-label" style="color:#E8E0D8;">Base</span>
+      </div>
+    </div>
+    <div class="swatch" style="background:#2C1C10;">
+      <div class="swatch-info">
+        <span class="swatch-hex">#2C1C10</span>
+        <span class="swatch-label" style="color:#E8E0D8;">Tierra</span>
+      </div>
+    </div>
+    <div class="swatch" style="background:#6A3820;">
+      <div class="swatch-info">
+        <span class="swatch-hex">#6A3820</span>
+        <span class="swatch-label" style="color:#E8E0D8;">Sombra</span>
+      </div>
+    </div>
+    <div class="swatch" style="background:#C07820;">
+      <div class="swatch-info">
+        <span class="swatch-hex">#C07820</span>
+        <span class="swatch-label" style="color:#1A1A1A;">Oro</span>
+      </div>
+    </div>
+    <div class="swatch" style="background:#EEE0C8;">
+      <div class="swatch-info">
+        <span class="swatch-hex">#EEE0C8</span>
+        <span class="swatch-label" style="color:#1A1A1A;">Luz</span>
+      </div>
+    </div>
+  </div>
+  <div class="paleta-uso">
+    <span>Fondo</span><span>Tierra</span><span>Sombra</span><span>Oro</span><span>Texto</span>
+  </div>
+</div>
+
+<div class="preview" style="background:#100C08; color:#EEE0C8;">
+  <blockquote>"Lo que rechazas de ti guarda la forma exacta de lo que más necesitas."</blockquote>
+  <span>Endonautas · Mapa del mundo interior</span>
+</div>
+
+<hr class="divider">
+
+<!-- PALETA 5 -->
+<div class="paleta">
+  <div class="paleta-header">
+    <div class="paleta-numero">05</div>
+    <div class="paleta-nombre">Cuerpo que siente</div>
+    <div class="paleta-concepto">Lo somático: la emoción como sensación física antes de ser pensamiento. El calor del pecho al llorar. La contracción del estómago ante el miedo. El cuerpo como primer lenguaje.</div>
+  </div>
+  <div class="swatches">
+    <div class="swatch" style="background:#120A0A;">
+      <div class="swatch-info">
+        <span class="swatch-hex">#120A0A</span>
+        <span class="swatch-label" style="color:#E8E0D8;">Base</span>
+      </div>
+    </div>
+    <div class="swatch" style="background:#301818;">
+      <div class="swatch-info">
+        <span class="swatch-hex">#301818</span>
+        <span class="swatch-label" style="color:#E8E0D8;">Profundo</span>
+      </div>
+    </div>
+    <div class="swatch" style="background:#703040;">
+      <div class="swatch-info">
+        <span class="swatch-hex">#703040</span>
+        <span class="swatch-label" style="color:#E8E0D8;">Visceral</span>
+      </div>
+    </div>
+    <div class="swatch" style="background:#D06858;">
+      <div class="swatch-info">
+        <span class="swatch-hex">#D06858</span>
+        <span class="swatch-label" style="color:#1A1A1A;">Calor</span>
+      </div>
+    </div>
+    <div class="swatch" style="background:#F0E0D8;">
+      <div class="swatch-info">
+        <span class="swatch-hex">#F0E0D8</span>
+        <span class="swatch-label" style="color:#1A1A1A;">Piel</span>
+      </div>
+    </div>
+  </div>
+  <div class="paleta-uso">
+    <span>Fondo</span><span>Profundo</span><span>Visceral</span><span>Calor</span><span>Piel</span>
+  </div>
+</div>
+
+<div class="preview" style="background:#120A0A; color:#F0E0D8;">
+  <blockquote>"Tu cuerpo sabe lo que tu mente aún no ha aceptado."</blockquote>
+  <span>Endonautas · Mapa del mundo interior</span>
+</div>
+
+<hr class="divider">
+
+<!-- RESUMEN COMPARATIVO -->
+<div style="max-width:720px; margin: 0 auto 80px;">
+  <div style="font-size:11px; letter-spacing:0.2em; text-transform:uppercase; color:#555; margin-bottom:24px;">Resumen — las 5 en una mirada</div>
+  <table style="width:100%; border-collapse:collapse; font-size:13px;">
+    <tr style="color:#555; font-size:11px; text-transform:uppercase; letter-spacing:0.1em;">
+      <td style="padding:8px 0; border-bottom:1px solid #1A1A1A;">Paleta</td>
+      <td style="padding:8px 0; border-bottom:1px solid #1A1A1A;">Estado interno</td>
+      <td style="padding:8px 0; border-bottom:1px solid #1A1A1A;">Temperatura</td>
+      <td style="padding:8px 0; border-bottom:1px solid #1A1A1A;">Tono dominante</td>
+    </tr>
+    <tr>
+      <td style="padding:12px 0; border-bottom:1px solid #111; color:#888;">01 Ojos cerrados</td>
+      <td style="padding:12px 0; border-bottom:1px solid #111; color:#AAA;">Introversión pura</td>
+      <td style="padding:12px 0; border-bottom:1px solid #111; color:#AAA;">Fría + cálida</td>
+      <td style="padding:12px 0; border-bottom:1px solid #111;">
+        <span style="display:inline-block;width:12px;height:12px;background:#281545;border-radius:50%;margin-right:6px;vertical-align:middle;"></span>Violeta
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:12px 0; border-bottom:1px solid #111; color:#888;">02 Peso emocional</td>
+      <td style="padding:12px 0; border-bottom:1px solid #111; color:#AAA;">Emoción sin nombre</td>
+      <td style="padding:12px 0; border-bottom:1px solid #111; color:#AAA;">Cálida oscura</td>
+      <td style="padding:12px 0; border-bottom:1px solid #111;">
+        <span style="display:inline-block;width:12px;height:12px;background:#6B3050;border-radius:50%;margin-right:6px;vertical-align:middle;"></span>Ciruela
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:12px 0; border-bottom:1px solid #111; color:#888;">03 Umbral</td>
+      <td style="padding:12px 0; border-bottom:1px solid #111; color:#AAA;">Consciencia/inconsciente</td>
+      <td style="padding:12px 0; border-bottom:1px solid #111; color:#AAA;">Fría</td>
+      <td style="padding:12px 0; border-bottom:1px solid #111;">
+        <span style="display:inline-block;width:12px;height:12px;background:#303870;border-radius:50%;margin-right:6px;vertical-align:middle;"></span>Índigo
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:12px 0; border-bottom:1px solid #111; color:#888;">04 Sombra viva</td>
+      <td style="padding:12px 0; border-bottom:1px solid #111; color:#AAA;">Integración junguiana</td>
+      <td style="padding:12px 0; border-bottom:1px solid #111; color:#AAA;">Muy cálida</td>
+      <td style="padding:12px 0; border-bottom:1px solid #111;">
+        <span style="display:inline-block;width:12px;height:12px;background:#C07820;border-radius:50%;margin-right:6px;vertical-align:middle;"></span>Oro oscuro
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:12px 0; color:#888;">05 Cuerpo que siente</td>
+      <td style="padding:12px 0; color:#AAA;">Somático / visceral</td>
+      <td style="padding:12px 0; color:#AAA;">Cálida intensa</td>
+      <td style="padding:12px 0;">
+        <span style="display:inline-block;width:12px;height:12px;background:#703040;border-radius:50%;margin-right:6px;vertical-align:middle;"></span>Burdeos
+      </td>
+    </tr>
+  </table>
+</div>
+
+</body>
+</html>

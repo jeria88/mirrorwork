@@ -1,0 +1,130 @@
+/* Endonautas — Design Tokens v1 */
+/* Generado Mayo 2026 */
+
+:root {
+  /* ─── COLOR ─── */
+
+  /* Primarios */
+  --color-primary:      #1C2B2D; /* Tinta profunda */
+  --color-primary-mid:  #2E4A4E; /* Bosque */
+  --color-primary-light:#3D6367; /* Bosque claro */
+
+  /* Acento */
+  --color-accent:       #C4813A; /* Ámbar tierra */
+  --color-accent-soft:  #E8C99A; /* Arena dorada */
+  --color-accent-muted: #F2E4CD; /* Arena pálida */
+
+  /* Neutros */
+  --color-neutral-50:  #F5F1EB; /* Hueso — fondo claro */
+  --color-neutral-100: #EDE8E0; /* Crema */
+  --color-neutral-200: #DDD7CD; /* Gris cálido claro */
+  --color-neutral-400: #9C9589; /* Piedra — texto muted */
+  --color-neutral-600: #5E5A53; /* Carbón medio */
+  --color-neutral-900: #1A1916; /* Carbón — texto principal */
+
+  /* Estado */
+  --color-success: #3D7A5E; /* Musgo */
+  --color-warning: #C4813A; /* Comparte con acento */
+  --color-error:   #A84B3C; /* Terracota */
+  --color-info:    #2E4A4E; /* Comparte con primary-mid */
+
+  /* Semánticos — Light mode */
+  --bg:           var(--color-neutral-50);
+  --bg-surface:   #FFFFFF;
+  --bg-muted:     var(--color-neutral-100);
+  --text:         var(--color-neutral-900);
+  --text-muted:   var(--color-neutral-400);
+  --border:       var(--color-neutral-200);
+  --cta:          var(--color-accent);
+  --cta-text:     #FFFFFF;
+
+  /* ─── TIPOGRAFÍA ─── */
+
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body:    'Inter', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+
+  /* Escala — Major Third (1.25) */
+  --text-xs:   0.64rem;   /* ~10px */
+  --text-sm:   0.8rem;    /* ~13px */
+  --text-base: 1rem;      /* 16px  */
+  --text-lg:   1.25rem;   /* 20px  */
+  --text-xl:   1.563rem;  /* 25px  */
+  --text-2xl:  1.953rem;  /* 31px  */
+  --text-3xl:  2.441rem;  /* 39px  */
+  --text-4xl:  3.052rem;  /* 49px  */
+  --text-5xl:  3.815rem;  /* 61px  */
+
+  /* Line heights */
+  --leading-tight:  1.2;
+  --leading-snug:   1.35;
+  --leading-normal: 1.6;
+  --leading-loose:  1.8;
+
+  /* Letter spacing */
+  --tracking-tight:  -0.02em;
+  --tracking-normal:  0;
+  --tracking-wide:    0.05em;
+  --tracking-widest:  0.12em;
+
+  /* ─── ESPACIADO (escala 4px) ─── */
+
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+  --space-32: 128px;
+
+  /* ─── RADIO ─── */
+
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-2xl:  24px;
+  --radius-full: 9999px;
+
+  /* ─── SOMBRAS ─── */
+
+  --shadow-sm: 0 1px 2px rgba(26,25,22,0.06);
+  --shadow-md: 0 4px 8px rgba(26,25,22,0.08);
+  --shadow-lg: 0 12px 24px rgba(26,25,22,0.10);
+  --shadow-xl: 0 24px 48px rgba(26,25,22,0.12);
+
+  /* ─── TRANSICIONES ─── */
+
+  --ease-out:  cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:   cubic-bezier(0.4, 0, 1, 1);
+  --ease-base: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --duration-fast:   150ms;
+  --duration-base:   250ms;
+  --duration-slow:   400ms;
+  --duration-slower: 700ms;
+
+  /* ─── LAYOUT ─── */
+
+  --max-w:     1200px;
+  --max-w-text: 680px;
+  --pad:        clamp(20px, 5vw, 80px);
+}
+
+/* ─── DARK MODE ─── */
+[data-theme="dark"] {
+  --bg:         var(--color-primary);
+  --bg-surface: var(--color-primary-mid);
+  --bg-muted:   #243436;
+  --text:       var(--color-neutral-50);
+  --text-muted: var(--color-neutral-400);
+  --border:     #2E4A4E;
+  --cta:        var(--color-accent);
+  --cta-text:   #FFFFFF;
+}

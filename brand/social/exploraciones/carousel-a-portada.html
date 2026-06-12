@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Inter:wght@300;400;500;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1080px;
+    height: 1080px;
+    background: #F5F1EB;
+    overflow: hidden;
+    position: relative;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* Textura de papel — ruido SVG */
+  .texture {
+    position: absolute;
+    inset: 0;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+    pointer-events: none;
+  }
+
+  /* Mancha de acuarela orgánica */
+  .splash {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+  }
+  .s1 {
+    width: 600px; height: 600px;
+    top: -180px; right: -120px;
+    background: radial-gradient(circle, #C4813A22 0%, transparent 70%);
+  }
+  .s2 {
+    width: 400px; height: 400px;
+    bottom: -100px; left: -80px;
+    background: radial-gradient(circle, #2E4A4E18 0%, transparent 70%);
+  }
+
+  /* Línea lateral */
+  .side-line {
+    position: absolute;
+    left: 72px;
+    top: 72px;
+    bottom: 72px;
+    width: 2px;
+    background: linear-gradient(to bottom, #C4813A, #C4813A44, transparent);
+  }
+
+  /* Contenido */
+  .content {
+    position: absolute;
+    inset: 0;
+    padding: 80px 80px 72px 108px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 400;
+    font-style: italic;
+    font-size: 18px;
+    letter-spacing: 0.04em;
+    color: #1C2B2D;
+  }
+
+  .slide-num {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    color: #9C9589;
+    text-transform: uppercase;
+  }
+
+  .middle {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px 0 20px;
+  }
+
+  .eyebrow {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #C4813A;
+    margin-bottom: 28px;
+  }
+
+  h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 300;
+    font-size: 76px;
+    line-height: 1.0;
+    letter-spacing: -0.02em;
+    color: #1C2B2D;
+    margin-bottom: 36px;
+  }
+
+  h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: #C4813A;
+  }
+
+  .desc {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: #9C9589;
+    max-width: 480px;
+  }
+
+  .bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 28px;
+    border-top: 1px solid #C4813A33;
+  }
+
+  .swipe {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: #C4813A;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .swipe-arrow {
+    font-size: 16px;
+  }
+
+  .dots {
+    display: flex;
+    gap: 5px;
+  }
+  .dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: #C4813A44;
+  }
+  .dot.active {
+    background: #C4813A;
+    width: 18px;
+    border-radius: 3px;
+  }
+</style>
+</head>
+<body>
+  <div class="texture"></div>
+  <div class="splash s1"></div>
+  <div class="splash s2"></div>
+  <div class="side-line"></div>
+
+  <div class="content">
+    <div class="top">
+      <div class="logo">Endonautas</div>
+      <div class="slide-num">01 / 09</div>
+    </div>
+
+    <div class="middle">
+      <div class="eyebrow">Vínculos · Autoconocimiento</div>
+      <h1>La pelea<br>no fue por<br>lo que <em>dijiste.</em></h1>
+      <p class="desc">Fue por lo que eso activó. Y eso tiene un origen que vale la pena encontrar.</p>
+    </div>
+
+    <div class="bottom">
+      <div class="swipe">
+        <span>Desliza</span>
+        <span class="swipe-arrow">→</span>
+      </div>
+      <div class="dots">
+        <div class="dot active"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

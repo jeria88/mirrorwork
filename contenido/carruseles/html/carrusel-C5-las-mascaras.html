@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>C5 — Las 5 Máscaras · Endonautas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0a0a;--gold:#c9a84c;--white:#fff;--muted:#9a9a9a;--border:rgba(201,168,76,.2)}
+body{background:#1a1a1a;font-family:'Inter',sans-serif;display:flex;min-height:100vh}
+.viewer{flex:0 0 420px;display:flex;flex-direction:column;align-items:center;padding:2rem;background:#111;border-right:1px solid #222}
+.slide-wrap{position:relative;width:360px;height:450px;overflow:hidden;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;background:var(--bg);padding:1.8rem}
+.slide.active{display:flex}
+.progress{display:flex;gap:6px;margin:1rem 0 .5rem}
+.dot{width:6px;height:6px;border-radius:50%;background:#333;transition:all .3s;cursor:pointer}
+.dot.active{background:var(--gold);width:18px;border-radius:3px}
+.nav-row{display:flex;gap:1rem;margin-top:.5rem}
+.btn{padding:.5rem 1.2rem;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--gold);font-size:.8rem;font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s}
+.btn:hover{background:var(--gold);color:#000}.btn:disabled{opacity:.3;cursor:default}
+.slide-counter{color:var(--muted);font-size:.75rem;margin-top:.8rem;letter-spacing:.1em}
+.copy-slide{padding:.35rem .8rem;border:1px solid #333;border-radius:6px;background:transparent;color:#666;font-size:.7rem;font-family:'Inter',sans-serif;cursor:pointer;margin-top:.5rem;transition:all .2s}
+.copy-slide:hover{border-color:var(--gold);color:var(--gold)}
+.panel{flex:1;padding:2rem;overflow-y:auto;background:#0d0d0d}
+.panel h2{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.1rem;margin-bottom:1.5rem;padding-bottom:.8rem;border-bottom:1px solid #222}
+.all-text{font-size:.82rem;color:#888;line-height:1.8;white-space:pre-wrap}
+.slide-label{color:var(--gold);font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;margin-top:1.2rem;margin-bottom:.3rem;display:block}
+.caption-box{margin-top:2rem;padding:1.2rem;border:1px solid #222;border-radius:10px;background:#111}
+.caption-box h3{color:var(--gold);font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.8rem}
+.caption-text{font-size:.8rem;color:#777;line-height:1.7;white-space:pre-wrap}
+.download-btn{margin-top:1.5rem;padding:.7rem 1.5rem;border:1px solid var(--gold);border-radius:8px;background:transparent;color:var(--gold);font-size:.8rem;font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s;width:100%}
+.download-btn:hover{background:var(--gold);color:#000}
+.sl{display:flex;align-items:center;gap:.5rem;margin-bottom:auto}
+.slm{width:18px;height:18px;background:var(--gold);clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);opacity:.8}
+.slt{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.sn{font-size:.6rem;color:#444;margin-left:auto}
+.sp{flex:1}
+.sh{font-family:'Playfair Display',serif;font-size:1.35rem;line-height:1.25;color:var(--white);flex:1;display:flex;align-items:center}
+.shsm{font-family:'Playfair Display',serif;font-size:1.05rem;line-height:1.35;color:var(--white)}
+.sb{font-size:.78rem;line-height:1.6;color:#ccc;margin-top:.6rem}
+.sb em{color:var(--gold);font-style:normal;font-weight:500}
+.sdiv{width:35px;height:2px;background:var(--gold);margin:.7rem 0;opacity:.6}
+.scta{font-size:.75rem;color:var(--gold);letter-spacing:.08em;margin-top:auto;padding-top:.8rem;border-top:1px solid var(--border)}
+.sey{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-top:auto;margin-bottom:.5rem}
+.mask-num{font-size:3rem;font-family:'Playfair Display',serif;color:var(--gold);opacity:.12;position:absolute;right:1.2rem;bottom:1.2rem;font-weight:700;line-height:1}
+.mask-name{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold);margin-bottom:.6rem}
+.mask-core{font-size:.82rem;color:var(--white);font-style:italic;margin-bottom:.6rem}
+.mask-origin{font-size:.75rem;color:#777;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="viewer">
+  <div class="slide-wrap">
+    <div class="slide active"><div class="sl"><div class="slm"></div><div class="slt">Endonautas</div><div class="sn">1/9</div></div><div class="sey">Educación</div><div class="sh">"Llevas años construyendo una versión de ti mismo para sobrevivir. Aquí te muestro cómo funciona."</div><div class="scta">→ Desliza · Comenta cuál eres tú</div></div>
+    <div class="slide"><div class="sl"><div class="slm"></div><div class="slt">Endonautas</div><div class="sn">2/9</div></div><div class="sp"></div><div class="shsm">La Máscara no es hipocresía.</div><div class="sdiv"></div><div class="sb">Es <em>adaptación</em>.<br><br>Se forma en la infancia cuando aprendemos que ciertas partes de nosotros son "peligrosas" de mostrar.<br><br>No elegiste la tuya. La construiste para sobrevivir.</div><div class="sp"></div></div>
+    <!-- Máscara 1 -->
+    <div class="slide" style="position:relative"><div class="sl"><div class="slm"></div><div class="slt">Endonautas</div><div class="sn">3/9</div></div><div class="sp"></div><div class="mask-name">01 · Perfeccionista</div><div class="mask-core">"Si no lo hago perfecto, me rechazarán."</div><div class="sdiv"></div><div class="mask-origin">Se autocritica sin pausa. El error le parece catastrófico. Detrás hay miedo al abandono.</div><div class="mask-num">01</div><div class="sp"></div></div>
+    <!-- Máscara 2 -->
+    <div class="slide" style="position:relative"><div class="sl"><div class="slm"></div><div class="slt">Endonautas</div><div class="sn">4/9</div></div><div class="sp"></div><div class="mask-name">02 · Complaciente</div><div class="mask-core">"Si digo que no, me dejarán de querer."</div><div class="sdiv"></div><div class="mask-origin">Dice sí cuando quiere decir no. Pone las necesidades de otros primero. Detrás hay herida de abandono.</div><div class="mask-num">02</div><div class="sp"></div></div>
+    <!-- Máscara 3 -->
+    <div class="slide" style="position:relative"><div class="sl"><div class="slm"></div><div class="slt">Endonautas</div><div class="sn">5/9</div></div><div class="sp"></div><div class="mask-name">03 · El Fuerte</div><div class="mask-core">"Mostrar vulnerabilidad es peligroso."</div><div class="sdiv"></div><div class="mask-origin">No llora. No pide ayuda. Carga solo con todo. Detrás hay herida de traición o invisibilidad.</div><div class="mask-num">03</div><div class="sp"></div></div>
+    <!-- Máscara 4 -->
+    <div class="slide" style="position:relative"><div class="sl"><div class="slm"></div><div class="slt">Endonautas</div><div class="sn">6/9</div></div><div class="sp"></div><div class="mask-name">04 · El Logrador</div><div class="mask-core">"Solo soy valioso si tengo resultados."</div><div class="sdiv"></div><div class="mask-origin">Su identidad vive en los logros. Sin éxito, se siente vacío. Detrás hay herida de rechazo.</div><div class="mask-num">04</div><div class="sp"></div></div>
+    <!-- Máscara 5 -->
+    <div class="slide" style="position:relative"><div class="sl"><div class="slm"></div><div class="slt">Endonautas</div><div class="sn">7/9</div></div><div class="sp"></div><div class="mask-name">05 · El Invisible</div><div class="mask-core">"Si me ven de verdad, me lastimarán."</div><div class="sdiv"></div><div class="mask-origin">Se borra del espacio. No ocupa lugar. Se mezcla con el fondo. Detrás hay herida de humillación.</div><div class="mask-num">05</div><div class="sp"></div></div>
+    <!-- Pregunta -->
+    <div class="slide"><div class="sl"><div class="slm"></div><div class="slt">Endonautas</div><div class="sn">8/9</div></div><div class="sp"></div><div class="shsm">¿Reconoces alguna?</div><div class="sdiv"></div><div class="sb">No tienes que quedarte solo con una.<br>A veces llevamos varias, según el contexto.<br><br>Lo importante: <em>verla</em>.<br>Porque cuando la ves, dejas de ser ella.</div><div class="sp"></div></div>
+    <!-- CTA -->
+    <div class="slide"><div class="sl"><div class="slm"></div><div class="slt">Endonautas</div><div class="sn">9/9</div></div><div class="sp"></div><div class="sey">Comenta abajo</div><div class="shsm">¿Cuál es la tuya?</div><div class="sdiv"></div><div class="sb">Comenta el número + <em>MASCARA</em> y te enviamos el mapa completo de tu máscara por DM.<br><br>Sin costo. Solo el mapa.</div><div class="scta">@endonautas</div></div>
+  </div>
+  <div class="progress" id="progress"></div>
+  <div class="nav-row"><button class="btn" id="prev" onclick="changeSlide(-1)" disabled>← Anterior</button><button class="btn" id="next" onclick="changeSlide(1)">Siguiente →</button></div>
+  <div class="slide-counter" id="counter">1 / 9</div>
+  <button class="copy-slide" onclick="copyCurrentSlide()">Copiar texto de este slide</button>
+</div>
+<div class="panel">
+  <h2>C5 — Las 5 Máscaras · Texto completo</h2>
+  <div class="all-text" id="allText"></div>
+  <div class="caption-box"><h3>Caption para Instagram</h3><div class="caption-text">Llevas años construyendo una versión de ti mismo para sobrevivir.
+
+No lo elegiste. Lo construiste de niño cuando aprendiste que ciertas partes de ti eran "peligrosas" de mostrar.
+
+Las 5 Máscaras más comunes 👇
+
+01 · Perfeccionista — "Si no lo hago perfecto, me rechazarán."
+02 · Complaciente — "Si digo que no, me dejarán de querer."
+03 · El Fuerte — "Mostrar vulnerabilidad es peligroso."
+04 · El Logrador — "Solo soy valioso si tengo resultados."
+05 · El Invisible — "Si me ven de verdad, me lastimarán."
+
+¿Cuál eres tú? Comenta el número + MASCARA y te envío el mapa completo al DM.
+
+.
+.
+.
+#endonautas #endonautica #mascara #heridadeinfancia #autoconocimiento #identidad #viajeinterior #sombra #psicologia #perfeccionista #complaciente #francojerica #consciencia #transformacion #mundointerior</div></div>
+  <button class="download-btn" onclick="downloadAll()">Descargar todos los textos (.txt)</button>
+</div>
+<script>
+const slides=document.querySelectorAll('.slide'),dots=document.getElementById('progress');let current=0;
+const texts=[`SLIDE 1\n"Llevas años construyendo una versión de ti mismo para sobrevivir. Aquí te muestro cómo funciona."\n→ Desliza · Comenta cuál eres tú`,`SLIDE 2\nLa Máscara no es hipocresía. Es adaptación.\nSe forma en la infancia cuando aprendemos que ciertas partes de nosotros son "peligrosas" de mostrar. No elegiste la tuya. La construiste para sobrevivir.`,`SLIDE 3 — MÁSCARA 01\nPerfeccionista\n"Si no lo hago perfecto, me rechazarán."\nSe autocritica sin pausa. El error le parece catastrófico. Detrás hay miedo al abandono.`,`SLIDE 4 — MÁSCARA 02\nComplaciente\n"Si digo que no, me dejarán de querer."\nDice sí cuando quiere decir no. Pone las necesidades de otros primero. Detrás hay herida de abandono.`,`SLIDE 5 — MÁSCARA 03\nEl Fuerte\n"Mostrar vulnerabilidad es peligroso."\nNo llora. No pide ayuda. Carga solo con todo. Detrás hay herida de traición o invisibilidad.`,`SLIDE 6 — MÁSCARA 04\nEl Logrador\n"Solo soy valioso si tengo resultados."\nSu identidad vive en los logros. Sin éxito, se siente vacío. Detrás hay herida de rechazo.`,`SLIDE 7 — MÁSCARA 05\nEl Invisible\n"Si me ven de verdad, me lastimarán."\nSe borra del espacio. No ocupa lugar. Se mezcla con el fondo. Detrás hay herida de humillación.`,`SLIDE 8\n¿Reconoces alguna?\nNo tienes que quedarte solo con una. A veces llevamos varias, según el contexto.\nLo importante: verla. Porque cuando la ves, dejas de ser ella.`,`SLIDE 9 — CTA\n¿Cuál es la tuya?\nComenta el número + MASCARA y te enviamos el mapa completo de tu máscara por DM. Sin costo. Solo el mapa.\n@endonautas`];
+function buildDots(){dots.innerHTML='';slides.forEach((_,i)=>{const d=document.createElement('div');d.className='dot'+(i===0?' active':'');d.onclick=()=>goTo(i);dots.appendChild(d)})}
+function buildPanel(){document.getElementById('allText').innerHTML=texts.map((t,i)=>`<span class="slide-label">— SLIDE ${i+1} —</span>${t}`).join('\n\n')}
+function goTo(n){slides[current].classList.remove('active');dots.children[current].classList.remove('active');current=n;slides[current].classList.add('active');dots.children[current].classList.add('active');document.getElementById('counter').textContent=`${current+1} / ${slides.length}`;document.getElementById('prev').disabled=current===0;document.getElementById('next').disabled=current===slides.length-1}
+function changeSlide(dir){goTo(Math.max(0,Math.min(slides.length-1,current+dir)))}
+function copyCurrentSlide(){navigator.clipboard.writeText(texts[current]).then(()=>{const b=document.querySelector('.copy-slide');b.textContent='¡Copiado!';setTimeout(()=>b.textContent='Copiar texto de este slide',1500)})}
+function downloadAll(){const c=`CARRUSEL C5 — LAS 5 MÁSCARAS\n${'='.repeat(50)}\n\n`+texts.map((t,i)=>`— SLIDE ${i+1} —\n${t}`).join('\n\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([c],{type:'text/plain'}));a.download='carrusel-C5-las-mascaras.txt';a.click()}
+buildDots();buildPanel();
+</script>
+</body>
+</html>

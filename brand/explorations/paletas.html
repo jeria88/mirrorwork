@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Endonautas — 5 Propuestas de Paleta</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0e0d0c; color: #f0ece6; font-family: 'Inter', system-ui, sans-serif; font-size: 15px; line-height: 1.6; }
+
+/* NAV */
+.nav { position: sticky; top: 0; z-index: 100; background: rgba(14,13,12,.92); backdrop-filter: blur(12px); border-bottom: 1px solid #2a2520; padding: 14px 40px; display: flex; gap: 8px; align-items: center; }
+.nav__label { font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: #666; margin-right: 16px; }
+.nav__btn { padding: 5px 14px; border-radius: 20px; border: 1px solid #2a2520; background: transparent; color: #888; cursor: pointer; font-size: 12px; transition: all .2s; white-space: nowrap; }
+.nav__btn:hover, .nav__btn.active { color: #f0ece6; border-color: #f0ece6; }
+
+/* INTRO */
+.intro { padding: 80px 40px 60px; border-bottom: 1px solid #1e1c1a; max-width: 720px; }
+.intro__eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: .12em; color: #555; margin-bottom: 20px; }
+.intro h1 { font-family: 'Fraunces', serif; font-size: clamp(2.4rem, 5vw, 3.8rem); font-weight: 300; line-height: 1.15; letter-spacing: -.02em; margin-bottom: 20px; }
+.intro p { color: #888; font-size: 14px; line-height: 1.7; }
+
+/* PALETA CARD */
+.palette-section { border-bottom: 1px solid #1e1c1a; }
+.palette-section.hidden { display: none; }
+
+/* HERO STRIP */
+.hero-strip { height: 280px; display: flex; position: relative; overflow: hidden; }
+.hero-strip__col { flex: 1; transition: flex .4s ease; }
+.hero-strip__col:hover { flex: 2; }
+.hero-strip__overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: 32px 40px; pointer-events: none; }
+.hero-strip__name { font-family: 'Fraunces', serif; font-size: clamp(2rem, 4vw, 3rem); font-weight: 300; line-height: 1; }
+.hero-strip__concept { font-size: 13px; margin-top: 6px; opacity: .7; }
+
+/* BODY */
+.palette-body { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+.palette-left { padding: 48px 40px; border-right: 1px solid #1e1c1a; }
+.palette-right { padding: 48px 40px; }
+
+/* SWATCHES */
+.swatches { display: flex; flex-direction: column; gap: 8px; margin-bottom: 32px; }
+.swatch-row { display: flex; align-items: center; gap: 14px; }
+.swatch-dot { width: 44px; height: 44px; border-radius: 8px; flex-shrink: 0; }
+.swatch-info { flex: 1; }
+.swatch-name { font-size: 13px; font-weight: 500; }
+.swatch-hex  { font-size: 11px; font-family: monospace; opacity: .5; }
+.swatch-role { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; opacity: .4; }
+
+/* SIMBOLISMO */
+.simbolismo { background: #161412; border-radius: 10px; padding: 24px; margin-top: 8px; }
+.simbolismo__label { font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: #555; margin-bottom: 12px; }
+.simbolismo__text { font-size: 13px; color: #aaa; line-height: 1.7; }
+.simbolismo__text strong { color: #f0ece6; font-weight: 500; }
+
+.persona-tags { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+.persona-tag { font-size: 11px; padding: 3px 10px; border-radius: 20px; }
+
+/* UI PREVIEW */
+.preview-label { font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: #555; margin-bottom: 16px; }
+.ui-card { border-radius: 14px; overflow: hidden; margin-bottom: 16px; }
+.ui-card__header { padding: 24px 24px 16px; }
+.ui-card__eyebrow { font-size: 10px; text-transform: uppercase; letter-spacing: .12em; margin-bottom: 8px; }
+.ui-card__title { font-family: 'Fraunces', serif; font-size: 1.4rem; font-weight: 300; line-height: 1.25; margin-bottom: 10px; }
+.ui-card__body { font-size: 13px; line-height: 1.6; opacity: .75; margin-bottom: 20px; }
+.ui-card__btn { display: inline-block; padding: 10px 22px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; }
+.ui-card__footer { padding: 14px 24px; font-size: 11px; text-transform: uppercase; letter-spacing: .1em; }
+
+/* ─── PALETA 1: Tierra Profunda ─── */
+#p1 .hero-strip__col:nth-child(1) { background: #2B1D0E; }
+#p1 .hero-strip__col:nth-child(2) { background: #5C3D1E; }
+#p1 .hero-strip__col:nth-child(3) { background: #C4813A; }
+#p1 .hero-strip__col:nth-child(4) { background: #E8D5B5; }
+#p1 .hero-strip__col:nth-child(5) { background: #F5EEE3; }
+#p1 .hero-strip__overlay { color: #F5EEE3; text-shadow: 0 2px 20px rgba(0,0,0,.5); }
+#p1 .ui-card { background: #F5EEE3; color: #2B1D0E; }
+#p1 .ui-card__header { border-bottom: 1px solid #E0CBA8; }
+#p1 .ui-card__eyebrow { color: #8B6040; }
+#p1 .ui-card__btn { background: #2B1D0E; color: #F5EEE3; }
+#p1 .ui-card__footer { background: #2B1D0E; color: #C4813A; }
+
+/* ─── PALETA 2: Araucanía ─── */
+#p2 .hero-strip__col:nth-child(1) { background: #1B3A2D; }
+#p2 .hero-strip__col:nth-child(2) { background: #2D5C44; }
+#p2 .hero-strip__col:nth-child(3) { background: #8B4F3C; }
+#p2 .hero-strip__col:nth-child(4) { background: #C8D5C0; }
+#p2 .hero-strip__col:nth-child(5) { background: #F2EFE8; }
+#p2 .hero-strip__overlay { color: #F2EFE8; text-shadow: 0 2px 20px rgba(0,0,0,.5); }
+#p2 .ui-card { background: #F2EFE8; color: #1B3A2D; }
+#p2 .ui-card__header { border-bottom: 1px solid #D5DECE; }
+#p2 .ui-card__eyebrow { color: #4D7A60; }
+#p2 .ui-card__btn { background: #1B3A2D; color: #F2EFE8; }
+#p2 .ui-card__footer { background: #1B3A2D; color: #C8D5C0; }
+
+/* ─── PALETA 3: Cartografía ─── */
+#p3 .hero-strip__col:nth-child(1) { background: #1A2340; }
+#p3 .hero-strip__col:nth-child(2) { background: #2B3D6B; }
+#p3 .hero-strip__col:nth-child(3) { background: #C4A832; }
+#p3 .hero-strip__col:nth-child(4) { background: #DDD5C0; }
+#p3 .hero-strip__col:nth-child(5) { background: #F5F0E8; }
+#p3 .hero-strip__overlay { color: #F5F0E8; text-shadow: 0 2px 20px rgba(0,0,0,.5); }
+#p3 .ui-card { background: #F5F0E8; color: #1A2340; }
+#p3 .ui-card__header { border-bottom: 1px solid #DDD5C0; }
+#p3 .ui-card__eyebrow { color: #2B3D6B; }
+#p3 .ui-card__btn { background: #1A2340; color: #F5F0E8; }
+#p3 .ui-card__footer { background: #1A2340; color: #C4A832; }
+
+/* ─── PALETA 4: Umbral ─── */
+#p4 .hero-strip__col:nth-child(1) { background: #120F1A; }
+#p4 .hero-strip__col:nth-child(2) { background: #261E38; }
+#p4 .hero-strip__col:nth-child(3) { background: #B8896A; }
+#p4 .hero-strip__col:nth-child(4) { background: #E8D5C4; }
+#p4 .hero-strip__col:nth-child(5) { background: #F5F1EE; }
+#p4 .hero-strip__overlay { color: #F5F1EE; text-shadow: 0 2px 20px rgba(0,0,0,.6); }
+#p4 .ui-card { background: #F5F1EE; color: #120F1A; }
+#p4 .ui-card__header { border-bottom: 1px solid #E0D0C0; }
+#p4 .ui-card__eyebrow { color: #6B4E8A; }
+#p4 .ui-card__btn { background: #120F1A; color: #F5F1EE; }
+#p4 .ui-card__footer { background: #120F1A; color: #B8896A; }
+
+/* ─── PALETA 5: Ceniza y Brasa ─── */
+#p5 .hero-strip__col:nth-child(1) { background: #1E1A17; }
+#p5 .hero-strip__col:nth-child(2) { background: #3A3028; }
+#p5 .hero-strip__col:nth-child(3) { background: #C4552A; }
+#p5 .hero-strip__col:nth-child(4) { background: #E8D8C8; }
+#p5 .hero-strip__col:nth-child(5) { background: #F5F0EA; }
+#p5 .hero-strip__overlay { color: #F5F0EA; text-shadow: 0 2px 20px rgba(0,0,0,.5); }
+#p5 .ui-card { background: #F5F0EA; color: #1E1A17; }
+#p5 .ui-card__header { border-bottom: 1px solid #DCCFC0; }
+#p5 .ui-card__eyebrow { color: #8A4820; }
+#p5 .ui-card__btn { background: #1E1A17; color: #F5F0EA; }
+#p5 .ui-card__footer { background: #1E1A17; color: #C4552A; }
+
+footer { padding: 32px 40px; font-size: 12px; color: #444; border-top: 1px solid #1e1c1a; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="nav__label">Paletas</span>
+  <button class="nav__btn active" data-target="all">Todas</button>
+  <button class="nav__btn" data-target="p1">① Tierra Profunda</button>
+  <button class="nav__btn" data-target="p2">② Araucanía</button>
+  <button class="nav__btn" data-target="p3">③ Cartografía</button>
+  <button class="nav__btn" data-target="p4">④ Umbral</button>
+  <button class="nav__btn" data-target="p5">⑤ Ceniza y Brasa</button>
+</nav>
+
+<div class="intro">
+  <div class="intro__eyebrow">Endonautas · 5 propuestas de paleta · Mayo 2026</div>
+  <h1>Cada color tiene<br><em>una razón.</em></h1>
+  <p>Cinco direcciones simbólicas. Cada paleta surge de lo que la marca es, no de lo que está de moda. Pasa el cursor sobre las franjas para explorar cada tono. Compara el preview UI para ver cómo se siente en pantalla.</p>
+</div>
+
+<!-- ═══════════════════════════════════════ PALETA 1 -->
+<div class="palette-section" id="p1" data-palette="p1">
+  <div class="hero-strip">
+    <div class="hero-strip__col"></div>
+    <div class="hero-strip__col"></div>
+    <div class="hero-strip__col"></div>
+    <div class="hero-strip__col"></div>
+    <div class="hero-strip__col"></div>
+    <div class="hero-strip__overlay">
+      <div class="hero-strip__name">① Tierra Profunda</div>
+      <div class="hero-strip__concept">Lo que está debajo de la superficie</div>
+    </div>
+  </div>
+  <div class="palette-body">
+    <div class="palette-left">
+      <div class="swatches">
+        <div class="swatch-row"><div class="swatch-dot" style="background:#2B1D0E"></div><div class="swatch-info"><div class="swatch-name">Tierra oscura</div><div class="swatch-hex">#2B1D0E</div><div class="swatch-role">Primario · Fondos oscuros · Texto</div></div></div>
+        <div class="swatch-row"><div class="swatch-dot" style="background:#5C3D1E"></div><div class="swatch-info"><div class="swatch-name">Arcilla</div><div class="swatch-hex">#5C3D1E</div><div class="swatch-role">Superficies · Cards dark</div></div></div>
+        <div class="swatch-row"><div class="swatch-dot" style="background:#C4813A"></div><div class="swatch-info"><div class="swatch-name">Ámbar cálido</div><div class="swatch-hex">#C4813A</div><div class="swatch-role">Acento · CTAs · Links</div></div></div>
+        <div class="swatch-row"><div class="swatch-dot" style="background:#E8D5B5"></div><div class="swatch-info"><div class="swatch-name">Arena dorada</div><div class="swatch-hex">#E8D5B5</div><div class="swatch-role">Acento suave · Highlights</div></div></div>
+        <div class="swatch-row"><div class="swatch-dot" style="background:#F5EEE3; border: 1px solid #e0d5c4"></div><div class="swatch-info"><div class="swatch-name">Pergamino</div><div class="swatch-hex">#F5EEE3</div><div class="swatch-role">Fondo claro · Texto dark</div></div></div>
+      </div>
+      <div class="simbolismo">
+        <div class="simbolismo__label">Sustento simbólico</div>
+        <div class="simbolismo__text">
+          <strong>La tierra como mapa del interior.</strong> Las pinturas rupestres — el primer intento humano de cartografiar el mundo simbólico — se hicieron en cuevas, con pigmentos de tierra. Esta paleta habla de eso: ir hacia abajo, hacia adentro, hacia lo que está antes del lenguaje.<br><br>
+          Para <strong>Claudia</strong>, que está cansada de soluciones de superficie, el marrón profundo dice "aquí no fingimos". El ámbar es calidez sin inocencia — no es el amarillo de la felicidad forzada.<br><br>
+          Para <strong>Valentina</strong>, evoca raíces, lo primordial, la terapia que sí llega al origen. Tierra ≠ barro — tierra = fundamento.
+        </div>
+        <div class="persona-tags">
+          <span class="persona-tag" style="background:rgba(196,129,58,.15);color:#C4813A">Claudia ✓</span>
+          <span class="persona-tag" style="background:rgba(92,61,30,.2);color:#E8D5B5">Valentina ✓</span>
+          <span class="persona-tag" style="background:rgba(43,29,14,.3);color:#C4813A">Calidez sin positivismo</span>
+        </div>
+      </div>
+    </div>
+    <div class="palette-right">
+      <div class="preview-label">Preview UI — Light mode</div>
+      <div class="ui-card">
+        <div class="ui-card__header">
+          <div class="ui-card__eyebrow">Proceso · 4 etapas</div>
+          <div class="ui-card__title">Llevas años buscando.<br>Lo que buscas no es lo que crees.</div>
+          <div class="ui-card__body">El trabajo del Endonauta no es llegar a un destino — es aprender a leer el terreno. Empezamos por lo que está debajo de todo.</div>
+          <button class="ui-card__btn">Comenzar el mapa</button>
+        </div>
+        <div class="ui-card__footer">Endonautas · El mapa del mundo interior</div>
+      </div>
+      <div style="background:#2B1D0E;border-radius:14px;padding:24px;margin-top:0;">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#8B6040;margin-bottom:10px;">Dark mode preview</div>
+        <div style="font-family:'Fraunces',serif;font-size:1.6rem;font-weight:300;color:#F5EEE3;line-height:1.2;margin-bottom:10px;">Para los que ya saben<br><em style="color:#C4813A">que el problema no es el problema.</em></div>
+        <div style="font-size:12px;color:#8B6040;">Autoconocimiento · Profundidad · Proceso</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ PALETA 2 -->
+<div class="palette-section" id="p2" data-palette="p2">
+  <div class="hero-strip">
+    <div class="hero-strip__col"></div>
+    <div class="hero-strip__col"></div>
+    <div class="hero-strip__col"></div>
+    <div class="hero-strip__col"></div>
+    <div class="hero-strip__col"></div>
+    <div class="hero-strip__overlay">
+      <div class="hero-strip__name">② Araucanía</div>
+      <div class="hero-strip__concept">El bosque que es también un mapa</div>
+    </div>
+  </div>
+  <div class="palette-body">
+    <div class="palette-left">
+      <div class="swatches">
+        <div class="swatch-row"><div class="swatch-dot" style="background:#1B3A2D"></div><div class="swatch-info"><div class="swatch-name">Bosque profundo</div><div class="swatch-hex">#1B3A2D</div><div class="swatch-role">Primario · Fondos oscuros</div></div></div>
+        <div class="swatch-row"><div class="swatch-dot" style="background:#2D5C44"></div><div class="swatch-info"><div class="swatch-name">Helecho</div><div class="swatch-hex">#2D5C44</div><div class="swatch-role">Superficies · Cards dark</div></div></div>
+        <div class="swatch-row"><div class="swatch-dot" style="background:#8B4F3C"></div><div class="swatch-info"><div class="swatch-name">Corteza de ñirre</div><div class="swatch-hex">#8B4F3C</div><div class="swatch-role">Acento · CTAs · Calidez</div></div></div>
+        <div class="swatch-row"><div class="swatch-dot" style="background:#C8D5C0"></div><div class="swatch-info"><div class="swatch-name">Musgo claro</div><div class="swatch-hex">#C8D5C0</div><div class="swatch-role">Acento suave · Fondos tono</div></div></div>
+        <div class="swatch-row"><div class="swatch-dot" style="background:#F2EFE8; border: 1px solid #ddd8cd"></div><div class="swatch-info"><div class="swatch-name">Niebla</div><div class="swatch-hex">#F2EFE8</div><div class="swatch-role">Fondo claro principal</div></div></div>
+      </div>
+      <div class="simbolismo">
+        <div class="simbolismo__label">Sustento simbólico</div>
+        <div class="simbolismo__text">
+          <strong>El pehuén como árbol cósmico.</strong> La Araucaria araucana crece en La Araucanía — es el árbol sagrado del pueblo Mapuche, que conecta el mundo de abajo (las raíces, los ancestros) con el mundo de arriba (el cosmos). El concepto Endonautas — navegar el interior — es exactamente ese movimiento: raíces como origen, copa como posibilidad.<br><br>
+          Para <strong>Claudia</strong>, este verde dice "vivo y real" — no el verde de las apps de meditación, sino el verde de algo que tiene raíces y crece.<br><br>
+          Para <strong>Valentina</strong>, el componente intercultural y el origen sur-chileno de Franco son diferenciales que una terapeuta valora. La autenticidad del territorio.
+        </div>
+        <div class="persona-tags">
+          <span class="persona-tag" style="background:rgba(27,58,45,.3);color:#C8D5C0">Claudia ✓</span>
+          <span class="persona-tag" style="background:rgba(139,79,60,.15);color:#8B4F3C">Valentina ✓✓</span>
+          <span class="persona-tag" style="background:rgba(27,58,45,.2);color:#2D5C44">Raíz territorial</span>
+        </div>
+      </div>
+    </div>
+    <div class="palette-right">
+      <div class="preview-label">Preview UI — Light mode</div>
+      <div class="ui-card">
+        <div class="ui-card__header">
+          <div class="ui-card__eyebrow">Proceso · 4 etapas</div>
+          <div class="ui-card__title">Llevas años buscando.<br>Lo que buscas no es lo que crees.</div>
+          <div class="ui-card__body">El trabajo del Endonauta no es llegar a un destino — es aprender a leer el terreno. Empezamos por lo que está debajo de todo.</div>
+          <button class="ui-card__btn">Comenzar el mapa</button>
+        </div>
+        <div class="ui-card__footer">Endonautas · El mapa del mundo interior</div>
+      </div>
+      <div style="background:#1B3A2D;border-radius:14px;padding:24px;">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#4D7A60;margin-bottom:10px;">Dark mode preview</div>
+        <div style="font-family:'Fraunces',serif;font-size:1.6rem;font-weight:300;color:#F2EFE8;line-height:1.2;margin-bottom:10px;">Para los que ya saben<br><em style="color:#C8D5C0">que el problema no es el problema.</em></div>
+        <div style="font-size:12px;color:#4D7A60;">Autoconocimiento · Profundidad · Proceso</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ PALETA 3 -->
+<div class="palette-section" id="p3" data-palette="p3">
+  <div class="hero-strip">
+    <div class="hero-strip__col"></div>
+    <div class="hero-strip__col"></div>
+    <div class="hero-strip__col"></div>
+    <div class="hero-strip__col"></div>
+    <div class="hero-strip__col"></div>
+    <div class="hero-strip__overlay">
+      <div class="hero-strip__name">③ Cartografía</div>
+      <div class="hero-strip__concept">Tinta de mapa, oro de coordenadas</div>
+    </div>
+  </div>
+  <div class="palette-body">
+    <div class="palette-left">
+      <div class="swatches">
+        <div class="swatch-row"><div class="swatch-dot" style="background:#1A2340"></div><div class="swatch-info"><div class="swatch-name">Tinta índigo</div><div class="swatch-hex">#1A2340</div><div class="swatch-role">Primario · Fondos oscuros</div></div></div>
+        <div class="swatch-row"><div class="swatch-dot" style="background:#2B3D6B"></div><div class="swatch-info"><div class="swatch-name">Azul profundo</div><div class="swatch-hex">#2B3D6B</div><div class="swatch-role">Superficies · Cards dark</div></div></div>
+        <div class="swatch-row"><div class="swatch-dot" style="background:#C4A832"></div><div class="swatch-info"><div class="swatch-name">Oro cartográfico</div><div class="swatch-hex">#C4A832</div><div class="swatch-role">Acento · Coordenadas · CTAs</div></div></div>
+        <div class="swatch-row"><div class="swatch-dot" style="background:#DDD5C0"></div><div class="swatch-info"><div class="swatch-name">Papel antiguo</div><div class="swatch-hex">#DDD5C0</div><div class="swatch-role">Superficies cálidas</div></div></div>
+        <div class="swatch-row"><div class="swatch-dot" style="background:#F5F0E8; border: 1px solid #ddd5c0"></div><div class="swatch-info"><div class="swatch-name">Pergamino</div><div class="swatch-hex">#F5F0E8</div><div class="swatch-role">Fondo claro principal</div></div></div>
+      </div>
+      <div class="simbolismo">
+        <div class="simbolismo__label">Sustento simbólico</div>
+        <div class="simbolismo__text">
+          <strong>El mapa como objeto sagrado de la exploración.</strong> Los grandes mapas históricos se hacían con tinta índigo extraída de plantas y oro para marcar lo que importaba. El acto de cartografiar fue durante siglos un acto intelectual Y espiritual — se trazaba el mundo conocido y se dejaba espacio honesto para lo desconocido.<br><br>
+          Para <strong>Claudia</strong>, el índigo profundo no es el azul corporativo de LinkedIn — es el azul de la noche antes del amanecer, de los sueños, del inconsciente.<br><br>
+          Para <strong>Valentina</strong>, el gold académico valida intelectualmente. Le dice "esto tiene rigor". La combinación índigo + oro es el par de la tradición académica más noble — universidades antiguas, encuadernaciones de cuero, sellos.
+        </div>
+        <div class="persona-tags">
+          <span class="persona-tag" style="background:rgba(26,35,64,.4);color:#DDD5C0">Claudia ✓</span>
+          <span class="persona-tag" style="background:rgba(196,168,50,.15);color:#C4A832">Valentina ✓✓</span>
+          <span class="persona-tag" style="background:rgba(26,35,64,.3);color:#9BAAD4">Rigor intelectual</span>
+        </div>
+      </div>
+    </div>
+    <div class="palette-right">
+      <div class="preview-label">Preview UI — Light mode</div>
+      <div class="ui-card">
+        <div class="ui-card__header">
+          <div class="ui-card__eyebrow">Proceso · 4 etapas</div>
+          <div class="ui-card__title">Llevas años buscando.<br>Lo que buscas no es lo que crees.</div>
+          <div class="ui-card__body">El trabajo del Endonauta no es llegar a un destino — es aprender a leer el terreno. Empezamos por lo que está debajo de todo.</div>
+          <button class="ui-card__btn">Comenzar el mapa</button>
+        </div>
+        <div class="ui-card__footer">Endonautas · El mapa del mundo interior</div>
+      </div>
+      <div style="background:#1A2340;border-radius:14px;padding:24px;">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#4A5E8A;margin-bottom:10px;">Dark mode preview</div>
+        <div style="font-family:'Fraunces',serif;font-size:1.6rem;font-weight:300;color:#F5F0E8;line-height:1.2;margin-bottom:10px;">Para los que ya saben<br><em style="color:#C4A832">que el problema no es el problema.</em></div>
+        <div style="font-size:12px;color:#4A5E8A;">Autoconocimiento · Profundidad · Proceso</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ PALETA 4 -->
+<div class="palette-section" id="p4" data-palette="p4">
+  <div class="hero-strip">
+    <div class="hero-strip__col"></div>
+    <div class="hero-strip__col"></div>
+    <div class="hero-strip__col"></div>
+    <div class="hero-strip__col"></div>
+    <div class="hero-strip__col"></div>
+    <div class="hero-strip__overlay">
+      <div class="hero-strip__name">④ Umbral</div>
+      <div class="hero-strip__concept">El momento justo antes de ver</div>
+    </div>
+  </div>
+  <div class="palette-body">
+    <div class="palette-left">
+      <div class="swatches">
+        <div class="swatch-row"><div class="swatch-dot" style="background:#120F1A"></div><div class="swatch-info"><div class="swatch-name">Noche interior</div><div class="swatch-hex">#120F1A</div><div class="swatch-role">Primario · Fondo oscuro</div></div></div>
+        <div class="swatch-row"><div class="swatch-dot" style="background:#261E38"></div><div class="swatch-info"><div class="swatch-name">Púrpura oscuro</div><div class="swatch-hex">#261E38</div><div class="swatch-role">Superficies · Cards dark</div></div></div>
+        <div class="swatch-row"><div class="swatch-dot" style="background:#B8896A"></div><div class="swatch-info"><div class="swatch-name">Amanecer</div><div class="swatch-hex">#B8896A</div><div class="swatch-role">Acento · CTAs · Calidez</div></div></div>
+        <div class="swatch-row"><div class="swatch-dot" style="background:#E8D5C4"></div><div class="swatch-info"><div class="swatch-name">Alba</div><div class="swatch-hex">#E8D5C4</div><div class="swatch-role">Acento suave · Highlights</div></div></div>
+        <div class="swatch-row"><div class="swatch-dot" style="background:#F5F1EE; border: 1px solid #e0d5c8"></div><div class="swatch-info"><div class="swatch-name">Luz del umbral</div><div class="swatch-hex">#F5F1EE</div><div class="swatch-role">Fondo claro principal</div></div></div>
+      </div>
+      <div class="simbolismo">
+        <div class="simbolismo__label">Sustento simbólico</div>
+        <div class="simbolismo__text">
+          <strong>El umbral como espacio sagrado.</strong> En antropología y psicología junguiana, el umbral es el espacio entre lo conocido y lo desconocido — ni dentro ni fuera, ni antes ni después. Claudia llega a Endonautas en ese lugar exacto: algo terminó, algo no ha comenzado. El púrpura oscuro no es el morado de los manteles espirituales — es el color del cielo en el momento en que ya no es de noche pero todavía no amanece.<br><br>
+          Para <strong>Claudia</strong>, este color la nombra sin que ella lo sepa. "Estoy en el umbral" es exactamente donde está.<br><br>
+          Para <strong>Valentina</strong>, el umbral es el espacio clínico por excelencia — el lugar donde el paciente está entre versiones de sí mismo.
+        </div>
+        <div class="persona-tags">
+          <span class="persona-tag" style="background:rgba(18,15,26,.4);color:#B8896A">Claudia ✓✓</span>
+          <span class="persona-tag" style="background:rgba(38,30,56,.4);color:#D4B8A8">Valentina ✓✓</span>
+          <span class="persona-tag" style="background:rgba(184,137,106,.1);color:#B8896A">Espacio liminal</span>
+        </div>
+      </div>
+    </div>
+    <div class="palette-right">
+      <div class="preview-label">Preview UI — Light mode</div>
+      <div class="ui-card">
+        <div class="ui-card__header">
+          <div class="ui-card__eyebrow">Proceso · 4 etapas</div>
+          <div class="ui-card__title">Llevas años buscando.<br>Lo que buscas no es lo que crees.</div>
+          <div class="ui-card__body">El trabajo del Endonauta no es llegar a un destino — es aprender a leer el terreno. Empezamos por lo que está debajo de todo.</div>
+          <button class="ui-card__btn">Comenzar el mapa</button>
+        </div>
+        <div class="ui-card__footer">Endonautas · El mapa del mundo interior</div>
+      </div>
+      <div style="background:#120F1A;border-radius:14px;padding:24px;">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#4A3A60;margin-bottom:10px;">Dark mode preview</div>
+        <div style="font-family:'Fraunces',serif;font-size:1.6rem;font-weight:300;color:#F5F1EE;line-height:1.2;margin-bottom:10px;">Para los que ya saben<br><em style="color:#B8896A">que el problema no es el problema.</em></div>
+        <div style="font-size:12px;color:#4A3A60;">Autoconocimiento · Profundidad · Proceso</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ PALETA 5 -->
+<div class="palette-section" id="p5" data-palette="p5">
+  <div class="hero-strip">
+    <div class="hero-strip__col"></div>
+    <div class="hero-strip__col"></div>
+    <div class="hero-strip__col"></div>
+    <div class="hero-strip__col"></div>
+    <div class="hero-strip__col"></div>
+    <div class="hero-strip__overlay">
+      <div class="hero-strip__name">⑤ Ceniza y Brasa</div>
+      <div class="hero-strip__concept">Lo que queda después del fuego es lo que eres</div>
+    </div>
+  </div>
+  <div class="palette-body">
+    <div class="palette-left">
+      <div class="swatches">
+        <div class="swatch-row"><div class="swatch-dot" style="background:#1E1A17"></div><div class="swatch-info"><div class="swatch-name">Ceniza oscura</div><div class="swatch-hex">#1E1A17</div><div class="swatch-role">Primario · Fondo oscuro</div></div></div>
+        <div class="swatch-row"><div class="swatch-dot" style="background:#3A3028"></div><div class="swatch-info"><div class="swatch-name">Piedra volcánica</div><div class="swatch-hex">#3A3028</div><div class="swatch-role">Superficies · Cards dark</div></div></div>
+        <div class="swatch-row"><div class="swatch-dot" style="background:#C4552A"></div><div class="swatch-info"><div class="swatch-name">Brasa viva</div><div class="swatch-hex">#C4552A</div><div class="swatch-role">Acento · CTAs · Fuego</div></div></div>
+        <div class="swatch-row"><div class="swatch-dot" style="background:#E8D8C8"></div><div class="swatch-info"><div class="swatch-name">Ceniza clara</div><div class="swatch-hex">#E8D8C8</div><div class="swatch-role">Acento suave · Fondos tono</div></div></div>
+        <div class="swatch-row"><div class="swatch-dot" style="background:#F5F0EA; border: 1px solid #ddd5c8"></div><div class="swatch-info"><div class="swatch-name">Humo blanco</div><div class="swatch-hex">#F5F0EA</div><div class="swatch-role">Fondo claro principal</div></div></div>
+      </div>
+      <div class="simbolismo">
+        <div class="simbolismo__label">Sustento simbólico</div>
+        <div class="simbolismo__text">
+          <strong>El volcán como metáfora del proceso interior.</strong> La Araucanía es zona volcánica activa — el Villarrica, el Llaima. La erupción destruye la forma anterior y la ceniza volcánica es lo que hace fértil el suelo. Esta es la metáfora exacta del trabajo de Endonautas: Claudia llega en crisis (la erupción), hace el proceso (la lava que se enfría), y lo que queda (la ceniza) es lo que permite que algo nuevo crezca.<br><br>
+          Para <strong>Claudia</strong>, la brasa dice "el fuego no está apagado — está dentro". Eso es reconocimiento, no positivismo.<br><br>
+          Para <strong>Valentina</strong>, la metáfora de la crisis como proceso necesario (no como falla) es exactamente el marco terapéutico que usa con sus clientes.
+        </div>
+        <div class="persona-tags">
+          <span class="persona-tag" style="background:rgba(196,85,42,.15);color:#C4552A">Claudia ✓✓</span>
+          <span class="persona-tag" style="background:rgba(58,48,40,.4);color:#E8D8C8">Valentina ✓✓</span>
+          <span class="persona-tag" style="background:rgba(196,85,42,.1);color:#C4552A">Crisis como proceso</span>
+        </div>
+      </div>
+    </div>
+    <div class="palette-right">
+      <div class="preview-label">Preview UI — Light mode</div>
+      <div class="ui-card">
+        <div class="ui-card__header">
+          <div class="ui-card__eyebrow">Proceso · 4 etapas</div>
+          <div class="ui-card__title">Llevas años buscando.<br>Lo que buscas no es lo que crees.</div>
+          <div class="ui-card__body">El trabajo del Endonauta no es llegar a un destino — es aprender a leer el terreno. Empezamos por lo que está debajo de todo.</div>
+          <button class="ui-card__btn">Comenzar el mapa</button>
+        </div>
+        <div class="ui-card__footer">Endonautas · El mapa del mundo interior</div>
+      </div>
+      <div style="background:#1E1A17;border-radius:14px;padding:24px;">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#5A4A38;margin-bottom:10px;">Dark mode preview</div>
+        <div style="font-family:'Fraunces',serif;font-size:1.6rem;font-weight:300;color:#F5F0EA;line-height:1.2;margin-bottom:10px;">Para los que ya saben<br><em style="color:#C4552A">que el problema no es el problema.</em></div>
+        <div style="font-size:12px;color:#5A4A38;">Autoconocimiento · Profundidad · Proceso</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>Endonautas · 5 propuestas de paleta · Mayo 2026 · Ninguna es definitiva hasta que tú lo decidas.</footer>
+
+<script>
+var btns = document.querySelectorAll('.nav__btn');
+var sections = document.querySelectorAll('.palette-section');
+
+btns.forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    btns.forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    var target = btn.getAttribute('data-target');
+    sections.forEach(function(s) {
+      if (target === 'all') {
+        s.classList.remove('hidden');
+      } else {
+        s.classList.toggle('hidden', s.getAttribute('data-palette') !== target);
+      }
+    });
+  });
+});
+</script>
+</body>
+</html>

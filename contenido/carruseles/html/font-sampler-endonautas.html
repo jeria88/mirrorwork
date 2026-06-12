@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Font Sampler — Endonautas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #070707;
+  font-family: 'Inter', sans-serif;
+  padding: 3rem 2rem 4rem;
+  color: #fff;
+}
+
+h1 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+  font-size: 0.75rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #444;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+.subtitle {
+  font-size: 0.7rem;
+  color: #2a2a2a;
+  text-align: center;
+  margin-bottom: 3rem;
+  letter-spacing: 0.1em;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.option {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.option-label {
+  text-align: center;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #333;
+}
+.option-label strong {
+  display: block;
+  font-size: 0.68rem;
+  color: #c9a84c;
+  letter-spacing: 0.08em;
+  text-transform: none;
+  font-weight: 500;
+  margin-bottom: 0.2rem;
+}
+
+/* SLIDE CARD */
+.slide-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4/5;
+  border-radius: 10px;
+  overflow: hidden;
+  background-image: url('https://images.pexels.com/photos/14256347/pexels-photo-14256347.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940');
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.04);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.slide-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.9), 0 0 0 1px rgba(201,168,76,0.2);
+}
+.slide-card.selected {
+  box-shadow: 0 0 0 2px #c9a84c, 0 20px 60px rgba(0,0,0,0.8);
+}
+
+.slide-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(168deg, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.68) 50%, rgba(0,0,0,0.94) 100%);
+  z-index: 0;
+}
+
+.slide-inner {
+  position: absolute;
+  inset: 0;
+  padding: 1.2rem 1.3rem;
+  display: flex;
+  flex-direction: column;
+  z-index: 1;
+}
+
+.brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand-mark {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.brand-logo {
+  height: 14px;
+  width: 14px;
+  object-fit: contain;
+  opacity: 0.85;
+  flex-shrink: 0;
+}
+.brand-name {
+  font-size: 0.42rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #c9a84c;
+  font-family: 'Inter', sans-serif;
+  opacity: 0.8;
+}
+.slide-num-sm {
+  font-size: 0.42rem;
+  letter-spacing: 0.15em;
+  color: rgba(255,255,255,0.2);
+  font-family: 'Inter', sans-serif;
+}
+
+.spacer { flex: 1; }
+
+.eyebrow {
+  font-size: 0.42rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #c9a84c;
+  margin-bottom: 0.6rem;
+  font-family: 'Inter', sans-serif;
+}
+
+.hook {
+  line-height: 1.22;
+  color: #fff;
+  margin-bottom: 0.4rem;
+}
+
+.sub {
+  font-style: italic;
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 0.9rem;
+}
+
+.swipe-hint {
+  font-size: 0.4rem;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.4);
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.swipe-hint::after {
+  content: '';
+  display: inline-block;
+  width: 18px;
+  height: 1px;
+  background: #c9a84c;
+  opacity: 0.4;
+}
+
+/* ── FONT VARIANTS ── */
+
+/* 1 — Playfair + Inter (actual) */
+.f1 .hook { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 400; }
+.f1 .sub  { font-family: 'Playfair Display', serif; font-size: 0.72rem; }
+
+/* 2 — Cormorant Garamond + Inter */
+.f2 .hook { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 300; letter-spacing: 0.01em; }
+.f2 .sub  { font-family: 'Cormorant Garamond', serif; font-size: 0.85rem; font-weight: 300; }
+
+/* 3 — Fraunces + Inter */
+.f3 .hook { font-family: 'Fraunces', serif; font-size: 1rem; font-weight: 400; font-optical-sizing: auto; }
+.f3 .sub  { font-family: 'Fraunces', serif; font-size: 0.72rem; font-weight: 300; }
+
+/* 4 — EB Garamond + Inter */
+.f4 .hook { font-family: 'EB Garamond', serif; font-size: 1.15rem; font-weight: 400; }
+.f4 .sub  { font-family: 'EB Garamond', serif; font-size: 0.82rem; font-style: italic; }
+
+/* 5 — DM Serif Display + DM Sans */
+.f5 .hook { font-family: 'DM Serif Display', serif; font-size: 1rem; font-weight: 400; }
+.f5 .sub  { font-family: 'DM Serif Display', serif; font-size: 0.72rem; font-style: italic; }
+.f5 .eyebrow { font-family: 'DM Sans', sans-serif; }
+.f5 .swipe-hint { font-family: 'DM Sans', sans-serif; }
+.f5 .brand-name { font-family: 'DM Sans', sans-serif; }
+.f5 .slide-num-sm { font-family: 'DM Sans', sans-serif; }
+
+/* CONTENT SLIDE PREVIEW (slide 2) */
+.content-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4/5;
+  border-radius: 10px;
+  overflow: hidden;
+  background-image: url('https://images.pexels.com/photos/36013160/pexels-photo-36013160.png?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940');
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.content-card:hover { transform: translateY(-4px); }
+.content-card.selected {
+  box-shadow: 0 0 0 2px #c9a84c, 0 12px 40px rgba(0,0,0,0.7);
+}
+.content-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(4,4,4,0.91);
+  z-index: 0;
+}
+
+.content-inner {
+  position: absolute;
+  inset: 0;
+  padding: 1.2rem 1.3rem;
+  display: flex;
+  flex-direction: column;
+  z-index: 1;
+}
+
+.c-label {
+  font-size: 0.4rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #c9a84c;
+  font-family: 'Inter', sans-serif;
+  margin-bottom: 0.6rem;
+  margin-top: auto;
+}
+.c-title {
+  line-height: 1.28;
+  color: #fff;
+  margin-bottom: 0.55rem;
+}
+.c-title em { color: #c9a84c; font-style: italic; }
+.c-rule {
+  width: 20px;
+  height: 1px;
+  background: #c9a84c;
+  opacity: 0.4;
+  margin-bottom: 0.65rem;
+}
+.c-body {
+  font-size: 0.58rem;
+  line-height: 1.72;
+  color: rgba(255,255,255,0.65);
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+}
+.c-body em { color: #fff; font-style: normal; font-weight: 500; }
+.c-spacer { flex: 1; }
+
+/* Content font variants */
+.f1 .c-title { font-family: 'Playfair Display', serif; font-size: 0.92rem; font-weight: 400; }
+.f2 .c-title { font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; font-weight: 300; }
+.f3 .c-title { font-family: 'Fraunces', serif; font-size: 0.88rem; font-weight: 400; }
+.f4 .c-title { font-family: 'EB Garamond', serif; font-size: 1rem; font-weight: 400; }
+.f5 .c-title { font-family: 'DM Serif Display', serif; font-size: 0.9rem; font-weight: 400; }
+.f5 .c-body  { font-family: 'DM Sans', sans-serif; }
+.f5 .c-label { font-family: 'DM Sans', sans-serif; }
+
+/* SELECTED INDICATOR */
+.select-btn {
+  padding: 0.45rem;
+  border: 1px solid #222;
+  border-radius: 8px;
+  background: transparent;
+  color: #333;
+  font-size: 0.65rem;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+  letter-spacing: 0.08em;
+  width: 100%;
+}
+.select-btn:hover { border-color: rgba(201,168,76,0.4); color: #c9a84c; }
+.select-btn.active { border-color: #c9a84c; color: #c9a84c; background: rgba(201,168,76,0.06); }
+
+/* FOOTER */
+.footer {
+  max-width: 1400px;
+  margin: 3rem auto 0;
+  padding-top: 2rem;
+  border-top: 1px solid #141414;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.selection-text {
+  font-size: 0.7rem;
+  color: #333;
+  letter-spacing: 0.06em;
+}
+.selection-text strong { color: #c9a84c; }
+.confirm-btn {
+  padding: 0.6rem 1.5rem;
+  border: 1px solid rgba(201,168,76,0.35);
+  border-radius: 8px;
+  background: transparent;
+  color: #c9a84c;
+  font-size: 0.75rem;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.06em;
+}
+.confirm-btn:hover { background: #c9a84c; color: #000; }
+</style>
+</head>
+<body>
+
+<h1>Font Sampler · Endonautas</h1>
+<p class="subtitle">Haz clic en la opción que más te gusta — portada + slide de contenido</p>
+
+<div class="grid">
+
+  <!-- OPCIÓN 1 — Playfair + Inter (actual) -->
+  <div class="option f1">
+    <div class="option-label">
+      <strong>Playfair Display + Inter</strong>
+      Actual · Editorial clásica
+    </div>
+    <div class="slide-card" onclick="select(1)" id="card-portada-1">
+      <div class="slide-inner">
+        <div class="brand-row">
+          <div class="brand-mark">
+            <img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt="">
+            <span class="brand-name">Endonautas</span>
+          </div>
+          <span class="slide-num-sm">1 / 5</span>
+        </div>
+        <div class="spacer"></div>
+        <div class="eyebrow">Endonautas · método</div>
+        <div class="hook">Cómo saber si estás trabajando el síntoma o el <em style="color:#c9a84c;font-style:italic">mapa</em>.</div>
+        <div class="sub">Tres señales.</div>
+        <div class="swipe-hint">Desliza </div>
+      </div>
+    </div>
+    <div class="content-card" onclick="select(1)" id="card-content-1">
+      <div class="content-inner">
+        <div class="brand-row">
+          <div class="brand-mark">
+            <img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt="">
+            <span class="brand-name">Endonautas</span>
+          </div>
+          <span class="slide-num-sm">2 / 5</span>
+        </div>
+        <div class="c-label">Señal 01</div>
+        <div class="c-title"><em>Vuelve</em> con el estrés.</div>
+        <div class="c-rule"></div>
+        <div class="c-body">Si el patrón desaparece cuando todo va bien y regresa cuando hay presión,<br><em>estás trabajando el síntoma.</em></div>
+        <div class="c-spacer"></div>
+      </div>
+    </div>
+    <button class="select-btn" id="btn-1" onclick="select(1)">Elegir esta</button>
+  </div>
+
+  <!-- OPCIÓN 2 — Cormorant Garamond + Inter -->
+  <div class="option f2">
+    <div class="option-label">
+      <strong>Cormorant Garamond + Inter</strong>
+      Etérea · Alta costura
+    </div>
+    <div class="slide-card" onclick="select(2)" id="card-portada-2">
+      <div class="slide-inner">
+        <div class="brand-row">
+          <div class="brand-mark">
+            <img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt="">
+            <span class="brand-name">Endonautas</span>
+          </div>
+          <span class="slide-num-sm">1 / 5</span>
+        </div>
+        <div class="spacer"></div>
+        <div class="eyebrow">Endonautas · método</div>
+        <div class="hook">Cómo saber si estás trabajando el síntoma o el <em style="color:#c9a84c;font-style:italic">mapa</em>.</div>
+        <div class="sub">Tres señales.</div>
+        <div class="swipe-hint">Desliza </div>
+      </div>
+    </div>
+    <div class="content-card" onclick="select(2)" id="card-content-2">
+      <div class="content-inner">
+        <div class="brand-row">
+          <div class="brand-mark">
+            <img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt="">
+            <span class="brand-name">Endonautas</span>
+          </div>
+          <span class="slide-num-sm">2 / 5</span>
+        </div>
+        <div class="c-label">Señal 01</div>
+        <div class="c-title"><em>Vuelve</em> con el estrés.</div>
+        <div class="c-rule"></div>
+        <div class="c-body">Si el patrón desaparece cuando todo va bien y regresa cuando hay presión,<br><em>estás trabajando el síntoma.</em></div>
+        <div class="c-spacer"></div>
+      </div>
+    </div>
+    <button class="select-btn" id="btn-2" onclick="select(2)">Elegir esta</button>
+  </div>
+
+  <!-- OPCIÓN 3 — Fraunces + Inter -->
+  <div class="option f3">
+    <div class="option-label">
+      <strong>Fraunces + Inter</strong>
+      Orgánica · Carácter propio
+    </div>
+    <div class="slide-card" onclick="select(3)" id="card-portada-3">
+      <div class="slide-inner">
+        <div class="brand-row">
+          <div class="brand-mark">
+            <img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt="">
+            <span class="brand-name">Endonautas</span>
+          </div>
+          <span class="slide-num-sm">1 / 5</span>
+        </div>
+        <div class="spacer"></div>
+        <div class="eyebrow">Endonautas · método</div>
+        <div class="hook">Cómo saber si estás trabajando el síntoma o el <em style="color:#c9a84c;font-style:italic">mapa</em>.</div>
+        <div class="sub">Tres señales.</div>
+        <div class="swipe-hint">Desliza </div>
+      </div>
+    </div>
+    <div class="content-card" onclick="select(3)" id="card-content-3">
+      <div class="content-inner">
+        <div class="brand-row">
+          <div class="brand-mark">
+            <img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt="">
+            <span class="brand-name">Endonautas</span>
+          </div>
+          <span class="slide-num-sm">2 / 5</span>
+        </div>
+        <div class="c-label">Señal 01</div>
+        <div class="c-title"><em>Vuelve</em> con el estrés.</div>
+        <div class="c-rule"></div>
+        <div class="c-body">Si el patrón desaparece cuando todo va bien y regresa cuando hay presión,<br><em>estás trabajando el síntoma.</em></div>
+        <div class="c-spacer"></div>
+      </div>
+    </div>
+    <button class="select-btn" id="btn-3" onclick="select(3)">Elegir esta</button>
+  </div>
+
+  <!-- OPCIÓN 4 — EB Garamond + Inter -->
+  <div class="option f4">
+    <div class="option-label">
+      <strong>EB Garamond + Inter</strong>
+      Literaria · Cálida · Ebook
+    </div>
+    <div class="slide-card" onclick="select(4)" id="card-portada-4">
+      <div class="slide-inner">
+        <div class="brand-row">
+          <div class="brand-mark">
+            <img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt="">
+            <span class="brand-name">Endonautas</span>
+          </div>
+          <span class="slide-num-sm">1 / 5</span>
+        </div>
+        <div class="spacer"></div>
+        <div class="eyebrow">Endonautas · método</div>
+        <div class="hook">Cómo saber si estás trabajando el síntoma o el <em style="color:#c9a84c;font-style:italic">mapa</em>.</div>
+        <div class="sub">Tres señales.</div>
+        <div class="swipe-hint">Desliza </div>
+      </div>
+    </div>
+    <div class="content-card" onclick="select(4)" id="card-content-4">
+      <div class="content-inner">
+        <div class="brand-row">
+          <div class="brand-mark">
+            <img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt="">
+            <span class="brand-name">Endonautas</span>
+          </div>
+          <span class="slide-num-sm">2 / 5</span>
+        </div>
+        <div class="c-label">Señal 01</div>
+        <div class="c-title"><em>Vuelve</em> con el estrés.</div>
+        <div class="c-rule"></div>
+        <div class="c-body">Si el patrón desaparece cuando todo va bien y regresa cuando hay presión,<br><em>estás trabajando el síntoma.</em></div>
+        <div class="c-spacer"></div>
+      </div>
+    </div>
+    <button class="select-btn" id="btn-4" onclick="select(4)">Elegir esta</button>
+  </div>
+
+  <!-- OPCIÓN 5 — DM Serif Display + DM Sans -->
+  <div class="option f5">
+    <div class="option-label">
+      <strong>DM Serif Display + DM Sans</strong>
+      Moderna · Limpia · Contraste
+    </div>
+    <div class="slide-card" onclick="select(5)" id="card-portada-5">
+      <div class="slide-inner">
+        <div class="brand-row">
+          <div class="brand-mark">
+            <img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt="">
+            <span class="brand-name">Endonautas</span>
+          </div>
+          <span class="slide-num-sm">1 / 5</span>
+        </div>
+        <div class="spacer"></div>
+        <div class="eyebrow">Endonautas · método</div>
+        <div class="hook">Cómo saber si estás trabajando el síntoma o el <em style="color:#c9a84c;font-style:italic">mapa</em>.</div>
+        <div class="sub">Tres señales.</div>
+        <div class="swipe-hint">Desliza </div>
+      </div>
+    </div>
+    <div class="content-card" onclick="select(5)" id="card-content-5">
+      <div class="content-inner">
+        <div class="brand-row">
+          <div class="brand-mark">
+            <img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt="">
+            <span class="brand-name">Endonautas</span>
+          </div>
+          <span class="slide-num-sm">2 / 5</span>
+        </div>
+        <div class="c-label">Señal 01</div>
+        <div class="c-title"><em>Vuelve</em> con el estrés.</div>
+        <div class="c-rule"></div>
+        <div class="c-body">Si el patrón desaparece cuando todo va bien y regresa cuando hay presión,<br><em>estás trabajando el síntoma.</em></div>
+        <div class="c-spacer"></div>
+      </div>
+    </div>
+    <button class="select-btn" id="btn-5" onclick="select(5)">Elegir esta</button>
+  </div>
+
+</div>
+
+<div class="footer">
+  <div class="selection-text" id="selectionText">Ninguna seleccionada aún</div>
+  <button class="confirm-btn" onclick="confirm()">Confirmar elección →</button>
+</div>
+
+<script>
+const FONTS = {
+  1: { heading: 'Playfair Display', body: 'Inter', desc: 'Editorial clásica' },
+  2: { heading: 'Cormorant Garamond', body: 'Inter', desc: 'Etérea · Alta costura' },
+  3: { heading: 'Fraunces', body: 'Inter', desc: 'Orgánica · Carácter propio' },
+  4: { heading: 'EB Garamond', body: 'Inter', desc: 'Literaria · Cálida · Ebook' },
+  5: { heading: 'DM Serif Display', body: 'DM Sans', desc: 'Moderna · Limpia · Contraste' },
+};
+
+let selected = null;
+
+function select(n) {
+  // Clear previous
+  if (selected) {
+    document.getElementById('card-portada-' + selected).classList.remove('selected');
+    document.getElementById('card-content-' + selected).classList.remove('selected');
+    document.getElementById('btn-' + selected).classList.remove('active');
+    document.getElementById('btn-' + selected).textContent = 'Elegir esta';
+  }
+  selected = n;
+  document.getElementById('card-portada-' + n).classList.add('selected');
+  document.getElementById('card-content-' + n).classList.add('selected');
+  document.getElementById('btn-' + n).classList.add('active');
+  document.getElementById('btn-' + n).textContent = '✓ Seleccionada';
+  document.getElementById('selectionText').innerHTML =
+    'Seleccionada: <strong>' + FONTS[n].heading + ' + ' + FONTS[n].body + '</strong> — ' + FONTS[n].desc;
+}
+
+function confirm() {
+  if (!selected) { alert('Primero elige una opción.'); return; }
+  const f = FONTS[selected];
+  alert('Fuente elegida:\n\nHeading: ' + f.heading + '\nBody: ' + f.body + '\n\nDile a Claude que guardé la opción ' + selected + ' — "' + f.heading + '"');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700;900&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { width:1080px; height:1080px; background:#000; overflow:hidden; position:relative;
+         font-family:'Space Grotesk',system-ui,sans-serif; }
+
+  img.bg {
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+    object-position:center center; z-index:0;
+  }
+  .layer { position:absolute; inset:0; z-index:1; pointer-events:none; }
+
+  /* Header */
+  .logo-wrap { display:flex; align-items:center; gap:11px; }
+  .logo-img  { width:34px; height:34px; }
+  .logo-text {
+    font-weight:900; font-size:18px; letter-spacing:-0.02em;
+    background:linear-gradient(135deg,#7ecfa8,#7ec8cf);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+  .tag {
+    font-family:'Plus Jakarta Sans'; font-size:10px; letter-spacing:0.2em;
+    color:rgba(240,232,220,0.28); text-transform:uppercase;
+    border:1px solid rgba(240,232,220,0.10); border-radius:20px; padding:5px 13px;
+  }
+
+  /* Footer nav */
+  .nav {
+    display:flex; align-items:center; justify-content:space-between;
+    border-top:1px solid rgba(255,255,255,0.065); padding-top:20px;
+    margin-top:0;
+  }
+  .swipe {
+    font-family:'Plus Jakarta Sans'; font-size:11px; font-weight:500;
+    color:rgba(126,207,168,0.60); letter-spacing:0.14em; text-transform:uppercase;
+  }
+  .slide-info { display:flex; align-items:center; gap:16px; }
+  .dots { display:flex; gap:5px; align-items:center; }
+  .dot { width:5px; height:5px; border-radius:50%; background:rgba(240,232,220,0.13); }
+  .dot.on { background:#7ecfa8; width:20px; border-radius:3px; }
+  .num {
+    font-family:'Plus Jakarta Sans'; font-size:10px; letter-spacing:0.24em;
+    color:rgba(240,232,220,0.20); text-transform:uppercase;
+  }
+
+  /* Jade gradient text */
+  .jade {
+    background:linear-gradient(135deg,#7ecfa8,#7ec8cf);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+  em { font-style:italic; }
+  em.jade {
+    background:linear-gradient(135deg,#7ecfa8,#7ec8cf);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+
+
+/* Más oscuro que los otros slides — enfoca el texto */
+img.bg { filter: brightness(0.40) contrast(1.25) saturate(0.35); }
+
+.ovr { background: rgba(0,0,8,0.55); }
+
+.vig {
+  background: radial-gradient(ellipse 85% 85% at 50% 50%,
+    transparent 22%, rgba(0,0,0,0.78) 100%);
+}
+
+.content {
+  position:absolute; inset:0; z-index:10;
+  padding:68px 84px 62px;
+  display:flex; flex-direction:column; justify-content:space-between;
+  color:#F0E8DC;
+}
+.top { display:flex; align-items:center; justify-content:space-between; }
+
+/* Zona de la cita — centrada verticalmente */
+.quote-zone {
+  flex:1; display:flex; flex-direction:column; justify-content:center;
+  padding:0 0 10px;
+}
+
+/* Comilla decorativa enorme */
+.quotemark {
+  font-size:190px; font-weight:900; line-height:0.8;
+  color:rgba(126,207,168,0.14);
+  margin-bottom:-60px; margin-left:-8px;
+  font-family:'Space Grotesk';
+  display:block;
+}
+
+.q-line1 {
+  font-weight:300; font-size:52px; line-height:1.1;
+  letter-spacing:-0.02em; color:rgba(240,232,220,0.62);
+  margin-bottom:8px;
+}
+
+.q-line2 {
+  font-weight:900; font-size:80px; line-height:0.86;
+  letter-spacing:-0.04em; color:#F0E8DC;
+  margin-bottom:36px;
+}
+
+/* Divisor horizontal jade */
+.h-divider {
+  width:100%; height:1px;
+  background:linear-gradient(to right,
+    rgba(126,207,168,0) 0%,
+    rgba(126,207,168,0.45) 20%,
+    rgba(126,207,168,0.45) 60%,
+    rgba(126,207,168,0) 100%);
+  margin-bottom:32px;
+}
+
+.q-sub {
+  font-family:'Plus Jakarta Sans'; font-size:22px; font-weight:400;
+  color:rgba(240,232,220,0.42); letter-spacing:-0.01em;
+}
+</style></head><body>
+
+<img class="bg" src="file:///home/nikka/Proyectos/endonautas/brand/social/plantilla/04-fondos-pexels/dark-galaxy-3-33931033.jpg" alt="">
+<div class="layer ovr"></div>
+<div class="layer vig"></div>
+
+<!-- Líneas horizontales decorativas sobre y bajo el bloque de cita (SVG) -->
+<svg style="position:absolute;inset:0;width:1080px;height:1080px;z-index:5;pointer-events:none;" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="hl2" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="rgba(126,207,168,0)"/>
+      <stop offset="15%"  stop-color="rgba(126,207,168,0.40)"/>
+      <stop offset="85%"  stop-color="rgba(126,207,168,0.40)"/>
+      <stop offset="100%" stop-color="rgba(126,207,168,0)"/>
+    </linearGradient>
+  </defs>
+  <!-- Línea arriba del bloque de cita -->
+  <line x1="0" y1="340" x2="1080" y2="340" stroke="url(#hl2)" stroke-width="1.5"/>
+  <!-- Línea abajo del bloque (aproximado) -->
+  <line x1="0" y1="840" x2="1080" y2="840" stroke="url(#hl2)" stroke-width="1"/>
+</svg>
+
+<div class="content">
+  <div class="top">
+    <div class="logo-wrap">
+      <img class="logo-img" src="file:///home/nikka/Proyectos/endonautas/brand/social/plantilla/_assets/logo-trans.png" alt="">
+      <div class="logo-text">Endonautas</div>
+    </div>
+  </div>
+
+  <div class="quote-zone">
+    <span class="quotemark">❝</span>
+    <p class="q-line1">El problema no es</p>
+    <h2 class="q-line2">lo que <em class="jade">dijo.</em></h2>
+    <div class="h-divider"></div>
+    <p class="q-sub">Es lo que eso tocó en ti.</p>
+  </div>
+
+  <div class="nav" style="border-top:none; padding-top:0;">
+    <div class="swipe">Continúa →</div>
+    <div class="slide-info">
+      <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot  on"></div><div class="dot"></div></div>
+      <div class="num">03 / 04</div>
+    </div>
+  </div>
+</div>
+
+</body></html>

@@ -1,0 +1,454 @@
+[
+  {
+    "id": "R1",
+    "title": "Contraintuitivo",
+    "duration": 35,
+    "scenes": [
+      {
+        "from": 0,
+        "duration": 3,
+        "padding": "100px 0",
+        "elements": [
+          { "type": "logo", "delay": 10 }
+        ]
+      },
+      {
+        "from": 2,
+        "duration": 12,
+        "gap": 16,
+        "padding": "80px 0",
+        "elements": [
+          { "type": "text", "text": "El autoconocimiento", "delay": 0, "font": "playfair", "size": 72, "weight": 700 },
+          { "type": "text", "text": "te va a hacer", "delay": 15, "font": "playfair", "size": 72, "weight": 700 },
+          { "type": "text", "text": "más infeliz.", "delay": 30, "font": "playfair", "size": 72, "weight": 700, "color": "gold" },
+          { "type": "line", "delay": 60 },
+          { "type": "text", "text": "Antes de que me mates:", "delay": 80, "font": "inter", "size": 26, "color": "muted" },
+          { "type": "text", "text": "escúchame.", "delay": 95, "font": "inter", "size": 36, "bold": true }
+        ]
+      },
+      {
+        "from": 14,
+        "duration": 11,
+        "gap": 32,
+        "padding": "100px 0",
+        "elements": [
+          { "type": "text", "text": "Cuando empiezas a conocerte de verdad,", "delay": 0, "font": "inter", "size": 32 },
+          { "type": "text", "text": "no encuentras paz inmediata.", "delay": 20, "font": "inter", "size": 32 },
+          { "type": "line", "delay": 45 },
+          { "type": "text", "text": "Encuentras capas que nunca habías visto.", "delay": 60, "font": "inter", "size": 32 },
+          { "type": "text", "text": "Miedos detrás de tu personalidad.", "delay": 80, "font": "inter", "size": 32 },
+          { "type": "text", "text": "Patrones que llevan años corriendo", "delay": 100, "font": "inter", "size": 32 },
+          { "type": "text", "text": "sin permiso.", "delay": 115, "font": "inter", "size": 32, "color": "gold" }
+        ]
+      },
+      {
+        "from": 25,
+        "duration": 10,
+        "gap": 24,
+        "padding": "80px 0",
+        "elements": [
+          { "type": "text", "text": "Ese dolor no es señal de que algo está mal.", "delay": 0, "font": "inter", "size": 32, "color": "muted" },
+          { "type": "text", "text": "Es señal de que por primera vez", "delay": 20, "font": "inter", "size": 32, "color": "muted" },
+          { "type": "text", "text": "estás mirando de verdad.", "delay": 35, "font": "inter", "size": 32, "bold": true },
+          { "type": "line", "delay": 70 },
+          { "type": "text", "text": "No te hace feliz.", "delay": 90, "font": "playfair", "size": 56, "weight": 700 },
+          { "type": "text", "text": "Te hace libre.", "delay": 115, "font": "playfair", "size": 64, "italic": true, "color": "gold" },
+          { "type": "text", "text": "Hay una diferencia enorme.", "delay": 145, "font": "inter", "size": 24, "color": "muted" },
+          { "type": "text", "text": "🔖 Guarda esto — lo vas a necesitar", "delay": 170, "font": "inter", "size": 26, "color": "gold", "border": true }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "R2",
+    "title": "El Complaciente",
+    "duration": 25,
+    "scenes": [
+      {
+        "from": 0,
+        "duration": 7,
+        "gap": 24,
+        "padding": "100px 0",
+        "elements": [
+          { "type": "text", "text": "\"¿Alguna vez dijiste 'sí'", "delay": 0, "font": "playfair", "size": 60, "italic": true },
+          { "type": "text", "text": "cuando querías decir 'no'?\"", "delay": 20, "font": "playfair", "size": 60, "italic": true },
+          { "type": "line", "delay": 50 },
+          { "type": "text", "text": "Eso tiene un nombre.", "delay": 70, "font": "playfair", "size": 52, "weight": 700, "color": "gold" }
+        ]
+      },
+      {
+        "from": 7,
+        "duration": 11,
+        "gap": 28,
+        "padding": "100px 0",
+        "elements": [
+          { "type": "text", "text": "La Máscara", "delay": 0, "font": "playfair", "size": 60, "weight": 700 },
+          { "type": "text", "text": "del Complaciente.", "delay": 15, "font": "playfair", "size": 52, "weight": 700, "color": "gold" },
+          { "type": "line", "delay": 45 },
+          { "type": "text", "text": "No la elegiste conscientemente.", "delay": 65, "font": "inter", "size": 30 },
+          { "type": "text", "text": "La construiste para que alguien", "delay": 82, "font": "inter", "size": 30 },
+          { "type": "text", "text": "importante te amara.", "delay": 96, "font": "inter", "size": 30, "bold": true },
+          { "type": "text", "text": "Tal vez a los 6 años.", "delay": 120, "font": "inter", "size": 26, "color": "muted" },
+          { "type": "text", "text": "Tal vez a los 12.", "delay": 136, "font": "inter", "size": 26, "color": "muted" }
+        ]
+      },
+      {
+        "from": 18,
+        "duration": 7,
+        "gap": 30,
+        "padding": "100px 0",
+        "elements": [
+          { "type": "text", "text": "Tu sistema nervioso cree que", "delay": 0, "font": "inter", "size": 30, "color": "muted" },
+          { "type": "text", "text": "decir \"no\" es peligroso.", "delay": 18, "font": "inter", "size": 30, "bold": true },
+          { "type": "line", "delay": 50 },
+          { "type": "text", "text": "No eres demasiado bueno.", "delay": 70, "font": "playfair", "size": 44, "weight": 700 },
+          { "type": "text", "text": "Estás en piloto automático.", "delay": 90, "font": "playfair", "size": 44, "weight": 700, "color": "gold" },
+          { "type": "text", "text": "Comenta MASCARA → test gratuito", "delay": 130, "font": "inter", "size": 26, "color": "gold", "border": true }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "R3",
+    "title": "Historia Personal",
+    "duration": 50,
+    "scenes": [
+      {
+        "from": 0,
+        "duration": 4,
+        "padding": "120px 0",
+        "elements": [
+          { "type": "text", "text": "\"Hay algo que nunca te he contado", "delay": 10, "font": "playfair", "size": 52, "italic": true },
+          { "type": "text", "text": "sobre por qué escribí este libro.\"", "delay": 30, "font": "playfair", "size": 52, "italic": true }
+        ]
+      },
+      {
+        "from": 4,
+        "duration": 9,
+        "gap": 20,
+        "padding": "100px 0",
+        "elements": [
+          { "type": "text", "text": "Hubo un período de mi vida", "delay": 0, "font": "inter", "size": 28 },
+          { "type": "text", "text": "en que no me reconocía.", "delay": 18, "font": "inter", "size": 28, "color": "gold" },
+          { "type": "line", "delay": 50 },
+          { "type": "text", "text": "Era terapeuta.", "delay": 70, "font": "inter", "size": 28 },
+          { "type": "text", "text": "Acompañaba a otros a encontrarse.", "delay": 85, "font": "inter", "size": 28 },
+          { "type": "line", "delay": 115 },
+          { "type": "text", "text": "Y yo mismo", "delay": 135, "font": "inter", "size": 28 },
+          { "type": "text", "text": "estaba completamente perdido.", "delay": 150, "font": "inter", "size": 28, "bold": true }
+        ]
+      },
+      {
+        "from": 13,
+        "duration": 11,
+        "gap": 22,
+        "padding": "100px 0",
+        "elements": [
+          { "type": "text", "text": "No era una crisis visible.", "delay": 0, "font": "inter", "size": 28, "color": "muted" },
+          { "type": "text", "text": "Fue algo más silencioso.", "delay": 18, "font": "inter", "size": 28, "color": "muted" },
+          { "type": "line", "delay": 50 },
+          { "type": "text", "text": "Me di cuenta de que", "delay": 70, "font": "inter", "size": 28 },
+          { "type": "text", "text": "la persona que los demás veían...", "delay": 85, "font": "inter", "size": 28 },
+          { "type": "text", "text": "no era yo.", "delay": 110, "font": "playfair", "size": 56, "weight": 700, "color": "gold" }
+        ]
+      },
+      {
+        "from": 24,
+        "duration": 11,
+        "gap": 28,
+        "padding": "100px 0",
+        "elements": [
+          { "type": "text", "text": "Era una construcción.", "delay": 0, "font": "inter", "size": 28 },
+          { "type": "text", "text": "Brillante, funcional, efectiva.", "delay": 18, "font": "inter", "size": 28, "color": "muted" },
+          { "type": "line", "delay": 55 },
+          { "type": "text", "text": "Pero no era yo.", "delay": 75, "font": "inter", "size": 28, "bold": true },
+          { "type": "text", "text": "Eso me rompió.", "delay": 120, "font": "inter", "size": 28, "color": "muted" },
+          { "type": "text", "text": "Y luego me salvó.", "delay": 150, "font": "playfair", "size": 56, "weight": 700, "color": "gold" }
+        ]
+      },
+      {
+        "from": 35,
+        "duration": 15,
+        "gap": 24,
+        "padding": "100px 0",
+        "elements": [
+          { "type": "text", "text": "Endonautica nació de ese momento.", "delay": 0, "font": "inter", "size": 24, "color": "muted" },
+          { "type": "line", "delay": 30 },
+          { "type": "text", "text": "Porque supe que no era el único", "delay": 55, "font": "inter", "size": 28 },
+          { "type": "text", "text": "que vivía dentro de un personaje", "delay": 72, "font": "inter", "size": 28 },
+          { "type": "text", "text": "que nunca eligió.", "delay": 88, "font": "inter", "size": 28, "color": "gold" },
+          { "type": "line", "delay": 130 },
+          { "type": "text", "text": "Si algo de esto te suena...", "delay": 160, "font": "inter", "size": 28 },
+          { "type": "text", "text": "este es tu lugar.", "delay": 180, "font": "inter", "size": 28, "bold": true, "color": "gold" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "R4",
+    "title": "12 Dimensiones",
+    "duration": 45,
+    "scenes": [
+      {
+        "from": 0,
+        "duration": 3,
+        "gap": 20,
+        "padding": "120px 0",
+        "elements": [
+          { "type": "text", "text": "¿Cuántas dimensiones de ti mismo conoces?", "delay": 0, "font": "playfair", "size": 54, "lineHeight": 1.2 },
+          { "type": "line", "delay": 35 },
+          { "type": "text", "text": "La mayoría conoce 2 o 3.", "delay": 50, "font": "inter", "size": 28, "color": "muted" },
+          { "type": "text", "text": "Hay 12.", "delay": 65, "font": "playfair", "size": 64, "weight": 700, "color": "gold" }
+        ]
+      },
+      {
+        "from": 3,
+        "duration": 3,
+        "gap": 16,
+        "padding": "80px 0",
+        "elements": [
+          { "type": "text", "text": "Dimensión 1", "delay": 0, "font": "inter", "size": 11, "color": "gold", "style": { "letterSpacing": "0.25em", "textTransform": "uppercase", "opacity": 0.6 } },
+          { "type": "text", "text": "Cuerpo", "delay": 10, "font": "playfair", "size": 52, "weight": 700 },
+          { "type": "text", "text": "Tu historia emocional vive ahí,<br>no en tu mente.", "delay": 20, "font": "inter", "size": 24, "color": "#aaaaaa" }
+        ]
+      },
+      {
+        "from": 6,
+        "duration": 3,
+        "gap": 16,
+        "padding": "80px 0",
+        "elements": [
+          { "type": "text", "text": "Dimensión 2", "delay": 0, "font": "inter", "size": 11, "color": "gold", "style": { "letterSpacing": "0.25em", "textTransform": "uppercase", "opacity": 0.6 } },
+          { "type": "text", "text": "Emoción", "delay": 10, "font": "playfair", "size": 52, "weight": 700 },
+          { "type": "text", "text": "La información más honesta<br>que tienes.", "delay": 20, "font": "inter", "size": 24, "color": "#aaaaaa" }
+        ]
+      },
+      {
+        "from": 9,
+        "duration": 3,
+        "gap": 16,
+        "padding": "80px 0",
+        "elements": [
+          { "type": "text", "text": "Dimensión 3", "delay": 0, "font": "inter", "size": 11, "color": "gold", "style": { "letterSpacing": "0.25em", "textTransform": "uppercase", "opacity": 0.6 } },
+          { "type": "text", "text": "Identidad", "delay": 10, "font": "playfair", "size": 52, "weight": 700 },
+          { "type": "text", "text": "La brecha entre quién crees que eres<br>y quién eres.", "delay": 20, "font": "inter", "size": 24, "color": "#aaaaaa" }
+        ]
+      },
+      {
+        "from": 12,
+        "duration": 3,
+        "gap": 16,
+        "padding": "80px 0",
+        "elements": [
+          { "type": "text", "text": "Dimensión 4", "delay": 0, "font": "inter", "size": 11, "color": "gold", "style": { "letterSpacing": "0.25em", "textTransform": "uppercase", "opacity": 0.6 } },
+          { "type": "text", "text": "Sombra", "delay": 10, "font": "playfair", "size": 52, "weight": 700 },
+          { "type": "text", "text": "Lo que niegas de ti<br>te controla más.", "delay": 20, "font": "inter", "size": 24, "color": "#aaaaaa" }
+        ]
+      },
+      {
+        "from": 15,
+        "duration": 3,
+        "gap": 16,
+        "padding": "80px 0",
+        "elements": [
+          { "type": "text", "text": "Dimensión 5", "delay": 0, "font": "inter", "size": 11, "color": "gold", "style": { "letterSpacing": "0.25em", "textTransform": "uppercase", "opacity": 0.6 } },
+          { "type": "text", "text": "Propósito", "delay": 10, "font": "playfair", "size": 52, "weight": 700 },
+          { "type": "text", "text": "No se encuentra.<br>Se construye.", "delay": 20, "font": "inter", "size": 24, "color": "#aaaaaa" }
+        ]
+      },
+      {
+        "from": 18,
+        "duration": 3,
+        "gap": 16,
+        "padding": "80px 0",
+        "elements": [
+          { "type": "text", "text": "Dimensión 6", "delay": 0, "font": "inter", "size": 11, "color": "gold", "style": { "letterSpacing": "0.25em", "textTransform": "uppercase", "opacity": 0.6 } },
+          { "type": "text", "text": "Relación", "delay": 10, "font": "playfair", "size": 52, "weight": 700 },
+          { "type": "text", "text": "Todo conflicto externo<br>tiene raíz interna.", "delay": 20, "font": "inter", "size": 24, "color": "#aaaaaa" }
+        ]
+      },
+      {
+        "from": 21,
+        "duration": 3,
+        "gap": 16,
+        "padding": "80px 0",
+        "elements": [
+          { "type": "text", "text": "Dimensión 7", "delay": 0, "font": "inter", "size": 11, "color": "gold", "style": { "letterSpacing": "0.25em", "textTransform": "uppercase", "opacity": 0.6 } },
+          { "type": "text", "text": "Creencia", "delay": 10, "font": "playfair", "size": 52, "weight": 700 },
+          { "type": "text", "text": "Lo que crees determina<br>lo que te permites vivir.", "delay": 20, "font": "inter", "size": 24, "color": "#aaaaaa" }
+        ]
+      },
+      {
+        "from": 24,
+        "duration": 3,
+        "gap": 16,
+        "padding": "80px 0",
+        "elements": [
+          { "type": "text", "text": "Dimensión 8", "delay": 0, "font": "inter", "size": 11, "color": "gold", "style": { "letterSpacing": "0.25em", "textTransform": "uppercase", "opacity": 0.6 } },
+          { "type": "text", "text": "Herida", "delay": 10, "font": "playfair", "size": 52, "weight": 700 },
+          { "type": "text", "text": "No una etiqueta.<br>Una puerta de entrada.", "delay": 20, "font": "inter", "size": 24, "color": "#aaaaaa" }
+        ]
+      },
+      {
+        "from": 27,
+        "duration": 3,
+        "gap": 16,
+        "padding": "80px 0",
+        "elements": [
+          { "type": "text", "text": "Dimensión 9", "delay": 0, "font": "inter", "size": 11, "color": "gold", "style": { "letterSpacing": "0.25em", "textTransform": "uppercase", "opacity": 0.6 } },
+          { "type": "text", "text": "Tiempo", "delay": 10, "font": "playfair", "size": 52, "weight": 700 },
+          { "type": "text", "text": "¿Cuánto tiempo vives<br>fuera del presente?", "delay": 20, "font": "inter", "size": 24, "color": "#aaaaaa" }
+        ]
+      },
+      {
+        "from": 30,
+        "duration": 3,
+        "gap": 16,
+        "padding": "80px 0",
+        "elements": [
+          { "type": "text", "text": "Dimensión 10", "delay": 0, "font": "inter", "size": 11, "color": "gold", "style": { "letterSpacing": "0.25em", "textTransform": "uppercase", "opacity": 0.6 } },
+          { "type": "text", "text": "Máscara", "delay": 10, "font": "playfair", "size": 52, "weight": 700 },
+          { "type": "text", "text": "La construcción que hiciste<br>para sobrevivir.", "delay": 20, "font": "inter", "size": 24, "color": "#aaaaaa" }
+        ]
+      },
+      {
+        "from": 33,
+        "duration": 3,
+        "gap": 16,
+        "padding": "80px 0",
+        "elements": [
+          { "type": "text", "text": "Dimensión 11", "delay": 0, "font": "inter", "size": 11, "color": "gold", "style": { "letterSpacing": "0.25em", "textTransform": "uppercase", "opacity": 0.6 } },
+          { "type": "text", "text": "Esencia", "delay": 10, "font": "playfair", "size": 52, "weight": 700 },
+          { "type": "text", "text": "Lo que quedas cuando<br>dejas de ser el personaje.", "delay": 20, "font": "inter", "size": 24, "color": "#aaaaaa" }
+        ]
+      },
+      {
+        "from": 36,
+        "duration": 3,
+        "gap": 16,
+        "padding": "80px 0",
+        "elements": [
+          { "type": "text", "text": "Dimensión 12", "delay": 0, "font": "inter", "size": 11, "color": "gold", "style": { "letterSpacing": "0.25em", "textTransform": "uppercase", "opacity": 0.6 } },
+          { "type": "text", "text": "Trascendencia", "delay": 10, "font": "playfair", "size": 52, "weight": 700 },
+          { "type": "text", "text": "El sentido que da coherencia<br>al viaje entero.", "delay": 20, "font": "inter", "size": 24, "color": "#aaaaaa" }
+        ]
+      },
+      {
+        "from": 39,
+        "duration": 6,
+        "gap": 24,
+        "padding": "100px 0",
+        "elements": [
+          { "type": "text", "text": "Cuando ves el mapa completo,", "delay": 0, "font": "playfair", "size": 48, "lineHeight": 1.25 },
+          { "type": "text", "text": "dejas de luchar contra ti", "delay": 20, "font": "playfair", "size": 48, "lineHeight": 1.25 },
+          { "type": "text", "text": "y empiezas a integrarte.", "delay": 40, "font": "playfair", "size": 52, "color": "gold", "italic": true },
+          { "type": "line", "delay": 80 },
+          { "type": "text", "text": "Comenta MASCARA → mapa gratis", "delay": 110, "font": "inter", "size": 26, "color": "gold", "border": true }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "R5",
+    "title": "CTA Máscara",
+    "duration": 25,
+    "scenes": [
+      {
+        "from": 0,
+        "duration": 6,
+        "gap": 20,
+        "padding": "120px 0",
+        "elements": [
+          { "type": "text", "text": "Si has llegado hasta aquí...", "delay": 0, "font": "inter", "size": 28, "color": "muted" },
+          { "type": "text", "text": "hay algo en ti", "delay": 20, "font": "playfair", "size": 60, "weight": 700 },
+          { "type": "text", "text": "que ya sabe que es hora.", "delay": 38, "font": "playfair", "size": 60, "weight": 700, "color": "gold" }
+        ]
+      },
+      {
+        "from": 6,
+        "duration": 10,
+        "gap": 24,
+        "padding": "100px 0",
+        "elements": [
+          { "type": "text", "text": "Tengo un test gratuito:", "delay": 0, "font": "inter", "size": 30, "color": "muted" },
+          { "type": "text", "text": "Descubre tu Máscara.", "delay": 20, "font": "playfair", "size": 56, "weight": 700 },
+          { "type": "line", "delay": 55 },
+          { "type": "text", "text": "Te toma 5 minutos.", "delay": 75, "font": "inter", "size": 30 },
+          { "type": "text", "text": "Te entrega un mapa", "delay": 90, "font": "inter", "size": 30 },
+          { "type": "text", "text": "de la identidad que construiste", "delay": 105, "font": "inter", "size": 30, "color": "white" },
+          { "type": "text", "text": "para sobrevivir.", "delay": 120, "font": "inter", "size": 30, "color": "gold" }
+        ]
+      },
+      {
+        "from": 16,
+        "duration": 9,
+        "gap": 28,
+        "padding": "120px 0",
+        "elements": [
+          { "type": "text", "text": "Solo comenta", "delay": 0, "font": "playfair", "size": 52, "weight": 700 },
+          { "type": "text", "text": "MASCARA", "delay": 18, "font": "playfair", "size": 72, "weight": 700, "color": "gold", "style": { "letterSpacing": "0.05em" } },
+          { "type": "text", "text": "en este video.", "delay": 50, "font": "inter", "size": 30, "color": "muted" },
+          { "type": "line", "delay": 80 },
+          { "type": "text", "text": "Sin costo.", "delay": 100, "font": "inter", "size": 26, "color": "muted" },
+          { "type": "text", "text": "Sin trampa.", "delay": 115, "font": "inter", "size": 26, "color": "muted" },
+          { "type": "text", "text": "Solo el mapa.", "delay": 140, "font": "inter", "size": 30, "bold": true }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "R6",
+    "title": "Cierre",
+    "duration": 30,
+    "scenes": [
+      {
+        "from": 0,
+        "duration": 3,
+        "padding": "100px 0",
+        "elements": [
+          { "type": "logo", "delay": 10 }
+        ]
+      },
+      {
+        "from": 3,
+        "duration": 9,
+        "gap": 16,
+        "padding": "110px 0",
+        "elements": [
+          { "type": "text", "text": "Endonautas no es un método.", "delay": 0, "font": "playfair", "size": 52, "weight": 700 },
+          { "type": "line", "delay": 35 },
+          { "type": "text", "text": "Es un mapa para encontrarte.", "delay": 55, "font": "playfair", "size": 60, "color": "gold", "italic": true }
+        ]
+      },
+      {
+        "from": 12,
+        "duration": 8,
+        "gap": 20,
+        "padding": "110px 0",
+        "elements": [
+          { "type": "text", "text": "En algún momento de tu vida", "delay": 0, "font": "inter", "size": 28, "color": "muted" },
+          { "type": "text", "text": "vas a tener que hacerte la pregunta.", "delay": 18, "font": "inter", "size": 28, "color": "muted" },
+          { "type": "line", "delay": 55 },
+          { "type": "text", "text": "No \"¿cómo puedo ser mejor?\"", "delay": 80, "font": "inter", "size": 28, "color": "#777777" },
+          { "type": "text", "text": "Sino...", "delay": 105, "font": "inter", "size": 28, "color": "#777777" },
+          { "type": "text", "text": "\"¿Quién soy realmente?\"", "delay": 135, "font": "playfair", "size": 50, "color": "gold", "italic": true }
+        ]
+      },
+      {
+        "from": 20,
+        "duration": 10,
+        "gap": 28,
+        "padding": "100px 0",
+        "elements": [
+          { "type": "text", "text": "Cuando llegues a esa pregunta,", "delay": 0, "font": "inter", "size": 28, "color": "#999999" },
+          { "type": "text", "text": "aquí estamos.", "delay": 22, "font": "playfair", "size": 52, "weight": 700 },
+          { "type": "line", "delay": 60 },
+          { "type": "logo", "delay": 90 },
+          { "type": "line", "delay": 140 },
+          { "type": "text", "text": "El viaje empieza con tu Máscara.", "delay": 165, "font": "inter", "size": 28 },
+          { "type": "text", "text": "Comenta MASCARA", "delay": 190, "font": "inter", "size": 26, "color": "gold", "border": true }
+        ]
+      }
+    ]
+  }
+]

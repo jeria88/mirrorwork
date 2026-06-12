@@ -1,0 +1,8 @@
+{
+  "name": "endonautas-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "postinstall": "cd studio && npm install && cd ../contenido/carruseles && npm install && cd ../reels/remotion && npm install"
+  }
+}

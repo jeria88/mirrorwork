@@ -1,0 +1,203 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700;900&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { width:1080px; height:1080px; background:#000; overflow:hidden; position:relative;
+         font-family:'Space Grotesk',system-ui,sans-serif; }
+
+  img.bg {
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+    object-position:center center; z-index:0;
+  }
+  .layer { position:absolute; inset:0; z-index:1; pointer-events:none; }
+
+  /* Header */
+  .logo-wrap { display:flex; align-items:center; gap:11px; }
+  .logo-img  { width:34px; height:34px; }
+  .logo-text {
+    font-weight:900; font-size:18px; letter-spacing:-0.02em;
+    background:linear-gradient(135deg,#7ecfa8,#7ec8cf);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+  .tag {
+    font-family:'Plus Jakarta Sans'; font-size:10px; letter-spacing:0.2em;
+    color:rgba(240,232,220,0.28); text-transform:uppercase;
+    border:1px solid rgba(240,232,220,0.10); border-radius:20px; padding:5px 13px;
+  }
+
+  /* Footer nav */
+  .nav {
+    display:flex; align-items:center; justify-content:space-between;
+    border-top:1px solid rgba(255,255,255,0.065); padding-top:20px;
+    margin-top:0;
+  }
+  .swipe {
+    font-family:'Plus Jakarta Sans'; font-size:11px; font-weight:500;
+    color:rgba(126,207,168,0.60); letter-spacing:0.14em; text-transform:uppercase;
+  }
+  .slide-info { display:flex; align-items:center; gap:16px; }
+  .dots { display:flex; gap:5px; align-items:center; }
+  .dot { width:5px; height:5px; border-radius:50%; background:rgba(240,232,220,0.13); }
+  .dot.on { background:#7ecfa8; width:20px; border-radius:3px; }
+  .num {
+    font-family:'Plus Jakarta Sans'; font-size:10px; letter-spacing:0.24em;
+    color:rgba(240,232,220,0.20); text-transform:uppercase;
+  }
+
+  /* Jade gradient text */
+  .jade {
+    background:linear-gradient(135deg,#7ecfa8,#7ec8cf);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+  em { font-style:italic; }
+  em.jade {
+    background:linear-gradient(135deg,#7ecfa8,#7ec8cf);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+
+
+img.bg { filter: brightness(0.55) contrast(1.14) saturate(0.48); }
+
+.ovr {
+  background:
+    rgba(2,4,14,0.48),
+    linear-gradient(to bottom, rgba(0,0,0,0.18) 0%, transparent 20%,
+                               transparent 80%, rgba(0,0,0,0.22) 100%);
+  background: rgba(2,4,14,0.48);
+}
+
+.vig {
+  background: radial-gradient(ellipse 100% 100% at 50% 50%,
+    transparent 30%, rgba(0,0,0,0.68) 100%);
+}
+
+/* Dot-grid en lado derecho — textura Canva premium */
+.dot-grid {
+  position:absolute; right:0; top:0; bottom:0; width:44%; z-index:4;
+  background-image: radial-gradient(rgba(126,207,168,0.16) 1px, transparent 1px);
+  background-size:28px 28px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 100% at 100% 50%, black 20%, transparent 80%);
+  mask-image: radial-gradient(ellipse 80% 100% at 100% 50%, black 20%, transparent 80%);
+  pointer-events:none;
+}
+
+/* Ghost número */
+.ghost {
+  position:absolute; z-index:3;
+  bottom:44px; right:60px;
+  font-size:280px; font-weight:900; line-height:1;
+  letter-spacing:-0.06em;
+  color:rgba(240,232,220,0.048);
+  pointer-events:none; user-select:none;
+}
+
+/* Franja jade vertical izquierda */
+.v-stripe {
+  position:absolute; z-index:6;
+  left:52px; top:22%; bottom:22%;
+  width:2.5px;
+  background:linear-gradient(to bottom,
+    transparent, rgba(126,207,168,0.55) 20%,
+    rgba(126,207,168,0.55) 80%, transparent);
+}
+
+.content {
+  position:absolute; inset:0; z-index:10;
+  padding:68px 84px 62px;
+  display:flex; flex-direction:column; justify-content:space-between;
+  color:#F0E8DC;
+}
+.top { display:flex; align-items:center; justify-content:space-between; }
+.mid { flex:1; display:flex; flex-direction:column; justify-content:center; padding:32px 0 16px; }
+
+/* Label de número de idea */
+.idea-label {
+  font-family:'Plus Jakarta Sans'; font-size:11px; letter-spacing:0.28em;
+  text-transform:uppercase; color:rgba(126,207,168,0.70);
+  margin-bottom:20px;
+  display:flex; align-items:center; gap:10px;
+}
+.idea-label::before {
+  content:''; display:block; width:18px; height:1.5px;
+  background:#7ecfa8;
+}
+
+h2 {
+  font-weight:900; font-size:62px; line-height:0.90;
+  letter-spacing:-0.03em; color:#F0E8DC;
+  margin-bottom:24px; max-width:560px;
+}
+
+.body {
+  font-family:'Plus Jakarta Sans'; font-size:18px; line-height:1.70;
+  color:rgba(240,232,220,0.42); max-width:500px; margin-bottom:0;
+}
+
+/* Callout — card con borde izquierdo jade (Canva premium pattern) */
+.callout {
+  margin-top:32px;
+  padding:18px 22px;
+  border-left:2.5px solid #7ecfa8;
+  background:rgba(126,207,168,0.06);
+  max-width:500px;
+}
+.callout .kw {
+  font-family:'Plus Jakarta Sans'; font-size:10px; letter-spacing:0.22em;
+  text-transform:uppercase; color:#7ecfa8; font-weight:600;
+  margin-bottom:6px;
+}
+.callout .kt {
+  font-family:'Plus Jakarta Sans'; font-size:16px; line-height:1.55;
+  color:rgba(240,232,220,0.55);
+}
+</style></head><body>
+
+<img class="bg" src="file:///home/nikka/Proyectos/endonautas/brand/social/plantilla/04-fondos-pexels/dark-galaxy-3-33931033.jpg" alt="">
+<div class="layer ovr"></div>
+<div class="layer vig"></div>
+<div class="dot-grid"></div>
+<div class="v-stripe"></div>
+<div class="ghost">02</div>
+
+<!-- Línea jade horizontal sobre h2 (SVG) -->
+<svg style="position:absolute;inset:0;width:1080px;height:1080px;z-index:8;pointer-events:none;" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="hl" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="rgba(126,207,168,0)"/>
+      <stop offset="8%"   stop-color="rgba(126,207,168,0.55)"/>
+      <stop offset="50%"  stop-color="rgba(126,207,168,0.40)"/>
+      <stop offset="100%" stop-color="rgba(126,207,168,0)"/>
+    </linearGradient>
+  </defs>
+  <line x1="84" y1="388" x2="700" y2="388" stroke="url(#hl)" stroke-width="1.5"/>
+</svg>
+
+<div class="content">
+  <div class="top">
+    <div class="logo-wrap">
+      <img class="logo-img" src="file:///home/nikka/Proyectos/endonautas/brand/social/plantilla/_assets/logo-trans.png" alt="">
+      <div class="logo-text">Endonautas</div>
+    </div>
+    <div class="tag">Autoconocimiento</div>
+  </div>
+
+  <div class="mid">
+    <div class="idea-label">Idea 02</div>
+    <h2>No reaccionas<br>a sus <em class="jade">palabras.</em></h2>
+    <p class="body">Reaccionas al significado que les das.<br>Y ese significado viene de antes — de algo<br>que se quedó sin resolver.</p>
+    <div class="callout">
+      <div class="kw">Clave</div>
+      <div class="kt">El significado tiene origen. Y ese origen tiene nombre, forma, y fecha.</div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <div class="swipe">Continúa →</div>
+    <div class="slide-info">
+      <div class="dots"><div class="dot"></div><div class="dot  on"></div><div class="dot"></div><div class="dot"></div></div>
+      <div class="num">02 / 04</div>
+    </div>
+  </div>
+</div>
+
+</body></html>

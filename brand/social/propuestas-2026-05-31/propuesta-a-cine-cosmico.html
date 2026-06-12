@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:ital,wght@0,300;0,400;0,600;0,700;0,900;1,900&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+body{width:1080px;height:1080px;overflow:hidden;position:relative;background:#03060c;font-family:'Space Grotesk',sans-serif;}
+
+/* === CAPA 1: Fondo cósmico con foto real === */
+.bg-photo{position:absolute;inset:0;z-index:1;
+  background:url('file:///home/nikka/Proyectos/endonautas/brand/social/plantilla/04-fondos-pexels/dark-galaxy-1-37217988.jpg') center/cover no-repeat;
+  filter:brightness(0.55) contrast(1.15) saturate(0.22);}
+
+/* === CAPA 2: Overlay de color profundo === */
+.bg-gradient{position:absolute;inset:0;z-index:2;
+  background:linear-gradient(170deg,
+    rgba(3,6,12,0.92) 0%,
+    rgba(3,6,12,0.60) 35%,
+    rgba(3,6,12,0.25) 55%,
+    rgba(3,6,12,0.45) 75%,
+    rgba(3,6,12,0.95) 100%);}
+
+/* === CAPA 3: Glow radial sutil tipo nebula === */
+.nebula{position:absolute;inset:0;z-index:3;pointer-events:none;
+  background:
+    radial-gradient(ellipse 90% 60% at 25% 30%, rgba(126,207,168,0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 70% 50% at 75% 70%, rgba(126,200,207,0.03) 0%, transparent 70%);}
+
+/* === CAPA 4: Vignette fuerte === */
+.vignette{position:absolute;inset:0;z-index:4;pointer-events:none;
+  background:radial-gradient(ellipse 75% 75% at 50% 45%, transparent 30%, rgba(3,6,12,0.70) 100%);}
+
+/* === CAPA 5: Grain / textura de película === */
+.grain{position:absolute;inset:0;z-index:5;pointer-events:none;opacity:0.06;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:256px;}
+
+/* === CAPA 6: Línea de luz cinematográfica === */
+.light-beam{position:absolute;z-index:6;pointer-events:none;
+  top:-10%;left:55%;width:2px;height:120%;
+  background:linear-gradient(to bottom, transparent 0%, rgba(126,207,168,0.08) 40%, rgba(126,207,168,0.12) 50%, rgba(126,207,168,0.08) 60%, transparent 100%);
+  transform:rotate(25deg);filter:blur(40px);width:60px;}
+
+.light-beam-2{position:absolute;z-index:6;pointer-events:none;
+  top:-5%;left:35%;width:1px;height:110%;
+  background:linear-gradient(to bottom, transparent 0%, rgba(126,200,207,0.06) 45%, rgba(126,200,207,0.10) 50%, rgba(126,200,207,0.06) 55%, transparent 100%);
+  transform:rotate(15deg);filter:blur(30px);width:40px;}
+
+/* === NAV === */
+.nav{position:absolute;top:56px;left:64px;right:64px;z-index:10;
+  display:flex;align-items:center;justify-content:space-between;}
+.logo-wrap{display:flex;align-items:center;gap:12px;}
+.logo-dot{width:32px;height:32px;border-radius:50%;
+  background:radial-gradient(circle at 40% 35%, #7ecfa8, #3a7d5c);
+  box-shadow:0 0 18px rgba(126,207,168,0.20);}
+.logo-text{font-weight:700;font-size:17px;letter-spacing:0.03em;color:rgba(240,232,220,0.80);}
+.nav-tag{font-family:'Plus Jakarta Sans';font-size:11px;letter-spacing:0.28em;
+  color:rgba(240,232,220,0.30);text-transform:uppercase;padding:6px 16px;
+  border:1px solid rgba(240,232,220,0.06);border-radius:100px;background:rgba(240,232,220,0.02);}
+
+/* === CONTENIDO PRINCIPAL === */
+.content{position:absolute;left:64px;right:80px;bottom:80px;z-index:10;}
+
+.eyebrow{font-family:'Plus Jakarta Sans';font-size:11px;font-weight:500;letter-spacing:0.28em;
+  text-transform:uppercase;color:rgba(126,207,168,0.55);margin-bottom:28px;
+  display:flex;align-items:center;gap:14px;}
+.eyebrow::before{content:'';display:block;width:28px;height:1px;background:rgba(126,207,168,0.30);}
+.eyebrow::after{content:'';flex:1;display:block;height:1px;background:rgba(126,207,168,0.06);}
+
+h1{font-weight:900;font-size:92px;line-height:0.88;letter-spacing:-0.045em;
+  color:#F0E8DC;margin-bottom:0;text-shadow:0 4px 80px rgba(3,6,12,0.60);}
+h1 .line{display:block;}
+h1 em{font-style:italic;background:linear-gradient(135deg,#7ecfa8 0%,#7ec8cf 50%,#a8e6cf 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  position:relative;text-shadow:none;
+  filter:drop-shadow(0 0 30px rgba(126,207,168,0.15));}
+
+.divider{width:100%;height:1px;background:linear-gradient(to right,rgba(126,207,168,0.35),rgba(126,207,168,0.05),transparent);margin:28px 0;}
+
+.sub{font-family:'Plus Jakarta Sans';font-size:18px;line-height:1.65;color:rgba(240,232,220,0.40);max-width:480px;margin-bottom:36px;}
+
+/* === FOOTER DEL SLIDE === */
+.slide-footer{display:flex;align-items:center;justify-content:space-between;padding-right:16px;}
+.cta-hint{font-family:'Plus Jakarta Sans';font-size:12px;font-weight:600;letter-spacing:0.14em;
+  text-transform:uppercase;color:rgba(126,207,168,0.60);display:flex;align-items:center;gap:6px;}
+.arrow{width:14px;height:14px;border-right:2px solid rgba(126,207,168,0.50);border-bottom:2px solid rgba(126,207,168,0.50);transform:rotate(-45deg);display:inline-block;}
+.slide-num{font-size:12px;letter-spacing:0.12em;color:rgba(240,232,220,0.18);font-family:'Plus Jakarta Sans';}
+</style></head><body>
+
+<!-- Capas de fondo -->
+<div class="bg-photo"></div>
+<div class="bg-gradient"></div>
+<div class="nebula"></div>
+<div class="vignette"></div>
+<div class="grain"></div>
+<div class="light-beam"></div>
+
+<!-- Nav -->
+<div class="nav">
+  <div class="logo-wrap">
+    <div class="logo-dot"></div>
+    <span class="logo-text">Endonautas</span>
+  </div>
+  <span class="nav-tag">Autoconocimiento</span>
+</div>
+
+<!-- Contenido -->
+<div class="content">
+  <div class="eyebrow">Antes de empezar</div>
+  <h1>
+    <span class="line">Entender</span>
+    <span class="line">no es</span>
+    <span class="line"><em>suficiente.</em></span>
+  </h1>
+  <div class="divider"></div>
+  <p class="sub">Puedes saber exactamente de dónde viene un patrón — y seguir repitiéndolo igual.</p>
+  <div class="slide-footer">
+    <span class="cta-hint">Desliza <span class="arrow"></span></span>
+    <span class="slide-num">01 / 04</span>
+  </div>
+</div>
+
+</body></html>

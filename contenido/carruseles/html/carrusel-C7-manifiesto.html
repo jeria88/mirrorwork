@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>C7 — Manifiesto · Endonautas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0a0a;--gold:#c9a84c;--white:#fff;--muted:#9a9a9a;--border:rgba(201,168,76,.2)}
+body{background:#1a1a1a;font-family:'Inter',sans-serif;display:flex;min-height:100vh}
+.viewer{flex:0 0 420px;display:flex;flex-direction:column;align-items:center;padding:2rem;background:#111;border-right:1px solid #222}
+.slide-wrap{position:relative;width:360px;height:450px;overflow:hidden;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;background:var(--bg);padding:2rem}
+.slide.active{display:flex}
+.progress{display:flex;gap:6px;margin:1rem 0 .5rem}
+.dot{width:6px;height:6px;border-radius:50%;background:#333;transition:all .3s;cursor:pointer}
+.dot.active{background:var(--gold);width:18px;border-radius:3px}
+.nav-row{display:flex;gap:1rem;margin-top:.5rem}
+.btn{padding:.5rem 1.2rem;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--gold);font-size:.8rem;font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s}
+.btn:hover{background:var(--gold);color:#000}.btn:disabled{opacity:.3;cursor:default}
+.slide-counter{color:var(--muted);font-size:.75rem;margin-top:.8rem;letter-spacing:.1em}
+.copy-slide{padding:.35rem .8rem;border:1px solid #333;border-radius:6px;background:transparent;color:#666;font-size:.7rem;font-family:'Inter',sans-serif;cursor:pointer;margin-top:.5rem;transition:all .2s}
+.copy-slide:hover{border-color:var(--gold);color:var(--gold)}
+.panel{flex:1;padding:2rem;overflow-y:auto;background:#0d0d0d}
+.panel h2{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.1rem;margin-bottom:1.5rem;padding-bottom:.8rem;border-bottom:1px solid #222}
+.all-text{font-size:.82rem;color:#888;line-height:1.8;white-space:pre-wrap}
+.slide-label{color:var(--gold);font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;margin-top:1.2rem;margin-bottom:.3rem;display:block}
+.caption-box{margin-top:2rem;padding:1.2rem;border:1px solid #222;border-radius:10px;background:#111}
+.caption-box h3{color:var(--gold);font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.8rem}
+.caption-text{font-size:.8rem;color:#777;line-height:1.7;white-space:pre-wrap}
+.download-btn{margin-top:1.5rem;padding:.7rem 1.5rem;border:1px solid var(--gold);border-radius:8px;background:transparent;color:var(--gold);font-size:.8rem;font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s;width:100%}
+.download-btn:hover{background:var(--gold);color:#000}
+/* Slide de manifiesto: centrado, frase única, minimalista */
+.s-creo{font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;color:#444;margin-bottom:.8rem}
+.s-frase{font-family:'Playfair Display',serif;font-size:1.35rem;line-height:1.3;color:var(--white);text-align:center}
+.s-frase em{color:var(--gold);font-style:italic}
+.s-num{position:absolute;bottom:1.2rem;right:1.5rem;font-size:.6rem;color:#333;letter-spacing:.15em}
+.s-logo-row{position:absolute;top:1.2rem;left:1.5rem;display:flex;align-items:center;gap:.4rem}
+.slm{width:14px;height:14px;background:var(--gold);clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);opacity:.8}
+.slt{font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:#333}
+.s-portada-hook{font-family:'Playfair Display',serif;font-size:1.3rem;line-height:1.3;color:var(--white);text-align:center}
+.s-sub{font-size:.75rem;color:#666;text-align:center;margin-top:1rem;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="viewer">
+  <div class="slide-wrap">
+    <!-- Portada -->
+    <div class="slide active"><div class="s-logo-row"><div class="slm"></div><div class="slt">Endonautas</div></div><div class="s-portada-hook">"No creo en el crecimiento personal.<br><br>Creo en el autoconocimiento real.<br><br>No es lo mismo."</div><div class="s-sub">Desliza para el manifiesto completo</div><div class="s-num">1/10</div></div>
+    <!-- Creencia 1 -->
+    <div class="slide"><div class="s-logo-row"><div class="slm"></div><div class="slt">Endonautas</div></div><div class="s-creo">creo que</div><div class="s-frase">nadie puede decirte<br>quién debes ser.</div><div class="s-num">2/10</div></div>
+    <!-- Creencia 2 -->
+    <div class="slide"><div class="s-logo-row"><div class="slm"></div><div class="slt">Endonautas</div></div><div class="s-creo">creo que</div><div class="s-frase">tus sombras son<br>tus mayores maestros.</div><div class="s-num">3/10</div></div>
+    <!-- Creencia 3 -->
+    <div class="slide"><div class="s-logo-row"><div class="slm"></div><div class="slt">Endonautas</div></div><div class="s-creo">creo que</div><div class="s-frase">la identidad no se descubre.<br><em>Se construye.</em></div><div class="s-num">4/10</div></div>
+    <!-- Creencia 4 -->
+    <div class="slide"><div class="s-logo-row"><div class="slm"></div><div class="slt">Endonautas</div></div><div class="s-creo">creo que</div><div class="s-frase">la mayoría de los conflictos relacionales<br>son conflictos internos proyectados.</div><div class="s-num">5/10</div></div>
+    <!-- Creencia 5 -->
+    <div class="slide"><div class="s-logo-row"><div class="slm"></div><div class="slt">Endonautas</div></div><div class="s-creo">creo que</div><div class="s-frase">el autoconocimiento<br>no debería ser un lujo.</div><div class="s-num">6/10</div></div>
+    <!-- Creencia 6 -->
+    <div class="slide"><div class="s-logo-row"><div class="slm"></div><div class="slt">Endonautas</div></div><div class="s-creo">creo que</div><div class="s-frase">ser auténtico<br>es más difícil y más valioso<br>que ser perfecto.</div><div class="s-num">7/10</div></div>
+    <!-- Creencia 7 -->
+    <div class="slide"><div class="s-logo-row"><div class="slm"></div><div class="slt">Endonautas</div></div><div class="s-creo">creo que</div><div class="s-frase">la herida que más duele<br>es también la que más tiene que enseñarte.</div><div class="s-num">8/10</div></div>
+    <!-- Creencia 8 -->
+    <div class="slide"><div class="s-logo-row"><div class="slm"></div><div class="slt">Endonautas</div></div><div class="s-creo">creo que</div><div class="s-frase">conocerte de verdad<br>es el acto más <em>radical</em><br>que puedes hacer.</div><div class="s-num">9/10</div></div>
+    <!-- CTA -->
+    <div class="slide"><div class="s-logo-row"><div class="slm"></div><div class="slt">Endonautas</div></div><div class="s-portada-hook" style="font-size:1.05rem">Si algo de este manifiesto<br>es también <em>tuyo</em>...<br><br>eres un endonauta.</div><div class="s-sub">Guarda esto · Compártelo · Comenta MASCARA para el primer mapa</div><div class="s-num">10/10</div></div>
+  </div>
+  <div class="progress" id="progress"></div>
+  <div class="nav-row"><button class="btn" id="prev" onclick="changeSlide(-1)" disabled>← Anterior</button><button class="btn" id="next" onclick="changeSlide(1)">Siguiente →</button></div>
+  <div class="slide-counter" id="counter">1 / 10</div>
+  <button class="copy-slide" onclick="copyCurrentSlide()">Copiar texto de este slide</button>
+</div>
+<div class="panel">
+  <h2>C7 — Manifiesto Endonautas · Texto completo</h2>
+  <div class="all-text" id="allText"></div>
+  <div class="caption-box"><h3>Caption para Instagram</h3><div class="caption-text">No creo en el crecimiento personal. Creo en el autoconocimiento real. No es lo mismo.
+
+El manifiesto Endonautas:
+
+Creo que nadie puede decirte quién debes ser.
+Creo que tus sombras son tus mayores maestros.
+Creo que la identidad no se descubre — se construye.
+Creo que la mayoría de los conflictos relacionales son conflictos internos proyectados.
+Creo que el autoconocimiento no debería ser un lujo.
+Creo que ser auténtico es más difícil y más valioso que ser perfecto.
+Creo que la herida que más duele es la que más tiene que enseñarte.
+Creo que conocerte de verdad es el acto más radical que puedes hacer.
+
+Si algo de esto es también tuyo, eres un endonauta.
+
+Guarda esto. Lo necesitarás.
+
+.
+.
+.
+#endonautas #endonautica #manifiesto #autoconocimiento #identidad #sombra #viajeinterior #autenticidad #consciencia #crecimientopersonal #herida #francojerica #mundointerior #psicologia #transformacion</div></div>
+  <button class="download-btn" onclick="downloadAll()">Descargar todos los textos (.txt)</button>
+</div>
+<script>
+const slides=document.querySelectorAll('.slide'),dots=document.getElementById('progress');let current=0;
+const texts=[`SLIDE 1 — PORTADA\n"No creo en el crecimiento personal. Creo en el autoconocimiento real. No es lo mismo."\nDesliza para el manifiesto completo`,`SLIDE 2\nCreo que nadie puede decirte quién debes ser.`,`SLIDE 3\nCreo que tus sombras son tus mayores maestros.`,`SLIDE 4\nCreo que la identidad no se descubre. Se construye.`,`SLIDE 5\nCreo que la mayoría de los conflictos relacionales son conflictos internos proyectados.`,`SLIDE 6\nCreo que el autoconocimiento no debería ser un lujo.`,`SLIDE 7\nCreo que ser auténtico es más difícil y más valioso que ser perfecto.`,`SLIDE 8\nCreo que la herida que más duele es también la que más tiene que enseñarte.`,`SLIDE 9\nCreo que conocerte de verdad es el acto más radical que puedes hacer.`,`SLIDE 10 — CTA\nSi algo de este manifiesto es también tuyo... eres un endonauta.\nGuarda esto · Compártelo · Comenta MASCARA para el primer mapa`];
+function buildDots(){dots.innerHTML='';slides.forEach((_,i)=>{const d=document.createElement('div');d.className='dot'+(i===0?' active':'');d.onclick=()=>goTo(i);dots.appendChild(d)})}
+function buildPanel(){document.getElementById('allText').innerHTML=texts.map((t,i)=>`<span class="slide-label">— SLIDE ${i+1} —</span>${t}`).join('\n\n')}
+function goTo(n){slides[current].classList.remove('active');dots.children[current].classList.remove('active');current=n;slides[current].classList.add('active');dots.children[current].classList.add('active');document.getElementById('counter').textContent=`${current+1} / ${slides.length}`;document.getElementById('prev').disabled=current===0;document.getElementById('next').disabled=current===slides.length-1}
+function changeSlide(dir){goTo(Math.max(0,Math.min(slides.length-1,current+dir)))}
+function copyCurrentSlide(){navigator.clipboard.writeText(texts[current]).then(()=>{const b=document.querySelector('.copy-slide');b.textContent='¡Copiado!';setTimeout(()=>b.textContent='Copiar texto de este slide',1500)})}
+function downloadAll(){const c=`CARRUSEL C7 — MANIFIESTO\n${'='.repeat(50)}\n\n`+texts.map((t,i)=>`— SLIDE ${i+1} —\n${t}`).join('\n\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([c],{type:'text/plain'}));a.download='carrusel-C7-manifiesto.txt';a.click()}
+buildDots();buildPanel();
+</script>
+</body>
+</html>

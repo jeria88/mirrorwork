@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Fraunces — Peso y cuerpo · Endonautas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,800;1,9..144,400;1,9..144,600;1,9..144,700;1,9..144,800&family=Outfit:wght@300;400;500&family=Plus+Jakarta+Sans:wght@300;400;500&family=Manrope:wght@300;400;500&family=Raleway:wght@300;400;500&family=Sora:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #070707;
+  font-family: 'Outfit', sans-serif;
+  padding: 3rem 2rem 4rem;
+  color: #fff;
+}
+
+h1 { font-weight: 300; font-size: 0.75rem; letter-spacing: 0.28em; text-transform: uppercase; color: #444; text-align: center; margin-bottom: 0.3rem; }
+.subtitle { font-size: 0.68rem; color: #2a2a2a; text-align: center; margin-bottom: 0.35rem; letter-spacing: 0.08em; }
+.ref-note { font-size: 0.62rem; color: rgba(201,168,76,0.3); text-align: center; margin-bottom: 3rem; letter-spacing: 0.06em; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.option { display: flex; flex-direction: column; gap: 1rem; }
+
+.option-label { text-align: center; }
+.option-label strong { display: block; font-size: 0.7rem; color: #c9a84c; letter-spacing: 0.04em; font-weight: 500; margin-bottom: 0.15rem; font-family: 'Outfit', sans-serif; }
+.option-label .weight-tag { display: inline-block; font-size: 0.52rem; letter-spacing: 0.18em; text-transform: uppercase; color: #333; font-family: 'Outfit', sans-serif; }
+.option-label .body-tag { display: block; font-size: 0.56rem; color: #2a2a2a; margin-top: 0.2rem; letter-spacing: 0.1em; font-family: 'Outfit', sans-serif; }
+
+/* SLIDE */
+.slide-card {
+  position: relative; width: 100%; aspect-ratio: 4/5; border-radius: 10px; overflow: hidden;
+  background-image: url('https://images.pexels.com/photos/14256347/pexels-photo-14256347.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940');
+  background-size: cover; background-position: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.04);
+  cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+}
+.slide-card:hover { transform: translateY(-3px); }
+.slide-card.selected { box-shadow: 0 0 0 2px #c9a84c, 0 20px 60px rgba(0,0,0,0.8); }
+.slide-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(168deg, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.68) 50%, rgba(0,0,0,0.94) 100%);
+  z-index: 0;
+}
+.slide-inner { position: absolute; inset: 0; padding: 1.2rem 1.3rem; display: flex; flex-direction: column; z-index: 1; }
+
+/* CONTENT */
+.content-card {
+  position: relative; width: 100%; aspect-ratio: 4/5; border-radius: 10px; overflow: hidden;
+  background-image: url('https://images.pexels.com/photos/36013160/pexels-photo-36013160.png?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940');
+  background-size: cover; background-position: center;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04);
+  cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+}
+.content-card:hover { transform: translateY(-3px); }
+.content-card.selected { box-shadow: 0 0 0 2px #c9a84c, 0 12px 40px rgba(0,0,0,0.7); }
+.content-card::before { content: ''; position: absolute; inset: 0; background: rgba(4,4,4,0.91); z-index: 0; }
+.content-inner { position: absolute; inset: 0; padding: 1.2rem 1.3rem; display: flex; flex-direction: column; z-index: 1; }
+
+/* ELEMENTOS */
+.brand-row { display: flex; align-items: center; justify-content: space-between; }
+.brand-mark { display: flex; align-items: center; gap: 0.3rem; }
+.brand-logo { height: 14px; width: 14px; object-fit: contain; opacity: 0.85; }
+.spacer { flex: 1; }
+.eyebrow { font-size: 0.42rem; letter-spacing: 0.25em; text-transform: uppercase; color: #c9a84c; margin-bottom: 0.55rem; }
+.hook { line-height: 1.2; color: #fff; margin-bottom: 0.35rem; font-family: 'Fraunces', serif; font-optical-sizing: auto; }
+.sub { font-style: italic; color: rgba(255,255,255,0.5); margin-bottom: 0.85rem; font-family: 'Fraunces', serif; font-optical-sizing: auto; }
+.swipe-hint { font-size: 0.4rem; letter-spacing: 0.12em; color: rgba(255,255,255,0.3); }
+.slide-num-sm { font-size: 0.42rem; letter-spacing: 0.15em; color: rgba(255,255,255,0.2); }
+.brand-name { font-size: 0.42rem; letter-spacing: 0.2em; text-transform: uppercase; color: #c9a84c; opacity: 0.8; }
+
+.c-label { font-size: 0.4rem; letter-spacing: 0.28em; text-transform: uppercase; color: #c9a84c; margin-bottom: 0.55rem; margin-top: auto; }
+.c-title { line-height: 1.26; color: #fff; margin-bottom: 0.5rem; font-family: 'Fraunces', serif; font-optical-sizing: auto; }
+.c-title em { color: #c9a84c; font-style: italic; }
+.c-rule { width: 20px; height: 1px; background: #c9a84c; opacity: 0.4; margin-bottom: 0.6rem; }
+.c-body { font-size: 0.58rem; line-height: 1.72; color: rgba(255,255,255,0.62); font-weight: 300; }
+.c-body em { color: #fff; font-style: normal; font-weight: 500; }
+.c-spacer { flex: 1; }
+
+/* ── VARIANTES: peso Fraunces + fuente cuerpo ── */
+
+/* 1 — Fraunces 600 + Outfit */
+.f1 .hook  { font-weight: 600; font-size: 1.05rem; }
+.f1 .sub   { font-size: 0.7rem; font-weight: 400; }
+.f1 .c-title { font-weight: 600; font-size: 0.92rem; }
+.f1 .c-body  { font-family: 'Outfit', sans-serif; }
+.f1 .eyebrow, .f1 .c-label, .f1 .swipe-hint, .f1 .brand-name, .f1 .slide-num-sm { font-family: 'Outfit', sans-serif; }
+
+/* 2 — Fraunces 700 + Outfit */
+.f2 .hook  { font-weight: 700; font-size: 1.05rem; }
+.f2 .sub   { font-size: 0.7rem; font-weight: 400; }
+.f2 .c-title { font-weight: 700; font-size: 0.92rem; }
+.f2 .c-body  { font-family: 'Outfit', sans-serif; }
+.f2 .eyebrow, .f2 .c-label, .f2 .swipe-hint, .f2 .brand-name, .f2 .slide-num-sm { font-family: 'Outfit', sans-serif; }
+
+/* 3 — Fraunces 700 + Plus Jakarta Sans */
+.f3 .hook  { font-weight: 700; font-size: 1.05rem; }
+.f3 .sub   { font-size: 0.7rem; font-weight: 400; }
+.f3 .c-title { font-weight: 700; font-size: 0.92rem; }
+.f3 .c-body  { font-family: 'Plus Jakarta Sans', sans-serif; }
+.f3 .eyebrow, .f3 .c-label, .f3 .swipe-hint, .f3 .brand-name, .f3 .slide-num-sm { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+/* 4 — Fraunces 800 + Manrope */
+.f4 .hook  { font-weight: 800; font-size: 1.02rem; letter-spacing: -0.01em; }
+.f4 .sub   { font-size: 0.68rem; font-weight: 400; }
+.f4 .c-title { font-weight: 800; font-size: 0.9rem; }
+.f4 .c-body  { font-family: 'Manrope', sans-serif; }
+.f4 .eyebrow, .f4 .c-label, .f4 .swipe-hint, .f4 .brand-name, .f4 .slide-num-sm { font-family: 'Manrope', sans-serif; }
+
+/* 5 — Fraunces 600 + Raleway */
+.f5 .hook  { font-weight: 600; font-size: 1.05rem; }
+.f5 .sub   { font-size: 0.7rem; font-weight: 400; }
+.f5 .c-title { font-weight: 600; font-size: 0.92rem; }
+.f5 .c-body  { font-family: 'Raleway', sans-serif; }
+.f5 .eyebrow, .f5 .c-label, .f5 .swipe-hint, .f5 .brand-name, .f5 .slide-num-sm { font-family: 'Raleway', sans-serif; letter-spacing: 0.06em; }
+
+/* BOTÓN */
+.select-btn {
+  padding: 0.45rem; border: 1px solid #1e1e1e; border-radius: 8px; background: transparent;
+  color: #2e2e2e; font-size: 0.65rem; cursor: pointer; text-align: center;
+  transition: all 0.2s; letter-spacing: 0.08em; width: 100%; font-family: 'Outfit', sans-serif;
+}
+.select-btn:hover { border-color: rgba(201,168,76,0.35); color: #c9a84c; }
+.select-btn.active { border-color: #c9a84c; color: #c9a84c; background: rgba(201,168,76,0.05); }
+
+/* FOOTER */
+.footer { max-width: 1400px; margin: 3rem auto 0; padding-top: 2rem; border-top: 1px solid #111; display: flex; align-items: center; justify-content: space-between; }
+.selection-text { font-size: 0.7rem; color: #2a2a2a; letter-spacing: 0.04em; font-family: 'Outfit', sans-serif; }
+.selection-text strong { color: #c9a84c; }
+.confirm-btn {
+  padding: 0.6rem 1.5rem; border: 1px solid rgba(201,168,76,0.3); border-radius: 8px;
+  background: transparent; color: #c9a84c; font-size: 0.75rem; font-family: 'Outfit', sans-serif;
+  cursor: pointer; transition: all 0.2s; letter-spacing: 0.06em;
+}
+.confirm-btn:hover { background: #c9a84c; color: #000; }
+</style>
+</head>
+<body>
+
+<h1>Fraunces — Peso y cuerpo · Endonautas</h1>
+<p class="subtitle">Todas usan Fraunces como titular — cambia el peso y la fuente de cuerpo</p>
+<p class="ref-note">Fraunces es una fuente variable — peso 100–900, con formas que cambian con el tamaño</p>
+
+<div class="grid">
+
+  <!-- 1 — Fraunces 600 + Outfit -->
+  <div class="option f1">
+    <div class="option-label">
+      <strong>Fraunces 600</strong>
+      <span class="weight-tag">Semibold · equilibrado</span>
+      <span class="body-tag">+ Outfit</span>
+    </div>
+    <div class="slide-card" onclick="sel(1)" id="p1">
+      <div class="slide-inner">
+        <div class="brand-row">
+          <div class="brand-mark"><img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt=""><span class="brand-name">Endonautas</span></div>
+          <span class="slide-num-sm">1/5</span>
+        </div>
+        <div class="spacer"></div>
+        <div class="eyebrow">Endonautas · método</div>
+        <div class="hook">Cómo saber si estás trabajando el síntoma o el <em style="color:#c9a84c;font-style:italic">mapa</em>.</div>
+        <div class="sub">Tres señales.</div>
+        <div class="swipe-hint">Desliza →</div>
+      </div>
+    </div>
+    <div class="content-card" onclick="sel(1)" id="c1">
+      <div class="content-inner">
+        <div class="brand-row">
+          <div class="brand-mark"><img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt=""><span class="brand-name">Endonautas</span></div>
+          <span class="slide-num-sm">2/5</span>
+        </div>
+        <div class="c-label">Señal 01</div>
+        <div class="c-title"><em>Vuelve</em> con el estrés.</div>
+        <div class="c-rule"></div>
+        <div class="c-body">Si el patrón desaparece cuando todo va bien y regresa cuando hay presión,<br><em>estás trabajando el síntoma.</em></div>
+        <div class="c-spacer"></div>
+      </div>
+    </div>
+    <button class="select-btn" id="b1" onclick="sel(1)">Elegir esta</button>
+  </div>
+
+  <!-- 2 — Fraunces 700 + Outfit -->
+  <div class="option f2">
+    <div class="option-label">
+      <strong>Fraunces 700</strong>
+      <span class="weight-tag">Bold · más presencia</span>
+      <span class="body-tag">+ Outfit</span>
+    </div>
+    <div class="slide-card" onclick="sel(2)" id="p2">
+      <div class="slide-inner">
+        <div class="brand-row">
+          <div class="brand-mark"><img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt=""><span class="brand-name">Endonautas</span></div>
+          <span class="slide-num-sm">1/5</span>
+        </div>
+        <div class="spacer"></div>
+        <div class="eyebrow">Endonautas · método</div>
+        <div class="hook">Cómo saber si estás trabajando el síntoma o el <em style="color:#c9a84c;font-style:italic">mapa</em>.</div>
+        <div class="sub">Tres señales.</div>
+        <div class="swipe-hint">Desliza →</div>
+      </div>
+    </div>
+    <div class="content-card" onclick="sel(2)" id="c2">
+      <div class="content-inner">
+        <div class="brand-row">
+          <div class="brand-mark"><img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt=""><span class="brand-name">Endonautas</span></div>
+          <span class="slide-num-sm">2/5</span>
+        </div>
+        <div class="c-label">Señal 01</div>
+        <div class="c-title"><em>Vuelve</em> con el estrés.</div>
+        <div class="c-rule"></div>
+        <div class="c-body">Si el patrón desaparece cuando todo va bien y regresa cuando hay presión,<br><em>estás trabajando el síntoma.</em></div>
+        <div class="c-spacer"></div>
+      </div>
+    </div>
+    <button class="select-btn" id="b2" onclick="sel(2)">Elegir esta</button>
+  </div>
+
+  <!-- 3 — Fraunces 700 + Plus Jakarta Sans -->
+  <div class="option f3">
+    <div class="option-label">
+      <strong>Fraunces 700</strong>
+      <span class="weight-tag">Bold · premium</span>
+      <span class="body-tag">+ Plus Jakarta Sans</span>
+    </div>
+    <div class="slide-card" onclick="sel(3)" id="p3">
+      <div class="slide-inner">
+        <div class="brand-row">
+          <div class="brand-mark"><img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt=""><span class="brand-name">Endonautas</span></div>
+          <span class="slide-num-sm">1/5</span>
+        </div>
+        <div class="spacer"></div>
+        <div class="eyebrow">Endonautas · método</div>
+        <div class="hook">Cómo saber si estás trabajando el síntoma o el <em style="color:#c9a84c;font-style:italic">mapa</em>.</div>
+        <div class="sub">Tres señales.</div>
+        <div class="swipe-hint">Desliza →</div>
+      </div>
+    </div>
+    <div class="content-card" onclick="sel(3)" id="c3">
+      <div class="content-inner">
+        <div class="brand-row">
+          <div class="brand-mark"><img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt=""><span class="brand-name">Endonautas</span></div>
+          <span class="slide-num-sm">2/5</span>
+        </div>
+        <div class="c-label">Señal 01</div>
+        <div class="c-title"><em>Vuelve</em> con el estrés.</div>
+        <div class="c-rule"></div>
+        <div class="c-body">Si el patrón desaparece cuando todo va bien y regresa cuando hay presión,<br><em>estás trabajando el síntoma.</em></div>
+        <div class="c-spacer"></div>
+      </div>
+    </div>
+    <button class="select-btn" id="b3" onclick="sel(3)">Elegir esta</button>
+  </div>
+
+  <!-- 4 — Fraunces 800 + Manrope -->
+  <div class="option f4">
+    <div class="option-label">
+      <strong>Fraunces 800</strong>
+      <span class="weight-tag">Extrabold · impacto</span>
+      <span class="body-tag">+ Manrope</span>
+    </div>
+    <div class="slide-card" onclick="sel(4)" id="p4">
+      <div class="slide-inner">
+        <div class="brand-row">
+          <div class="brand-mark"><img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt=""><span class="brand-name">Endonautas</span></div>
+          <span class="slide-num-sm">1/5</span>
+        </div>
+        <div class="spacer"></div>
+        <div class="eyebrow">Endonautas · método</div>
+        <div class="hook">Cómo saber si estás trabajando el síntoma o el <em style="color:#c9a84c;font-style:italic">mapa</em>.</div>
+        <div class="sub">Tres señales.</div>
+        <div class="swipe-hint">Desliza →</div>
+      </div>
+    </div>
+    <div class="content-card" onclick="sel(4)" id="c4">
+      <div class="content-inner">
+        <div class="brand-row">
+          <div class="brand-mark"><img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt=""><span class="brand-name">Endonautas</span></div>
+          <span class="slide-num-sm">2/5</span>
+        </div>
+        <div class="c-label">Señal 01</div>
+        <div class="c-title"><em>Vuelve</em> con el estrés.</div>
+        <div class="c-rule"></div>
+        <div class="c-body">Si el patrón desaparece cuando todo va bien y regresa cuando hay presión,<br><em>estás trabajando el síntoma.</em></div>
+        <div class="c-spacer"></div>
+      </div>
+    </div>
+    <button class="select-btn" id="b4" onclick="sel(4)">Elegir esta</button>
+  </div>
+
+  <!-- 5 — Fraunces 600 + Raleway -->
+  <div class="option f5">
+    <div class="option-label">
+      <strong>Fraunces 600</strong>
+      <span class="weight-tag">Semibold · elegante</span>
+      <span class="body-tag">+ Raleway</span>
+    </div>
+    <div class="slide-card" onclick="sel(5)" id="p5">
+      <div class="slide-inner">
+        <div class="brand-row">
+          <div class="brand-mark"><img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt=""><span class="brand-name">Endonautas</span></div>
+          <span class="slide-num-sm">1/5</span>
+        </div>
+        <div class="spacer"></div>
+        <div class="eyebrow">Endonautas · método</div>
+        <div class="hook">Cómo saber si estás trabajando el síntoma o el <em style="color:#c9a84c;font-style:italic">mapa</em>.</div>
+        <div class="sub">Tres señales.</div>
+        <div class="swipe-hint">Desliza →</div>
+      </div>
+    </div>
+    <div class="content-card" onclick="sel(5)" id="c5">
+      <div class="content-inner">
+        <div class="brand-row">
+          <div class="brand-mark"><img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt=""><span class="brand-name">Endonautas</span></div>
+          <span class="slide-num-sm">2/5</span>
+        </div>
+        <div class="c-label">Señal 01</div>
+        <div class="c-title"><em>Vuelve</em> con el estrés.</div>
+        <div class="c-rule"></div>
+        <div class="c-body">Si el patrón desaparece cuando todo va bien y regresa cuando hay presión,<br><em>estás trabajando el síntoma.</em></div>
+        <div class="c-spacer"></div>
+      </div>
+    </div>
+    <button class="select-btn" id="b5" onclick="sel(5)">Elegir esta</button>
+  </div>
+
+</div>
+
+<div class="footer">
+  <div class="selection-text" id="selText">Ninguna seleccionada</div>
+  <button class="confirm-btn" onclick="confirm()">Confirmar y guardar →</button>
+</div>
+
+<script>
+const FONTS = {
+  1: { heading: 'Fraunces', weight: 600, body: 'Outfit',           desc: 'Semibold + Outfit' },
+  2: { heading: 'Fraunces', weight: 700, body: 'Outfit',           desc: 'Bold + Outfit' },
+  3: { heading: 'Fraunces', weight: 700, body: 'Plus Jakarta Sans', desc: 'Bold + Plus Jakarta Sans' },
+  4: { heading: 'Fraunces', weight: 800, body: 'Manrope',          desc: 'Extrabold + Manrope' },
+  5: { heading: 'Fraunces', weight: 600, body: 'Raleway',          desc: 'Semibold + Raleway' },
+};
+let cur = null;
+
+function sel(n) {
+  if (cur) {
+    ['p','c'].forEach(t => document.getElementById(t+cur).classList.remove('selected'));
+    const b = document.getElementById('b'+cur);
+    b.classList.remove('active'); b.textContent = 'Elegir esta';
+  }
+  cur = n;
+  ['p','c'].forEach(t => document.getElementById(t+n).classList.add('selected'));
+  const b = document.getElementById('b'+n);
+  b.classList.add('active'); b.textContent = '✓ Seleccionada';
+  const f = FONTS[n];
+  document.getElementById('selText').innerHTML =
+    'Seleccionada: <strong>Fraunces ' + f.weight + ' + ' + f.body + '</strong>';
+}
+
+function confirm() {
+  if (!cur) { alert('Primero elige una opción.'); return; }
+  const f = FONTS[cur];
+  alert('Elegiste:\nTitular: Fraunces weight ' + f.weight + '\nCuerpo: ' + f.body + '\n\nDile a Claude que guarde esta combinación.');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>C4 — Contraintuitivo · Endonautas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0a0a;--gold:#c9a84c;--white:#fff;--muted:#9a9a9a;--border:rgba(201,168,76,.2)}
+body{background:#1a1a1a;font-family:'Inter',sans-serif;display:flex;min-height:100vh}
+.viewer{flex:0 0 420px;display:flex;flex-direction:column;align-items:center;padding:2rem;background:#111;border-right:1px solid #222}
+.slide-wrap{position:relative;width:360px;height:450px;overflow:hidden;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;background:var(--bg);padding:1.8rem}
+.slide.active{display:flex}
+.progress{display:flex;gap:6px;margin:1rem 0 .5rem}
+.dot{width:6px;height:6px;border-radius:50%;background:#333;transition:all .3s;cursor:pointer}
+.dot.active{background:var(--gold);width:18px;border-radius:3px}
+.nav-row{display:flex;gap:1rem;margin-top:.5rem}
+.btn{padding:.5rem 1.2rem;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--gold);font-size:.8rem;font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s}
+.btn:hover{background:var(--gold);color:#000}.btn:disabled{opacity:.3;cursor:default}
+.slide-counter{color:var(--muted);font-size:.75rem;margin-top:.8rem;letter-spacing:.1em}
+.copy-slide{padding:.35rem .8rem;border:1px solid #333;border-radius:6px;background:transparent;color:#666;font-size:.7rem;font-family:'Inter',sans-serif;cursor:pointer;margin-top:.5rem;transition:all .2s}
+.copy-slide:hover{border-color:var(--gold);color:var(--gold)}
+.panel{flex:1;padding:2rem;overflow-y:auto;background:#0d0d0d}
+.panel h2{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.1rem;margin-bottom:1.5rem;padding-bottom:.8rem;border-bottom:1px solid #222}
+.all-text{font-size:.82rem;color:#888;line-height:1.8;white-space:pre-wrap}
+.slide-label{color:var(--gold);font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;margin-top:1.2rem;margin-bottom:.3rem;display:block}
+.caption-box{margin-top:2rem;padding:1.2rem;border:1px solid #222;border-radius:10px;background:#111}
+.caption-box h3{color:var(--gold);font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.8rem}
+.caption-text{font-size:.8rem;color:#777;line-height:1.7;white-space:pre-wrap}
+.download-btn{margin-top:1.5rem;padding:.7rem 1.5rem;border:1px solid var(--gold);border-radius:8px;background:transparent;color:var(--gold);font-size:.8rem;font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s;width:100%}
+.download-btn:hover{background:var(--gold);color:#000}
+.sl{display:flex;align-items:center;gap:.5rem;margin-bottom:auto}
+.slm{width:18px;height:18px;background:var(--gold);clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);opacity:.8}
+.slt{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.sn{font-size:.6rem;letter-spacing:.15em;color:#444;margin-left:auto}
+.sp{flex:1}
+.sh{font-family:'Playfair Display',serif;font-size:1.4rem;line-height:1.25;color:var(--white);flex:1;display:flex;align-items:center}
+.sh em{color:var(--gold);font-style:italic}
+.shsm{font-family:'Playfair Display',serif;font-size:1.05rem;line-height:1.35;color:var(--white)}
+.sb{font-size:.8rem;line-height:1.6;color:#ccc;margin-top:.7rem}
+.sb em{color:var(--gold);font-style:normal;font-weight:500}
+.sdiv{width:35px;height:2px;background:var(--gold);margin:.7rem 0;opacity:.6}
+.scta{font-size:.75rem;color:var(--gold);letter-spacing:.08em;margin-top:auto;padding-top:.8rem;border-top:1px solid var(--border)}
+.sey{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-top:auto;margin-bottom:.5rem}
+.stag{display:inline-block;padding:.2rem .6rem;border:1px solid var(--border);border-radius:20px;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:.7rem}
+.scross{font-family:'Playfair Display',serif;font-size:1rem;color:#444;text-decoration:line-through;margin-bottom:.3rem}
+.sbold{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--white);margin-bottom:.3rem}
+</style>
+</head>
+<body>
+<div class="viewer">
+  <div class="slide-wrap">
+    <div class="slide active"><div class="sl"><div class="slm"></div><div class="slt">Endonautas</div><div class="sn">1/8</div></div><div class="sey">Contraintuitivo</div><div class="sh">"El crecimiento personal te está mintiendo.<br><br>No con mala intención —<br>con una creencia equivocada."</div><div class="scta">→ Desliza para entender por qué</div></div>
+    <div class="slide"><div class="sl"><div class="slm"></div><div class="slt">Endonautas</div><div class="sn">2/8</div></div><div class="sp"></div><div class="stag">El problema</div><div class="shsm">La industria del crecimiento personal tiene un problema estructural.</div><div class="sdiv"></div><div class="sb">Te enseña a <em>mejorar al yo que ya tienes</em>.<br><br>Pero no te pregunta si ese yo eres tú de verdad.</div><div class="sp"></div></div>
+    <div class="slide"><div class="sl"><div class="slm"></div><div class="slt">Endonautas</div><div class="sn">3/8</div></div><div class="sp"></div><div class="sb" style="font-size:.72rem;color:#555;letter-spacing:.08em">La pregunta que nadie hace:</div><div class="shsm" style="margin-top:.5rem">¿Y si el problema no es<br>que eres insuficiente?</div><div class="sdiv"></div><div class="sb">¿Y si el problema es que llevas años siendo <em>alguien que no eres</em>?</div><div class="sp"></div></div>
+    <div class="slide"><div class="sl"><div class="slm"></div><div class="slt">Endonautas</div><div class="sn">4/8</div></div><div class="sp"></div><div class="stag">El concepto</div><div class="shsm">Eso se llama<br><span style="color:var(--gold)">Máscara.</span></div><div class="sdiv"></div><div class="sb">Y todos la llevamos.<br>Sin excepción.<br>Sin culpa.</div><div class="sp"></div></div>
+    <div class="slide"><div class="sl"><div class="slm"></div><div class="slt">Endonautas</div><div class="sn">5/8</div></div><div class="sp"></div><div class="shsm">La Máscara no es mala.</div><div class="sdiv"></div><div class="sb">Fue una estrategia de supervivencia <em>brillante</em>.<br><br>La construiste cuando eras pequeño para que alguien importante te amara, te aceptara, te viera.</div><div class="sp"></div></div>
+    <div class="slide"><div class="sl"><div class="slm"></div><div class="slt">Endonautas</div><div class="sn">6/8</div></div><div class="sp"></div><div class="scross">Mejorar tu productividad</div><div class="scross">Optimizar tus hábitos</div><div class="scross">Ser más disciplinado</div><div class="sdiv"></div><div class="sbold">Primero: ver qué parte de ti hace todo eso para no tener que mirarte de verdad.</div><div class="sp"></div></div>
+    <div class="slide"><div class="sl"><div class="slm"></div><div class="slt">Endonautas</div><div class="sn">7/8</div></div><div class="sp"></div><div class="shsm">Endonautica no te enseña<br>a ser <em>mejor</em>.</div><div class="sdiv"></div><div class="shsm">Te enseña a ver la diferencia entre<br><span style="color:var(--gold)">tú y tu máscara.</span></div><div class="sb" style="margin-top:1rem">Esa diferencia lo cambia todo.</div><div class="sp"></div></div>
+    <div class="slide"><div class="sl"><div class="slm"></div><div class="slt">Endonautas</div><div class="sn">8/8</div></div><div class="sp"></div><div class="sey">¿Cuál es la tuya?</div><div class="shsm">Comenta <em>MASCARA</em> y te enviamos el test gratuito al DM.</div><div class="sdiv"></div><div class="sb">5 minutos. Sin costo.<br>El mapa que cambia la pregunta.</div><div class="scta">@endonautas</div></div>
+  </div>
+  <div class="progress" id="progress"></div>
+  <div class="nav-row"><button class="btn" id="prev" onclick="changeSlide(-1)" disabled>← Anterior</button><button class="btn" id="next" onclick="changeSlide(1)">Siguiente →</button></div>
+  <div class="slide-counter" id="counter">1 / 8</div>
+  <button class="copy-slide" onclick="copyCurrentSlide()">Copiar texto de este slide</button>
+</div>
+<div class="panel">
+  <h2>C4 — El contraintuitivo profundo · Texto completo</h2>
+  <div class="all-text" id="allText"></div>
+  <div class="caption-box"><h3>Caption para Instagram</h3><div class="caption-text">El crecimiento personal te está mintiendo. No con mala intención — con una creencia equivocada.
+
+La industria entera está construida sobre una premisa: que tú eres insuficiente y necesitas mejorar.
+
+Pero ¿y si el problema no es que eres insuficiente? ¿Y si el problema es que llevas años siendo alguien que no eres?
+
+Eso se llama Máscara. Y trabajar sobre ella cambia la pregunta entera.
+
+Comenta MASCARA y te envío el test gratis.
+
+.
+.
+.
+#endonautas #endonautica #crecimientopersonal #mascara #autoconocimiento #identidad #viajeinterior #psicologia #sombra #autenticidad #herida #consciencia #transformacion #francojerica #contrintuitivo</div></div>
+  <button class="download-btn" onclick="downloadAll()">Descargar todos los textos (.txt)</button>
+</div>
+<script>
+const slides=document.querySelectorAll('.slide'),dots=document.getElementById('progress');let current=0;
+const texts=[`SLIDE 1\n"El crecimiento personal te está mintiendo. No con mala intención — con una creencia equivocada."`,`SLIDE 2\nLa industria del crecimiento personal te enseña a mejorar al yo que ya tienes. Pero no te pregunta si ese yo eres tú de verdad.`,`SLIDE 3\nLa pregunta que nadie hace: ¿Y si el problema no es que eres insuficiente? ¿Y si el problema es que llevas años siendo alguien que no eres?`,`SLIDE 4\nEso se llama Máscara. Y todos la llevamos. Sin excepción. Sin culpa.`,`SLIDE 5\nLa Máscara no es mala. Fue una estrategia de supervivencia brillante. La construiste cuando eras pequeño para que alguien importante te amara, te aceptara, te viera.`,`SLIDE 6\nAntes de mejorar tu productividad, optimizar tus hábitos, ser más disciplinado...\nPrimero: ver qué parte de ti hace todo eso para no tener que mirarte de verdad.`,`SLIDE 7\nEndonautica no te enseña a ser mejor. Te enseña a ver la diferencia entre tú y tu máscara. Esa diferencia lo cambia todo.`,`SLIDE 8 — CTA\nComenta MASCARA y te enviamos el test gratuito al DM. 5 minutos. Sin costo. El mapa que cambia la pregunta.\n@endonautas`];
+function buildDots(){dots.innerHTML='';slides.forEach((_,i)=>{const d=document.createElement('div');d.className='dot'+(i===0?' active':'');d.onclick=()=>goTo(i);dots.appendChild(d)})}
+function buildPanel(){document.getElementById('allText').innerHTML=texts.map((t,i)=>`<span class="slide-label">— SLIDE ${i+1} —</span>${t}`).join('\n\n')}
+function goTo(n){slides[current].classList.remove('active');dots.children[current].classList.remove('active');current=n;slides[current].classList.add('active');dots.children[current].classList.add('active');document.getElementById('counter').textContent=`${current+1} / ${slides.length}`;document.getElementById('prev').disabled=current===0;document.getElementById('next').disabled=current===slides.length-1}
+function changeSlide(dir){goTo(Math.max(0,Math.min(slides.length-1,current+dir)))}
+function copyCurrentSlide(){navigator.clipboard.writeText(texts[current]).then(()=>{const b=document.querySelector('.copy-slide');b.textContent='¡Copiado!';setTimeout(()=>b.textContent='Copiar texto de este slide',1500)})}
+function downloadAll(){const c=`CARRUSEL C4 — CONTRAINTUITIVO\n${'='.repeat(50)}\n\n`+texts.map((t,i)=>`— SLIDE ${i+1} —\n${t}`).join('\n\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([c],{type:'text/plain'}));a.download='carrusel-C4-contrintuitivo.txt';a.click()}
+buildDots();buildPanel();
+</script>
+</body>
+</html>

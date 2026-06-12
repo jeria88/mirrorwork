@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700;900&family=Plus+Jakarta+Sans:wght@400;500&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1080px; height: 1080px;
+    background: #000;
+    overflow: hidden; position: relative;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
+
+  /* Capas z-index explícitas */
+  canvas      { position: absolute; inset: 0; z-index: 0; }
+  .const-svg  { position: absolute; inset: 0; width: 1080px; height: 1080px; z-index: 1; }
+  .vignette   { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+  .content    { position: absolute; inset: 0; z-index: 3; }
+
+  /* Vignette cinematográfico — esquinas oscuras + izquierda sutilmente más oscura */
+  .vignette {
+    background:
+      radial-gradient(ellipse 100% 100% at 50% 50%,
+        transparent 28%, rgba(0,0,0,.72) 100%),
+      linear-gradient(to right,
+        rgba(0,0,0,.28) 0%, transparent 52%),
+      linear-gradient(to bottom,
+        rgba(0,0,0,.18) 0%, transparent 22%,
+        transparent 78%, rgba(0,0,0,.22) 100%);
+  }
+
+  /* Contenido */
+  .content {
+    padding: 68px 84px 62px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    color: #F0E8DC;
+  }
+  .top { display: flex; align-items: center; justify-content: space-between; }
+  .logo-wrap { display: flex; align-items: center; gap: 11px; }
+  .logo-img  { width: 36px; height: 36px; }
+  .logo-text {
+    font-weight: 900; font-size: 19px; letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #7ecfa8, #7ec8cf);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .tag {
+    font-family: 'Plus Jakarta Sans'; font-size: 10px; letter-spacing: 0.2em;
+    color: rgba(240,232,220,0.28); text-transform: uppercase;
+    border: 1px solid rgba(240,232,220,0.09); border-radius: 20px; padding: 5px 13px;
+  }
+  .middle {
+    flex: 1; display: flex; flex-direction: column; justify-content: center;
+    padding: 44px 0 20px;
+  }
+  .eyebrow {
+    font-family: 'Plus Jakarta Sans'; font-size: 11px; letter-spacing: 0.3em;
+    text-transform: uppercase; color: rgba(240,232,220,0.34);
+    margin-bottom: 30px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .eyebrow::before {
+    content: ''; display: block; width: 26px; height: 1px;
+    background: rgba(240,232,220,0.18); flex-shrink: 0;
+  }
+  h1 {
+    font-weight: 900; font-size: 90px; line-height: 0.87;
+    letter-spacing: -0.035em; color: #F0E8DC; margin-bottom: 38px;
+  }
+  h1 em {
+    font-style: italic;
+    background: linear-gradient(135deg, #7ecfa8, #7ec8cf);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .desc {
+    font-family: 'Plus Jakarta Sans'; font-size: 17px; line-height: 1.65;
+    color: rgba(240,232,220,0.36); max-width: 490px;
+  }
+  .bottom {
+    display: flex; align-items: center; justify-content: space-between;
+    border-top: 1px solid rgba(255,255,255,0.065); padding-top: 22px;
+  }
+  .swipe {
+    font-family: 'Plus Jakarta Sans'; font-size: 11px; font-weight: 500;
+    color: rgba(126,207,168,0.62); letter-spacing: 0.14em; text-transform: uppercase;
+  }
+  .slide-info { display: flex; align-items: center; gap: 18px; }
+  .dots { display: flex; gap: 5px; align-items: center; }
+  .dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(240,232,220,0.13); }
+  .dot.active { background: #7ecfa8; width: 20px; border-radius: 3px; }
+  .slide-num {
+    font-family: 'Plus Jakarta Sans'; font-size: 10px; letter-spacing: 0.24em;
+    color: rgba(240,232,220,0.20); text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<!-- CAPA 0: Campo estelar con profundidad de campo (3 capas de distancia) -->
+<canvas id="c" width="1080" height="1080"></canvas>
+
+<!-- CAPA 1: Constelaciones reales + efectos astronómicos -->
+<svg class="const-svg" xmlns="http://www.w3.org/2000/svg">
+<defs>
+
+  <!-- Milky Way — banda diagonal muy sutil -->
+  <radialGradient id="mw" cx="50%" cy="50%" r="50%" gradientUnits="userSpaceOnUse"
+    gradientTransform="translate(540 540) rotate(32) scale(1 3.2) translate(-540 -540)">
+    <stop offset="0%"   stop-color="rgb(165,175,195)" stop-opacity="0.055"/>
+    <stop offset="65%"  stop-color="rgb(145,155,175)" stop-opacity="0.018"/>
+    <stop offset="100%" stop-color="transparent"       stop-opacity="0"/>
+  </radialGradient>
+
+  <!-- Nebulosa de Orión M42 — cyan cálido, difusa -->
+  <radialGradient id="m42" cx="745" cy="315" r="58" gradientUnits="userSpaceOnUse">
+    <stop offset="0%"   stop-color="#80d8c0" stop-opacity="0.22"/>
+    <stop offset="40%"  stop-color="#5ec8b0" stop-opacity="0.10"/>
+    <stop offset="100%" stop-color="transparent" stop-opacity="0"/>
+  </radialGradient>
+
+  <!-- Glow suave (estrellas medianas) -->
+  <filter id="gs" x="-120%" y="-120%" width="340%" height="340%">
+    <feGaussianBlur stdDeviation="2.6" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <!-- Glow fuerte (estrellas muy brillantes) -->
+  <filter id="gl" x="-200%" y="-200%" width="500%" height="500%">
+    <feGaussianBlur stdDeviation="5.5" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <!-- Glow mínimo -->
+  <filter id="gx" x="-60%" y="-60%" width="220%" height="220%">
+    <feGaussianBlur stdDeviation="1.2" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+
+  <!-- Destellos de difracción — gradientes para simular spike de telescopio -->
+  <linearGradient id="sv" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%"   stop-color="white" stop-opacity="0"/>
+    <stop offset="50%"  stop-color="white" stop-opacity="1"/>
+    <stop offset="100%" stop-color="white" stop-opacity="0"/>
+  </linearGradient>
+  <linearGradient id="sh" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0%"   stop-color="white" stop-opacity="0"/>
+    <stop offset="50%"  stop-color="white" stop-opacity="1"/>
+    <stop offset="100%" stop-color="white" stop-opacity="0"/>
+  </linearGradient>
+</defs>
+
+<!-- Milky Way difusa -->
+<ellipse cx="540" cy="540" rx="540" ry="540"
+  fill="url(#mw)" opacity="1"/>
+
+<!-- ════════════════════════ ORIÓN ════════════════════════
+     Posición: cuadrante superior-derecho
+     La constelación más reconocida del cielo
+     → Hombros (Betelgeuse, Bellatrix) arriba
+     → Cinturón de 3 (Alnitak-Alnilam-Mintaka) al centro
+     → Pies (Saiph, Rigel) abajo
+     → Nebulosa M42 en la espada (entre cinturón y pie izq)
+-->
+
+<!-- Nebulosa M42 — difusa cyan, en la espada de Orión -->
+<ellipse cx="745" cy="315" rx="52" ry="38"
+  fill="url(#m42)" opacity="0.9"
+  transform="rotate(-12 745 315)"/>
+<!-- Núcleo de M42 un poco más brillante -->
+<ellipse cx="748" cy="318" rx="18" ry="14"
+  fill="#90dcc8" opacity="0.09"
+  transform="rotate(-12 748 318)"/>
+
+<!-- Estrellas de la espada (theta Ori, iota Ori) -->
+<circle cx="750" cy="284" r="1.2" fill="white" opacity="0.52"/>
+<circle cx="746" cy="318" r="1.4" fill="#a0e8d8" opacity="0.62"/>
+<circle cx="742" cy="348" r="1.1" fill="white" opacity="0.46"/>
+
+<!-- Líneas de la constelación -->
+<g stroke="rgba(126,207,168,0.45)" stroke-width="0.75"
+   fill="none" stroke-linecap="round">
+  <line x1="670" y1="142" x2="716" y2="256"/>  <!-- Betelgeuse → Alnitak  -->
+  <line x1="848" y1="122" x2="796" y2="252"/>  <!-- Bellatrix  → Mintaka  -->
+  <line x1="716" y1="256" x2="756" y2="252"/>  <!-- cinturón izq → centro -->
+  <line x1="756" y1="252" x2="796" y2="252"/>  <!-- cinturón centro → der  -->
+  <line x1="716" y1="256" x2="692" y2="388"/>  <!-- Alnitak   → Saiph    -->
+  <line x1="796" y1="252" x2="876" y2="372"/>  <!-- Mintaka   → Rigel    -->
+</g>
+
+<!-- Rigel β — mag 0.13, pie derecho, la más brillante de Orión (azul-blanca) -->
+<circle cx="876" cy="372" r="4.8" fill="white" opacity="0.97" filter="url(#gl)"/>
+<!-- Destello de difracción — Rigel -->
+<rect x="875.2" y="342" width="1.6" height="60" fill="url(#sv)" opacity="0.28"/>
+<rect x="846"   y="371.2" width="60" height="1.6" fill="url(#sh)" opacity="0.28"/>
+
+<!-- Betelgeuse α — mag 0.42, hombro izquierdo, supergigante roja -->
+<circle cx="670" cy="142" r="4.0" fill="#ffddaa" opacity="0.95" filter="url(#gl)"/>
+<!-- Destello de difracción — Betelgeuse -->
+<rect x="669.2" y="116" width="1.6" height="52" fill="url(#sv)" opacity="0.22"/>
+<rect x="644"   y="141.2" width="52" height="1.6" fill="url(#sh)" opacity="0.22"/>
+
+<!-- Bellatrix γ — mag 1.64 -->
+<circle cx="848" cy="122" r="2.6" fill="white"   opacity="0.88" filter="url(#gs)"/>
+<!-- Alnilam ε — mag 1.69, el más brillante del cinturón -->
+<circle cx="756" cy="252" r="2.8" fill="white"   opacity="0.92" filter="url(#gs)"/>
+<!-- Alnitak ζ — mag 1.74 -->
+<circle cx="716" cy="256" r="2.5" fill="white"   opacity="0.88" filter="url(#gs)"/>
+<!-- Mintaka δ — mag 2.23 -->
+<circle cx="796" cy="252" r="2.2" fill="white"   opacity="0.82" filter="url(#gx)"/>
+<!-- Saiph κ — mag 2.06 -->
+<circle cx="692" cy="388" r="2.2" fill="white"   opacity="0.83" filter="url(#gx)"/>
+
+<!-- Estrellas periféricas de Orión -->
+<circle cx="614" cy="186" r="1.3" fill="white" opacity="0.50"/>  <!-- pi3 Ori -->
+<circle cx="600" cy="218" r="1.1" fill="white" opacity="0.40"/>  <!-- pi4 Ori -->
+<circle cx="932" cy="182" r="1.2" fill="white" opacity="0.46"/>
+<circle cx="916" cy="308" r="1.0" fill="white" opacity="0.38"/>
+<circle cx="652" cy="308" r="1.0" fill="white" opacity="0.34"/>
+
+<!-- ════════════════════════ CRUZ DEL SUR (Crux) ════════════════════════
+     Zona inferior-izquierda, visible solo desde el hemisferio sur
+     Aparece en la bandera de Chile
+     → Eje largo: Gacrux (norte) → Acrux (sur)
+     → Eje corto: Delta Crucis (oeste) → Mimosa (este)
+     La Cruz está inclinada ~26° como se ve en el cielo austral
+-->
+<g stroke="rgba(126,207,168,0.42)" stroke-width="0.78"
+   fill="none" stroke-linecap="round">
+  <line x1="174" y1="768" x2="194" y2="878"/>  <!-- Gacrux → Acrux   -->
+  <line x1="108" y1="826" x2="262" y2="823"/>  <!-- Delta  → Mimosa  -->
+</g>
+
+<!-- Acrux α — mag 0.77, el más brillante de la Cruz -->
+<circle cx="194" cy="878" r="3.8" fill="white"   opacity="0.95" filter="url(#gl)"/>
+<!-- Destello de difracción — Acrux -->
+<rect x="193.2" y="854" width="1.6" height="48" fill="url(#sv)" opacity="0.24"/>
+<rect x="170"   y="877.2" width="48" height="1.6" fill="url(#sh)" opacity="0.24"/>
+
+<!-- Mimosa β — mag 1.25 -->
+<circle cx="262" cy="823" r="3.0" fill="white"   opacity="0.91" filter="url(#gs)"/>
+<!-- Gacrux γ — mag 1.59, levemente rojiza -->
+<circle cx="174" cy="768" r="2.7" fill="#ffd8b0"  opacity="0.89" filter="url(#gs)"/>
+<!-- Delta Crucis δ — mag 2.78, la más tenue -->
+<circle cx="108" cy="826" r="1.8" fill="white"   opacity="0.70" filter="url(#gx)"/>
+<!-- Epsilon Crucis — interior de la Cruz, muy tenue -->
+<circle cx="196" cy="824" r="1.0" fill="white"   opacity="0.38"/>
+
+<!-- ════════════════════════ ESTRELLAS BRILLANTES REALES ════════════════════
+     Estrellas que estarían visibles en el mismo cielo que Orión y la Cruz del Sur
+     con sus colores espectrosímiles reales
+-->
+
+<!-- Sirio α CMa — mag -1.46, la MÁS brillante del cielo (blanco-azulada) -->
+<circle cx="428" cy="860" r="5.2" fill="white"   opacity="0.98" filter="url(#gl)"/>
+<rect x="427.2" y="828" width="1.6" height="64" fill="url(#sv)" opacity="0.32"/>
+<rect x="395"   y="859.2" width="66" height="1.6" fill="url(#sh)" opacity="0.32"/>
+
+<!-- Canopo α Car — mag -0.74, 2ª más brillante (amarillo-blanca) -->
+<circle cx="80"  cy="944" r="4.4" fill="#fff5d8"  opacity="0.96" filter="url(#gl)"/>
+<rect x="79.2"  y="918" width="1.6" height="52" fill="url(#sv)" opacity="0.26"/>
+<rect x="54"    y="943.2" width="52" height="1.6" fill="url(#sh)" opacity="0.26"/>
+
+<!-- Cápela α Aur — mag 0.08, amarillo-dorada — zona superior -->
+<circle cx="316" cy="88"  r="3.6" fill="#ffe090"  opacity="0.93" filter="url(#gs)"/>
+<rect x="315.2" y="68" width="1.6" height="40" fill="url(#sv)" opacity="0.20"/>
+<rect x="296"   y="87.2" width="40" height="1.6" fill="url(#sh)" opacity="0.20"/>
+
+<!-- Proción α CMi — mag 0.37, blanco-amarillenta -->
+<circle cx="982" cy="476" r="3.0" fill="white"   opacity="0.89" filter="url(#gs)"/>
+
+<!-- Aldebarán α Tau — mag 0.87, naranja-rojiza -->
+<circle cx="502" cy="196" r="2.8" fill="#ffc080"  opacity="0.84" filter="url(#gs)"/>
+
+<!-- Rigil Kentaurus α Cen — mag -0.27, vecino de la Cruz del Sur -->
+<circle cx="318" cy="874" r="3.6" fill="white"   opacity="0.92" filter="url(#gs)"/>
+<!-- Hadar β Cen — mag 0.60, acompaña a Rígil Kentauro -->
+<circle cx="296" cy="900" r="2.8" fill="#d8eeff"  opacity="0.86" filter="url(#gs)"/>
+
+<!-- Achernar α Eri — mag 0.46, azul-blanca, sur profundo -->
+<circle cx="72"  cy="678" r="3.2" fill="#d0e8ff"  opacity="0.90" filter="url(#gs)"/>
+
+<!-- Pólux β Gem — mag 1.14, naranja -->
+<circle cx="558" cy="278" r="2.4" fill="#ffcc90"  opacity="0.80" filter="url(#gx)"/>
+<!-- Castor α Gem — mag 1.58, blanca, doble estrella -->
+<circle cx="526" cy="252" r="1.9" fill="white"   opacity="0.74" filter="url(#gx)"/>
+
+<!-- Estrellas de acento jade del sistema brand -->
+<circle cx="148" cy="440" r="1.5" fill="#7ecfa8" opacity="0.58" filter="url(#gx)"/>
+<circle cx="970" cy="638" r="1.3" fill="#7ec8cf" opacity="0.50"/>
+<circle cx="442" cy="510" r="0.9" fill="#7ecfa8" opacity="0.36"/>
+</svg>
+
+<!-- CAPA 2: Vignette cinematográfico -->
+<div class="vignette"></div>
+
+<!-- CAPA 3: Contenido — esto es lo que cambia slide a slide -->
+<div class="content">
+  <div class="top">
+    <div class="logo-wrap">
+      <img class="logo-img"
+        src="file:///home/nikka/Proyectos/endonautas/brand/social/plantilla/_assets/logo-trans.png"
+        alt="">
+      <div class="logo-text">Endonautas</div>
+    </div>
+    <div class="tag">Autoconocimiento</div>
+  </div>
+
+  <div class="middle">
+    <div class="eyebrow">Vínculos · Patrones</div>
+    <h1>La pelea<br>no fue por<br>lo que <em>dijiste.</em></h1>
+    <p class="desc">Fue por lo que eso activó. Y eso tiene un origen que vale la pena encontrar.</p>
+  </div>
+
+  <div class="bottom">
+    <div class="swipe">Desliza para ver →</div>
+    <div class="slide-info">
+      <div class="dots">
+        <div class="dot active"></div>
+        <div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div>
+      </div>
+      <div class="slide-num">01 / 09</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CAMPO ESTELAR CON PROFUNDIDAD DE CAMPO
+// Tres capas que simulan paralaje: fondo / medio / primer plano
+// Igual que base.js de endonautas.cl pero con estratificación
+// ═══════════════════════════════════════════════════════════════
+const ctx = document.getElementById('c').getContext('2d');
+const W = 1080, H = 1080;
+
+// PRNG determinístico — mismo seed = misma distribución siempre
+let s = 74521;
+const rng = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+
+// Paleta base web
+const BONE = 'rgb(210,200,185)';
+const JADE = '#7ecfa8';
+const TURQ = '#7ec8cf';
+
+function star(sz_min, sz_max, op_min, op_max, count) {
+  for (let i = 0; i < count; i++) {
+    const x = rng() * W, y = rng() * H, t = rng();
+    let color, sz, op;
+    if      (t < 0.83) { color = BONE; }
+    else if (t < 0.92) { color = JADE; }
+    else               { color = TURQ; }
+    sz = rng() * (sz_max - sz_min) + sz_min;
+    op = rng() * (op_max - op_min) + op_min;
+    ctx.globalAlpha = op;
+    ctx.fillStyle   = color;
+    ctx.fillRect(x, y, sz, sz);
+  }
+}
+
+// Capa 1 — Fondo lejano: estrellas diminutas, muy tenues
+star(0.12, 0.38, 0.03, 0.14, 420);
+
+// Capa 2 — Plano medio
+star(0.35, 0.88, 0.08, 0.36, 280);
+
+// Capa 3 — Primer plano: estrellas más cercanas, más brillantes
+star(0.88, 1.55, 0.26, 0.58, 95);
+
+ctx.globalAlpha = 1;
+</script>
+</body>
+</html>

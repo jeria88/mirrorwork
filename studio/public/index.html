@@ -1,0 +1,3476 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Endonautas · Content Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@300;400;500;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-gradient: radial-gradient(ellipse at top, #140d1f 0%, #070409 100%);
+  --bg-dark: #070409;
+  --surface: rgba(18, 11, 28, 0.45);
+  --surface-hover: rgba(26, 17, 39, 0.65);
+  --card: rgba(22, 14, 33, 0.6);
+  --panel-bg: rgba(10, 6, 15, 0.85);
+  --border: rgba(201, 120, 32, 0.12);
+  --border-gold: rgba(126, 207, 168, 0.25);
+  --border-gold-hover: rgba(126, 207, 168, 0.55);
+  --gold: #7ecfa8;
+  --gold-dim: rgba(126, 207, 168, 0.65);
+  --gold-glow: rgba(126, 207, 168, 0.08);
+  --white: #f3f0ea;
+  --muted: #5e546d;
+  --muted-bright: #988ba9;
+  --green: #58b67b;
+  --red: #d34c4c;
+  --teal: #58b6b0;
+  --purple: #aa58b6;
+  --orange: #b66d58;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg-dark);
+  background-image: var(--bg-gradient);
+  background-attachment: fixed;
+  color: var(--white);
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(10, 6, 15, 0.5);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(201, 168, 76, 0.25);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold);
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 40px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(7, 4, 9, 0.75);
+  backdrop-filter: blur(20px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.brand-icon {
+  width: 38px;
+  height: 38px;
+  opacity: 0.85;
+}
+.brand-text h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--white);
+}
+.brand-text span {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-top: 2px;
+}
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.live-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--muted-bright);
+}
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 10px var(--green);
+  animation: blink 2.5s infinite;
+}
+.live-dot.off {
+  background: var(--red);
+  box-shadow: none;
+  animation: none;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Main Layout */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 79px);
+}
+
+/* Navigation tabs */
+.nav-tabs {
+  display: flex;
+  padding: 0 40px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(7, 4, 9, 0.3);
+  gap: 8px;
+}
+.tab {
+  padding: 18px 24px;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted-bright);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.25s ease;
+  font-weight: 600;
+  user-select: none;
+}
+.tab:hover {
+  color: var(--white);
+  border-bottom-color: rgba(201, 168, 76, 0.3);
+}
+.tab.active {
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+}
+
+/* Stats Ribbon */
+.stats {
+  display: flex;
+  padding: 0 40px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(12, 8, 20, 0.35);
+  overflow-x: auto;
+  gap: 0;
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 36px 16px 0;
+  gap: 6px;
+  white-space: nowrap;
+}
+.stat + .stat {
+  padding-left: 36px;
+  border-left: 1px solid var(--border);
+}
+.stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  color: var(--gold);
+  line-height: 1;
+  font-weight: 600;
+}
+.stat-label {
+  font-size: 11px;
+  color: var(--muted-bright);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Main panels content */
+.main {
+  flex: 1;
+  padding: 30px 40px 100px;
+}
+.panel {
+  display: none;
+}
+.panel.active {
+  display: block;
+}
+.sec-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+.sec-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--gold-dim);
+  letter-spacing: 0.02em;
+}
+.sec-subtitle {
+  font-size: 12px;
+  color: var(--muted-bright);
+  margin-top: 4px;
+}
+
+/* Grid & Cards (Modern Glassmorphism) */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+.card {
+  background: var(--card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(201, 168, 76, 0.45), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.card:hover {
+  border-color: var(--border-gold);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+  transform: translateY(-2px);
+}
+.card:hover::before {
+  opacity: 1;
+}
+.card-ghost {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-family: 'Playfair Display', serif;
+  font-size: 52px;
+  font-weight: 700;
+  color: var(--white);
+  opacity: 0.025;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.badge {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+.badge-Perfil { color: var(--gold); background: rgba(201,168,76,0.08); border: 1px solid rgba(201,168,76,0.2); }
+.badge-Viralidad { color: var(--red); background: rgba(211,76,76,0.08); border: 1px solid rgba(211,76,76,0.2); }
+.badge-Conexión { color: var(--teal); background: rgba(88,182,176,0.08); border: 1px solid rgba(88,182,176,0.2); }
+.badge-Autoridad { color: var(--purple); background: rgba(170,88,182,0.08); border: 1px solid rgba(170,88,182,0.2); }
+.badge-Conversión { color: var(--orange); background: rgba(182,109,88,0.08); border: 1px solid rgba(182,109,88,0.2); }
+.badge-dur { color: var(--gold-dim); background: var(--gold-glow); border: 1px solid rgba(201,168,76,0.18); }
+
+.sdot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+.sdot.pub { background: var(--green); box-shadow: 0 0 10px var(--green); }
+.sdot.par { background: var(--gold); box-shadow: 0 0 10px rgba(201, 168, 76, 0.4); }
+.sdot.emp { background: var(--muted); }
+
+.card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 6px;
+  color: var(--white);
+}
+.card-sub {
+  font-size: 12px;
+  color: var(--muted-bright);
+  letter-spacing: 0.02em;
+  margin-bottom: 18px;
+}
+
+/* Slide representation list inside cards */
+.steps {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+.step {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+.step.done { color: var(--green); background: rgba(88,182,123,0.08); border: 1px solid rgba(88,182,123,0.15); }
+.step.pend { color: var(--muted-bright); background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); }
+.step.wait { color: var(--gold); background: var(--gold-glow); border: 1px solid rgba(201, 168, 76, 0.15); }
+
+/* Progress bar inside cards */
+.card-progress {
+  height: 3px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 2px;
+  margin: 8px 0 16px;
+  overflow:hidden;
+}
+.card-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+  width: 0%;
+  transition: width 0.4s;
+  border-radius: 2px;
+}
+
+.card-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 18px 0;
+}
+
+/* Buttons */
+.btn {
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 9px 18px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+}
+.btn-gold {
+  color: var(--gold);
+  background: transparent;
+  border-color: rgba(201,168,76,0.3);
+}
+.btn-gold:hover {
+  background: rgba(201,168,76,0.08);
+  border-color: var(--gold);
+  box-shadow: 0 0 15px rgba(201,168,76,0.15);
+}
+.btn-ghost {
+  color: var(--muted-bright);
+  background: transparent;
+  border-color: rgba(255,255,255,0.07);
+}
+.btn-ghost:hover {
+  color: var(--white);
+  border-color: rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.02);
+}
+.btn-green {
+  color: var(--green);
+  background: rgba(88,182,123,0.08);
+  border-color: rgba(88,182,123,0.2);
+}
+.btn-green:hover {
+  background: rgba(88,182,123,0.15);
+}
+.btn-solid {
+  color: #0d0615;
+  background: var(--gold);
+  border-color: var(--gold);
+}
+.btn-solid:hover {
+  background: #e8c97a;
+  border-color: #e8c97a;
+  box-shadow: 0 4px 16px rgba(201,168,76,0.35);
+}
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 10px;
+}
+.btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Image upload styling in carousels */
+.upload-label {
+  border: 1px dashed rgba(201, 168, 76, 0.2);
+  border-radius: 4px;
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  margin-top: 14px;
+  display: block;
+}
+.upload-label:hover {
+  border-color: var(--gold);
+  background: var(--gold-glow);
+}
+.upload-label input {
+  display: none;
+}
+.upload-label p {
+  font-size: 11px;
+  color: var(--muted-bright);
+  letter-spacing: 0.05em;
+}
+.img-thumbs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.img-thumb {
+  width: 46px;
+  height: 46px;
+  border-radius: 4px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  transition: border-color 0.2s;
+}
+.img-thumb:hover {
+  border-color: var(--gold);
+}
+
+/* ── AI CREATOR Tab ── */
+.creator-wizard {
+  max-width: 800px;
+  background: var(--surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 40px;
+}
+.wiz-step {
+  margin-bottom: 32px;
+}
+.wiz-label {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-bottom: 14px;
+  display: block;
+  font-weight: 600;
+}
+.chip-grid {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.chip {
+  padding: 10px 18px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+  font-size: 13px;
+  color: var(--muted-bright);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+.chip:hover {
+  border-color: var(--border-gold);
+  color: var(--white);
+  background: rgba(255,255,255,0.04);
+}
+.chip.selected {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: var(--gold-glow);
+}
+.count-selector {
+  display: flex;
+  gap: 10px;
+}
+.count-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+  color: var(--muted-bright);
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.count-btn:hover {
+  border-color: var(--border-gold);
+  color: var(--white);
+}
+.count-btn.selected {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: var(--gold-glow);
+}
+.textarea-styled {
+  width: 100%;
+  background: rgba(10, 6, 15, 0.4);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--white);
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  padding: 16px;
+  resize: vertical;
+  min-height: 120px;
+  outline: none;
+  transition: border-color 0.25s;
+  line-height: 1.6;
+}
+.textarea-styled:focus {
+  border-color: var(--border-gold-hover);
+}
+.textarea-styled::placeholder {
+  color: var(--muted);
+}
+.input-styled {
+  width: 100%;
+  background: rgba(10, 6, 15, 0.4);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--muted-bright);
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  padding: 12px 16px;
+  outline: none;
+  transition: all 0.25s;
+}
+.input-styled:focus {
+  border-color: var(--border-gold-hover);
+  color: var(--white);
+}
+.input-styled::placeholder {
+  color: var(--muted);
+}
+
+/* ── EDITOR Tab (Visual Splitscreen Layout) ── */
+.editor-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr 380px;
+  gap: 24px;
+  height: calc(100vh - 200px);
+  min-height: 550px;
+}
+.editor-sidebar {
+  background: rgba(12, 8, 20, 0.45);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.sidebar-hdr {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sidebar-title {
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  font-weight: 600;
+}
+.sidebar-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+.slide-item {
+  padding: 12px 16px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255,255,255,0.01);
+}
+.slide-item:hover {
+  background: rgba(255,255,255,0.03);
+  color: var(--white);
+}
+.slide-item.active {
+  background: var(--gold-glow);
+  border-color: var(--border-gold);
+  color: var(--gold);
+}
+.slide-item-title {
+  font-size: 12px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 180px;
+}
+.slide-item-type {
+  font-size: 9px;
+  text-transform: uppercase;
+  color: var(--muted-bright);
+  letter-spacing: 0.08em;
+}
+.sidebar-ftr {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  background: rgba(7, 4, 9, 0.2);
+}
+
+.editor-workspace {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.form-label {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted-bright);
+  font-weight: 600;
+}
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.select-styled {
+  width: 100%;
+  background: rgba(10, 6, 15, 0.45);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--white);
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  padding: 10px 14px;
+  outline: none;
+  cursor: pointer;
+}
+.select-styled option {
+  background: var(--bg-dark);
+}
+
+/* Editor Element list for Reels */
+.element-card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 16px;
+  margin-bottom: 12px;
+  position: relative;
+}
+.element-card-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.remove-btn {
+  background: transparent;
+  color: var(--red);
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.remove-btn:hover {
+  text-decoration: underline;
+}
+
+/* Real-Time Live Preview Pane */
+.editor-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  background: rgba(12, 8, 20, 0.35);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  justify-content: center;
+}
+.preview-title {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  font-weight: 600;
+}
+/* Live slide viewer box replicating instagram 4:5 */
+.live-slide-viewport {
+  width: 320px;
+  height: 320px;
+  overflow: hidden;
+  position: relative;
+  border-radius: 8px;
+  box-shadow: 0 15px 45px rgba(0,0,0,0.8);
+  border: 1px solid rgba(251, 168, 76, 0.1);
+}
+.live-slide-box {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1080px;
+  height: 1080px;
+  transform: scale(0.296296); /* 320 / 1080 */
+  transform-origin: top left;
+  background: #000;
+  overflow: hidden;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  color: #F0E8DC;
+  box-sizing: border-box;
+}
+.live-slide-box canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.live-slide-box .const-svg {
+  position: absolute;
+  inset: 0;
+  width: 1080px;
+  height: 1080px;
+  z-index: 1;
+  pointer-events: none;
+}
+.live-slide-box .vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: radial-gradient(ellipse 80% 80% at 50% 50%, transparent 35%, rgba(0,0,0,.52) 100%);
+  pointer-events: none;
+}
+.live-slide-box .content {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  padding: 68px 84px 62px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #F0E8DC;
+  box-sizing: border-box;
+}
+.live-slide-box .top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+.live-slide-box .logo-wrap {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.live-slide-box .logo-img {
+  width: 36px;
+  height: 36px;
+  opacity: 0.88;
+}
+.live-slide-box .logo-text {
+  font-weight: 900;
+  font-size: 19px;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #7ecfa8, #7ec8cf);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.live-slide-box .tag {
+  font-family: 'Plus Jakarta Sans';
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: rgba(240,232,220,0.32);
+  text-transform: uppercase;
+  border: 1px solid rgba(240,232,220,0.1);
+  border-radius: 20px;
+  padding: 5px 13px;
+}
+.live-slide-box .middle {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 44px 0 20px;
+  width: 100%;
+}
+.live-slide-box .eyebrow {
+  font-family: 'Plus Jakarta Sans';
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(240,232,220,0.36);
+  margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.live-slide-box .eyebrow::before {
+  content: '';
+  display: block;
+  width: 26px;
+  height: 1px;
+  background: rgba(240,232,220,0.22);
+  flex-shrink: 0;
+}
+.live-slide-box h1.headline {
+  font-weight: 900;
+  font-size: 90px;
+  line-height: 0.87;
+  letter-spacing: -0.035em;
+  color: #F0E8DC;
+  margin-bottom: 38px;
+}
+.live-slide-box h1.headline.sm {
+  font-size: 64px;
+  line-height: 0.95;
+}
+.live-slide-box h1.headline em, .live-slide-box em {
+  font-style: italic;
+  color: #7ecfa8;
+  -webkit-text-fill-color: #7ecfa8;
+  background: none;
+  -webkit-background-clip: initial;
+}
+.live-slide-box .desc {
+  font-family: 'Plus Jakarta Sans';
+  font-size: 17px;
+  line-height: 1.65;
+  color: rgba(240,232,220,0.40);
+  max-width: 490px;
+}
+.live-slide-box .s-quote {
+  font-family: 'Space Grotesk';
+  font-size: 42px;
+  font-weight: 500;
+  font-style: italic;
+  color: #F0E8DC;
+  line-height: 1.3;
+  border-left: 3px solid #7ecfa8;
+  padding-left: 28px;
+  margin: 20px 0;
+}
+.live-slide-box .cta-btn {
+  display: inline-block;
+  padding: 16px 36px;
+  border: 1px solid rgba(126,207,168,0.3);
+  border-radius: 30px;
+  background: linear-gradient(135deg, rgba(126,207,168,0.1), rgba(126,200,207,0.1));
+  color: #7ecfa8;
+  font-family: 'Plus Jakarta Sans';
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  margin: 28px 0;
+  text-transform: uppercase;
+}
+.live-slide-box .cta-btn strong {
+  color: #fff;
+  background: linear-gradient(135deg, #7ecfa8, #7ec8cf);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.live-slide-box .bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  padding-top: 22px;
+  width: 100%;
+}
+.live-slide-box .swipe {
+  font-family: 'Plus Jakarta Sans';
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(126,207,168,0.65);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.live-slide-box .slide-info {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.live-slide-box .dots {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+.live-slide-box .dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(240,232,220,0.14);
+}
+.live-slide-box .dot.active {
+  background: #7ecfa8;
+  width: 20px;
+  border-radius: 3px;
+}
+.live-slide-box .slide-num {
+  font-family: 'Plus Jakarta Sans';
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  color: rgba(240,232,220,0.22);
+  text-transform: uppercase;
+}
+.live-progress-dots {
+  display: flex;
+  gap: 4px;
+  margin-top: auto;
+  justify-content: center;
+}
+.live-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #333;
+  transition: all .3s;
+}
+.live-dot.active {
+  background: #7ecfa8;
+  width: 12px;
+  border-radius: 2px;
+}
+
+/* ── VIRAL LAB Tab ── */
+.vlab-container {
+  max-width: 800px;
+  background: var(--surface);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 40px;
+}
+.vlab-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.vlab-result-card {
+  background: rgba(10, 6, 15, 0.45);
+  border: 1px solid var(--border-gold);
+  border-radius: 8px;
+  padding: 30px;
+  margin-top: 30px;
+}
+.vlab-score-big {
+  font-family: 'Playfair Display', serif;
+  font-size: 64px;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+}
+.vlab-level {
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-top: 8px;
+  margin-bottom: 30px;
+}
+.vlab-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 30px;
+}
+.vbar {
+  display: grid;
+  grid-template-columns: 80px 1fr 40px;
+  align-items: center;
+  gap: 16px;
+}
+.vbar-lbl {
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--muted-bright);
+  text-transform: uppercase;
+}
+.vbar-bg {
+  height: 4px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.vbar-fg {
+  height: 100%;
+  border-radius: 2px;
+}
+.vbar-score {
+  font-family: 'Playfair Display', serif;
+  font-size: 13px;
+  text-align: right;
+  font-weight: 600;
+}
+.vbar-comment {
+  font-size: 11px;
+  color: var(--muted-bright);
+  grid-column: 2;
+  margin-top: 4px;
+}
+.insight-box {
+  padding: 16px 20px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  margin-top: 16px;
+}
+.insight-box.fort { border-color: rgba(88,182,123,0.2); background: rgba(88,182,123,0.04); }
+.insight-box.mej { border-color: rgba(201,168,76,0.25); background: var(--gold-glow); }
+.insight-box.ver { border-color: rgba(170,88,182,0.2); background: rgba(170,88,182,0.04); }
+
+.insight-box-lbl {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted-bright);
+  margin-bottom: 6px;
+}
+.insight-box-txt {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ── PIPELINE Tab ── */
+.pipeline-columns {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+.pipeline-col {
+  background: rgba(12, 8, 20, 0.3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  min-height: 400px;
+}
+.pcol-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+.pcol-title {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  font-weight: 600;
+}
+.pcol-count {
+  background: rgba(255,255,255,0.05);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  color: var(--muted-bright);
+}
+.pcard {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.pcard:hover {
+  border-color: var(--border-gold);
+  transform: translateY(-1px);
+}
+.pcard-id {
+  font-size: 10px;
+  color: var(--muted-bright);
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+.pcard-name {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--white);
+}
+.pcard-type {
+  font-size: 10px;
+  color: var(--gold-dim);
+  margin-top: 6px;
+  letter-spacing: 0.05em;
+}
+
+/* Modals */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(7, 4, 9, 0.9);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+.modal-content {
+  background: var(--bg-dark);
+  border: 1px solid var(--border-gold);
+  border-radius: 8px;
+  width: 100%;
+  max-width: 760px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 28px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  color: var(--gold);
+}
+.modal-close {
+  cursor: pointer;
+  color: var(--muted-bright);
+  font-size: 20px;
+  line-height: 1;
+  padding: 4px;
+  background: transparent;
+  border: none;
+  transition: color 0.2s;
+}
+.modal-close:hover {
+  color: var(--white);
+}
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px;
+}
+
+/* Video Modal Specifics */
+.video-modal {
+  max-width: 400px;
+}
+.video-modal video {
+  width: 100%;
+  display: block;
+  max-height: 70vh;
+  border-radius: 4px;
+}
+
+/* Configuration Panel (Drawer) */
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 399;
+  display: none;
+}
+.drawer-overlay.open {
+  display: block;
+}
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 360px;
+  background: var(--panel-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-left: 1px solid var(--border-gold);
+  z-index: 400;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 40px 30px;
+  overflow-y: auto;
+}
+.drawer.open {
+  transform: translateX(0);
+}
+.drawer-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+.drawer-subtitle {
+  font-size: 12px;
+  color: var(--muted-bright);
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+.drawer-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 30px 0;
+}
+
+/* Console Terminal Overlay */
+.console-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background: rgba(7, 4, 9, 0.95);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border);
+  height: 38px;
+  transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.console-panel.expanded {
+  height: 240px;
+}
+.console-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 38px;
+  padding: 0 24px;
+  cursor: pointer;
+  user-select: none;
+}
+.console-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted-bright);
+}
+.console-indicator {
+  color: var(--gold);
+  font-weight: 600;
+}
+.console-chev {
+  font-size: 11px;
+  color: var(--muted-bright);
+  transition: transform 0.2s;
+}
+.console-panel.expanded .console-chev {
+  transform: rotate(180deg);
+}
+.console-body {
+  height: calc(100% - 38px);
+  overflow-y: auto;
+  padding: 16px 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.8;
+  color: #a499b8;
+  white-space: pre-wrap;
+  border-top: 1px solid var(--border);
+}
+.log-info { color: var(--gold-dim); }
+.log-success { color: var(--green); }
+.log-error { color: var(--red); }
+
+/* Toasts Container */
+.toast-container {
+  position: fixed;
+  top: 96px;
+  right: 30px;
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+.toast {
+  background: rgba(18, 11, 28, 0.9);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-gold);
+  padding: 12px 20px;
+  border-radius: 4px;
+  font-size: 13px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  animation: slideIn 0.3s ease, fadeOut 0.3s 2.7s ease forwards;
+}
+.toast.success { color: var(--green); border-color: rgba(88, 182, 123, 0.45); }
+.toast.error { color: var(--red); border-color: rgba(211, 76, 76, 0.45); }
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes fadeOut {
+  to { opacity: 0; }
+}
+
+/* Spinner */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(201, 168, 76, 0.2);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <div class="brand">
+    <svg class="brand-icon" viewBox="0 0 56 56" fill="none">
+      <ellipse cx="28" cy="28" rx="24" ry="14" stroke="#7ecfa8" stroke-width="1.5" fill="none" opacity="0.75"/>
+      <circle cx="28" cy="28" r="7" fill="#7ecfa8" opacity="0.9"/>
+      <circle cx="28" cy="28" r="3" fill="#070409"/>
+      <line x1="4" y1="28" x2="10" y2="28" stroke="#7ecfa8" stroke-width="1" opacity="0.45"/>
+      <line x1="46" y1="28" x2="52" y2="28" stroke="#7ecfa8" stroke-width="1" opacity="0.45"/>
+    </svg>
+    <div class="brand-text">
+      <h1>Content Studio</h1>
+      <span>Endonautas</span>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-ghost btn-sm" onclick="openDrawer()">⚙ Configuración</button>
+    <div class="live-badge">
+      <div class="live-dot" id="liveDot"></div>
+      <span id="liveLabel">En vivo</span>
+    </div>
+  </div>
+</header>
+
+<div class="app-container">
+  <!-- Nav -->
+  <nav class="nav-tabs">
+    <div class="tab active" data-tab="studio">Studio</div>
+    <div class="tab" data-tab="creator">AI Creator</div>
+    <div class="tab" data-tab="editor" id="tabEditor" style="display:none">Editor</div>
+    <div class="tab" data-tab="repository">Repositorio</div>
+    <div class="tab" data-tab="virallab">Viral Lab</div>
+    <div class="tab" data-tab="pipeline">Pipeline</div>
+  </nav>
+
+  <!-- Stats Ribbon -->
+  <div class="stats">
+    <div class="stat"><div class="stat-num" id="statHtml">—</div><div class="stat-label">Carruseles</div></div>
+    <div class="stat"><div class="stat-num" id="statPngs">—</div><div class="stat-label">PNGs Listos</div></div>
+    <div class="stat"><div class="stat-num" id="statVideos">—</div><div class="stat-label">Reels Listos</div></div>
+    <div class="stat"><div class="stat-num" id="statRepo">—</div><div class="stat-label">Generaciones</div></div>
+    <div class="stat"><div class="stat-num" id="statPublished">—</div><div class="stat-label">Publicados</div></div>
+  </div>
+
+  <!-- Main Container -->
+  <main class="main">
+
+    <!-- ═══ Tab: STUDIO ═══ -->
+    <div class="panel active" id="panel-studio">
+      <div class="sec-header">
+        <div>
+          <h2 class="sec-title">Carruseles de Instagram</h2>
+          <p class="sec-subtitle">Publicaciones de 1080x1350px editables dinámicamente</p>
+        </div>
+        <button class="btn btn-gold btn-sm" onclick="compileAllPngs()">Compilar todos los PNGs</button>
+      </div>
+      <div class="grid" id="gridCarruseles" style="margin-bottom: 50px;"></div>
+
+      <div class="sec-header">
+        <div>
+          <h2 class="sec-title">Reels de Video</h2>
+          <p class="sec-subtitle">Animaciones de Remotion en 9:16 listas para exportar</p>
+        </div>
+      </div>
+      <div class="grid" id="gridReels"></div>
+    </div>
+
+    <!-- ═══ Tab: AI CREATOR ═══ -->
+    <div class="panel" id="panel-creator">
+      <div class="creator-wizard">
+        <div class="sec-header"><h2 class="sec-title">Generación de carruseles con IA</h2></div>
+
+        <div class="wiz-step">
+          <span class="wiz-label">Estrategia de posicionamiento</span>
+          <div class="chip-grid" id="wizStrategyGrid">
+            <div class="chip" data-val="viralidad">Viralidad</div>
+            <div class="chip" data-val="conexion">Conexión</div>
+            <div class="chip" data-val="educacion">Educación</div>
+            <div class="chip" data-val="autoridad">Autoridad</div>
+            <div class="chip" data-val="creencia">Creencia</div>
+            <div class="chip" data-val="conversion">Conversión</div>
+            <div class="chip" data-val="perfil">Perfil</div>
+            <div class="chip" data-val="cotidiano">Cotidiano</div>
+          </div>
+        </div>
+
+        <div class="wiz-step">
+          <span class="wiz-label">Cantidad de carruseles a generar</span>
+          <div class="count-selector" id="wizCountSelector">
+            <button class="count-btn selected" data-val="1">1</button>
+            <button class="count-btn" data-val="2">2</button>
+            <button class="count-btn" data-val="3">3</button>
+            <button class="count-btn" data-val="5">5</button>
+          </div>
+        </div>
+
+        <div class="wiz-step">
+          <span class="wiz-label">Concepto a comunicar (Prompt)</span>
+          <textarea class="textarea-styled" id="wizPrompt" placeholder="Ej: Un carrusel sobre la máscara del Complaciente y el peligro de decir siempre que sí a los demás..."></textarea>
+        </div>
+
+        <div class="wiz-step">
+          <span class="wiz-label">Referencias (URLs opcionales)</span>
+          <div style="display:flex; flex-direction:column; gap:10px">
+            <input class="input-styled" placeholder="Enlace a post o artículo de referencia 1" id="wizRef1">
+            <input class="input-styled" placeholder="Enlace a post o artículo de referencia 2" id="wizRef2">
+          </div>
+        </div>
+
+        <div class="wiz-step">
+          <span class="wiz-label">Estilo de escritura</span>
+          <div class="chip-grid" id="wizStyleGrid">
+            <div class="chip" data-val="filosófico">Filosófico</div>
+            <div class="chip" data-val="íntimo">Íntimo</div>
+            <div class="chip" data-val="contraintuitivo">Contraintuitivo</div>
+            <div class="chip" data-val="narrativo">Narrativo</div>
+            <div class="chip" data-val="directo">Directo</div>
+            <div class="chip" data-val="poético">Poético</div>
+          </div>
+        </div>
+
+        <button class="btn btn-solid" style="padding: 14px 28px;" id="genBtn" onclick="runAiGeneration()">
+          <span id="genSpinner" style="display:none" class="spinner"></span>
+          <span id="genBtnText">Generar Carruseles</span>
+        </button>
+
+        <div id="noKeyWarn" style="display:none; margin-top:20px; padding:15px; border:1px solid rgba(211,76,76,0.3); border-radius:4px; color:var(--red); font-size:12px; line-height:1.6;">
+          ⚠ API key no configurada. Haz click en <span style="cursor:pointer; text-decoration:underline" onclick="openDrawer()">Configuración</span> e ingresa tu Gemini/OpenRouter API Key.
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ Tab: EDITOR (Visual split workspace) ═══ -->
+    <div class="panel" id="panel-editor">
+      <div class="editor-layout">
+        <!-- Sidebar: Slides list -->
+        <div class="editor-sidebar">
+          <div class="sidebar-hdr">
+            <span class="sidebar-title" id="editorSidebarTitle">Slides</span>
+            <button class="btn btn-gold btn-sm" id="btnSaveAll" onclick="saveEditorData()">Guardar</button>
+          </div>
+          <div class="sidebar-list" id="editorSidebarList">
+            <!-- Dynamic elements load here -->
+          </div>
+          <div class="sidebar-ftr">
+            <button class="btn btn-ghost btn-sm" style="flex:1" onclick="addNewSlideOrScene()">＋ Agregar</button>
+            <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="removeActiveSlideOrScene()">✕ Borrar</button>
+          </div>
+        </div>
+
+        <!-- Center: Work form -->
+        <div class="editor-workspace" id="editorWorkspace">
+          <!-- Load fields here based on item type -->
+        </div>
+
+        <!-- Right: Live visual preview -->
+        <div class="editor-preview">
+          <span class="preview-title">Visualización en vivo</span>
+          <div class="live-slide-viewport">
+            <div class="live-slide-box" id="liveSlideBox">
+              <!-- Simulated slide -->
+            </div>
+          </div>
+          <div class="live-progress-dots" id="liveProgressDots"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ Tab: REPOSITORIO ═══ -->
+    <div class="panel" id="panel-repository">
+      <div class="sec-header">
+        <div>
+          <h2 class="sec-title">Historial de generaciones</h2>
+          <p class="sec-subtitle">Colecciones estáticas generadas previamente con IA</p>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="fetchRepository()">↻ Actualizar</button>
+      </div>
+      <div id="repoList"><div style="text-align:center; padding:100px; color:var(--muted)">Sin datos</div></div>
+    </div>
+
+    <!-- ═══ Tab: VIRAL LAB ═══ -->
+    <div class="panel" id="panel-virallab">
+      <div class="vlab-container">
+        <div class="sec-header">
+          <div>
+            <h2 class="sec-title">Viral Lab</h2>
+            <p class="sec-subtitle">Análisis predictivo de enganche y alineación con la voz de Endonautas</p>
+          </div>
+        </div>
+        
+        <div style="display:flex; flex-direction:column; gap:16px; margin-bottom: 24px;">
+          <div class="form-group">
+            <span class="form-label">Selecciona el tipo de contenido</span>
+            <div class="chip-grid" id="vlabTypeGrid">
+              <div class="chip selected" data-val="carousel">Carrusel</div>
+              <div class="chip" data-val="reel">Reel</div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <span class="form-label">Contenido a analizar</span>
+            <textarea class="textarea-styled" style="min-height: 200px" id="vlabText" placeholder="Pega los textos de los slides, guion o ideas aquí..."></textarea>
+          </div>
+          
+          <button class="btn btn-solid" style="align-self: flex-start" id="vlabBtn" onclick="runViralAnalysis()">
+            <span id="vlabSpinner" style="display:none" class="spinner"></span>
+            Evaluar Potencial
+          </button>
+        </div>
+
+        <div id="vlabResult" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- ═══ Tab: PIPELINE ═══ -->
+    <div class="panel" id="panel-pipeline">
+      <div class="sec-header">
+        <div>
+          <h2 class="sec-title">Flujo de producción</h2>
+          <p class="sec-subtitle">Estado actual de todos tus contenidos</p>
+        </div>
+      </div>
+      <div class="pipeline-columns">
+        <div class="pipeline-col">
+          <div class="pcol-hdr"><span class="pcol-title">Ideas / Pendiente</span><span class="pcol-count" id="pCountP">0</span></div>
+          <div id="pColP"></div>
+        </div>
+        <div class="pipeline-col">
+          <div class="pcol-hdr"><span class="pcol-title">En edición</span><span class="pcol-count" id="pCountE">0</span></div>
+          <div id="pColE"></div>
+        </div>
+        <div class="pipeline-col">
+          <div class="pcol-hdr"><span class="pcol-title">Compilado</span><span class="pcol-count" id="pCountC">0</span></div>
+          <div id="pColC"></div>
+        </div>
+        <div class="pipeline-col">
+          <div class="pcol-hdr"><span class="pcol-title">Publicado</span><span class="pcol-count" id="pCountPub">0</span></div>
+          <div id="pColPub"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Console Terminal Overlay -->
+  <div class="console-panel" id="consolePanel">
+    <div class="console-hdr" onclick="toggleConsole()">
+      <div class="console-title">
+        <span>▸ Consola de compilación:</span>
+        <span class="console-indicator" id="consoleIndicator">Inactivo</span>
+      </div>
+      <span class="console-chev">▲</span>
+    </div>
+    <div class="console-body" id="consoleBody">Consola lista. Esperando acciones de compilación...</div>
+  </div>
+</div>
+
+<!-- Configuration Drawer -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <h2 class="drawer-title">Configuración</h2>
+  <p class="drawer-subtitle">Configura tus accesos y API keys locales</p>
+  
+  <div class="form-group" style="margin-bottom: 15px;">
+    <span class="form-label">API Key (Gemini o OpenRouter)</span>
+    <input class="input-styled" type="password" id="drawerKey" placeholder="AIzaSy... (Gemini) o sk-or-... (OpenRouter)">
+    <span style="font-size:10px; color:var(--muted-bright); margin-top:4px">Soporta Gemini Native y OpenRouter. Se guarda localmente.</span>
+  </div>
+
+  <div class="drawer-divider"></div>
+
+  <h3 class="drawer-title" style="font-size: 14px; margin-top: 10px; margin-bottom: 10px; border:none; padding:0;">Integración Postiz</h3>
+  
+  <div class="form-group" style="margin-bottom: 10px;">
+    <span class="form-label">Postiz Host / URL</span>
+    <input class="input-styled" type="text" id="drawerPostizHost" placeholder="https://api.postiz.com o http://localhost:3000">
+  </div>
+  
+  <div class="form-group" style="margin-bottom: 10px;">
+    <span class="form-label">Postiz API Key</span>
+    <input class="input-styled" type="password" id="drawerPostizApiKey" placeholder="Tu API Key de Postiz">
+  </div>
+  
+  <div class="form-group" style="margin-bottom: 15px;">
+    <span class="form-label">Postiz Channel ID (Instagram)</span>
+    <input class="input-styled" type="text" id="drawerPostizChannelId" placeholder="ID del canal en Postiz">
+  </div>
+
+  <div class="drawer-divider"></div>
+
+  <h3 class="drawer-title" style="font-size: 14px; margin-top: 10px; margin-bottom: 10px; border:none; padding:0;">Integración Make.com</h3>
+  
+  <div class="form-group" style="margin-bottom: 15px;">
+    <span class="form-label">Webhook URL de Make</span>
+    <input class="input-styled" type="text" id="drawerMakeWebhookUrl" placeholder="https://hook.us1.make.com/...">
+  </div>
+
+  <button class="btn btn-solid" style="width: 100%" onclick="saveDrawerConfig()">Guardar Configuración</button>
+
+  <div class="drawer-divider"></div>
+
+  <span class="form-label" style="margin-bottom: 12px; display:block">Carpetas del Sistema</span>
+  <div style="font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--muted-bright); line-height: 1.8;">
+    Ruta base: /endonautas/<br>
+    Carruseles: contenido/carruseles/<br>
+    Videos MP4: contenido/reels/mp4/<br>
+    Configuración: studio/data/
+  </div>
+</div>
+
+<!-- Modal Overlays -->
+<div class="modal-overlay" id="modalOverlay" style="display:none" onclick="if(event.target===this)closeModal()">
+  <div id="modalContent" class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title" id="modalTitle">Detalle</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- Postiz/Make Publish Modal -->
+<div class="modal-overlay" id="postizModalOverlay" style="display:none" onclick="if(event.target===this)closePostizModal()">
+  <div class="modal-content" style="max-width: 500px;">
+    <div class="modal-header">
+      <h3 class="modal-title">Publicar en redes</h3>
+      <button class="modal-close" onclick="closePostizModal()">✕</button>
+    </div>
+    <div class="modal-body" style="display:flex; flex-direction:column; gap:16px;">
+      <div class="form-group">
+        <span class="form-label">Texto de la publicación (Social Copy)</span>
+        <textarea class="textarea-styled" id="postizCaption" style="min-height: 120px; font-size: 13px; line-height: 1.5; font-family:inherit;"></textarea>
+      </div>
+      
+      <div class="form-group">
+        <span class="form-label">Destino / Canal de envío</span>
+        <select class="select-styled" id="publishDest" onchange="togglePublishDest()">
+          <option value="postiz">Postiz (Nativo)</option>
+          <option value="make">Make.com (Webhook)</option>
+          <option value="local">Solo registrar localmente (Sin publicar)</option>
+        </select>
+      </div>
+
+      <div id="postizOptionsGroup">
+        <div class="form-group" style="margin-bottom: 12px;">
+          <span class="form-label">Modo de envío</span>
+          <select class="select-styled" id="postizMode" onchange="togglePostizScheduleDate()">
+            <option value="now">Publicar ahora</option>
+            <option value="schedule">Programar fecha y hora</option>
+          </select>
+        </div>
+        
+        <div class="form-group" id="postizScheduleGroup" style="display:none; margin-bottom: 12px;">
+          <span class="form-label">Fecha y hora de publicación</span>
+          <input class="input-styled" type="datetime-local" id="postizDate">
+        </div>
+      </div>
+      
+      <div style="display:flex; gap:12px; margin-top:8px;">
+        <button class="btn btn-solid" style="flex:1" id="btnPublishSubmit" onclick="executePublishAction()">Confirmar y Enviar</button>
+        <button class="btn btn-ghost" style="flex:1" onclick="closePostizModal()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script>
+// ── Global App State ──────────────────────────────────────────────
+let studioData = { carousels: [], reels: [] };
+let originalEditorData = null; // Copy of array when editing starts
+let editorActiveId = null;     // 'C1', 'R1', etc.
+let editorActiveIndex = 0;    // Index of slide/scene currently active
+let editorItemData = null;    // Shallow clone of the item being edited
+let isBusy = false;
+let isConsoleOpen = false;
+
+// Creator Tab States
+let wizStrategy = null;
+let wizCount = 1;
+let wizStyle = null;
+let vlabType = 'carousel';
+
+// ── Server-Sent Events (SSE) ──────────────────────────────────────
+const sse = new EventSource('/api/events');
+sse.addEventListener('log', e => {
+  const data = JSON.parse(e.data);
+  appendLog(data.text, data.type);
+});
+sse.addEventListener('progress', e => {
+  const data = JSON.parse(e.data);
+  const fill = document.getElementById(`pfill-${data.id}`);
+  if (fill) fill.style.width = `${data.pct}%`;
+});
+sse.addEventListener('action-done', e => {
+  const data = JSON.parse(e.data);
+  isBusy = false;
+  setConsoleIndicator('Inactivo');
+  if (data.id) {
+    const fill = document.getElementById(`pfill-${data.id}`);
+    if (fill) setTimeout(() => { fill.style.width = '0%'; }, 800);
+  }
+  if (data.action === 'generate') {
+    setGenBusy(false);
+    refreshDashboard();
+    fetchRepository();
+    toast('✓ Carruseles generados con éxito', 'success');
+  } else {
+    refreshDashboard();
+    toast(data.code === 0 ? '✓ Compilación completada con éxito' : '✗ La compilación falló', data.code === 0 ? 'success' : 'error');
+  }
+});
+sse.addEventListener('state-update', () => {
+  refreshDashboard();
+});
+sse.onerror = () => {
+  document.getElementById('liveDot').className = 'live-dot off';
+  document.getElementById('liveLabel').innerText = 'Desconectado';
+};
+
+// ── Tab Management ────────────────────────────────────────────────
+document.querySelectorAll('.nav-tabs .tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const tabName = tab.dataset.tab;
+    
+    // Safety check: if editing and unsaved changes?
+    if (tabName !== 'editor' && editorActiveId !== null) {
+      if (!confirm('¿Deseas salir del editor? Los cambios no guardados se perderán.')) {
+        return;
+      }
+      exitEditorMode();
+    }
+
+    document.querySelectorAll('.nav-tabs .tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+    
+    tab.classList.add('active');
+    document.getElementById(`panel-${tabName}`).classList.add('active');
+    
+    if (tabName === 'repository') fetchRepository();
+  });
+});
+
+// ── Config Drawer ─────────────────────────────────────────────────
+function openDrawer() {
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('open');
+}
+function closeDrawer() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+}
+async function saveDrawerConfig() {
+  const key = document.getElementById('drawerKey').value.trim();
+  const postizHost = document.getElementById('drawerPostizHost').value.trim();
+  const postizApiKey = document.getElementById('drawerPostizApiKey').value.trim();
+  const postizChannelId = document.getElementById('drawerPostizChannelId').value.trim();
+  const makeWebhookUrl = document.getElementById('drawerMakeWebhookUrl').value.trim();
+  
+  const payload = { postizHost, postizChannelId, makeWebhookUrl };
+  if (key) payload.apiKey = key;
+  if (postizApiKey) payload.postizApiKey = postizApiKey;
+
+  const res = await fetch('/api/config', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  if (res.ok) {
+    showToast('Configuración guardada con éxito', 'success');
+    closeDrawer();
+    checkApiKeySetup();
+  }
+}
+async function checkApiKeySetup() {
+  const res = await fetch('/api/config');
+  const data = await res.json();
+  document.getElementById('noKeyWarn').style.display = data.hasApiKey ? 'none' : 'block';
+  if (data.hasApiKey) {
+    document.getElementById('drawerKey').placeholder = 'API Key configurada (Gemini/OpenRouter)';
+  }
+  document.getElementById('drawerPostizHost').value = data.postizHost || '';
+  document.getElementById('drawerPostizApiKey').placeholder = data.postizApiKey ? '********' : 'Tu API Key de Postiz';
+  document.getElementById('drawerPostizChannelId').value = data.postizChannelId || '';
+  document.getElementById('drawerMakeWebhookUrl').value = data.makeWebhookUrl || '';
+}
+
+// ── Toast Notifications ───────────────────────────────────────────
+function showToast(msg, type = 'success') {
+  const container = document.getElementById('toasts');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerText = msg;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+function toast(msg, type) { showToast(msg, type); }
+
+// ── Console functions ─────────────────────────────────────────────
+function toggleConsole() {
+  isConsoleOpen = !isConsoleOpen;
+  document.getElementById('consolePanel').classList.toggle('expanded', isConsoleOpen);
+}
+function appendLog(text, type = '') {
+  const body = document.getElementById('consoleBody');
+  const span = document.createElement('span');
+  span.className = type ? `log-${type}` : '';
+  span.innerText = text;
+  body.appendChild(span);
+  body.scrollTop = body.scrollHeight;
+  if (!isConsoleOpen) toggleConsole();
+}
+function setConsoleIndicator(txt) {
+  document.getElementById('consoleIndicator').innerText = txt;
+}
+
+// ── Modal windows ─────────────────────────────────────────────────
+function showModal(title, bodyHtml, isVideo = false) {
+  const overlay = document.getElementById('modalOverlay');
+  const titleEl = document.getElementById('modalTitle');
+  const bodyEl = document.getElementById('modalBody');
+  const contentEl = document.getElementById('modalContent');
+  
+  contentEl.className = isVideo ? 'modal-content video-modal' : 'modal-content';
+  titleEl.innerText = title;
+  bodyEl.innerHTML = bodyHtml;
+  overlay.style.display = 'flex';
+}
+function closeModal() {
+  const overlay = document.getElementById('modalOverlay');
+  document.getElementById('modalBody').innerHTML = '';
+  overlay.style.display = 'none';
+}
+
+// ── AI Creator Chips ──────────────────────────────────────────────
+setupChips('wizStrategyGrid', val => wizStrategy = val);
+setupChips('wizStyleGrid', val => wizStyle = val);
+setupChips('wizCountSelector', val => wizCount = parseInt(val), '.count-btn');
+setupChips('vlabTypeGrid', val => vlabType = val);
+
+function setupChips(id, callback, selector = '.chip') {
+  const container = document.getElementById(id);
+  if (!container) return;
+  container.querySelectorAll(selector).forEach(item => {
+    item.addEventListener('click', () => {
+      container.querySelectorAll(selector).forEach(x => x.classList.remove('selected'));
+      item.classList.add('selected');
+      callback(item.dataset.val);
+    });
+  });
+}
+
+function setGenBusy(b) {
+  document.getElementById('genBtn').disabled = b;
+  document.getElementById('genSpinner').style.display = b ? 'inline-block' : 'none';
+  document.getElementById('genBtnText').innerText = b ? 'Generando...' : 'Generar Carruseles';
+}
+
+async function runAiGeneration() {
+  const prompt = document.getElementById('wizPrompt').value.trim();
+  if (!prompt) return showToast('Escribe una idea o prompt primero', 'error');
+
+  setGenBusy(true);
+  isBusy = true;
+  setConsoleIndicator('Generando con IA...');
+  appendLog('▶ Iniciando generación de carruseles con IA...\n', 'info');
+
+  const body = {
+    prompt,
+    strategy: wizStrategy,
+    count: wizCount,
+    style: wizStyle,
+    references: [
+      document.getElementById('wizRef1').value.trim(),
+      document.getElementById('wizRef2').value.trim()
+    ]
+  };
+
+  try {
+    const res = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (data.error) {
+      showToast(data.error, 'error');
+      setGenBusy(false);
+      isBusy = false;
+      setConsoleIndicator('Inactivo');
+    }
+  } catch (err) {
+    showToast('Error de red al conectar al servidor', 'error');
+    setGenBusy(false);
+    isBusy = false;
+    setConsoleIndicator('Inactivo');
+  }
+}
+
+// ── Renders/Lists dashboard ────────────────────────────────────────
+async function refreshDashboard() {
+  try {
+    const res = await fetch('/api/status');
+    if (!res.ok) return;
+    studioData = await res.json();
+    
+    renderStudioList();
+    renderPipeline();
+    updateStatsRibbon();
+    checkApiKeySetup();
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+function updateStatsRibbon() {
+  const cCount = studioData.carousels.length;
+  const cHtmlCount = studioData.carousels.filter(x => x.hasHtml).length;
+  const cPngCount = studioData.carousels.filter(x => x.pngCount > 0).length;
+  const rVideoCount = studioData.reels.filter(x => x.hasVideo).length;
+  const rCount = studioData.reels.length;
+  
+  document.getElementById('statHtml').innerText = `${cHtmlCount}/${cCount}`;
+  document.getElementById('statPngs').innerText = `${cPngCount}/${cCount}`;
+  document.getElementById('statVideos').innerText = `${rVideoCount}/${rCount}`;
+  
+  const pubCount = [...studioData.carousels, ...studioData.reels].filter(x => x.published).length;
+  document.getElementById('statPublished').innerText = pubCount;
+}
+
+function renderStudioList() {
+  const carouselsGrid = document.getElementById('gridCarruseles');
+  const reelsGrid = document.getElementById('gridReels');
+  
+  carouselsGrid.innerHTML = studioData.carousels.map(c => {
+    const thumbs = c.assets.length > 0
+      ? `<div class="img-thumbs">${c.assets.slice(0,6).map(a=>`<img class="img-thumb" src="/assets/${c.id}/${a}">`).join('')}</div>`
+      : '';
+      
+    const dotColor = c.published ? 'pub' : (c.pngCount >= c.slides ? 'par' : 'emp');
+    
+    return `
+      <div class="card">
+        <div class="card-ghost">${c.id}</div>
+        <div class="card-top">
+          <span class="badge badge-${c.phase}">${c.phase}</span>
+          <span class="sdot ${dotColor}"></span>
+        </div>
+        <div class="card-title">${c.title}</div>
+        <div class="card-sub">${c.slides} slides</div>
+        <div class="steps">
+          <span class="step done">✓ JSON</span>
+          <span class="step ${c.pngCount > 0 ? 'done' : 'pend'}">${c.pngCount > 0 ? `✓ PNGs ${c.pngCount}/${c.slides}` : '○ PNGs'}</span>
+          <span class="step ${c.published ? 'done' : 'pend'}">${c.published ? '✓ Publicado' : '○ Publicado'}</span>
+        </div>
+        <div class="card-progress"><div class="card-progress-fill" id="pfill-${c.id}"></div></div>
+        <div class="card-divider"></div>
+        <div class="actions">
+          <button class="btn btn-gold btn-sm" onclick="enterEditor('${c.id}')">Editar</button>
+          <a class="btn btn-ghost btn-sm" href="/preview/carousel/${c.id}" target="_blank">HTML</a>
+          ${c.pngCount > 0 ? `<button class="btn btn-ghost btn-sm" onclick="viewPngSlides('${c.id}','${c.file}',${c.pngCount})">Ver PNGs</button>` : ''}
+          <button class="btn btn-solid btn-sm" onclick="compileCarouselPngs('${c.id}')" ${isBusy?'disabled':''}>PNGs</button>
+          <button class="btn btn-sm ${c.published ? 'btn-green' : 'btn-ghost'}" onclick="togglePublish('${c.id}', ${!c.published})">
+            ${c.published ? '✓ Pub.' : 'Publicar'}
+          </button>
+        </div>
+        <label class="upload-label">
+          <input type="file" accept="image/*" multiple onchange="uploadAssetImages(event, '${c.id}')">
+          <p>${c.assets.length > 0 ? `${c.assets.length} Imágenes subidas` : '＋ Subir imágenes de fondo'}</p>
+        </label>
+        ${thumbs}
+      </div>
+    `;
+  }).join('');
+  
+  reelsGrid.innerHTML = studioData.reels.map(r => {
+    const dotColor = r.published ? 'pub' : (r.hasVideo ? 'par' : 'emp');
+    return `
+      <div class="card">
+        <div class="card-ghost">${r.id}</div>
+        <div class="card-top">
+          <span class="badge badge-dur">${r.duration}</span>
+          <span class="sdot ${dotColor}"></span>
+        </div>
+        <div class="card-title">${r.title}</div>
+        <div class="card-sub">${r.hasVideo ? `${r.videoSize} MB · H264 1080x1920` : 'Sin renderizar'}</div>
+        <div class="steps">
+          <span class="step done">✓ JSON</span>
+          <span class="step ${r.hasVideo ? 'done' : 'pend'}">${r.hasVideo ? '✓ Video MP4' : '○ Video MP4'}</span>
+          <span class="step ${r.published ? 'done' : 'pend'}">${r.published ? '✓ Publicado' : '○ Publicado'}</span>
+        </div>
+        <div class="card-progress"><div class="card-progress-fill" id="pfill-${r.id}"></div></div>
+        <div class="card-divider"></div>
+        <div class="actions">
+          <button class="btn btn-gold btn-sm" onclick="enterEditor('${r.id}')">Editar</button>
+          ${r.hasScript ? `<button class="btn btn-ghost btn-sm" onclick="viewReelScript('${r.id}','${r.title}')">Script</button>` : ''}
+          ${r.hasVideo ? `<button class="btn btn-ghost btn-sm" onclick="playReelVideo('${r.id}','${r.title}')">▶ Ver Video</button>` : ''}
+          <button class="btn btn-solid btn-sm" onclick="compileReelVideo('${r.id}')" ${isBusy?'disabled':''}>Renderizar</button>
+          <button class="btn btn-sm ${r.published ? 'btn-green' : 'btn-ghost'}" onclick="togglePublish('${r.id}', ${!r.published})">
+            ${r.published ? '✓ Pub.' : 'Publicar'}
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ── Pipeline & Status Columns ──────────────────────────────────────
+function renderPipeline() {
+  const all = [
+    ...studioData.carousels.map(x => ({
+      id: x.id,
+      title: x.title,
+      type: 'Carrusel',
+      sub: x.phase,
+      status: x.published ? 'pub' : (x.pngCount >= x.slides ? 'c' : 'e')
+    })),
+    ...studioData.reels.map(x => ({
+      id: x.id,
+      title: x.title,
+      type: 'Reel',
+      sub: x.duration,
+      status: x.published ? 'pub' : (x.hasVideo ? 'c' : 'e')
+    }))
+  ];
+  
+  const columns = { p: [], e: [], c: [], pub: [] };
+  all.forEach(item => {
+    // Add default to ideas/pending
+    columns[item.status].push(item);
+  });
+  
+  const mapCard = i => `
+    <div class="pcard" onclick="enterEditor('${i.id}')">
+      <div class="pcard-id">${i.id}</div>
+      <div class="pcard-name">${i.title}</div>
+      <div class="pcard-type">${i.type} · ${i.sub}</div>
+    </div>
+  `;
+  const empty = '<div style="font-size:12px;color:var(--muted);text-align:center;padding:20px 0">— Vacío —</div>';
+  
+  document.getElementById('pColP').innerHTML = columns.p.map(mapCard).join('') || empty;
+  document.getElementById('pColE').innerHTML = columns.e.map(mapCard).join('') || empty;
+  document.getElementById('pColC').innerHTML = columns.c.map(mapCard).join('') || empty;
+  document.getElementById('pColPub').innerHTML = columns.pub.map(mapCard).join('') || empty;
+  
+  document.getElementById('pCountP').innerText = columns.p.length;
+  document.getElementById('pCountE').innerText = columns.e.length;
+  document.getElementById('pCountC').innerText = columns.c.length;
+  document.getElementById('pCountPub').innerText = columns.pub.length;
+}
+
+// ── Compiler & Actions ────────────────────────────────────────────
+async function compileAllPngs() {
+  if (isBusy) return showToast('Hay un proceso activo. Espera a que finalice.', 'error');
+  isBusy = true;
+  setConsoleIndicator('Generando PNGs...');
+  appendLog('▶ Iniciando captura de PNGs en Puppeteer para todos los carruseles...\n', 'info');
+  const res = await fetch('/api/generate-pngs', { method: 'POST' });
+  const data = await res.json();
+  if (data.error) {
+    isBusy = false;
+    showToast(data.error, 'error');
+    setConsoleIndicator('Inactivo');
+  }
+}
+
+async function compileCarouselPngs(id) {
+  if (isBusy) return showToast('Hay un proceso activo', 'error');
+  isBusy = true;
+  setConsoleIndicator(`Generando PNGs ${id}...`);
+  appendLog(`▶ Capturando slides de ${id} con Puppeteer...\n`, 'info');
+  const res = await fetch('/api/generate-pngs', { method: 'POST' }); // currently processes all
+  const data = await res.json();
+  if (data.error) {
+    isBusy = false;
+    showToast(data.error, 'error');
+    setConsoleIndicator('Inactivo');
+  }
+}
+
+async function compileReelVideo(id) {
+  if (isBusy) return showToast('Hay un proceso activo', 'error');
+  isBusy = true;
+  setConsoleIndicator(`Renderizando ${id}...`);
+  appendLog(`▶ Ejecutando compilación Remotion para Reel ${id}...\n`, 'info');
+  const fill = document.getElementById(`pfill-${id}`);
+  if (fill) fill.style.width = '2%';
+  
+  const res = await fetch(`/api/render/${id}`, { method: 'POST' });
+  const data = await res.json();
+  if (data.error) {
+    isBusy = false;
+    showToast(data.error, 'error');
+    setConsoleIndicator('Inactivo');
+    if (fill) fill.style.width = '0%';
+  }
+}
+
+let postizActiveId = null;
+
+function closePostizModal() {
+  document.getElementById('postizModalOverlay').style.display = 'none';
+  postizActiveId = null;
+}
+
+function togglePostizScheduleDate() {
+  const mode = document.getElementById('postizMode').value;
+  document.getElementById('postizScheduleGroup').style.display = mode === 'schedule' ? 'block' : 'none';
+}
+
+async function togglePublish(id, val) {
+  if (!val) {
+    // Just unpublish locally directly
+    await fetch(`/api/state/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ published: false })
+    });
+    showToast('Desmarcado como publicado', 'success');
+    refreshDashboard();
+    return;
+  }
+  
+  // Opening Publish Modal
+  postizActiveId = id;
+  
+  // Try to find the item in local studioData
+  let item = studioData.carousels.find(x => x.id === id) || studioData.reels.find(x => x.id === id);
+  if (!item) {
+    const type = id.startsWith('C') ? 'carruseles' : 'reels';
+    const res = await fetch(`/api/editor/${type}`);
+    const data = await res.json();
+    item = data.find(x => x.id === id);
+  }
+  
+  // Pre-fill caption/copy:
+  let caption = '';
+  if (item) {
+    caption = item.caption || '';
+    if (!caption && item.slides) {
+      caption = item.slides.map(s => s.headline || s.body || '').filter(Boolean).join('\n\n');
+    }
+  }
+  
+  document.getElementById('postizCaption').value = caption;
+  document.getElementById('publishDest').value = 'postiz';
+  document.getElementById('postizOptionsGroup').style.display = 'block';
+  document.getElementById('postizMode').value = 'now';
+  document.getElementById('postizScheduleGroup').style.display = 'none';
+  
+  // Set default datetime to today + 1 hour in local time format
+  const now = new Date();
+  now.setHours(now.getHours() + 1);
+  const localIso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  document.getElementById('postizDate').value = localIso;
+  
+  document.getElementById('postizModalOverlay').style.display = 'flex';
+}
+
+function togglePublishDest() {
+  const dest = document.getElementById('publishDest').value;
+  document.getElementById('postizOptionsGroup').style.display = dest === 'postiz' ? 'block' : 'none';
+}
+
+async function executePublishAction() {
+  const dest = document.getElementById('publishDest').value;
+  if (dest === 'postiz') {
+    await submitToPostiz();
+  } else if (dest === 'make') {
+    await submitToMake();
+  } else {
+    await markLocallyPublished();
+  }
+}
+
+async function markLocallyPublished() {
+  if (!postizActiveId) return;
+  const id = postizActiveId;
+  closePostizModal();
+  
+  await fetch(`/api/state/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ published: true })
+  });
+  showToast('✓ Marcado como publicado en local', 'success');
+  refreshDashboard();
+}
+
+async function submitToPostiz() {
+  if (!postizActiveId) return;
+  const id = postizActiveId;
+  const caption = document.getElementById('postizCaption').value.trim();
+  const mode = document.getElementById('postizMode').value;
+  const date = document.getElementById('postizDate').value;
+  
+  if (!caption) return showToast('El texto de la publicación es obligatorio', 'error');
+  if (mode === 'schedule' && !date) return showToast('Selecciona la fecha y hora de programación', 'error');
+  
+  closePostizModal();
+  
+  isBusy = true;
+  setConsoleIndicator(`Publicando ${id}...`);
+  appendLog(`▶ Preparando publicación de ${id} a Postiz...\n`, 'info');
+  
+  try {
+    const res = await fetch('/api/postiz/publish', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, caption, mode, date })
+    });
+    
+    const data = await res.json();
+    if (data.error) {
+      isBusy = false;
+      showToast(data.error, 'error');
+      setConsoleIndicator('Inactivo');
+      appendLog(`✗ Error al publicar: ${data.error}\n`, 'error');
+    } else {
+      showToast('✓ Proceso de publicación iniciado', 'success');
+    }
+  } catch (err) {
+    isBusy = false;
+    showToast(err.message, 'error');
+    setConsoleIndicator('Inactivo');
+    appendLog(`✗ Error de conexión: ${err.message}\n`, 'error');
+  }
+}
+
+async function submitToMake() {
+  if (!postizActiveId) return;
+  const id = postizActiveId;
+  const caption = document.getElementById('postizCaption').value.trim();
+  
+  if (!caption) return showToast('El texto de la publicación es obligatorio', 'error');
+  
+  closePostizModal();
+  
+  isBusy = true;
+  setConsoleIndicator(`Publicando ${id}...`);
+  appendLog(`▶ Preparando envío de ${id} a Make.com...\n`, 'info');
+  
+  try {
+    const res = await fetch('/api/make/publish', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, caption })
+    });
+    
+    const data = await res.json();
+    if (data.error) {
+      isBusy = false;
+      showToast(data.error, 'error');
+      setConsoleIndicator('Inactivo');
+      appendLog(`✗ Error al enviar: ${data.error}\n`, 'error');
+    } else {
+      showToast('✓ Envío a Make.com iniciado', 'success');
+    }
+  } catch (err) {
+    isBusy = false;
+    showToast(err.message, 'error');
+    setConsoleIndicator('Inactivo');
+    appendLog(`✗ Error de conexión: ${err.message}\n`, 'error');
+  }
+}
+
+async function uploadAssetImages(event, carouselId) {
+  const files = event.target.files;
+  if (!files.length) return;
+  const form = new FormData();
+  for (const f of files) form.append('images', f);
+  
+  const res = await fetch(`/api/upload/${carouselId}`, {
+    method: 'POST',
+    body: form
+  });
+  const data = await res.json();
+  if (data.ok) {
+    showToast(`✓ ${data.files.length} Imágenes subidas con éxito`, 'success');
+  }
+}
+
+// ── Repository view ───────────────────────────────────────────────
+async function fetchRepository() {
+  try {
+    const res = await fetch('/api/repository');
+    const list = await res.json();
+    document.getElementById('statRepo').innerText = list.length;
+    
+    if (!list.length) {
+      document.getElementById('repoList').innerHTML = `<div style="text-align:center; padding:100px; color:var(--muted)">Sin generaciones estáticas aún. Usa el AI Creator.</div>`;
+      return;
+    }
+    
+    document.getElementById('repoList').innerHTML = `
+      <div class="grid">${list.map(m => `
+        <div class="card" onclick="openRepoDetail('${m.id}')" style="cursor:pointer">
+          <div class="card-ghost">${m.carousels.length}</div>
+          <div class="card-top">
+            <span class="badge badge-dur">${new Date(m.createdAt).toLocaleDateString('es-CL')}</span>
+          </div>
+          <div class="card-title">${m.prompt.slice(0, 60)}${m.prompt.length>60?'...':''}</div>
+          <div class="card-sub" style="margin-bottom:0">
+            ${m.strategy ? `<span class="badge badge-Perfil" style="margin-right:6px">${m.strategy}</span>` : ''}
+            ${m.style ? `<span class="badge badge-dur">${m.style}</span>` : ''}
+          </div>
+        </div>
+      `).join('')}</div>
+    `;
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+async function openRepoDetail(repoId) {
+  const res = await fetch(`/api/repository/${repoId}`);
+  const meta = await res.json();
+  
+  const cardsHtml = meta.carousels.map(c => `
+    <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:6px; padding:16px; display:flex; flex-direction:column; gap:10px">
+      <h4 style="font-family:'Playfair Display',serif; color:var(--gold)">${c.title}</h4>
+      <div style="font-size:11px; color:var(--muted-bright)">${c.slides} slides · Fase: ${c.phase || 'N/A'}</div>
+      <div style="display:flex; gap:8px; margin-top:8px">
+        <a class="btn btn-ghost btn-sm" href="/repo/${repoId}/${c.htmlFile}" target="_blank">Ver HTML</a>
+        <button class="btn btn-gold btn-sm" onclick="loadRepoToViralLab('${repoId}', '${c.id}')">Viral Lab</button>
+      </div>
+    </div>
+  `).join('');
+  
+  showModal(
+    'Generación histórica',
+    `
+      <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px">
+        <div style="font-size:11px; color:var(--muted-bright)">Prompt original:</div>
+        <p style="font-size:14px; font-style:italic; color:var(--white); line-height:1.5">"${meta.prompt}"</p>
+      </div>
+      <div class="grid" style="grid-template-columns: 1fr 1fr; gap:16px">${cardsHtml}</div>
+    `
+  );
+}
+
+async function loadRepoToViralLab(repoId, carouselId) {
+  closeModal();
+  document.querySelector('[data-tab="virallab"]').click();
+  document.getElementById('vlabText').value = 'Cargando texto de la pieza...';
+  
+  try {
+    const res = await fetch(`/repo/${repoId}/${carouselId}.html`);
+    const html = await res.text();
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const text = Array.from(doc.querySelectorAll('.s-hook, .s-hook-sm, .s-body, .s-quote, .cta-btn'))
+      .map(el => el.innerText.trim())
+      .filter(Boolean)
+      .join('\n');
+      
+    document.getElementById('vlabText').value = text || 'No se pudo parsear el texto. Pega el contenido manualmente.';
+  } catch (err) {
+    document.getElementById('vlabText').value = '';
+    showToast('Error al importar el contenido', 'error');
+  }
+}
+
+// ── Preview elements ──────────────────────────────────────────────
+async function viewReelScript(id, title) {
+  const res = await fetch(`/preview/script/${id}`);
+  if (!res.ok) return showToast('Script no encontrado', 'error');
+  const text = await res.text();
+  showModal(
+    `${id} — Script de voz`,
+    `<pre style="font-family:'JetBrains Mono',monospace; font-size:12px; line-height:1.8; color:var(--muted-bright); white-space:pre-wrap">${text.replace(/</g,'&lt;')}</pre>`
+  );
+}
+
+function playReelVideo(id, title) {
+  showModal(
+    `${id} — ${title}`,
+    `<video src="/preview/video/${id}" controls autoplay style="width:100%"></video>`,
+    true
+  );
+}
+
+function viewPngSlides(id, file, count) {
+  const imgs = Array.from({ length: count }, (_, i) => {
+    const slideNum = String(i + 1).padStart(2, '0');
+    return `<img src="/preview/png/${id}/slide-${slideNum}.png" style="width:100%; border-radius:6px; border:1px solid var(--border); margin-bottom:12px" loading="lazy">`;
+  }).join('');
+  
+  showModal(
+    `${id} · PNGs compilados`,
+    `<div style="display:flex; flex-direction:column; gap:4px; max-width:340px; margin:0 auto">${imgs}</div>`
+  );
+}
+
+// ── Viral Lab Predictor ───────────────────────────────────────────
+async function runViralAnalysis() {
+  const text = document.getElementById('vlabText').value.trim();
+  if (!text) return showToast('Pega o selecciona un texto para analizar', 'error');
+
+  const btn = document.getElementById('vlabBtn');
+  const spinner = document.getElementById('vlabSpinner');
+  btn.disabled = true;
+  spinner.style.display = 'inline-block';
+  
+  try {
+    const res = await fetch('/api/viral-score', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, type: vlabType })
+    });
+    const data = await res.json();
+    if (data.error) {
+      showToast(data.error, 'error');
+      return;
+    }
+    renderViralResult(data);
+  } catch(e) {
+    showToast('Error de red al analizar', 'error');
+  } finally {
+    btn.disabled = false;
+    spinner.style.display = 'none';
+  }
+}
+
+function renderViralResult(d) {
+  const total = d.total ?? 60;
+  const level = d.nivel || 'Buen potencial';
+  const totalColor = total >= 80 ? 'var(--green)' : (total >= 60 ? 'var(--gold)' : 'var(--red)');
+  const barColor = s => s >= 8 ? 'var(--green)' : (s >= 5 ? 'var(--gold)' : 'var(--red)');
+  
+  const labels = { hook: 'Hook de gancho', emocion: 'Carga Emocional', claridad: 'Claridad', cta: 'Llamado a Acción (CTA)', marca: 'Alineación de Marca', viralidad: 'Viralidad General' };
+  const barsHtml = Object.entries(d.scores).map(([k, v]) => `
+    <div class="vbar">
+      <div class="vbar-lbl">${labels[k] || k}</div>
+      <div>
+        <div class="vbar-bg"><div class="vbar-fg" style="width:${v.score*10}%; background:${barColor(v.score)}"></div></div>
+        ${v.comment ? `<div class="vbar-comment">${v.comment}</div>` : ''}
+      </div>
+      <div class="vbar-score" style="color:${barColor(v.score)}">${v.score}/10</div>
+    </div>
+  `).join('');
+
+  const resContainer = document.getElementById('vlabResult');
+  resContainer.style.display = 'block';
+  resContainer.innerHTML = `
+    <div class="vlab-result-card">
+      <div class="vlab-score-big" style="color:${totalColor}">${total}</div>
+      <div class="vlab-level">${level}</div>
+      <div class="vlab-bars">${barsHtml}</div>
+      <div style="display:flex; flex-direction:column; gap:16px">
+        ${d.fortaleza ? `<div class="insight-box fort"><div class="insight-box-lbl">Fortaleza Clave</div><div class="insight-box-txt">${d.fortaleza}</div></div>` : ''}
+        ${d.mejora ? `<div class="insight-box mej"><div class="insight-box-lbl">Acción de Mejora</div><div class="insight-box-txt">${d.mejora}</div></div>` : ''}
+        ${d.version_mejorada ? `<div class="insight-box ver"><div class="insight-box-lbl">Propuesta de Hook (Optimizado)</div><div class="insight-box-txt" style="font-family:'Playfair Display',serif; font-style:italic; font-size:15px; color:var(--gold)">"${d.version_mejorada}"</div></div>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+// ── VISUAL FORM EDITOR ENGINE ──────────────────────────────────────
+async function enterEditor(id) {
+  editorActiveId = id;
+  editorActiveIndex = 0;
+  
+  // Get latest editor state
+  const type = id.startsWith('C') ? 'carruseles' : 'reels';
+  const res = await fetch(`/api/editor/${type}`);
+  originalEditorData = await res.json();
+  
+  // Clone item
+  const item = originalEditorData.find(x => x.id === id);
+  editorItemData = JSON.parse(JSON.stringify(item));
+  
+  // Activate tab in navigation
+  document.getElementById('tabEditor').style.display = 'block';
+  document.querySelector('[data-tab="editor"]').click();
+  
+  document.getElementById('editorSidebarTitle').innerText = `${id} Workspace`;
+  
+  renderEditorSidebar();
+  loadSelectedSlideOrScene();
+}
+
+function exitEditorMode() {
+  editorActiveId = null;
+  editorActiveIndex = 0;
+  editorItemData = null;
+  originalEditorData = null;
+  document.getElementById('tabEditor').style.display = 'none';
+}
+
+function renderEditorSidebar() {
+  const container = document.getElementById('editorSidebarList');
+  let html = '';
+  
+  if (editorActiveId.startsWith('C')) {
+    // Carousels: slide based list
+    const N = editorItemData.slides.length;
+    editorItemData.slides.forEach((slide, idx) => {
+      const activeCls = idx === editorActiveIndex ? 'active' : '';
+      html += `
+        <div class="slide-item ${activeCls}" onclick="selectSlideOrScene(${idx})">
+          <span class="slide-item-title">Slide ${idx + 1}: ${slide.headline ? slide.headline.slice(0, 24) + '...' : 'Vacío'}</span>
+          <span class="slide-item-type">${slide.type}</span>
+        </div>
+      `;
+    });
+  } else {
+    // Reels: Scene based list
+    editorItemData.scenes.forEach((scene, idx) => {
+      const activeCls = idx === editorActiveIndex ? 'active' : '';
+      const textEl = scene.elements.find(e => e.text);
+      const label = textEl ? textEl.text.slice(0, 24) + '...' : `Escena ${idx+1}`;
+      html += `
+        <div class="slide-item ${activeCls}" onclick="selectSlideOrScene(${idx})">
+          <span class="slide-item-title">${idx + 1}: ${label}</span>
+          <span class="slide-item-type">${scene.from}s - ${scene.duration}s</span>
+        </div>
+      `;
+    });
+  }
+  container.innerHTML = html;
+}
+
+function selectSlideOrScene(idx) {
+  // Save active form state to object first
+  saveFormStateToObject();
+  editorActiveIndex = idx;
+  renderEditorSidebar();
+  loadSelectedSlideOrScene();
+}
+
+function saveFormStateToObject() {
+  if (!editorItemData) return;
+  
+  const workspace = document.getElementById('editorWorkspace');
+  if (editorActiveId.startsWith('C')) {
+    const slide = editorItemData.slides[editorActiveIndex];
+    if (!slide) return;
+    
+    // Save carousel slides inputs
+    const typeSelect = document.getElementById('editType');
+    if (typeSelect) slide.type = typeSelect.value;
+    
+    const headlineText = document.getElementById('editHeadline');
+    if (headlineText) slide.headline = headlineText.value;
+    
+    const bodyText = document.getElementById('editBody');
+    if (bodyText) slide.body = bodyText.value;
+    
+    const tagInput = document.getElementById('editTag');
+    if (tagInput) slide.tag = tagInput.value;
+    
+    const eyebrowInput = document.getElementById('editEyebrow');
+    if (eyebrowInput) slide.eyebrow = eyebrowInput.value;
+    
+    const ctaTextInput = document.getElementById('editCtaText');
+    if (ctaTextInput) slide.ctaText = ctaTextInput.value;
+    
+    const authorNameInput = document.getElementById('editAuthorName');
+    if (authorNameInput) slide.authorName = authorNameInput.value;
+    
+    const authorRoleInput = document.getElementById('editAuthorRole');
+    if (authorRoleInput) slide.authorRole = authorRoleInput.value;
+  } else {
+    const scene = editorItemData.scenes[editorActiveIndex];
+    if (!scene) return;
+    
+    // Save scene timings
+    const fromInput = document.getElementById('editFrom');
+    if (fromInput) scene.from = parseFloat(fromInput.value) || 0;
+    
+    const durationInput = document.getElementById('editDuration');
+    if (durationInput) scene.duration = parseFloat(durationInput.value) || 0;
+    
+    const gapInput = document.getElementById('editGap');
+    if (gapInput) scene.gap = parseInt(gapInput.value) || 24;
+    
+    const paddingInput = document.getElementById('editPadding');
+    if (paddingInput) scene.padding = paddingInput.value;
+    
+    // Save nested elements dynamically by looping form cards
+    const elementCards = workspace.querySelectorAll('.element-card');
+    scene.elements = [];
+    
+    elementCards.forEach(card => {
+      const elIdx = parseInt(card.dataset.idx);
+      const elType = card.querySelector('.el-type').value;
+      const el = { type: elType };
+      
+      if (elType === 'text') {
+        el.text = card.querySelector('.el-text').value;
+        el.delay = parseInt(card.querySelector('.el-delay').value) || 0;
+        el.font = card.querySelector('.el-font').value;
+        el.size = parseInt(card.querySelector('.el-size').value) || 32;
+        el.color = card.querySelector('.el-color').value;
+        el.weight = parseInt(card.querySelector('.el-weight').value) || 300;
+        el.italic = card.querySelector('.el-italic').checked;
+        el.border = card.querySelector('.el-border').checked;
+      } else {
+        // Logo or line
+        el.delay = parseInt(card.querySelector('.el-delay-simple').value) || 0;
+      }
+      scene.elements.push(el);
+    });
+  }
+}
+
+function loadSelectedSlideOrScene() {
+  const workspace = document.getElementById('editorWorkspace');
+  let html = '';
+  
+  if (editorActiveId.startsWith('C')) {
+    // CAROUSEL Form
+    const slide = editorItemData.slides[editorActiveIndex];
+    if (!slide) {
+      workspace.innerHTML = 'Error al cargar el slide.';
+      return;
+    }
+    
+    const isHook = slide.type === 'hook';
+    const isCta = slide.type === 'cta';
+    const isQuote = slide.type === 'quote';
+    
+    html = `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
+        <h3 class="sec-title" style="font-size:15px">Slide ${editorActiveIndex + 1} de ${editorItemData.slides.length}</h3>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Tipo de Slide</label>
+          <select class="select-styled" id="editType" onchange="saveFormStateToObject(); loadSelectedSlideOrScene()">
+            <option value="hook" ${isHook?'selected':''}>Hook / Portada</option>
+            <option value="content" ${(!isHook&&!isCta&&!isQuote)?'selected':''}>Desarrollo / Contenido</option>
+            <option value="quote" ${isQuote?'selected':''}>Frase / Cita</option>
+            <option value="cta" ${isCta?'selected':''}>Llamado a la acción (CTA)</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Etiqueta Superior (Tag / Eyebrow)</label>
+          ${isHook 
+            ? `<input class="input-styled" id="editEyebrow" value="${slide.eyebrow || ''}" placeholder="Ej: Quién soy">` 
+            : `<input class="input-styled" id="editTag" value="${slide.tag || ''}" placeholder="Ej: El Autor" ${isCta||isQuote?'disabled':''}>`
+          }
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">${isQuote ? 'Frase de la cita' : 'Línea de título principal (Headline)'}</label>
+        <textarea class="textarea-styled" id="editHeadline" placeholder="Escribe el texto de enganche o título principal..." oninput="updateLiveSlidePreview()">${slide.headline || ''}</textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Cuerpo de texto descriptivo (Body)</label>
+        <textarea class="textarea-styled" style="min-height: 80px" id="editBody" placeholder="Texto adicional de apoyo..." oninput="updateLiveSlidePreview()">${slide.body || ''}</textarea>
+      </div>
+      
+      ${isHook ? `
+        <div class="form-group">
+          <label class="form-label">Texto de Llamado en Portada (CTA)</label>
+          <input class="input-styled" id="editCtaText" value="${slide.ctaText || ''}" placeholder="Ej: → Desliza para leer la historia">
+        </div>
+      ` : ''}
+      
+      ${isCta ? `
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Nombre del Autor</label>
+            <input class="input-styled" id="editAuthorName" value="${slide.authorName || 'Franco Jeria'}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Rol del Autor</label>
+            <input class="input-styled" id="editAuthorRole" value="${slide.authorRole || 'Terapeuta · Autor · Endonauta'}">
+          </div>
+        </div>
+      ` : ''}
+      
+      <div class="card-divider"></div>
+      
+      <div class="form-group" style="margin-bottom: 20px;">
+        <label class="form-label">Estilo Visual (Tema)</label>
+        <select class="select-styled" id="editTheme" onchange="editorItemData.theme = this.value; updateLiveSlidePreview()">
+          <option value="B" ${editorItemData.theme === 'B' || !editorItemData.theme ? 'selected' : ''}>Estilo B (Nebula Jade - Space Dark 3)</option>
+          <option value="C" ${editorItemData.theme === 'C' ? 'selected' : ''}>Estilo C (Dark Galaxy 3)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Caption de Instagram (Compartido por todo el carrusel)</label>
+        <textarea class="textarea-styled" style="min-height:120px" id="editCaption" onchange="editorItemData.caption = this.value">${editorItemData.caption || ''}</textarea>
+      </div>
+    `;
+    
+    workspace.innerHTML = html;
+    updateLiveSlidePreview();
+    
+  } else {
+    // REEL Form
+    const scene = editorItemData.scenes[editorActiveIndex];
+    if (!scene) {
+      workspace.innerHTML = 'Error al cargar la escena.';
+      return;
+    }
+    
+    html = `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
+        <h3 class="sec-title" style="font-size:15px">Escena ${editorActiveIndex + 1} de ${editorItemData.scenes.length}</h3>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Tiempo de Inicio (segundos)</label>
+          <input class="input-styled" type="number" step="0.1" id="editFrom" value="${scene.from}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Duración (segundos)</label>
+          <input class="input-styled" type="number" step="0.1" id="editDuration" value="${scene.duration}">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Espaciado de elementos (Gap)</label>
+          <input class="input-styled" type="number" id="editGap" value="${scene.gap !== undefined ? scene.gap : 24}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Padding superior/inferior (CSS)</label>
+          <input class="input-styled" id="editPadding" value="${scene.padding || '100px 0'}">
+        </div>
+      </div>
+      
+      <div class="card-divider"></div>
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px">
+        <span class="form-label" style="color:var(--gold-dim)">Elementos Visuales</span>
+        <button class="btn btn-ghost btn-sm" onclick="addNewSceneElement()">＋ Elemento</button>
+      </div>
+      
+      <div id="elementsContainer">
+        ${renderSceneElementsForm(scene.elements)}
+      </div>
+    `;
+    
+    workspace.innerHTML = html;
+    updateLiveReelPreview();
+  }
+}
+
+function renderSceneElementsForm(elements) {
+  if (!elements || !elements.length) {
+    return '<div style="font-size:12px; color:var(--muted); text-align:center; padding:20px 0">Sin elementos en esta escena.</div>';
+  }
+  
+  return elements.map((el, elIdx) => {
+    const isText = el.type === 'text';
+    const isLogo = el.type === 'logo';
+    const isLine = el.type === 'line';
+    
+    return `
+      <div class="element-card" data-idx="${elIdx}">
+        <div class="element-card-hdr">
+          <select class="select-styled el-type" style="width: 150px" onchange="changeElementType(${elIdx}, this.value)">
+            <option value="text" ${isText?'selected':''}>Texto animado</option>
+            <option value="logo" ${isLogo?'selected':''}>Logo Endonautas</option>
+            <option value="line" ${isLine?'selected':''}>Línea dorada</option>
+          </select>
+          <button class="remove-btn" onclick="removeSceneElement(${elIdx})">✕ Eliminar</button>
+        </div>
+        
+        ${isText ? `
+          <div class="form-group" style="margin-bottom:10px">
+            <textarea class="textarea-styled el-text" style="min-height:50px" placeholder="Escribe el texto de la animación..." oninput="updateLiveReelPreview()">${el.text || ''}</textarea>
+          </div>
+          <div class="form-row" style="margin-bottom:10px">
+            <div class="form-group">
+              <label class="form-label" style="font-size:9px">Delay de animación (frames)</label>
+              <input class="input-styled el-delay" type="number" value="${el.delay || 0}" oninput="updateLiveReelPreview()">
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-size:9px">Familia tipográfica</label>
+              <select class="select-styled el-font" onchange="updateLiveReelPreview()">
+                <option value="inter" ${el.font==='inter'?'selected':''}>Inter (Sansa-serif)</option>
+                <option value="playfair" ${el.font==='playfair'?'selected':''}>Playfair Display (Serif)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row" style="margin-bottom:10px">
+            <div class="form-group">
+              <label class="form-label" style="font-size:9px">Tamaño (px)</label>
+              <input class="input-styled el-size" type="number" value="${el.size || 32}" oninput="updateLiveReelPreview()">
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-size:9px">Peso (Weight)</label>
+              <select class="select-styled el-weight" onchange="updateLiveReelPreview()">
+                <option value="300" ${el.weight===300?'selected':''}>Delgado (300)</option>
+                <option value="400" ${el.weight===400?'selected':''}>Regular (400)</option>
+                <option value="500" ${el.weight===500?'selected':''}>Medio (500)</option>
+                <option value="700" ${el.weight===700?'selected':''}>Negrita (700)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row" style="margin-bottom:10px">
+            <div class="form-group">
+              <label class="form-label" style="font-size:9px">Color</label>
+              <select class="select-styled el-color" onchange="updateLiveReelPreview()">
+                <option value="white" ${el.color==='white'?'selected':''}>Blanco</option>
+                <option value="gold" ${el.color==='gold'?'selected':''}>Oro</option>
+                <option value="muted" ${el.color==='muted'?'selected':''}>Gris oscuro</option>
+                <option value="#aaaaaa" ${el.color==='#aaaaaa'?'selected':''}>Gris claro</option>
+              </select>
+            </div>
+            <div class="form-group" style="flex-direction:row; gap:16px; align-items:center; margin-top:20px">
+              <label style="display:flex; align-items:center; gap:6px; font-size:11px; cursor:pointer">
+                <input class="el-italic" type="checkbox" ${el.italic?'checked':''} onchange="updateLiveReelPreview()"> Cursiva
+              </label>
+              <label style="display:flex; align-items:center; gap:6px; font-size:11px; cursor:pointer">
+                <input class="el-border" type="checkbox" ${el.border?'checked':''} onchange="updateLiveReelPreview()"> Borde CTA
+              </label>
+            </div>
+          </div>
+        ` : `
+          <div class="form-group">
+            <label class="form-label" style="font-size:9px">Delay de animación (frames)</label>
+            <input class="input-styled el-delay-simple" type="number" value="${el.delay || 0}">
+          </div>
+        `}
+      </div>
+    `;
+  }).join('');
+}
+
+function changeElementType(elIdx, val) {
+  saveFormStateToObject();
+  const scene = editorItemData.scenes[editorActiveIndex];
+  scene.elements[elIdx] = { type: val, delay: 0 };
+  if (val === 'text') {
+    scene.elements[elIdx].text = 'Nuevo texto';
+    scene.elements[elIdx].size = 32;
+    scene.elements[elIdx].font = 'inter';
+    scene.elements[elIdx].color = 'white';
+  }
+  loadSelectedSlideOrScene();
+}
+
+function addNewSceneElement() {
+  saveFormStateToObject();
+  const scene = editorItemData.scenes[editorActiveIndex];
+  if (!scene.elements) scene.elements = [];
+  scene.elements.push({ type: 'text', text: 'Nuevo texto animado', delay: 10, font: 'inter', size: 30 });
+  loadSelectedSlideOrScene();
+}
+
+function removeSceneElement(elIdx) {
+  saveFormStateToObject();
+  const scene = editorItemData.scenes[editorActiveIndex];
+  scene.elements.splice(elIdx, 1);
+  loadSelectedSlideOrScene();
+}
+
+// ── Realtime Previews ─────────────────────────────────────────────
+// SVG Constellation from brandbook
+const svgConstellation = `
+  <svg class="const-svg" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- Glow suave para estrellas brillantes -->
+      <filter id="gs" x="-80%" y="-80%" width="260%" height="260%">
+        <feGaussianBlur stdDeviation="2.2" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <!-- Glow fuerte para Rigel / Betelgeuse -->
+      <filter id="gl" x="-120%" y="-120%" width="340%" height="340%">
+        <feGaussianBlur stdDeviation="4" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+    <g stroke="rgba(126,207,168,0.26)" stroke-width="0.65" fill="none">
+      <line x1="672" y1="148" x2="718" y2="262"/>
+      <line x1="845" y1="128" x2="794" y2="258"/>
+      <line x1="718" y1="262" x2="756" y2="258"/>
+      <line x1="756" y1="258" x2="794" y2="258"/>
+      <line x1="718" y1="262" x2="695" y2="395"/>
+      <line x1="794" y1="258" x2="876" y2="382"/>
+    </g>
+    <circle cx="876" cy="382" r="4.2" fill="white" opacity="0.96" filter="url(#gl)"/>
+    <circle cx="672" cy="148" r="3.6" fill="#ffe8d0" opacity="0.93" filter="url(#gl)"/>
+    <circle cx="845" cy="128" r="2.3" fill="white" opacity="0.84" filter="url(#gs)"/>
+    <circle cx="756" cy="258" r="2.6" fill="white" opacity="0.90" filter="url(#gs)"/>
+    <circle cx="718" cy="262" r="2.4" fill="white" opacity="0.87" filter="url(#gs)"/>
+    <circle cx="794" cy="258" r="2.1" fill="white" opacity="0.81" filter="url(#gs)"/>
+    <circle cx="695" cy="395" r="2.0" fill="white" opacity="0.80" filter="url(#gs)"/>
+    <circle cx="612" cy="192" r="1.4" fill="white" opacity="0.52"/>
+    <circle cx="600" cy="224" r="1.1" fill="white" opacity="0.42"/>
+    <circle cx="920" cy="190" r="1.2" fill="white" opacity="0.48"/>
+    <circle cx="936" cy="312" r="1.0" fill="white" opacity="0.38"/>
+    <circle cx="752" cy="204" r="1.0" fill="white" opacity="0.35"/>
+    <g stroke="rgba(126,207,168,0.20)" stroke-width="0.60" fill="none">
+      <line x1="622" y1="800" x2="684" y2="868"/>
+      <line x1="684" y1="868" x2="804" y2="884"/>
+      <line x1="804" y1="884" x2="840" y2="812"/>
+      <line x1="840" y1="812" x2="622" y2="800"/>
+      <line x1="840" y1="812" x2="952" y2="792"/>
+      <line x1="952" y1="792" x2="1044" y2="826"/>
+      <line x1="1044" y1="826" x2="1068" y2="878"/>
+    </g>
+    <circle cx="622" cy="800" r="2.4" fill="white" opacity="0.86" filter="url(#gs)"/>
+    <circle cx="684" cy="868" r="2.0" fill="white" opacity="0.80"/>
+    <circle cx="804" cy="884" r="1.9" fill="white" opacity="0.77"/>
+    <circle cx="840" cy="812" r="1.5" fill="white" opacity="0.60"/>
+    <circle cx="952" cy="792" r="2.5" fill="white" opacity="0.88" filter="url(#gs)"/>
+    <circle cx="1044" cy="826" r="2.1" fill="white" opacity="0.82"/>
+    <circle cx="1068" cy="878" r="2.2" fill="white" opacity="0.84" filter="url(#gs)"/>
+    <circle cx="118" cy="862" r="3.0" fill="white" opacity="0.88" filter="url(#gs)"/>
+    <circle cx="490" cy="192" r="2.2" fill="#ffcca0" opacity="0.72" filter="url(#gs)"/>
+    <circle cx="320" cy="96" r="2.0" fill="#ffe8c0" opacity="0.68" filter="url(#gs)"/>
+    <circle cx="968" cy="512" r="1.8" fill="white" opacity="0.65" filter="url(#gs)"/>
+    <circle cx="548" cy="298" r="1.6" fill="#ffd8b0" opacity="0.60"/>
+    <circle cx="518" cy="274" r="1.3" fill="white" opacity="0.55"/>
+    <circle cx="144" cy="450" r="1.5" fill="#7ecfa8" opacity="0.58" filter="url(#gs)"/>
+    <circle cx="966" cy="648" r="1.3" fill="#7ec8cf" opacity="0.50"/>
+  </svg>
+`;
+
+function updateLiveSlidePreview() {
+  const headlineVal = document.getElementById('editHeadline').value.replace(/\n/g, '<br>');
+  const bodyVal = document.getElementById('editBody').value.replace(/\n/g, '<br>');
+  const typeVal = document.getElementById('editType').value;
+  
+  const slideBox = document.getElementById('liveSlideBox');
+  const N = editorItemData.slides.length;
+  
+  const isHook = editorActiveIndex === 0 || typeVal === 'hook';
+  const isCta = editorActiveIndex === N - 1 || typeVal === 'cta';
+  const isQuote = typeVal === 'quote';
+
+  const themeVal = editorItemData.theme || 'B';
+  const isThemeC = themeVal === 'C' || (themeVal !== 'B' && editorActiveId && parseInt(editorActiveId.replace(/\D/g, '')) % 2 === 0);
+
+  const bgUrl = isThemeC 
+    ? '/fondos-pexels/dark-galaxy-3-33931033.jpg' 
+    : '/fondos-pexels/nebula-space-dark-3-33931036.jpg';
+
+  let bgFilter = 'brightness(0.72) contrast(1.12) saturate(0.28)'; // Theme C default
+  if (!isThemeC) {
+    if (isHook) bgFilter = 'brightness(0.65) contrast(1.18) saturate(0.55) hue-rotate(15deg)';
+    else if (isQuote) bgFilter = 'brightness(0.52) contrast(1.22) saturate(0.45) hue-rotate(15deg)';
+    else if (isCta) bgFilter = 'brightness(0.58) contrast(1.18) saturate(0.48) hue-rotate(15deg)';
+    else bgFilter = 'brightness(0.58) contrast(1.20) saturate(0.50) hue-rotate(15deg)';
+  }
+
+  // Top Nav bar
+  let topNav = '';
+  if (isThemeC) {
+    topNav = `
+      <div style="position:absolute;top:52px;left:64px;right:64px;z-index:10;display:flex;align-items:center;justify-content:space-between;width:calc(100% - 128px);">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <img style="width:30px;height:30px;border-radius:50%;" src="/brand-assets/logo-trans.png">
+          <span style="font-weight:700;font-size:16px;letter-spacing:0.04em;color:rgba(240,232,220,0.72);">Endonautas</span>
+        </div>
+        <span style="font-family:'Plus Jakarta Sans';font-size:12px;letter-spacing:0.24em;color:rgba(240,232,220,0.28);text-transform:uppercase;">
+          ${editorItemData.strategy || editorItemData.phase || 'Vínculos · Patrones'}
+        </span>
+      </div>`;
+  } else {
+    topNav = `
+      <div style="position:absolute;top:52px;left:64px;right:64px;z-index:10;display:flex;align-items:center;justify-content:space-between;width:calc(100% - 128px);">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <img style="width:30px;height:30px;border-radius:50%;" src="/brand-assets/logo-trans.png">
+          <span style="font-weight:700;font-size:16px;letter-spacing:0.04em;color:rgba(240,232,220,0.75);">Endonautas</span>
+        </div>
+        <div style="border:1px solid rgba(126,207,168,0.30);border-radius:2px;padding:8px 16px;font-family:'Plus Jakarta Sans';font-size:12px;letter-spacing:0.24em;text-transform:uppercase;color:rgba(126,207,168,0.65);">
+          ${editorItemData.strategy || editorItemData.phase || 'VÍNCULOS · PATRONES'}
+        </div>
+      </div>`;
+  }
+
+  let innerHtml = '';
+  
+  if (isHook) {
+    const titleClean = headlineVal.replace(/_([^_]+)_/g, '<em>$1</em>').replace(/\*([^*]+)\*/g, '<em>$1</em>');
+    if (isThemeC) {
+      innerHtml = `
+        <div style="position:absolute;left:64px;right:0;bottom:52px;z-index:10;text-align:left;">
+          <h1 style="font-weight:900;font-size:128px;line-height:0.85;letter-spacing:-0.05em;color:#F0E8DC;margin-bottom:30px;">
+            ${titleClean || 'Escribe un hook...'}
+          </h1>
+          <div style="width:calc(100% - 0px);height:1px;background:linear-gradient(to right,rgba(126,207,168,0.50),transparent);margin-bottom:22px;margin-right:64px;"></div>
+          <p style="font-family:'Plus Jakarta Sans';font-size:24px;line-height:1.52;color:rgba(240,232,220,0.48);max-width:520px;padding-right:64px;margin-bottom:24px;">
+            ${bodyVal || ''}
+          </p>
+          <div style="display:flex;padding-right:64px;justify-content:space-between;align-items:center;">
+            <span style="font-family:'Plus Jakarta Sans';font-size:12px;letter-spacing:0.18em;color:rgba(126,207,168,0.65);text-transform:uppercase;">
+              ${(document.getElementById('editCtaText') && document.getElementById('editCtaText').value) || 'Desliza →'}
+            </span>
+            <span style="font-size:12px;letter-spacing:0.14em;color:rgba(240,232,220,0.25);">${String(editorActiveIndex + 1).padStart(2, '0')} / ${String(N).padStart(2, '0')}</span>
+          </div>
+        </div>
+      `;
+    } else {
+      innerHtml = `
+        <div style="position:absolute;left:64px;right:64px;bottom:52px;z-index:10;text-align:left;">
+          <div style="display:inline-block;background:rgba(126,207,168,0.10);border-left:3px solid #7ecfa8;padding:9px 18px;margin-bottom:24px;">
+            <span style="font-family:'Plus Jakarta Sans';font-size:12px;letter-spacing:0.28em;text-transform:uppercase;color:#7ecfa8;">
+              ${(document.getElementById('editEyebrow') && document.getElementById('editEyebrow').value) || editorItemData.strategy || editorItemData.phase || 'Post 01 de 09'}
+            </span>
+          </div>
+          <h1 style="font-weight:900;font-size:104px;line-height:0.87;letter-spacing:-0.042em;color:#F0E8DC;margin-bottom:30px;">
+            ${titleClean || 'Escribe un hook...'}
+          </h1>
+          <p style="font-family:'Plus Jakarta Sans';font-size:24px;line-height:1.55;color:rgba(240,232,220,0.52);max-width:520px;margin-bottom:28px;">
+            ${bodyVal || ''}
+          </p>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-family:'Plus Jakarta Sans';font-size:12px;letter-spacing:0.18em;color:rgba(126,207,168,0.60);text-transform:uppercase;">
+              ${(document.getElementById('editCtaText') && document.getElementById('editCtaText').value) || 'Desliza para ver →'}
+            </span>
+            <span style="font-size:12px;letter-spacing:0.14em;color:rgba(240,232,220,0.25);">${String(editorActiveIndex + 1).padStart(2, '0')} / ${String(N).padStart(2, '0')}</span>
+          </div>
+        </div>
+      `;
+    }
+  } else if (isCta) {
+    const titleClean = headlineVal.replace(/_([^_]+)_/g, '<em>$1</em>').replace(/\*([^*]+)\*/g, '<em>$1</em>');
+    if (isThemeC) {
+      innerHtml = `
+        <div style="position:absolute;left:64px;right:64px;bottom:52px;z-index:10;text-align:left;">
+          <h2 style="font-weight:900;font-size:118px;line-height:0.84;letter-spacing:-0.05em;color:#F0E8DC;margin-bottom:28px;">
+            ${titleClean || 'Llamado al seguidor...'}
+          </h2>
+          <p style="font-family:'Plus Jakarta Sans';font-size:24px;line-height:1.55;color:rgba(240,232,220,0.46);max-width:500px;margin-bottom:44px;">
+            ${bodyVal || ''}
+          </p>
+          <div style="display:flex;align-items:center;gap:32px;">
+            <div style="padding:18px 44px;border-radius:60px;background:#7ecfa8;color:#030c07;font-weight:700;font-size:14px;letter-spacing:0.12em;text-transform:uppercase;box-shadow:0 0 80px rgba(126,207,168,0.48),0 0 160px rgba(126,207,168,0.16);">
+              ${(document.getElementById('editCtaText') && document.getElementById('editCtaText').value) || 'COMENZAR EN ENDONAUTAS.CL →'}
+            </div>
+            <span style="font-size:12px;letter-spacing:0.14em;color:rgba(240,232,220,0.22);">${String(editorActiveIndex + 1).padStart(2, '0')} / ${String(N).padStart(2, '0')}</span>
+          </div>
+        </div>
+      `;
+    } else {
+      innerHtml = `
+        <div style="position:absolute;left:64px;right:64px;bottom:52px;z-index:10;text-align:left;">
+          <div style="display:inline-block;background:rgba(126,207,168,0.10);border-left:3px solid #7ecfa8;padding:9px 18px;margin-bottom:22px;">
+            <span style="font-family:'Plus Jakarta Sans';font-size:12px;letter-spacing:0.28em;text-transform:uppercase;color:#7ecfa8;">
+              ${(document.getElementById('editEyebrow') && document.getElementById('editEyebrow').value) || 'Mapa Interior'}
+            </span>
+          </div>
+          <h2 style="font-weight:900;font-size:96px;line-height:0.87;letter-spacing:-0.042em;color:#F0E8DC;margin-bottom:26px;">
+            ${titleClean || 'Llamado al seguidor...'}
+          </h2>
+          <p style="font-family:'Plus Jakarta Sans';font-size:23px;line-height:1.55;color:rgba(240,232,220,0.48);max-width:480px;margin-bottom:40px;">
+            ${bodyVal || ''}
+          </p>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="padding:18px 44px;border-radius:60px;background:#7ecfa8;color:#030c07;font-weight:700;font-size:14px;letter-spacing:0.12em;text-transform:uppercase;box-shadow:0 0 80px rgba(126,207,168,0.45),0 0 160px rgba(126,207,168,0.15);">
+              ${(document.getElementById('editCtaText') && document.getElementById('editCtaText').value) || 'COMENZAR EN ENDONAUTAS.CL →'}
+            </div>
+            <span style="font-size:12px;letter-spacing:0.14em;color:rgba(240,232,220,0.22);">${String(editorActiveIndex + 1).padStart(2, '0')} / ${String(N).padStart(2, '0')}</span>
+          </div>
+        </div>
+      `;
+    }
+  } else if (isQuote) {
+    let quoteLine1 = '';
+    let quoteLine2 = headlineVal.replace(/_([^_]+)_/g, '<em>$1</em>').replace(/\*([^*]+)\*/g, '<em>$1</em>');
+    if (headlineVal.includes('<br>')) {
+      const parts = headlineVal.split('<br>');
+      quoteLine1 = parts[0].trim().replace(/_([^_]+)_/g, '<em>$1</em>').replace(/\*([^*]+)\*/g, '<em>$1</em>');
+      quoteLine2 = parts.slice(1).join('<br>').trim().replace(/_([^_]+)_/g, '<em>$1</em>').replace(/\*([^*]+)\*/g, '<em>$1</em>');
+    }
+    
+    if (isThemeC) {
+      innerHtml = `
+        <div style="position:absolute;left:64px;right:64px;top:0;bottom:0;z-index:10;display:flex;flex-direction:column;justify-content:center;padding-top:40px;text-align:left;">
+          <div style="font-size:200px;line-height:0.45;font-weight:900;color:rgba(126,207,168,0.15);margin-left:-10px;margin-bottom:24px;">&ldquo;</div>
+          ${quoteLine1 ? `
+          <p style="font-family:'Plus Jakarta Sans';font-size:52px;font-weight:300;line-height:1.05;color:rgba(240,232,220,0.52);letter-spacing:-0.015em;margin-bottom:4px;">
+            ${quoteLine1}
+          </p>` : ''}
+          <p style="font-size:92px;font-weight:900;line-height:0.88;letter-spacing:-0.046em;color:#F0E8DC;margin-bottom:40px;">
+            ${quoteLine2}
+          </p>
+          <div style="display:flex;align-items:center;gap:18px;margin-bottom:26px;">
+            <div style="width:50px;height:1.5px;background:#7ecfa8;opacity:0.65;"></div>
+            <div style="width:7px;height:7px;border-radius:50%;background:#7ecfa8;opacity:0.55;"></div>
+          </div>
+          <p style="font-family:'Plus Jakarta Sans';font-size:25px;line-height:1.48;color:rgba(240,232,220,0.36);font-style:italic;">
+            ${bodyVal || ''}
+          </p>
+        </div>
+        <div style="position:absolute;bottom:52px;left:64px;right:64px;z-index:10;display:flex;justify-content:space-between;">
+          <span style="font-family:'Plus Jakarta Sans';font-size:12px;letter-spacing:0.18em;color:rgba(126,207,168,0.60);text-transform:uppercase;">Continúa →</span>
+          <span style="font-size:12px;letter-spacing:0.14em;color:rgba(240,232,220,0.25);">${String(editorActiveIndex + 1).padStart(2, '0')} / ${String(N).padStart(2, '0')}</span>
+        </div>
+      `;
+    } else {
+      innerHtml = `
+        <!-- SVG Accent Lines -->
+        <svg style="position:absolute;inset:0;width:100%;height:100%;z-index:5;" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="hl" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#7ecfa8" stop-opacity="0"/>
+              <stop offset="35%" stop-color="#7ecfa8" stop-opacity="0.35"/>
+              <stop offset="65%" stop-color="#7ecfa8" stop-opacity="0.35"/>
+              <stop offset="100%" stop-color="#7ecfa8" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <line x1="0" y1="360" x2="1080" y2="360" stroke="url(#hl)" stroke-width="1"/>
+          <line x1="0" y1="820" x2="1080" y2="820" stroke="url(#hl)" stroke-width="1"/>
+        </svg>
+        <div style="position:absolute;left:64px;right:64px;top:0;bottom:0;z-index:10;display:flex;flex-direction:column;justify-content:center;padding-top:80px;text-align:left;">
+          <div style="font-size:150px;line-height:0.5;font-weight:900;color:rgba(126,207,168,0.18);margin-left:-8px;margin-bottom:28px;">&ldquo;</div>
+          ${quoteLine1 ? `
+          <p style="font-family:'Plus Jakarta Sans';font-size:48px;font-weight:300;line-height:1.06;color:rgba(240,232,220,0.55);letter-spacing:-0.01em;margin-bottom:6px;">
+            ${quoteLine1}
+          </p>` : ''}
+          <p style="font-size:80px;font-weight:900;line-height:0.90;letter-spacing:-0.042em;color:#F0E8DC;margin-bottom:36px;">
+            ${quoteLine2}
+          </p>
+          <div style="width:72px;height:1.5px;background:#7ecfa8;opacity:0.60;margin-bottom:28px;"></div>
+          <p style="font-family:'Plus Jakarta Sans';font-size:24px;line-height:1.50;color:rgba(240,232,220,0.40);font-style:italic;">
+            ${bodyVal || ''}
+          </p>
+        </div>
+        <div style="position:absolute;bottom:52px;left:64px;right:64px;z-index:10;display:flex;justify-content:space-between;">
+          <span style="font-family:'Plus Jakarta Sans';font-size:12px;letter-spacing:0.18em;color:rgba(126,207,168,0.60);text-transform:uppercase;">Continúa →</span>
+          <span style="font-size:12px;letter-spacing:0.14em;color:rgba(240,232,220,0.25);">${String(editorActiveIndex + 1).padStart(2, '0')} / ${String(N).padStart(2, '0')}</span>
+        </div>
+      `;
+    }
+  } else {
+    // Content slide
+    const titleClean = headlineVal.replace(/_([^_]+)_/g, '<em>$1</em>').replace(/\*([^*]+)\*/g, '<em>$1</em>');
+    
+    let bodyMain = bodyVal;
+    let bodyKey = '';
+    const indexNewline = bodyVal.indexOf('<br>');
+    if (indexNewline !== -1) {
+      bodyMain = bodyVal.substring(0, indexNewline).trim();
+      bodyKey = bodyVal.substring(indexNewline + 4).replace(/<br>/g, '\n').trim();
+    }
+    
+    let keyCard = '';
+    if (bodyKey) {
+      if (isThemeC) {
+        keyCard = `
+          <div style="border-top:1px solid rgba(126,207,168,0.18);border-bottom:1px solid rgba(126,207,168,0.10);padding:16px 0;margin-bottom:22px;">
+            <div style="font-family:'Plus Jakarta Sans';font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:#7ecfa8;opacity:0.75;margin-bottom:8px;">CLAVE</div>
+            <div style="font-family:'Plus Jakarta Sans';font-size:21px;line-height:1.48;color:rgba(240,232,220,0.60);">${bodyKey}</div>
+          </div>`;
+      } else {
+        keyCard = `
+          <div style="background:rgba(126,207,168,0.07);border:1px solid rgba(126,207,168,0.16);border-left:3px solid #7ecfa8;border-radius:0 3px 3px 0;padding:16px 20px;max-width:560px;margin-bottom:24px;">
+            <div style="font-family:'Plus Jakarta Sans';font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:#7ecfa8;margin-bottom:8px;">CLAVE</div>
+            <div style="font-family:'Plus Jakarta Sans';font-size:21px;line-height:1.48;color:rgba(240,232,220,0.70);">${bodyKey}</div>
+          </div>`;
+      }
+    }
+
+    const tag = (document.getElementById('editTag') && document.getElementById('editTag').value) || '';
+
+    if (isThemeC) {
+      innerHtml = `
+        <div style="position:absolute;left:64px;top:160px;width:3px;height:500px;z-index:9;background:linear-gradient(to bottom,#7ecfa8,rgba(126,207,168,0.08));"></div>
+        <div style="position:absolute;left:88px;right:64px;bottom:52px;z-index:10;text-align:left;">
+          <div style="font-size:14px;font-weight:500;letter-spacing:0.22em;color:rgba(126,207,168,0.50);text-transform:uppercase;margin-bottom:26px;font-family:'Plus Jakarta Sans';">
+            ${String(editorActiveIndex + 1).padStart(2, '0')} ── ${tag || 'DESARROLLO'}
+          </div>
+          <h2 style="font-weight:900;font-size:96px;line-height:0.86;letter-spacing:-0.044em;color:#F0E8DC;margin-bottom:26px;">
+            ${titleClean || 'Título de sección...'}
+          </h2>
+          <p style="font-family:'Plus Jakarta Sans';font-size:23px;line-height:1.58;color:rgba(240,232,220,0.48);max-width:560px;margin-bottom:28px;">
+            ${bodyMain}
+          </p>
+          ${keyCard}
+          <span style="font-family:'Plus Jakarta Sans';font-size:12px;letter-spacing:0.18em;color:rgba(126,207,168,0.65);text-transform:uppercase;">Continúa →</span>
+        </div>
+      `;
+    } else {
+      innerHtml = `
+        <div style="position:absolute;left:64px;right:64px;bottom:52px;z-index:10;text-align:left;">
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:22px;">
+            <span style="font-size:56px;font-weight:900;color:#7ecfa8;line-height:1;opacity:0.75;">${String(editorActiveIndex + 1).padStart(2, '0')}</span>
+            <div style="width:1px;height:52px;background:rgba(126,207,168,0.25);"></div>
+            <span style="font-family:'Plus Jakarta Sans';font-size:13px;letter-spacing:0.26em;text-transform:uppercase;color:rgba(240,232,220,0.35);">
+              ${tag || 'DESARROLLO'}
+            </span>
+          </div>
+          <h2 style="font-weight:900;font-size:80px;line-height:0.88;letter-spacing:-0.036em;color:#F0E8DC;margin-bottom:22px;">
+            ${titleClean || 'Título de sección...'}
+          </h2>
+          <p style="font-family:'Plus Jakarta Sans';font-size:23px;line-height:1.58;color:rgba(240,232,220,0.50);max-width:560px;margin-bottom:24px;">
+            ${bodyMain}
+          </p>
+          ${keyCard}
+          <div style="display:flex;justify-content:space-between;">
+            <span style="font-family:'Plus Jakarta Sans';font-size:12px;letter-spacing:0.18em;color:rgba(126,207,168,0.60);text-transform:uppercase;">Continúa →</span>
+            <span style="font-size:12px;letter-spacing:0.14em;color:rgba(240,232,220,0.25);">${String(editorActiveIndex + 1).padStart(2, '0')} / ${String(N).padStart(2, '0')}</span>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // Dots in bottom bar
+  let dotsHtml = '<div class="dots">';
+  for (let j = 0; j < N; j++) {
+    dotsHtml += `<div class="dot${j===editorActiveIndex ? ' active' : ''}"></div>`;
+  }
+  dotsHtml += '</div>';
+
+  slideBox.innerHTML = `
+    <div style="position:absolute;inset:0;z-index:1;background:url('${bgUrl}')center/cover;filter:${bgFilter};"></div>
+    <div style="position:absolute;inset:0;z-index:2;background:linear-gradient(to top, ${isThemeC ? 'rgba(3,6,12,0.96) 0%, rgba(3,6,12,0.75) 42%, rgba(3,6,12,0.30) 62%, rgba(3,6,12,0.0) 100%' : 'rgba(4,6,14,0.96) 0%, rgba(4,6,14,0.75) 35%, rgba(4,6,14,0.30) 55%, rgba(4,6,14,0.0) 100%'});"></div>
+    ${isCta ? `<div style="position:absolute;inset:0;z-index:3;background:radial-gradient(ellipse 85% 60% at 50% 110%, ${isThemeC ? 'rgba(6,48,36,0.52)' : 'rgba(8,55,42,0.55)'} 0%,transparent 58%);"></div>` : ''}
+    <div style="position:absolute;inset:0;opacity:${isThemeC ? 0.07 : 0.08};mix-blend-mode:overlay;pointer-events:none;z-index:8;background-image:url('data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3CfeColorMatrix type=\'saturate\' values=\'0\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E');background-size:256px;"></div>
+    ${!isThemeC ? `<div style="position:absolute;left:0;top:0;bottom:0;width:4px;z-index:10;background:linear-gradient(to bottom,transparent 8%,#7ecfa8 25%,#7ecfa8 75%,transparent 92%);opacity:0.65;"></div>` : ''}
+    ${topNav}
+    ${innerHtml}
+  `;
+
+  // Update outer visual dots
+  const dotsContainer = document.getElementById('liveProgressDots');
+  let pDots = '';
+  for(let i=0; i<N; i++) {
+    pDots += `<div class="live-dot${i===editorActiveIndex ? ' active' : ''}"></div>`;
+  }
+  dotsContainer.innerHTML = pDots;
+}
+
+function updateLiveReelPreview() {
+  const slideBox = document.getElementById('liveSlideBox');
+  const scene = editorItemData.scenes[editorActiveIndex];
+  if (!scene) return;
+  
+  const isThemeC = editorItemData.theme === 'C' || (editorActiveId && parseInt(editorActiveId.replace(/\D/g, '')) % 2 === 0);
+  const bgImg = isThemeC ? '/fondos-pexels/dark-galaxy-3-33931033.jpg' : '/fondos-pexels/nebula-space-dark-3-33931036.jpg';
+  const bgFilter = isThemeC 
+    ? 'brightness(0.72) contrast(1.12) saturate(0.28)' 
+    : 'brightness(0.58) contrast(1.18) saturate(0.48) hue-rotate(15deg)';
+
+  let innerHtml = '';
+  const elements = scene.elements || [];
+  
+  innerHtml = `
+    <div style="display:flex; flex-direction:column; justify-content:${scene.justifyContent || 'center'}; align-items:center; height:100%; gap:${(scene.gap || 24)/2}px; padding:20px 0">
+  `;
+  
+  elements.forEach(el => {
+    if (el.type === 'logo') {
+      innerHtml += `
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+          <svg width="24" height="24" viewBox="0 0 48 48" fill="none">
+            <ellipse cx="24" cy="24" rx="20" ry="12" stroke="#7ecfa8" stroke-width="1.5" fill="none" opacity="0.8"/>
+            <circle cx="24" cy="24" r="6" fill="#7ecfa8" opacity="0.9"/>
+          </svg>
+          <span style="font-size: 7px; letter-spacing: 0.2em; text-transform: uppercase; color: #7ecfa8; opacity: 0.7">Endonautas</span>
+        </div>
+      `;
+    } else if (el.type === 'line') {
+      innerHtml += `
+        <div style="height: 1px; background: #7ecfa8; width: 40px; opacity: 0.5; margin: 4px 0"></div>
+      `;
+    } else if (el.type === 'text') {
+      const font = el.font === 'playfair' ? "'Space Grotesk', sans-serif" : "'Plus Jakarta Sans', sans-serif";
+      const italic = el.italic ? 'font-style: italic;' : '';
+      const bold = el.bold || el.weight >= 500 ? 'font-weight: bold;' : 'font-weight: 300;';
+      const border = el.border ? 'border: 1px solid #7ecfa8; padding: 6px 16px; border-radius: 4px; color: #7ecfa8; font-size:11px;' : '';
+      
+      let color = el.color;
+      if (color === 'gold') color = '#7ecfa8';
+      else if (color === 'white') color = '#ffffff';
+      else if (color === 'muted') color = '#5e546d';
+      else if (!color) color = '#ffffff';
+      
+      const elText = el.text ? el.text.replace(/\n/g, '<br>') : 'Texto';
+      
+      innerHtml += `
+        <div style="font-family:${font}; font-size:${(el.size || 32)/2}px; color:${color}; text-align:center; line-height:1.4; ${italic} ${bold} ${border}">
+          ${elText}
+        </div>
+      `;
+    }
+  });
+  
+  innerHtml += `</div>`;
+  
+  slideBox.innerHTML = `
+    <div style="position:absolute;inset:0;z-index:1;background:url('${bgImg}')center/cover;filter:${bgFilter};"></div>
+    <div style="position:absolute;inset:0;z-index:2;background:linear-gradient(to top, ${isThemeC ? 'rgba(3,6,12,0.96) 0%, rgba(3,6,12,0.75) 42%, rgba(3,6,12,0.30) 62%, rgba(3,6,12,0.0) 100%' : 'rgba(4,6,14,0.96) 0%, rgba(4,6,14,0.75) 35%, rgba(4,6,14,0.30) 55%, rgba(4,6,14,0.0) 100%'});"></div>
+    <div style="position:absolute;inset:0;opacity:${isThemeC ? 0.07 : 0.08};mix-blend-mode:overlay;pointer-events:none;z-index:8;background-image:url('data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3CfeColorMatrix type=\'saturate\' values=\'0\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E');background-size:256px;"></div>
+    ${!isThemeC ? `<div style="position:absolute;left:0;top:0;bottom:0;width:4px;z-index:10;background:linear-gradient(to bottom,transparent 8%,#7ecfa8 25%,#7ecfa8 75%,transparent 92%);opacity:0.65;"></div>` : ''}
+    <div style="position:relative;z-index:10;width:100%;height:100%;">
+      ${innerHtml}
+    </div>
+  `;
+  
+  // Progress dot is just index
+  document.getElementById('liveProgressDots').innerHTML = `<span style="font-size:11px; color:var(--muted-bright)">Escena ${editorActiveIndex+1} / ${editorItemData.scenes.length}</span>`;
+}
+
+// ── CRUD operations ───────────────────────────────────────────────
+function addNewSlideOrScene() {
+  saveFormStateToObject();
+  
+  if (editorActiveId.startsWith('C')) {
+    // Carousel Slide append
+    const N = editorItemData.slides.length;
+    editorItemData.slides.push({
+      type: 'content',
+      headline: 'Nuevo Slide',
+      body: 'Texto descriptivo'
+    });
+    editorActiveIndex = N;
+  } else {
+    // Reel Scene append
+    const N = editorItemData.scenes.length;
+    const lastScene = editorItemData.scenes[N - 1];
+    const newFrom = lastScene ? lastScene.from + lastScene.duration : 0;
+    
+    editorItemData.scenes.push({
+      from: newFrom,
+      duration: 5,
+      gap: 24,
+      elements: [
+        { type: 'text', text: 'Nueva Escena de Video', delay: 10, font: 'inter', size: 30 }
+      ]
+    });
+    editorActiveIndex = N;
+  }
+  
+  renderEditorSidebar();
+  loadSelectedSlideOrScene();
+}
+
+function removeActiveSlideOrScene() {
+  if (editorActiveId.startsWith('C')) {
+    if (editorItemData.slides.length <= 1) {
+      alert('Un carrusel debe tener al menos un slide.');
+      return;
+    }
+    editorItemData.slides.splice(editorActiveIndex, 1);
+  } else {
+    if (editorItemData.scenes.length <= 1) {
+      alert('Un reel debe tener al menos una escena.');
+      return;
+    }
+    editorItemData.scenes.splice(editorActiveIndex, 1);
+  }
+  
+  editorActiveIndex = Math.max(0, editorActiveIndex - 1);
+  renderEditorSidebar();
+  loadSelectedSlideOrScene();
+}
+
+async function saveEditorData() {
+  saveFormStateToObject();
+  
+  const type = editorActiveId.startsWith('C') ? 'carruseles' : 'reels';
+  const dataList = originalEditorData.map(item => {
+    if (item.id === editorActiveId) {
+      return editorItemData;
+    }
+    return item;
+  });
+  
+  const res = await fetch(`/api/editor/${type}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dataList)
+  });
+  
+  if (res.ok) {
+    showToast('✓ Cambios guardados con éxito', 'success');
+    // Reload sidebar lists and keep edit mode
+    originalEditorData = dataList;
+    renderEditorSidebar();
+    loadSelectedSlideOrScene();
+    refreshDashboard();
+  } else {
+    showToast('Error al guardar los cambios en el servidor', 'error');
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────
+refreshDashboard();
+setInterval(refreshDashboard, 20000);
+</script>
+</body>
+</html>

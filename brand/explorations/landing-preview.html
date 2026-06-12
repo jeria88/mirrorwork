@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Endonautas — Landing Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=EB+Garamond:ital,wght@0,400;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&family=Inter:wght@300;400;500&family=Lato:wght@300;400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Nunito+Sans:ital,wght@0,300;0,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@300;400&display=swap" rel="stylesheet">
+
+<style>
+/* ─── PALETA FIJA: Ojos cerrados + oro ────────────────────── */
+:root {
+  --bg:        #100818;
+  --deep:      #281545;
+  --mid:       #5A2E6A;
+  --accent:    #C07820;
+  --text:      #F0E8DC;
+  --text-dim:  rgba(240,232,220,0.45);
+  --text-mid:  rgba(240,232,220,0.72);
+  --border:    rgba(240,232,220,0.08);
+
+  --font-display: 'Fraunces', serif;
+  --font-body:    'Inter', sans-serif;
+}
+
+/* ─── RESET ───────────────────────────────────────────────── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-weight: 300;
+  overflow-x: hidden;
+}
+
+/* fade suave al cambiar tipografía */
+body.switching { opacity: 0.7; transition: opacity 0.15s ease; }
+body { transition: opacity 0.15s ease; }
+
+/* ─── SWITCHER TIPOGRAFÍA ─────────────────────────────────── */
+.switcher {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.switcher-label {
+  font-family: var(--font-body);
+  font-size: 9px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.switcher-pills {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-end;
+}
+
+.pill {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: 8px 14px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  background: rgba(8,4,16,0.75);
+  backdrop-filter: blur(16px);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  text-align: right;
+}
+
+.pill:hover { border-color: rgba(192,120,32,0.5); }
+
+.pill.active {
+  border-color: var(--accent);
+  background: rgba(192,120,32,0.12);
+}
+
+.pill-sample {
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.1;
+  letter-spacing: 0;
+}
+
+.pill.active .pill-sample { color: var(--accent); }
+
+.pill-meta {
+  font-family: 'Inter', sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+.pill.active .pill-meta { color: rgba(192,120,32,0.7); }
+
+/* ─── NAV ─────────────────────────────────────────────────── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 50;
+  padding: 24px 52px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(to bottom, var(--bg) 0%, transparent 100%);
+}
+
+.nav-logo {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  color: var(--text);
+}
+
+.nav-logo span { color: var(--accent); }
+
+.nav-links {
+  display: flex;
+  gap: 40px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover { color: var(--text); }
+
+/* ─── HERO ────────────────────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 120px 52px 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -20%; right: -8%;
+  width: 640px; height: 640px;
+  background: radial-gradient(circle, var(--mid) 0%, transparent 68%);
+  opacity: 0.18;
+  pointer-events: none;
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: -10%; left: -4%;
+  width: 440px; height: 440px;
+  background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+  opacity: 0.06;
+  pointer-events: none;
+}
+
+.hero-tag {
+  font-family: var(--font-body);
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 32px;
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(52px, 8vw, 96px);
+  font-weight: 300;
+  line-height: 1.05;
+  max-width: 820px;
+  margin-bottom: 32px;
+  color: var(--text);
+}
+
+.hero-title em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.hero-sub {
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--text-mid);
+  max-width: 460px;
+  margin-bottom: 48px;
+  font-weight: 300;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.btn-primary {
+  padding: 15px 36px;
+  background: var(--accent);
+  color: var(--bg);
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  border-radius: 100px;
+  transition: opacity 0.2s;
+}
+
+.btn-primary:hover { opacity: 0.82; }
+
+.btn-ghost {
+  padding: 15px 36px;
+  background: transparent;
+  color: var(--text-mid);
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  border-radius: 100px;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.btn-ghost:hover {
+  color: var(--text);
+  border-color: var(--text-mid);
+}
+
+.hero-scroll {
+  position: absolute;
+  bottom: 40px; left: 52px;
+  font-family: var(--font-body);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.hero-scroll::before {
+  content: '';
+  display: block;
+  width: 36px; height: 1px;
+  background: var(--accent);
+}
+
+/* ─── QUOTE ───────────────────────────────────────────────── */
+.quote-section {
+  padding: 110px 52px;
+  display: flex;
+  justify-content: center;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+blockquote {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 2.8vw, 34px);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.55;
+  text-align: center;
+  max-width: 660px;
+  color: var(--text);
+}
+
+blockquote cite {
+  display: block;
+  margin-top: 24px;
+  font-family: var(--font-body);
+  font-style: normal;
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* ─── WHAT IS ─────────────────────────────────────────────── */
+.what-section {
+  padding: 110px 52px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.what-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.section-tag {
+  font-family: var(--font-body);
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 18px;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(30px, 3.6vw, 46px);
+  font-weight: 300;
+  line-height: 1.2;
+  color: var(--text);
+  margin-bottom: 22px;
+}
+
+.section-body {
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.82;
+  color: var(--text-mid);
+}
+
+.section-body p + p { margin-top: 14px; }
+
+.what-right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.what-item {
+  padding: 30px 32px;
+  background: var(--deep);
+  border-radius: 16px;
+}
+
+.what-item-num {
+  font-family: var(--font-body);
+  font-size: 10px;
+  color: var(--accent);
+  letter-spacing: 0.24em;
+  margin-bottom: 10px;
+}
+
+.what-item-title {
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 300;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.what-item-body {
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.72;
+  color: var(--text-mid);
+}
+
+/* ─── PILLARS ─────────────────────────────────────────────── */
+.pillars-section {
+  padding: 110px 52px;
+  background: var(--deep);
+}
+
+.pillars-header {
+  text-align: center;
+  margin-bottom: 68px;
+}
+
+.pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.pillar {
+  padding: 46px 34px;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  transition: box-shadow 0.32s ease;
+}
+
+.pillar:hover {
+  box-shadow: 0 0 0 1px rgba(192,120,32,0.35), 0 8px 40px rgba(192,120,32,0.08);
+}
+
+.pillar-glyph {
+  font-family: var(--font-display);
+  font-size: 52px;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--accent);
+  margin-bottom: 22px;
+  opacity: 0.55;
+  line-height: 1;
+}
+
+.pillar-title {
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 300;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.pillar-body {
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.72;
+  color: var(--text-mid);
+}
+
+/* ─── BOOK ────────────────────────────────────────────────── */
+.book-section {
+  padding: 110px 52px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  max-width: 1100px;
+  margin: 0 auto;
+  align-items: center;
+}
+
+.book-cover {
+  aspect-ratio: 2/3;
+  background: var(--deep);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+}
+
+.book-cover::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(circle at 32% 28%, var(--mid) 0%, transparent 58%);
+  opacity: 0.28;
+}
+
+.book-cover-author {
+  font-family: var(--font-body);
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.book-cover-title {
+  font-family: var(--font-display);
+  font-size: 38px;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--text);
+  line-height: 1.08;
+  position: relative;
+  z-index: 1;
+}
+
+.book-cover-sub {
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--text-dim);
+  margin-top: 18px;
+  position: relative;
+  z-index: 1;
+}
+
+.book-features {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 28px 0 38px;
+}
+
+.book-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-mid);
+}
+
+.book-feature::before {
+  content: '—';
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* ─── TESTIMONIALS ────────────────────────────────────────── */
+.testimonial-section {
+  padding: 80px 52px;
+  border-top: 1px solid var(--border);
+}
+
+.testimonial-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.testimonial {
+  padding: 38px;
+  background: var(--deep);
+  border-radius: 20px;
+}
+
+.testimonial-text {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 15px;
+  line-height: 1.72;
+  color: var(--text);
+  margin-bottom: 22px;
+}
+
+.testimonial-author {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+}
+
+.testimonial-author strong {
+  display: block;
+  font-family: var(--font-body);
+  color: var(--accent);
+  font-weight: 400;
+  margin-bottom: 2px;
+}
+
+/* ─── CTA ─────────────────────────────────────────────────── */
+.cta-section {
+  padding: 150px 52px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-section::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, var(--mid) 0%, transparent 64%);
+  opacity: 0.13;
+  pointer-events: none;
+}
+
+.cta-title {
+  font-family: var(--font-display);
+  font-size: clamp(34px, 5vw, 62px);
+  font-weight: 300;
+  line-height: 1.15;
+  max-width: 620px;
+  margin: 16px auto 22px;
+  color: var(--text);
+}
+
+.cta-sub {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--text-mid);
+  max-width: 380px;
+  margin: 0 auto 46px;
+  line-height: 1.72;
+}
+
+.cta-actions {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── FOOTER ──────────────────────────────────────────────── */
+footer {
+  padding: 38px 52px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-copy {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-dim);
+}
+</style>
+</head>
+<body>
+
+<!-- ─── SWITCHER TIPOGRAFÍA ───────────────────────────────── -->
+<div class="switcher">
+  <span class="switcher-label">Tipografía</span>
+  <div class="switcher-pills">
+
+    <button class="pill active" onclick="setTipo('t1',this)" data-display="'Fraunces',serif" data-body="'Inter',sans-serif">
+      <span class="pill-sample" style="font-family:'Fraunces',serif;font-style:italic">Endonautas</span>
+      <span class="pill-meta">Fraunces · Diario interior</span>
+    </button>
+
+    <button class="pill" onclick="setTipo('t2',this)" data-display="'Cormorant Garamond',serif" data-body="'Inter',sans-serif">
+      <span class="pill-sample" style="font-family:'Cormorant Garamond',serif;font-style:italic">Endonautas</span>
+      <span class="pill-meta">Cormorant · El libro de Jung</span>
+    </button>
+
+    <button class="pill" onclick="setTipo('t3',this)" data-display="'Playfair Display',serif" data-body="'Lato',sans-serif">
+      <span class="pill-sample" style="font-family:'Playfair Display',serif;font-style:italic">Endonautas</span>
+      <span class="pill-meta">Playfair · Umbral editorial</span>
+    </button>
+
+    <button class="pill" onclick="setTipo('t4',this)" data-display="'EB Garamond',serif" data-body="'Source Sans 3',sans-serif">
+      <span class="pill-sample" style="font-family:'EB Garamond',serif;font-style:italic">Endonautas</span>
+      <span class="pill-meta">EB Garamond · Memoria ancestral</span>
+    </button>
+
+    <button class="pill" onclick="setTipo('t5',this)" data-display="'Libre Baskerville',serif" data-body="'Nunito Sans',sans-serif">
+      <span class="pill-sample" style="font-family:'Libre Baskerville',serif;font-style:italic">Endonautas</span>
+      <span class="pill-meta">Baskerville · Cuerpo blando</span>
+    </button>
+
+  </div>
+</div>
+
+<!-- ─── NAV ──────────────────────────────────────────────── -->
+<nav>
+  <div class="nav-logo">Endo<span>nautas</span></div>
+  <ul class="nav-links">
+    <li><a href="#">El libro</a></li>
+    <li><a href="#">El método</a></li>
+    <li><a href="#">Para terapeutas</a></li>
+    <li><a href="#">Conseguir</a></li>
+  </ul>
+</nav>
+
+<!-- ─── HERO ──────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-tag">El mapa del mundo interior</div>
+  <h1 class="hero-title">
+    Lo que buscas<br>
+    afuera vive<br>
+    <em>dentro de ti.</em>
+  </h1>
+  <p class="hero-sub">
+    No es autoayuda. No es terapia clínica.
+    Es el espacio entre las dos — donde los patrones se hacen visibles
+    y el proceso de integrar empieza.
+  </p>
+  <div class="hero-actions">
+    <button class="btn-primary">Conseguir el libro</button>
+    <button class="btn-ghost">Conocer el método</button>
+  </div>
+  <div class="hero-scroll">Explorar</div>
+</section>
+
+<!-- ─── QUOTE ─────────────────────────────────────────────── -->
+<section class="quote-section">
+  <blockquote>
+    "Hay un lugar al que no llegas viajando.<br>Solo cerrando los ojos y aprendiendo a navegar."
+    <cite>Endonautica</cite>
+  </blockquote>
+</section>
+
+<!-- ─── WHAT IS ───────────────────────────────────────────── -->
+<section class="what-section">
+  <div class="what-left">
+    <div class="section-tag">Qué es Endonautas</div>
+    <h2 class="section-title">Un sistema para cartografiar tu mundo interior</h2>
+    <div class="section-body">
+      <p>La mayoría de los mapas apuntan hacia afuera. Endonautas es el primero que apunta hacia adentro.</p>
+      <p>No te dice qué sentir ni cómo vivir. Te da el lenguaje y las herramientas para leer tus propios patrones, navegar tus sombras, e integrar lo que llevas cargando sin saber por qué.</p>
+    </div>
+  </div>
+  <div class="what-right">
+    <div class="what-item">
+      <div class="what-item-num">01</div>
+      <div class="what-item-title">Origen</div>
+      <div class="what-item-body">Cada patrón tiene una raíz. Aprender a verla no es revivir el pasado — es dejar de repetirlo.</div>
+    </div>
+    <div class="what-item">
+      <div class="what-item-num">02</div>
+      <div class="what-item-title">Sombra</div>
+      <div class="what-item-body">Lo que rechazas de ti guarda la forma exacta de lo que más necesitas. Navegar la sombra es encontrar ese tesoro.</div>
+    </div>
+    <div class="what-item">
+      <div class="what-item-num">03</div>
+      <div class="what-item-title">Integración</div>
+      <div class="what-item-body">No se trata de cambiar quién eres. Se trata de habitar completo lo que ya eres.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PILLARS ───────────────────────────────────────────── -->
+<section class="pillars-section">
+  <div class="pillars-header">
+    <div class="section-tag">El método</div>
+    <h2 class="section-title">Tres territorios para explorar</h2>
+  </div>
+  <div class="pillars-grid">
+    <div class="pillar">
+      <div class="pillar-glyph">i</div>
+      <div class="pillar-title">El inconsciente como mapa</div>
+      <div class="pillar-body">No como misterio inaccesible, sino como territorio navegable. Lo que no ves te guía de todas formas — mejor aprender a leerlo.</div>
+    </div>
+    <div class="pillar">
+      <div class="pillar-glyph">e</div>
+      <div class="pillar-title">La emoción como lenguaje</div>
+      <div class="pillar-body">Las emociones no son reacciones irracionales. Son datos. El cuerpo habla antes que la mente. Endonautas te enseña a escuchar ese idioma primario.</div>
+    </div>
+    <div class="pillar">
+      <div class="pillar-glyph">p</div>
+      <div class="pillar-title">El patrón como punto de partida</div>
+      <div class="pillar-body">Seguir repitiendo lo mismo no es debilidad — es que el mapa viejo es el único que conoces. El proceso empieza cuando puedes ver el patrón desde afuera.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── BOOK ──────────────────────────────────────────────── -->
+<section class="book-section">
+  <div class="book-cover">
+    <div class="book-cover-author">Franco Jeria</div>
+    <div class="book-cover-title">Endonautica</div>
+    <div class="book-cover-sub">El mapa del mundo interior</div>
+  </div>
+  <div class="book-content">
+    <div class="section-tag">El libro</div>
+    <h2 class="section-title">Endonautica</h2>
+    <div class="section-body">
+      <p>El libro que da origen al método. No un manual de instrucciones — una exploración de los patrones que nos hacen humanos y de las herramientas para comenzar a integrarlos.</p>
+    </div>
+    <div class="book-features">
+      <div class="book-feature">Cartografía del mundo interior: los territorios que todos habitamos pero pocos reconocen</div>
+      <div class="book-feature">El lenguaje del inconsciente: cómo leer los mensajes que ya están ahí</div>
+      <div class="book-feature">Trabajo con la sombra: procesar lo que cargamos sin saber por qué</div>
+      <div class="book-feature">Integración práctica: herramientas para la vida cotidiana</div>
+    </div>
+    <div class="hero-actions">
+      <button class="btn-primary">Conseguir en Amazon</button>
+    </div>
+  </div>
+</section>
+
+<!-- ─── TESTIMONIALS ──────────────────────────────────────── -->
+<section class="testimonial-section">
+  <div class="testimonial-grid">
+    <div class="testimonial">
+      <p class="testimonial-text">"Por primera vez entendí por qué repetía los mismos patrones. No desde la cabeza — desde algo más profundo."</p>
+      <div class="testimonial-author">
+        <strong>Claudia M.</strong>
+        Santiago, Chile
+      </div>
+    </div>
+    <div class="testimonial">
+      <p class="testimonial-text">"Llevo años trabajando en autoconocimiento y este libro me dio un lenguaje que ningún otro había podido darme."</p>
+      <div class="testimonial-author">
+        <strong>Valentina R.</strong>
+        Terapeuta Gestalt
+      </div>
+    </div>
+    <div class="testimonial">
+      <p class="testimonial-text">"No es un libro para leer una vez. Es un libro para volver cuando algo en ti se mueve y no sabes qué es."</p>
+      <div class="testimonial-author">
+        <strong>Andrea S.</strong>
+        Buenos Aires
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── CTA ───────────────────────────────────────────────── -->
+<section class="cta-section">
+  <div class="section-tag">Comenzar</div>
+  <h2 class="cta-title">El viaje interior empieza con un mapa</h2>
+  <p class="cta-sub">El proceso no requiere que cambies quién eres. Solo que aprendas a verte completo.</p>
+  <div class="cta-actions">
+    <button class="btn-primary">Conseguir Endonautica</button>
+    <button class="btn-ghost">Para terapeutas</button>
+  </div>
+</section>
+
+<!-- ─── FOOTER ────────────────────────────────────────────── -->
+<footer>
+  <div class="nav-logo">Endo<span>nautas</span></div>
+  <span class="footer-copy">© 2026 Endonautas · Franco Jeria</span>
+</footer>
+
+<script>
+  function setTipo(id, btn) {
+    const display = btn.dataset.display;
+    const body    = btn.dataset.body;
+    const root    = document.documentElement;
+
+    document.body.classList.add('switching');
+    setTimeout(() => {
+      root.style.setProperty('--font-display', display);
+      root.style.setProperty('--font-body', body);
+      document.body.classList.remove('switching');
+    }, 120);
+
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+  }
+</script>
+
+</body>
+</html>

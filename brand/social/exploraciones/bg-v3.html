@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700;900&family=Plus+Jakarta+Sans:wght@400;500&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1080px; height: 1080px;
+    background: #0C0C14;
+    overflow: hidden; position: relative;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
+
+  /* Gradiente diagonal vibrante */
+  .grad {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 90% 70% at 100% 0%, #2D1B69 0%, transparent 55%),
+      radial-gradient(ellipse 70% 60% at 0% 100%, #0B3D3D 0%, transparent 55%),
+      radial-gradient(ellipse 40% 40% at 30% 40%, #1A0A40 0%, transparent 60%);
+  }
+
+  /* Orbe principal — glow fuerte */
+  .orb {
+    position: absolute; border-radius: 50%;
+    pointer-events: none;
+  }
+  .o1 {
+    width: 500px; height: 500px;
+    top: -140px; right: -80px;
+    background: radial-gradient(circle, #7C3AED88 0%, #4C1D9544 30%, transparent 70%);
+    filter: blur(30px);
+  }
+  .o2 {
+    width: 380px; height: 380px;
+    bottom: -100px; left: -60px;
+    background: radial-gradient(circle, #0F766E88 0%, #14B8A644 30%, transparent 70%);
+    filter: blur(30px);
+  }
+  .o3 {
+    width: 200px; height: 200px;
+    top: 45%; right: 28%;
+    background: radial-gradient(circle, #7ecfa840 0%, transparent 70%);
+    filter: blur(40px);
+  }
+
+  /* Cuadrícula sutil */
+  .grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.028) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.028) 1px, transparent 1px);
+    background-size: 80px 80px;
+  }
+
+  /* Marco con glow en bordes */
+  .frame {
+    position: absolute; inset: 36px;
+    border-radius: 24px;
+    border: 1px solid rgba(126,207,168,0.18);
+    box-shadow:
+      inset 0 0 60px rgba(126,207,168,0.04),
+      0 0 40px rgba(124,58,237,0.08);
+    pointer-events: none;
+  }
+
+  /* Línea diagonal decorativa */
+  .deco-lines {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+  }
+
+  /* Grain */
+  .grain {
+    position: absolute; inset: 0;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px;
+  }
+
+  /* Content */
+  .content {
+    position: absolute; inset: 0;
+    padding: 80px 88px 72px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    color: #F0E8DC;
+  }
+  .top { display: flex; align-items: center; justify-content: space-between; }
+  .logo {
+    font-weight: 900; font-size: 20px; letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #7ecfa8, #7ec8cf);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .slide-num { font-family: 'Plus Jakarta Sans'; font-size: 11px; letter-spacing: 0.22em; color: rgba(240,232,220,0.28); text-transform: uppercase; }
+  .middle { flex:1; display:flex; flex-direction:column; justify-content:center; padding: 36px 0 16px; }
+  .eyebrow { font-family: 'Plus Jakarta Sans'; font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(240,232,220,0.35); margin-bottom: 28px; }
+  h1 { font-weight: 900; font-size: 84px; line-height: 0.9; letter-spacing: -0.03em; color: #F0E8DC; margin-bottom: 36px; }
+  h1 em { font-style: italic; background: linear-gradient(135deg, #7ecfa8, #7ec8cf); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .desc { font-family: 'Plus Jakarta Sans'; font-size: 17px; line-height: 1.65; color: rgba(240,232,220,0.45); max-width: 520px; }
+  .bottom { display:flex; align-items:center; justify-content:space-between; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 24px; }
+  .swipe { font-family: 'Plus Jakarta Sans'; font-size: 12px; font-weight: 500; color: rgba(126,207,168,0.7); letter-spacing: 0.12em; text-transform: uppercase; }
+  .dots { display:flex; gap:5px; align-items:center; }
+  .dot { width:5px; height:5px; border-radius:50%; background: rgba(240,232,220,0.15); }
+  .dot.active { background:#7ecfa8; width:20px; border-radius:3px; }
+  .variant-label {
+    position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+    font-size: 11px; letter-spacing: 0.2em; color: rgba(255,255,255,0.2);
+    font-family: 'Plus Jakarta Sans'; text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+  <div class="grad"></div>
+  <div class="orb o1"></div>
+  <div class="orb o2"></div>
+  <div class="orb o3"></div>
+  <div class="grid"></div>
+
+  <!-- Líneas diagonales decorativas -->
+  <svg class="deco-lines" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#7ecfa8" stop-opacity="0"/>
+        <stop offset="40%" stop-color="#7ecfa8" stop-opacity="0.25"/>
+        <stop offset="100%" stop-color="#7C3AED" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <line x1="0" y1="380" x2="1080" y2="380" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+    <line x1="0" y1="700" x2="1080" y2="700" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+    <line x1="380" y1="0" x2="380" y2="1080" stroke="rgba(255,255,255,0.02)" stroke-width="1"/>
+    <!-- Línea diagonal acento -->
+    <line x1="1080" y1="0" x2="0" y2="600" stroke="url(#lg1)" stroke-width="1.5"/>
+  </svg>
+
+  <div class="frame"></div>
+  <div class="grain"></div>
+
+  <div class="content">
+    <div class="top">
+      <div class="logo">Endonautas</div>
+      <div class="slide-num">01 / 09</div>
+    </div>
+    <div class="middle">
+      <div class="eyebrow">Vínculos · Autoconocimiento</div>
+      <h1>La pelea<br>no fue por<br>lo que <em>dijiste.</em></h1>
+      <p class="desc">Fue por lo que eso activó. Y eso tiene un origen que vale la pena encontrar.</p>
+    </div>
+    <div class="bottom">
+      <div class="swipe">Desliza →</div>
+      <div class="dots">
+        <div class="dot active"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>
+    </div>
+  </div>
+  <div class="variant-label">V3 — Gradiente + Grid</div>
+</body>
+</html>

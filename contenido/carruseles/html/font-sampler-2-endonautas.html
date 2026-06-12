@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Font Sampler 2 — Endonautas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,600;1,6..72,300;1,6..72,400&family=Gloock&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,600;1,6..96,400&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #070707;
+  font-family: 'Inter', sans-serif;
+  padding: 3rem 2rem 4rem;
+  color: #fff;
+}
+
+h1 {
+  font-weight: 300;
+  font-size: 0.75rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #444;
+  text-align: center;
+  margin-bottom: 0.3rem;
+}
+.subtitle {
+  font-size: 0.68rem;
+  color: #2a2a2a;
+  text-align: center;
+  margin-bottom: 0.4rem;
+  letter-spacing: 0.08em;
+}
+.ref-note {
+  font-size: 0.62rem;
+  color: rgba(201,168,76,0.35);
+  text-align: center;
+  margin-bottom: 3rem;
+  letter-spacing: 0.06em;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.option {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.option-label {
+  text-align: center;
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #2e2e2e;
+}
+.option-label strong {
+  display: block;
+  font-size: 0.68rem;
+  color: #c9a84c;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  font-weight: 500;
+  margin-bottom: 0.15rem;
+}
+.option-label em {
+  font-style: normal;
+  color: #333;
+  font-size: 0.56rem;
+  letter-spacing: 0.12em;
+}
+
+/* SLIDE PORTADA */
+.slide-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4/5;
+  border-radius: 10px;
+  overflow: hidden;
+  background-image: url('https://images.pexels.com/photos/14256347/pexels-photo-14256347.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940');
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.04);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.slide-card:hover { transform: translateY(-3px); }
+.slide-card.selected { box-shadow: 0 0 0 2px #c9a84c, 0 20px 60px rgba(0,0,0,0.8); }
+.slide-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(168deg, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.68) 50%, rgba(0,0,0,0.94) 100%);
+  z-index: 0;
+}
+.slide-inner {
+  position: absolute;
+  inset: 0;
+  padding: 1.2rem 1.3rem;
+  display: flex;
+  flex-direction: column;
+  z-index: 1;
+}
+
+/* SLIDE CONTENIDO */
+.content-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4/5;
+  border-radius: 10px;
+  overflow: hidden;
+  background-image: url('https://images.pexels.com/photos/36013160/pexels-photo-36013160.png?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940');
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.content-card:hover { transform: translateY(-3px); }
+.content-card.selected { box-shadow: 0 0 0 2px #c9a84c, 0 12px 40px rgba(0,0,0,0.7); }
+.content-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(4,4,4,0.91);
+  z-index: 0;
+}
+.content-inner {
+  position: absolute;
+  inset: 0;
+  padding: 1.2rem 1.3rem;
+  display: flex;
+  flex-direction: column;
+  z-index: 1;
+}
+
+/* ELEMENTOS COMUNES */
+.brand-row { display: flex; align-items: center; justify-content: space-between; }
+.brand-mark { display: flex; align-items: center; gap: 0.3rem; }
+.brand-logo { height: 14px; width: 14px; object-fit: contain; opacity: 0.85; flex-shrink: 0; }
+.brand-name { font-size: 0.42rem; letter-spacing: 0.2em; text-transform: uppercase; color: #c9a84c; font-family: 'Inter', sans-serif; opacity: 0.8; }
+.slide-num-sm { font-size: 0.42rem; letter-spacing: 0.15em; color: rgba(255,255,255,0.2); font-family: 'Inter', sans-serif; }
+.spacer { flex: 1; }
+.eyebrow { font-size: 0.42rem; letter-spacing: 0.25em; text-transform: uppercase; color: #c9a84c; margin-bottom: 0.55rem; font-family: 'Inter', sans-serif; }
+.hook { line-height: 1.22; color: #fff; margin-bottom: 0.35rem; }
+.sub { font-style: italic; color: rgba(255,255,255,0.52); margin-bottom: 0.85rem; }
+.swipe-hint { font-size: 0.4rem; letter-spacing: 0.12em; color: rgba(255,255,255,0.35); font-family: 'Inter', sans-serif; }
+
+.c-label { font-size: 0.4rem; letter-spacing: 0.28em; text-transform: uppercase; color: #c9a84c; font-family: 'Inter', sans-serif; margin-bottom: 0.55rem; margin-top: auto; }
+.c-title { line-height: 1.28; color: #fff; margin-bottom: 0.5rem; }
+.c-title em { color: #c9a84c; font-style: italic; }
+.c-rule { width: 20px; height: 1px; background: #c9a84c; opacity: 0.4; margin-bottom: 0.6rem; }
+.c-body { font-size: 0.58rem; line-height: 1.72; color: rgba(255,255,255,0.62); font-family: 'Inter', sans-serif; font-weight: 300; }
+.c-body em { color: #fff; font-style: normal; font-weight: 500; }
+.c-spacer { flex: 1; }
+
+/* ── VARIANTES DE FUENTE ── */
+
+/* 1 — Spectral + Inter */
+.f1 .hook { font-family: 'Spectral', serif; font-size: 1.02rem; font-weight: 300; letter-spacing: 0.005em; }
+.f1 .sub  { font-family: 'Spectral', serif; font-size: 0.72rem; font-weight: 300; }
+.f1 .c-title { font-family: 'Spectral', serif; font-size: 0.9rem; font-weight: 300; }
+
+/* 2 — Newsreader + Inter */
+.f2 .hook { font-family: 'Newsreader', serif; font-size: 1.05rem; font-weight: 300; font-optical-sizing: auto; }
+.f2 .sub  { font-family: 'Newsreader', serif; font-size: 0.75rem; font-weight: 300; font-optical-sizing: auto; }
+.f2 .c-title { font-family: 'Newsreader', serif; font-size: 0.92rem; font-weight: 300; font-optical-sizing: auto; }
+
+/* 3 — Gloock + Inter */
+.f3 .hook { font-family: 'Gloock', serif; font-size: 1rem; font-weight: 400; }
+.f3 .sub  { font-family: 'Gloock', serif; font-size: 0.7rem; }
+.f3 .c-title { font-family: 'Gloock', serif; font-size: 0.88rem; }
+
+/* 4 — Bodoni Moda + Inter */
+.f4 .hook { font-family: 'Bodoni Moda', serif; font-size: 0.95rem; font-weight: 400; letter-spacing: 0.01em; font-optical-sizing: auto; }
+.f4 .sub  { font-family: 'Bodoni Moda', serif; font-size: 0.68rem; font-optical-sizing: auto; }
+.f4 .c-title { font-family: 'Bodoni Moda', serif; font-size: 0.85rem; font-optical-sizing: auto; }
+
+/* 5 — Lora + Inter */
+.f5 .hook { font-family: 'Lora', serif; font-size: 1rem; font-weight: 400; }
+.f5 .sub  { font-family: 'Lora', serif; font-size: 0.72rem; }
+.f5 .c-title { font-family: 'Lora', serif; font-size: 0.9rem; }
+
+/* BOTÓN */
+.select-btn {
+  padding: 0.45rem;
+  border: 1px solid #1e1e1e;
+  border-radius: 8px;
+  background: transparent;
+  color: #2e2e2e;
+  font-size: 0.65rem;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+  letter-spacing: 0.08em;
+  width: 100%;
+}
+.select-btn:hover { border-color: rgba(201,168,76,0.35); color: #c9a84c; }
+.select-btn.active { border-color: #c9a84c; color: #c9a84c; background: rgba(201,168,76,0.05); }
+
+/* FOOTER */
+.footer {
+  max-width: 1400px;
+  margin: 3rem auto 0;
+  padding-top: 2rem;
+  border-top: 1px solid #111;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.selection-text { font-size: 0.7rem; color: #2a2a2a; letter-spacing: 0.06em; }
+.selection-text strong { color: #c9a84c; }
+.confirm-btn {
+  padding: 0.6rem 1.5rem;
+  border: 1px solid rgba(201,168,76,0.3);
+  border-radius: 8px;
+  background: transparent;
+  color: #c9a84c;
+  font-size: 0.75rem;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.06em;
+}
+.confirm-btn:hover { background: #c9a84c; color: #000; }
+</style>
+</head>
+<body>
+
+<h1>Font Sampler 2 · Endonautas</h1>
+<p class="subtitle">Alternativas en la línea de Fraunces — orgánicas, con carácter, no genéricas</p>
+<p class="ref-note">Referencia: Fraunces + Inter fue la elegida en la ronda anterior</p>
+
+<div class="grid">
+
+  <!-- 1 — Spectral -->
+  <div class="option f1">
+    <div class="option-label">
+      <strong>Spectral + Inter</strong>
+      <em>Elegante · Levemente inquieta</em>
+    </div>
+    <div class="slide-card" onclick="sel(1)" id="p1">
+      <div class="slide-inner">
+        <div class="brand-row">
+          <div class="brand-mark"><img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt=""><span class="brand-name">Endonautas</span></div>
+          <span class="slide-num-sm">1 / 5</span>
+        </div>
+        <div class="spacer"></div>
+        <div class="eyebrow">Endonautas · método</div>
+        <div class="hook">Cómo saber si estás trabajando el síntoma o el <em style="color:#c9a84c;font-style:italic">mapa</em>.</div>
+        <div class="sub">Tres señales.</div>
+        <div class="swipe-hint">Desliza →</div>
+      </div>
+    </div>
+    <div class="content-card" onclick="sel(1)" id="c1">
+      <div class="content-inner">
+        <div class="brand-row">
+          <div class="brand-mark"><img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt=""><span class="brand-name">Endonautas</span></div>
+          <span class="slide-num-sm">2 / 5</span>
+        </div>
+        <div class="c-label">Señal 01</div>
+        <div class="c-title"><em>Vuelve</em> con el estrés.</div>
+        <div class="c-rule"></div>
+        <div class="c-body">Si el patrón desaparece cuando todo va bien y regresa cuando hay presión,<br><em>estás trabajando el síntoma.</em></div>
+        <div class="c-spacer"></div>
+      </div>
+    </div>
+    <button class="select-btn" id="b1" onclick="sel(1)">Elegir esta</button>
+  </div>
+
+  <!-- 2 — Newsreader -->
+  <div class="option f2">
+    <div class="option-label">
+      <strong>Newsreader + Inter</strong>
+      <em>Editorial · Óptica variable</em>
+    </div>
+    <div class="slide-card" onclick="sel(2)" id="p2">
+      <div class="slide-inner">
+        <div class="brand-row">
+          <div class="brand-mark"><img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt=""><span class="brand-name">Endonautas</span></div>
+          <span class="slide-num-sm">1 / 5</span>
+        </div>
+        <div class="spacer"></div>
+        <div class="eyebrow">Endonautas · método</div>
+        <div class="hook">Cómo saber si estás trabajando el síntoma o el <em style="color:#c9a84c;font-style:italic">mapa</em>.</div>
+        <div class="sub">Tres señales.</div>
+        <div class="swipe-hint">Desliza →</div>
+      </div>
+    </div>
+    <div class="content-card" onclick="sel(2)" id="c2">
+      <div class="content-inner">
+        <div class="brand-row">
+          <div class="brand-mark"><img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt=""><span class="brand-name">Endonautas</span></div>
+          <span class="slide-num-sm">2 / 5</span>
+        </div>
+        <div class="c-label">Señal 01</div>
+        <div class="c-title"><em>Vuelve</em> con el estrés.</div>
+        <div class="c-rule"></div>
+        <div class="c-body">Si el patrón desaparece cuando todo va bien y regresa cuando hay presión,<br><em>estás trabajando el síntoma.</em></div>
+        <div class="c-spacer"></div>
+      </div>
+    </div>
+    <button class="select-btn" id="b2" onclick="sel(2)">Elegir esta</button>
+  </div>
+
+  <!-- 3 — Gloock -->
+  <div class="option f3">
+    <div class="option-label">
+      <strong>Gloock + Inter</strong>
+      <em>Moderna · Ink traps · Actual</em>
+    </div>
+    <div class="slide-card" onclick="sel(3)" id="p3">
+      <div class="slide-inner">
+        <div class="brand-row">
+          <div class="brand-mark"><img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt=""><span class="brand-name">Endonautas</span></div>
+          <span class="slide-num-sm">1 / 5</span>
+        </div>
+        <div class="spacer"></div>
+        <div class="eyebrow">Endonautas · método</div>
+        <div class="hook">Cómo saber si estás trabajando el síntoma o el <em style="color:#c9a84c;font-style:italic">mapa</em>.</div>
+        <div class="sub">Tres señales.</div>
+        <div class="swipe-hint">Desliza →</div>
+      </div>
+    </div>
+    <div class="content-card" onclick="sel(3)" id="c3">
+      <div class="content-inner">
+        <div class="brand-row">
+          <div class="brand-mark"><img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt=""><span class="brand-name">Endonautas</span></div>
+          <span class="slide-num-sm">2 / 5</span>
+        </div>
+        <div class="c-label">Señal 01</div>
+        <div class="c-title"><em>Vuelve</em> con el estrés.</div>
+        <div class="c-rule"></div>
+        <div class="c-body">Si el patrón desaparece cuando todo va bien y regresa cuando hay presión,<br><em>estás trabajando el síntoma.</em></div>
+        <div class="c-spacer"></div>
+      </div>
+    </div>
+    <button class="select-btn" id="b3" onclick="sel(3)">Elegir esta</button>
+  </div>
+
+  <!-- 4 — Bodoni Moda -->
+  <div class="option f4">
+    <div class="option-label">
+      <strong>Bodoni Moda + Inter</strong>
+      <em>Alto contraste · Dramática</em>
+    </div>
+    <div class="slide-card" onclick="sel(4)" id="p4">
+      <div class="slide-inner">
+        <div class="brand-row">
+          <div class="brand-mark"><img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt=""><span class="brand-name">Endonautas</span></div>
+          <span class="slide-num-sm">1 / 5</span>
+        </div>
+        <div class="spacer"></div>
+        <div class="eyebrow">Endonautas · método</div>
+        <div class="hook">Cómo saber si estás trabajando el síntoma o el <em style="color:#c9a84c;font-style:italic">mapa</em>.</div>
+        <div class="sub">Tres señales.</div>
+        <div class="swipe-hint">Desliza →</div>
+      </div>
+    </div>
+    <div class="content-card" onclick="sel(4)" id="c4">
+      <div class="content-inner">
+        <div class="brand-row">
+          <div class="brand-mark"><img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt=""><span class="brand-name">Endonautas</span></div>
+          <span class="slide-num-sm">2 / 5</span>
+        </div>
+        <div class="c-label">Señal 01</div>
+        <div class="c-title"><em>Vuelve</em> con el estrés.</div>
+        <div class="c-rule"></div>
+        <div class="c-body">Si el patrón desaparece cuando todo va bien y regresa cuando hay presión,<br><em>estás trabajando el síntoma.</em></div>
+        <div class="c-spacer"></div>
+      </div>
+    </div>
+    <button class="select-btn" id="b4" onclick="sel(4)">Elegir esta</button>
+  </div>
+
+  <!-- 5 — Lora -->
+  <div class="option f5">
+    <div class="option-label">
+      <strong>Lora + Inter</strong>
+      <em>Cálida · Cercana · Legible</em>
+    </div>
+    <div class="slide-card" onclick="sel(5)" id="p5">
+      <div class="slide-inner">
+        <div class="brand-row">
+          <div class="brand-mark"><img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt=""><span class="brand-name">Endonautas</span></div>
+          <span class="slide-num-sm">1 / 5</span>
+        </div>
+        <div class="spacer"></div>
+        <div class="eyebrow">Endonautas · método</div>
+        <div class="hook">Cómo saber si estás trabajando el síntoma o el <em style="color:#c9a84c;font-style:italic">mapa</em>.</div>
+        <div class="sub">Tres señales.</div>
+        <div class="swipe-hint">Desliza →</div>
+      </div>
+    </div>
+    <div class="content-card" onclick="sel(5)" id="c5">
+      <div class="content-inner">
+        <div class="brand-row">
+          <div class="brand-mark"><img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt=""><span class="brand-name">Endonautas</span></div>
+          <span class="slide-num-sm">2 / 5</span>
+        </div>
+        <div class="c-label">Señal 01</div>
+        <div class="c-title"><em>Vuelve</em> con el estrés.</div>
+        <div class="c-rule"></div>
+        <div class="c-body">Si el patrón desaparece cuando todo va bien y regresa cuando hay presión,<br><em>estás trabajando el síntoma.</em></div>
+        <div class="c-spacer"></div>
+      </div>
+    </div>
+    <button class="select-btn" id="b5" onclick="sel(5)">Elegir esta</button>
+  </div>
+
+</div>
+
+<div class="footer">
+  <div class="selection-text" id="selText">Ninguna seleccionada</div>
+  <button class="confirm-btn" onclick="confirm()">Confirmar y guardar →</button>
+</div>
+
+<script>
+const FONTS = {
+  1: { heading: 'Spectral', body: 'Inter', desc: 'Elegante · Levemente inquieta' },
+  2: { heading: 'Newsreader', body: 'Inter', desc: 'Editorial · Óptica variable' },
+  3: { heading: 'Gloock', body: 'Inter', desc: 'Moderna · Ink traps · Actual' },
+  4: { heading: 'Bodoni Moda', body: 'Inter', desc: 'Alto contraste · Dramática' },
+  5: { heading: 'Lora', body: 'Inter', desc: 'Cálida · Cercana · Legible' },
+};
+let cur = null;
+
+function sel(n) {
+  if (cur) {
+    ['p','c'].forEach(t => document.getElementById(t+cur).classList.remove('selected'));
+    document.getElementById('b'+cur).classList.remove('active');
+    document.getElementById('b'+cur).textContent = 'Elegir esta';
+  }
+  cur = n;
+  ['p','c'].forEach(t => document.getElementById(t+n).classList.add('selected'));
+  document.getElementById('b'+n).classList.add('active');
+  document.getElementById('b'+n).textContent = '✓ Seleccionada';
+  document.getElementById('selText').innerHTML =
+    'Seleccionada: <strong>' + FONTS[n].heading + ' + ' + FONTS[n].body + '</strong> — ' + FONTS[n].desc;
+}
+
+function confirm() {
+  if (!cur) { alert('Primero elige una opción.'); return; }
+  const f = FONTS[cur];
+  alert('Elegiste: ' + f.heading + ' + ' + f.body + '\n\nDile a Claude: "guarda ' + f.heading + '"');
+}
+</script>
+</body>
+</html>

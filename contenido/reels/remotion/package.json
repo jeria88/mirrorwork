@@ -1,0 +1,17 @@
+{
+  "name": "endonautas-reels",
+  "version": "1.0.0",
+  "description": "Faceless reels animados para Endonautas",
+  "type": "module",
+  "scripts": {
+    "render": "node render.mjs"
+  },
+  "dependencies": {
+    "@remotion/bundler": "*",
+    "@remotion/renderer": "*",
+    "ffmpeg-static": "*",
+    "react": "*",
+    "react-dom": "*",
+    "remotion": "*"
+  }
+}

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700;900&family=Plus+Jakarta+Sans:wght@400;500&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1080px; height: 1080px;
+    background: #030810;
+    overflow: hidden; position: relative;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
+
+  /* Aurora horizontal bands — estilo luces del norte */
+  .aurora-band {
+    position: absolute;
+    width: 200%;
+    left: -50%;
+    pointer-events: none;
+  }
+  .ab1 {
+    height: 380px; top: -60px;
+    background: linear-gradient(180deg,
+      transparent 0%,
+      #1a0a3a 20%,
+      #2d0f6b 40%,
+      #1a0a3a 60%,
+      transparent 100%);
+    opacity: 0.8;
+    filter: blur(40px);
+    transform: rotate(-8deg) translateY(-40px);
+  }
+  .ab2 {
+    height: 280px; top: 80px;
+    background: linear-gradient(180deg,
+      transparent 0%,
+      #063030 20%,
+      #0a5f5f 50%,
+      #063030 80%,
+      transparent 100%);
+    opacity: 0.6;
+    filter: blur(50px);
+    transform: rotate(-8deg);
+  }
+  .ab3 {
+    height: 200px; bottom: 180px;
+    background: linear-gradient(180deg,
+      transparent 0%,
+      #0f1a60 30%,
+      #1a2a90 60%,
+      transparent 100%);
+    opacity: 0.4;
+    filter: blur(60px);
+    transform: rotate(-4deg);
+  }
+
+  /* Glow spots */
+  .glow {
+    position: absolute; border-radius: 50%;
+    filter: blur(50px); pointer-events: none;
+  }
+  .g1 { width: 350px; height: 350px; top: 50px; right: 80px; background: #6d28d9; opacity: 0.35; }
+  .g2 { width: 280px; height: 280px; bottom: 120px; left: 60px; background: #0d9488; opacity: 0.30; }
+  .g3 { width: 200px; height: 200px; top: 400px; right: 300px; background: #7ecfa8; opacity: 0.20; filter: blur(70px); }
+
+  /* Líneas de aurora finas */
+  .aurora-lines { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.25; }
+
+  /* Grain */
+  .grain {
+    position: absolute; inset: 0;
+    opacity: 0.08;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px;
+  }
+
+  /* Content */
+  .content {
+    position: absolute; inset: 0;
+    padding: 80px 88px 72px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    color: #F0E8DC;
+  }
+  .top { display: flex; align-items: center; justify-content: space-between; }
+  .logo {
+    font-weight: 900; font-size: 20px; letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #7ecfa8, #7ec8cf);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .slide-num { font-family: 'Plus Jakarta Sans'; font-size: 11px; letter-spacing: 0.22em; color: rgba(240,232,220,0.28); text-transform: uppercase; }
+  .middle { flex:1; display:flex; flex-direction:column; justify-content:center; padding: 36px 0 16px; }
+  .eyebrow { font-family: 'Plus Jakarta Sans'; font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(240,232,220,0.35); margin-bottom: 28px; }
+  h1 { font-weight: 900; font-size: 84px; line-height: 0.9; letter-spacing: -0.03em; color: #F0E8DC; margin-bottom: 36px; }
+  h1 em { font-style: italic; background: linear-gradient(135deg, #7ecfa8, #7ec8cf); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .desc { font-family: 'Plus Jakarta Sans'; font-size: 17px; line-height: 1.65; color: rgba(240,232,220,0.45); max-width: 520px; }
+  .bottom { display:flex; align-items:center; justify-content:space-between; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 24px; }
+  .swipe { font-family: 'Plus Jakarta Sans'; font-size: 12px; font-weight: 500; color: rgba(126,207,168,0.7); letter-spacing: 0.12em; text-transform: uppercase; }
+  .dots { display:flex; gap:5px; align-items:center; }
+  .dot { width:5px; height:5px; border-radius:50%; background: rgba(240,232,220,0.15); }
+  .dot.active { background:#7ecfa8; width:20px; border-radius:3px; }
+  .variant-label {
+    position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+    font-size: 11px; letter-spacing: 0.2em; color: rgba(255,255,255,0.2);
+    font-family: 'Plus Jakarta Sans'; text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+  <div class="aurora-band ab1"></div>
+  <div class="aurora-band ab2"></div>
+  <div class="aurora-band ab3"></div>
+  <div class="glow g1"></div>
+  <div class="glow g2"></div>
+  <div class="glow g3"></div>
+
+  <!-- Líneas aurora tipo northern lights -->
+  <svg class="aurora-lines" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="al1" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="transparent"/>
+        <stop offset="30%" stop-color="#7ecfa8"/>
+        <stop offset="70%" stop-color="#6d28d9"/>
+        <stop offset="100%" stop-color="transparent"/>
+      </linearGradient>
+      <linearGradient id="al2" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="transparent"/>
+        <stop offset="40%" stop-color="#0d9488"/>
+        <stop offset="100%" stop-color="transparent"/>
+      </linearGradient>
+    </defs>
+    <path d="M -100 120 Q 200 80 540 140 Q 800 200 1180 100" stroke="url(#al1)" stroke-width="1.2" fill="none"/>
+    <path d="M -100 160 Q 300 110 600 170 Q 850 230 1180 140" stroke="url(#al1)" stroke-width="0.8" fill="none"/>
+    <path d="M -100 200 Q 250 150 580 200 Q 820 250 1180 175" stroke="url(#al2)" stroke-width="0.6" fill="none"/>
+    <path d="M -100 240 Q 350 190 650 240 Q 900 285 1180 210" stroke="url(#al1)" stroke-width="0.5" fill="none" opacity="0.6"/>
+  </svg>
+
+  <div class="grain"></div>
+
+  <div class="content">
+    <div class="top">
+      <div class="logo">Endonautas</div>
+      <div class="slide-num">01 / 09</div>
+    </div>
+    <div class="middle">
+      <div class="eyebrow">Vínculos · Autoconocimiento</div>
+      <h1>La pelea<br>no fue por<br>lo que <em>dijiste.</em></h1>
+      <p class="desc">Fue por lo que eso activó. Y eso tiene un origen que vale la pena encontrar.</p>
+    </div>
+    <div class="bottom">
+      <div class="swipe">Desliza →</div>
+      <div class="dots">
+        <div class="dot active"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>
+    </div>
+  </div>
+  <div class="variant-label">V2 — Aurora</div>
+</body>
+</html>

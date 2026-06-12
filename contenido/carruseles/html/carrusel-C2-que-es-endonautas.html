@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C2 — Qué es Endonautas · Endonautas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0a0a;--gold:#c9a84c;--white:#ffffff;--muted:#9a9a9a;--border:rgba(201,168,76,0.2)}
+body{background:#1a1a1a;font-family:'Inter',sans-serif;display:flex;gap:0;min-height:100vh}
+.viewer{flex:0 0 420px;display:flex;flex-direction:column;align-items:center;padding:2rem;background:#111;border-right:1px solid #222}
+.slide-wrap{position:relative;width:360px;height:450px;overflow:hidden;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;background:var(--bg);padding:2rem 1.8rem}
+.slide.active{display:flex}
+.progress{display:flex;gap:6px;margin:1rem 0 .5rem}
+.dot{width:6px;height:6px;border-radius:50%;background:#333;transition:all .3s;cursor:pointer}
+.dot.active{background:var(--gold);width:18px;border-radius:3px}
+.nav-row{display:flex;gap:1rem;margin-top:.5rem}
+.btn{padding:.5rem 1.2rem;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--gold);font-size:.8rem;font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s}
+.btn:hover{background:var(--gold);color:#000}
+.btn:disabled{opacity:.3;cursor:default}
+.slide-counter{color:var(--muted);font-size:.75rem;margin-top:.8rem;letter-spacing:.1em}
+.copy-slide{padding:.35rem .8rem;border:1px solid #333;border-radius:6px;background:transparent;color:#666;font-size:.7rem;font-family:'Inter',sans-serif;cursor:pointer;margin-top:.5rem;transition:all .2s}
+.copy-slide:hover{border-color:var(--gold);color:var(--gold)}
+.panel{flex:1;padding:2rem;overflow-y:auto;background:#0d0d0d}
+.panel h2{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.1rem;margin-bottom:1.5rem;padding-bottom:.8rem;border-bottom:1px solid #222}
+.all-text{font-size:.82rem;color:#888;line-height:1.8;white-space:pre-wrap}
+.slide-label{color:var(--gold);font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;margin-top:1.2rem;margin-bottom:.3rem;display:block}
+.caption-box{margin-top:2rem;padding:1.2rem;border:1px solid #222;border-radius:10px;background:#111}
+.caption-box h3{color:var(--gold);font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.8rem}
+.caption-text{font-size:.8rem;color:#777;line-height:1.7;white-space:pre-wrap}
+.download-btn{margin-top:1.5rem;padding:.7rem 1.5rem;border:1px solid var(--gold);border-radius:8px;background:transparent;color:var(--gold);font-size:.8rem;font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s;width:100%}
+.download-btn:hover{background:var(--gold);color:#000}
+.s-logo{display:flex;align-items:center;gap:.5rem;margin-bottom:auto}
+.s-logo-mark{width:20px;height:20px;background:var(--gold);clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);opacity:.8}
+.s-logo-text{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.s-num{font-size:.65rem;letter-spacing:.15em;color:#444;margin-left:auto}
+.s-eyebrow{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;margin-top:auto}
+.s-hook{font-family:'Playfair Display',serif;font-size:1.45rem;line-height:1.25;color:var(--white);flex:1;display:flex;align-items:center}
+.s-hook em{color:var(--gold);font-style:italic}
+.s-hook-sm{font-family:'Playfair Display',serif;font-size:1.05rem;line-height:1.35;color:var(--white)}
+.s-body{font-size:.82rem;line-height:1.65;color:#ccc;margin-top:.8rem}
+.s-body em{color:var(--gold);font-style:normal;font-weight:500}
+.s-divider{width:40px;height:2px;background:var(--gold);margin:.8rem 0;opacity:.6}
+.s-cta{font-size:.8rem;color:var(--gold);letter-spacing:.08em;margin-top:auto;padding-top:1rem;border-top:1px solid var(--border)}
+.s-space{flex:1}
+.s-big{font-family:'Playfair Display',serif;font-size:2.5rem;color:var(--gold);font-weight:700;line-height:1;margin-bottom:.3rem}
+.s-tag{display:inline-block;padding:.25rem .7rem;border:1px solid var(--border);border-radius:20px;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:.8rem}
+.s-contrast{font-family:'Playfair Display',serif;font-size:1rem;color:#555;text-decoration:line-through;margin-bottom:.3rem}
+.s-bold{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--white)}
+</style>
+</head>
+<body>
+<div class="viewer">
+  <div class="slide-wrap">
+
+    <!-- SLIDE 1 -->
+    <div class="slide active" id="s1">
+      <div class="s-logo"><div class="s-logo-mark"></div><div class="s-logo-text">Endonautas</div><div class="s-num">1/7</div></div>
+      <div class="s-eyebrow">El universo</div>
+      <div class="s-hook">"No eres quien crees que eres.<br><br>Y eso no es una crítica.<br>Es la mejor noticia que recibirás hoy."</div>
+      <div class="s-cta">→ Desliza para entender por qué</div>
+    </div>
+
+    <!-- SLIDE 2 -->
+    <div class="slide" id="s2">
+      <div class="s-logo"><div class="s-logo-mark"></div><div class="s-logo-text">Endonautas</div><div class="s-num">2/7</div></div>
+      <div class="s-space"></div>
+      <div class="s-tag">Qué es</div>
+      <div class="s-hook-sm">Endonautas es una comunidad de personas que eligieron conocerse de verdad.</div>
+      <div class="s-divider"></div>
+      <div class="s-body">No para ser mejores.<br>Sino para ser más <em>auténticos</em>.</div>
+      <div class="s-space"></div>
+    </div>
+
+    <!-- SLIDE 3 -->
+    <div class="slide" id="s3">
+      <div class="s-logo"><div class="s-logo-mark"></div><div class="s-logo-text">Endonautas</div><div class="s-num">3/7</div></div>
+      <div class="s-space"></div>
+      <div class="s-contrast">No es autoayuda.</div>
+      <div class="s-contrast">No es terapia.</div>
+      <div class="s-contrast">No es coaching.</div>
+      <div class="s-divider"></div>
+      <div class="s-bold">Es cartografía interior.</div>
+      <div class="s-body">Aprendemos a leer el mapa del ser humano desde adentro.</div>
+      <div class="s-space"></div>
+    </div>
+
+    <!-- SLIDE 4 -->
+    <div class="slide" id="s4">
+      <div class="s-logo"><div class="s-logo-mark"></div><div class="s-logo-text">Endonautas</div><div class="s-num">4/7</div></div>
+      <div class="s-space"></div>
+      <div class="s-body" style="font-size:.75rem;color:#555;letter-spacing:.1em;text-transform:uppercase">El nombre lo dice todo</div>
+      <div class="s-hook-sm" style="margin-top:.8rem">Un endonauta es alguien que navega hacia adentro.</div>
+      <div class="s-body">No busca respuestas afuera.<br>No sigue a gurús.<br>Aprende a leer su propio territorio.</div>
+      <div class="s-space"></div>
+    </div>
+
+    <!-- SLIDE 5 -->
+    <div class="slide" id="s5">
+      <div class="s-logo"><div class="s-logo-mark"></div><div class="s-logo-text">Endonautas</div><div class="s-num">5/7</div></div>
+      <div class="s-space"></div>
+      <div class="s-tag">Lo que encontrarás aquí</div>
+      <div class="s-body" style="margin-top:.5rem;font-size:.85rem;line-height:2">
+        → Herramientas de autoconocimiento real<br>
+        → Las 12 dimensiones del ser humano<br>
+        → El concepto de la Máscara<br>
+        → Un mapa, no una receta
+      </div>
+      <div class="s-space"></div>
+    </div>
+
+    <!-- SLIDE 6 -->
+    <div class="slide" id="s6">
+      <div class="s-logo"><div class="s-logo-mark"></div><div class="s-logo-text">Endonautas</div><div class="s-num">6/7</div></div>
+      <div class="s-space"></div>
+      <div class="s-hook-sm">El resultado no es ser mejor.</div>
+      <div class="s-divider"></div>
+      <div class="s-hook-sm" style="color:var(--gold)">Es ser más auténtico.</div>
+      <div class="s-body" style="margin-top:1rem">Hay una diferencia enorme entre las dos cosas.</div>
+      <div class="s-space"></div>
+    </div>
+
+    <!-- SLIDE 7 — CTA -->
+    <div class="slide" id="s7">
+      <div class="s-logo"><div class="s-logo-mark"></div><div class="s-logo-text">Endonautas</div><div class="s-num">7/7</div></div>
+      <div class="s-space"></div>
+      <div class="s-eyebrow">Primer paso</div>
+      <div class="s-hook-sm">¿Quieres saber qué máscara llevas?</div>
+      <div class="s-divider"></div>
+      <div class="s-body">Comenta <em>MASCARA</em> y te enviamos el test gratuito.<br><br>Sin costo. Sin trampa.<br>Solo el mapa.</div>
+      <div class="s-cta">@endonautas · endonautas.cl</div>
+    </div>
+
+  </div>
+  <div class="progress" id="progress"></div>
+  <div class="nav-row">
+    <button class="btn" id="prev" onclick="changeSlide(-1)" disabled>← Anterior</button>
+    <button class="btn" id="next" onclick="changeSlide(1)">Siguiente →</button>
+  </div>
+  <div class="slide-counter" id="counter">1 / 7</div>
+  <button class="copy-slide" onclick="copyCurrentSlide()">Copiar texto de este slide</button>
+</div>
+
+<div class="panel">
+  <h2>C2 — Qué es Endonautas · Texto completo</h2>
+  <div class="all-text" id="allText"></div>
+  <div class="caption-box">
+    <h3>Caption para Instagram</h3>
+    <div class="caption-text">No eres quien crees que eres. Y eso no es una crítica — es la mejor noticia que recibirás hoy.
+
+La mayoría del "autoconocimiento" que existe te enseña a pulir la versión de ti que ya tienes. Endonautas hace algo diferente: te enseña a ver si esa versión eres tú de verdad, o una construcción que hiciste para sobrevivir.
+
+No es terapia. No es autoayuda. Es cartografía interior.
+
+Si eso te resuena, comenta MASCARA y te envío el primer mapa gratis.
+
+.
+.
+.
+#endonautas #endonautica #autoconocimiento #mascara #viajeinterior #identidad #autenticidad #consciencia #psicologia #crecimientopersonal #cartografiainterior #sombra #mundointerior #francojerica #transformacion</div>
+  </div>
+  <button class="download-btn" onclick="downloadAll()">Descargar todos los textos (.txt)</button>
+</div>
+
+<script>
+const slides=document.querySelectorAll('.slide');
+const dots=document.getElementById('progress');
+let current=0;
+const texts=[
+  `SLIDE 1 — PORTADA\n"No eres quien crees que eres. Y eso no es una crítica. Es la mejor noticia que recibirás hoy."\n→ Desliza para entender por qué`,
+  `SLIDE 2\nEndonautas es una comunidad de personas que eligieron conocerse de verdad.\nNo para ser mejores. Sino para ser más auténticos.`,
+  `SLIDE 3\nNo es autoayuda. No es terapia. No es coaching.\nEs cartografía interior. Aprendemos a leer el mapa del ser humano desde adentro.`,
+  `SLIDE 4\nUn endonauta es alguien que navega hacia adentro.\nNo busca respuestas afuera. No sigue a gurús. Aprende a leer su propio territorio.`,
+  `SLIDE 5\nLo que encontrarás aquí:\n→ Herramientas de autoconocimiento real\n→ Las 12 dimensiones del ser humano\n→ El concepto de la Máscara\n→ Un mapa, no una receta`,
+  `SLIDE 6\nEl resultado no es ser mejor.\nEs ser más auténtico. Hay una diferencia enorme entre las dos cosas.`,
+  `SLIDE 7 — CTA\n¿Quieres saber qué máscara llevas?\nComenta MASCARA y te enviamos el test gratuito. Sin costo. Sin trampa. Solo el mapa.\n@endonautas · endonautas.cl`
+];
+function buildDots(){dots.innerHTML='';slides.forEach((_,i)=>{const d=document.createElement('div');d.className='dot'+(i===0?' active':'');d.onclick=()=>goTo(i);dots.appendChild(d);})}
+function buildPanel(){const el=document.getElementById('allText');el.innerHTML=texts.map((t,i)=>`<span class="slide-label">— SLIDE ${i+1} —</span>${t}`).join('\n\n')}
+function goTo(n){slides[current].classList.remove('active');dots.children[current].classList.remove('active');current=n;slides[current].classList.add('active');dots.children[current].classList.add('active');document.getElementById('counter').textContent=`${current+1} / ${slides.length}`;document.getElementById('prev').disabled=current===0;document.getElementById('next').disabled=current===slides.length-1;}
+function changeSlide(dir){goTo(Math.max(0,Math.min(slides.length-1,current+dir)))}
+function copyCurrentSlide(){navigator.clipboard.writeText(texts[current]).then(()=>{const btn=document.querySelector('.copy-slide');btn.textContent='¡Copiado!';setTimeout(()=>btn.textContent='Copiar texto de este slide',1500)})}
+function downloadAll(){const content=`CARRUSEL C2 — QUÉ ES ENDONAUTAS\n${'='.repeat(50)}\n\n`+texts.map((t,i)=>`— SLIDE ${i+1} —\n${t}`).join('\n\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type:'text/plain'}));a.download='carrusel-C2-que-es-endonautas.txt';a.click()}
+buildDots();buildPanel();
+</script>
+</body>
+</html>

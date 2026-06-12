@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C1 — Quién soy yo · Endonautas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0a;--card:#111;--gold:#c9a84c;--gold2:#e8c97a;
+  --white:#ffffff;--muted:#9a9a9a;--border:rgba(201,168,76,0.2);
+}
+body{background:#1a1a1a;font-family:'Inter',sans-serif;display:flex;gap:0;min-height:100vh}
+
+/* VIEWER */
+.viewer{flex:0 0 420px;display:flex;flex-direction:column;align-items:center;padding:2rem;background:#111;border-right:1px solid #222}
+.slide-wrap{position:relative;width:360px;height:450px;overflow:hidden;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.slide{
+  position:absolute;inset:0;display:none;flex-direction:column;
+  background:var(--bg);padding:2rem 1.8rem;
+}
+.slide.active{display:flex}
+
+/* PROGRESS */
+.progress{display:flex;gap:6px;margin:1rem 0 .5rem}
+.dot{width:6px;height:6px;border-radius:50%;background:#333;transition:all .3s;cursor:pointer}
+.dot.active{background:var(--gold);width:18px;border-radius:3px}
+
+/* NAV */
+.nav-row{display:flex;gap:1rem;margin-top:.5rem}
+.btn{padding:.5rem 1.2rem;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--gold);font-size:.8rem;font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s}
+.btn:hover{background:var(--gold);color:#000}
+.btn:disabled{opacity:.3;cursor:default}
+.slide-counter{color:var(--muted);font-size:.75rem;margin-top:.8rem;letter-spacing:.1em}
+.copy-slide{padding:.35rem .8rem;border:1px solid #333;border-radius:6px;background:transparent;color:#666;font-size:.7rem;font-family:'Inter',sans-serif;cursor:pointer;margin-top:.5rem;transition:all .2s}
+.copy-slide:hover{border-color:var(--gold);color:var(--gold)}
+
+/* PANEL */
+.panel{flex:1;padding:2rem;overflow-y:auto;background:#0d0d0d}
+.panel h2{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.1rem;margin-bottom:1.5rem;padding-bottom:.8rem;border-bottom:1px solid #222}
+.all-text{font-size:.82rem;color:#888;line-height:1.8;white-space:pre-wrap}
+.slide-label{color:var(--gold);font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;margin-top:1.2rem;margin-bottom:.3rem;display:block}
+.caption-box{margin-top:2rem;padding:1.2rem;border:1px solid #222;border-radius:10px;background:#111}
+.caption-box h3{color:var(--gold);font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.8rem}
+.caption-text{font-size:.8rem;color:#777;line-height:1.7;white-space:pre-wrap}
+.download-btn{margin-top:1.5rem;padding:.7rem 1.5rem;border:1px solid var(--gold);border-radius:8px;background:transparent;color:var(--gold);font-size:.8rem;font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s;width:100%}
+.download-btn:hover{background:var(--gold);color:#000}
+
+/* SLIDE STYLES */
+.s-logo{display:flex;align-items:center;gap:.5rem;margin-bottom:auto}
+.s-logo-mark{width:20px;height:20px;background:var(--gold);clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);opacity:.8}
+.s-logo-text{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.s-num{font-size:.65rem;letter-spacing:.15em;color:#444;margin-left:auto}
+
+.s-eyebrow{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;margin-top:auto}
+.s-hook{font-family:'Playfair Display',serif;font-size:1.45rem;line-height:1.25;color:var(--white);flex:1;display:flex;align-items:center}
+.s-hook em{color:var(--gold);font-style:italic}
+.s-hook-sm{font-family:'Playfair Display',serif;font-size:1.1rem;line-height:1.35;color:var(--white)}
+.s-body{font-size:.82rem;line-height:1.65;color:#ccc;margin-top:1rem}
+.s-body em{color:var(--gold);font-style:normal;font-weight:500}
+.s-divider{width:40px;height:2px;background:var(--gold);margin:1rem 0;opacity:.6}
+.s-cta{font-size:.8rem;color:var(--gold);letter-spacing:.08em;margin-top:auto;padding-top:1rem;border-top:1px solid var(--border)}
+.s-author{display:flex;flex-direction:column;gap:.2rem;margin-top:auto}
+.s-author-name{font-family:'Playfair Display',serif;font-size:1rem;color:var(--white)}
+.s-author-role{font-size:.7rem;color:var(--muted);letter-spacing:.08em}
+.s-tag{display:inline-block;padding:.25rem .7rem;border:1px solid var(--border);border-radius:20px;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:.8rem}
+.s-quote{font-family:'Playfair Display',serif;font-size:1rem;font-style:italic;color:var(--gold);line-height:1.5;border-left:2px solid var(--gold);padding-left:1rem;margin:1rem 0}
+.s-space{flex:1}
+</style>
+</head>
+<body>
+
+<div class="viewer">
+  <div class="slide-wrap">
+
+    <!-- SLIDE 1 — PORTADA -->
+    <div class="slide active" id="s1">
+      <div class="s-logo"><div class="s-logo-mark"></div><div class="s-logo-text">Endonautas</div><div class="s-num">1/8</div></div>
+      <div class="s-eyebrow">Quién soy</div>
+      <div class="s-hook">"Durante 10 años le pregunté a miles de personas quiénes eran.<br><br>Un día me di cuenta de que yo tampoco lo sabía."</div>
+      <div class="s-cta">→ Desliza para conocer la historia</div>
+    </div>
+
+    <!-- SLIDE 2 -->
+    <div class="slide" id="s2">
+      <div class="s-logo"><div class="s-logo-mark"></div><div class="s-logo-text">Endonautas</div><div class="s-num">2/8</div></div>
+      <div class="s-space"></div>
+      <div class="s-tag">El autor</div>
+      <div class="s-hook-sm">Me llamo Franco.<br>Soy terapeuta en salud integrativa.</div>
+      <div class="s-divider"></div>
+      <div class="s-body">Pero lo que realmente soy —<br>lo que descubrí después de años de trabajo interior —<br>es un <em>endonauta</em>.</div>
+      <div class="s-space"></div>
+    </div>
+
+    <!-- SLIDE 3 -->
+    <div class="slide" id="s3">
+      <div class="s-logo"><div class="s-logo-mark"></div><div class="s-logo-text">Endonautas</div><div class="s-num">3/8</div></div>
+      <div class="s-space"></div>
+      <div class="s-body" style="color:#888;font-size:.75rem">Hubo un punto en mi vida en que...</div>
+      <div class="s-hook-sm" style="margin-top:.5rem">El mapa que tenía de mí mismo<br>ya no coincidía con el territorio.</div>
+      <div class="s-body" style="margin-top:1rem">Acompañaba a otros a encontrarse.<br>Pero yo mismo estaba completamente perdido.</div>
+      <div class="s-space"></div>
+    </div>
+
+    <!-- SLIDE 4 -->
+    <div class="slide" id="s4">
+      <div class="s-logo"><div class="s-logo-mark"></div><div class="s-logo-text">Endonautas</div><div class="s-num">4/8</div></div>
+      <div class="s-space"></div>
+      <div class="s-body" style="font-size:.75rem;color:#555;letter-spacing:.1em;text-transform:uppercase">No era una crisis visible.</div>
+      <div class="s-hook-sm" style="margin-top:.8rem">No perdí nada material.<br>Fue algo más silencioso<br>y más profundo.</div>
+      <div class="s-divider"></div>
+      <div class="s-body">Me di cuenta de que la persona que los demás veían...<br><em>no era yo.</em></div>
+      <div class="s-space"></div>
+    </div>
+
+    <!-- SLIDE 5 -->
+    <div class="slide" id="s5">
+      <div class="s-logo"><div class="s-logo-mark"></div><div class="s-logo-text">Endonautas</div><div class="s-num">5/8</div></div>
+      <div class="s-space"></div>
+      <div class="s-quote">"¿Quién soy cuando nadie me mira, nadie me necesita y no tengo que ser nada para nadie?"</div>
+      <div class="s-body">Esa pregunta lo cambió todo.<br>No tenía respuesta inmediata.<br>Y eso fue lo más honesto que me había pasado en años.</div>
+      <div class="s-space"></div>
+    </div>
+
+    <!-- SLIDE 6 -->
+    <div class="slide" id="s6">
+      <div class="s-logo"><div class="s-logo-mark"></div><div class="s-logo-text">Endonautas</div><div class="s-num">6/8</div></div>
+      <div class="s-space"></div>
+      <div class="s-hook-sm">Era una construcción.<br>Brillante, funcional, efectiva.</div>
+      <div class="s-divider"></div>
+      <div class="s-body">Pero no era <em>yo</em>.<br><br>Eso me rompió.<br>Y luego me salvó.</div>
+      <div class="s-space"></div>
+    </div>
+
+    <!-- SLIDE 7 -->
+    <div class="slide" id="s7">
+      <div class="s-logo"><div class="s-logo-mark"></div><div class="s-logo-text">Endonautas</div><div class="s-num">7/8</div></div>
+      <div class="s-space"></div>
+      <div class="s-body" style="font-size:.75rem;color:#555;letter-spacing:.1em;text-transform:uppercase">Por eso existe Endonautas</div>
+      <div class="s-hook-sm" style="margin-top:.8rem">Escribí <em>Endonautica</em> porque nadie más estaba haciendo la pregunta correcta.</div>
+      <div class="s-body" style="margin-top:1rem">Supe que no era el único que vivía dentro de un personaje que nunca eligió.</div>
+      <div class="s-space"></div>
+    </div>
+
+    <!-- SLIDE 8 — CTA -->
+    <div class="slide" id="s8">
+      <div class="s-logo"><div class="s-logo-mark"></div><div class="s-logo-text">Endonautas</div><div class="s-num">8/8</div></div>
+      <div class="s-space"></div>
+      <div class="s-eyebrow">Para ti</div>
+      <div class="s-hook-sm">Si algo de esto<br>te resuena...</div>
+      <div class="s-divider"></div>
+      <div class="s-body"><em>Quédate.</em><br>Aquí exploramos juntos<br>quiénes somos de verdad.</div>
+      <div class="s-author" style="margin-top:1.5rem">
+        <div class="s-author-name">Franco Jeria</div>
+        <div class="s-author-role">Terapeuta · Autor · Endonauta</div>
+      </div>
+      <div class="s-cta" style="margin-top:1rem">@endonautas</div>
+    </div>
+
+  </div>
+
+  <div class="progress" id="progress"></div>
+  <div class="nav-row">
+    <button class="btn" id="prev" onclick="changeSlide(-1)" disabled>← Anterior</button>
+    <button class="btn" id="next" onclick="changeSlide(1)">Siguiente →</button>
+  </div>
+  <div class="slide-counter" id="counter">1 / 8</div>
+  <button class="copy-slide" onclick="copyCurrentSlide()">Copiar texto de este slide</button>
+</div>
+
+<div class="panel">
+  <h2>C1 — Quién soy yo · Texto completo</h2>
+  <div class="all-text" id="allText"></div>
+  <div class="caption-box">
+    <h3>Caption para Instagram</h3>
+    <div class="caption-text">Durante 10 años le pregunté a miles de personas quiénes eran.
+
+Un día me di cuenta de que yo tampoco lo sabía.
+
+Ser terapeuta no te protege del desconocimiento de uno mismo. De hecho, a veces lo prolonga — porque te mantienes ocupado acompañando a otros para no mirarte a ti.
+
+Este carrusel es el punto de partida. Mi historia. Por qué existe Endonautas y para quién.
+
+Si algo te resuena, quédate. Aquí no hay fórmulas. Hay un mapa.
+
+.
+.
+.
+#endonautas #endonautica #autoconocimiento #viajeinterior #psicologiajungiana #sombra #mascara #identidad #crecimientopersonal #terapia #francojerica #consciencia #transformacionpersonal #mundointerior #cartografiainterior</div>
+  </div>
+  <button class="download-btn" onclick="downloadAll()">Descargar todos los textos (.txt)</button>
+</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const dots = document.getElementById('progress');
+let current = 0;
+
+const texts = [
+  `SLIDE 1 — PORTADA\n"Durante 10 años le pregunté a miles de personas quiénes eran. Un día me di cuenta de que yo tampoco lo sabía."\n→ Desliza para conocer la historia`,
+  `SLIDE 2\nMe llamo Franco. Soy terapeuta en salud integrativa.\nPero lo que realmente soy —lo que descubrí después de años de trabajo interior— es un endonauta.`,
+  `SLIDE 3\nHubo un punto en mi vida en que el mapa que tenía de mí mismo ya no coincidía con el territorio.\nAcompañaba a otros a encontrarse. Pero yo mismo estaba completamente perdido.`,
+  `SLIDE 4\nNo era una crisis visible. No perdí nada material. Fue algo más silencioso y más profundo.\nMe di cuenta de que la persona que los demás veían... no era yo.`,
+  `SLIDE 5\n"¿Quién soy cuando nadie me mira, nadie me necesita y no tengo que ser nada para nadie?"\nEsa pregunta lo cambió todo. No tenía respuesta inmediata. Y eso fue lo más honesto que me había pasado en años.`,
+  `SLIDE 6\nEra una construcción. Brillante, funcional, efectiva.\nPero no era yo. Eso me rompió. Y luego me salvó.`,
+  `SLIDE 7\nPor eso existe Endonautas.\nEscribí Endonautica porque nadie más estaba haciendo la pregunta correcta. Supe que no era el único que vivía dentro de un personaje que nunca eligió.`,
+  `SLIDE 8 — CTA\nSi algo de esto te resuena...\nQuédate. Aquí exploramos juntos quiénes somos de verdad.\nFranco Jeria · Terapeuta · Autor · Endonauta · @endonautas`
+];
+
+function buildDots() {
+  dots.innerHTML = '';
+  slides.forEach((_,i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i===0?' active':'');
+    d.onclick = () => goTo(i);
+    dots.appendChild(d);
+  });
+}
+
+function buildPanel() {
+  const el = document.getElementById('allText');
+  el.innerHTML = texts.map((t,i) => `<span class="slide-label">— SLIDE ${i+1} —</span>${t}`).join('\n\n');
+}
+
+function goTo(n) {
+  slides[current].classList.remove('active');
+  dots.children[current].classList.remove('active');
+  current = n;
+  slides[current].classList.add('active');
+  dots.children[current].classList.add('active');
+  document.getElementById('counter').textContent = `${current+1} / ${slides.length}`;
+  document.getElementById('prev').disabled = current === 0;
+  document.getElementById('next').disabled = current === slides.length - 1;
+}
+
+function changeSlide(dir) { goTo(Math.max(0, Math.min(slides.length-1, current+dir))); }
+
+function copyCurrentSlide() {
+  navigator.clipboard.writeText(texts[current]).then(() => {
+    const btn = document.querySelector('.copy-slide');
+    btn.textContent = '¡Copiado!';
+    setTimeout(() => btn.textContent = 'Copiar texto de este slide', 1500);
+  });
+}
+
+function downloadAll() {
+  const content = `CARRUSEL C1 — QUIÉN SOY YO\nEndonautas · Instagram\n${'='.repeat(50)}\n\n` +
+    texts.map((t,i) => `— SLIDE ${i+1} —\n${t}`).join('\n\n') +
+    `\n\n${'='.repeat(50)}\nCAPTION:\nDurante 10 años le pregunté a miles de personas quiénes eran.\n\nUn día me di cuenta de que yo tampoco lo sabía.\n\nSer terapeuta no te protege del desconocimiento de uno mismo. De hecho, a veces lo prolonga — porque te mantienes ocupado acompañando a otros para no mirarte a ti.\n\nEste carrusel es el punto de partida. Mi historia. Por qué existe Endonautas y para quién.\n\nSi algo te resuena, quédate. Aquí no hay fórmulas. Hay un mapa.\n\n.\n.\n.\n#endonautas #endonautica #autoconocimiento #viajeinterior #psicologiajungiana #sombra #mascara #identidad #crecimientopersonal #terapia #francojerica #consciencia #transformacionpersonal #mundointerior #cartografiainterior`;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content], {type:'text/plain'}));
+  a.download = 'carrusel-C1-quien-soy-yo.txt';
+  a.click();
+}
+
+buildDots();
+buildPanel();
+</script>
+</body>
+</html>

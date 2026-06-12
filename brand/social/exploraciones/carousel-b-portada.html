@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700;900&family=Plus+Jakarta+Sans:wght@400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1080px;
+    height: 1080px;
+    background: #000000;
+    color: #F0E8DC;
+    overflow: hidden;
+    position: relative;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
+
+  /* Aurora blobs */
+  .aurora {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    pointer-events: none;
+  }
+  .a1 { width: 700px; height: 700px; top: -200px; right: -150px; background: radial-gradient(circle, #0C3535 0%, transparent 70%); opacity: 0.7; }
+  .a2 { width: 500px; height: 500px; bottom: -150px; left: -100px; background: radial-gradient(circle, #180A42 0%, transparent 70%); opacity: 0.6; }
+  .a3 { width: 300px; height: 300px; top: 300px; left: 200px; background: radial-gradient(circle, #7ecfa820 0%, transparent 70%); }
+
+  /* Frame border */
+  .frame {
+    position: absolute;
+    inset: 40px;
+    border: 1px solid rgba(240,232,220,0.07);
+    border-radius: 28px;
+    pointer-events: none;
+  }
+
+  /* Constellation */
+  .svg-const {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.15;
+  }
+  .const-line { stroke: #F0E8DC; stroke-width: 0.7; }
+  .const-node { fill: #7ecfa8; }
+  .const-dim  { fill: #F0E8DC; opacity: 0.35; }
+
+  /* Content */
+  .content {
+    position: absolute;
+    inset: 0;
+    padding: 80px 88px 72px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 900;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #7ecfa8, #7ec8cf);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .slide-num {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    color: rgba(240,232,220,0.28);
+    text-transform: uppercase;
+  }
+
+  .middle {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 36px 0 16px;
+  }
+
+  .eyebrow {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(240,232,220,0.3);
+    margin-bottom: 28px;
+  }
+
+  h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 900;
+    font-size: 84px;
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+    color: #F0E8DC;
+    margin-bottom: 36px;
+  }
+
+  h1 em {
+    font-style: italic;
+    background: linear-gradient(135deg, #7ecfa8, #7ec8cf);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .desc {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 17px;
+    line-height: 1.65;
+    color: rgba(240,232,220,0.42);
+    max-width: 520px;
+  }
+
+  .bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding-top: 24px;
+  }
+
+  .swipe {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(126,207,168,0.7);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .dots {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+  .dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: rgba(240,232,220,0.15);
+  }
+  .dot.active {
+    background: #7ecfa8;
+    width: 20px;
+    border-radius: 3px;
+  }
+</style>
+</head>
+<body>
+  <div class="aurora a1"></div>
+  <div class="aurora a2"></div>
+  <div class="aurora a3"></div>
+
+  <svg class="svg-const" xmlns="http://www.w3.org/2000/svg">
+    <line x1="6%"  y1="8%"  x2="22%" y2="4%"  class="const-line"/>
+    <line x1="22%" y1="4%"  x2="45%" y2="14%" class="const-line"/>
+    <line x1="45%" y1="14%" x2="72%" y2="6%"  class="const-line"/>
+    <line x1="72%" y1="6%"  x2="94%" y2="18%" class="const-line"/>
+    <circle cx="6%"  cy="8%"  r="3" class="const-node"/>
+    <circle cx="22%" cy="4%"  r="2" class="const-dim"/>
+    <circle cx="45%" cy="14%" r="3" class="const-node"/>
+    <circle cx="72%" cy="6%"  r="2" class="const-dim"/>
+    <circle cx="94%" cy="18%" r="3" class="const-node"/>
+    <line x1="10%" y1="88%" x2="32%" y2="80%" class="const-line"/>
+    <line x1="32%" y1="80%" x2="58%" y2="90%" class="const-line"/>
+    <circle cx="10%" cy="88%" r="2" class="const-dim"/>
+    <circle cx="32%" cy="80%" r="3" class="const-node"/>
+    <circle cx="58%" cy="90%" r="2" class="const-dim"/>
+  </svg>
+
+  <div class="frame"></div>
+
+  <div class="content">
+    <div class="top">
+      <div class="logo">Endonautas</div>
+      <div class="slide-num">01 / 09</div>
+    </div>
+
+    <div class="middle">
+      <div class="eyebrow">Vínculos · Autoconocimiento</div>
+      <h1>La pelea<br>no fue por<br>lo que <em>dijiste.</em></h1>
+      <p class="desc">Fue por lo que eso activó. Y eso tiene un origen que vale la pena encontrar.</p>
+    </div>
+
+    <div class="bottom">
+      <div class="swipe">Desliza →</div>
+      <div class="dots">
+        <div class="dot active"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

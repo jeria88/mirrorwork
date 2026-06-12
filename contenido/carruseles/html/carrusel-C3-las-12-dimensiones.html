@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C3 — Las 12 Dimensiones · Endonautas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0a0a;--gold:#c9a84c;--white:#ffffff;--muted:#9a9a9a;--border:rgba(201,168,76,0.2)}
+body{background:#1a1a1a;font-family:'Inter',sans-serif;display:flex;min-height:100vh}
+.viewer{flex:0 0 420px;display:flex;flex-direction:column;align-items:center;padding:2rem;background:#111;border-right:1px solid #222}
+.slide-wrap{position:relative;width:360px;height:450px;overflow:hidden;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;background:var(--bg);padding:1.8rem}
+.slide.active{display:flex}
+.progress{display:flex;gap:5px;margin:1rem 0 .5rem;flex-wrap:wrap;justify-content:center;max-width:360px}
+.dot{width:5px;height:5px;border-radius:50%;background:#333;transition:all .3s;cursor:pointer}
+.dot.active{background:var(--gold);width:14px;border-radius:3px}
+.nav-row{display:flex;gap:1rem;margin-top:.5rem}
+.btn{padding:.5rem 1.2rem;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--gold);font-size:.8rem;font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s}
+.btn:hover{background:var(--gold);color:#000}
+.btn:disabled{opacity:.3;cursor:default}
+.slide-counter{color:var(--muted);font-size:.75rem;margin-top:.8rem;letter-spacing:.1em}
+.copy-slide{padding:.35rem .8rem;border:1px solid #333;border-radius:6px;background:transparent;color:#666;font-size:.7rem;font-family:'Inter',sans-serif;cursor:pointer;margin-top:.5rem;transition:all .2s}
+.copy-slide:hover{border-color:var(--gold);color:var(--gold)}
+.panel{flex:1;padding:2rem;overflow-y:auto;background:#0d0d0d}
+.panel h2{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.1rem;margin-bottom:1.5rem;padding-bottom:.8rem;border-bottom:1px solid #222}
+.all-text{font-size:.82rem;color:#888;line-height:1.8;white-space:pre-wrap}
+.slide-label{color:var(--gold);font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;margin-top:1.2rem;margin-bottom:.3rem;display:block}
+.caption-box{margin-top:2rem;padding:1.2rem;border:1px solid #222;border-radius:10px;background:#111}
+.caption-box h3{color:var(--gold);font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.8rem}
+.caption-text{font-size:.8rem;color:#777;line-height:1.7;white-space:pre-wrap}
+.download-btn{margin-top:1.5rem;padding:.7rem 1.5rem;border:1px solid var(--gold);border-radius:8px;background:transparent;color:var(--gold);font-size:.8rem;font-family:'Inter',sans-serif;cursor:pointer;transition:all .2s;width:100%}
+.download-btn:hover{background:var(--gold);color:#000}
+/* Slide elements */
+.s-logo{display:flex;align-items:center;gap:.5rem;margin-bottom:auto}
+.s-logo-mark{width:18px;height:18px;background:var(--gold);clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);opacity:.8}
+.s-logo-text{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.s-num{font-size:.6rem;letter-spacing:.15em;color:#444;margin-left:auto}
+.s-eyebrow{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-top:auto;margin-bottom:.6rem}
+.s-hook{font-family:'Playfair Display',serif;font-size:1.35rem;line-height:1.25;color:var(--white);flex:1;display:flex;align-items:center}
+.s-hook-sm{font-family:'Playfair Display',serif;font-size:1rem;line-height:1.35;color:var(--white)}
+.s-body{font-size:.78rem;line-height:1.6;color:#ccc;margin-top:.6rem}
+.s-body em{color:var(--gold);font-style:normal;font-weight:500}
+.s-divider{width:35px;height:2px;background:var(--gold);margin:.7rem 0;opacity:.6}
+.s-cta{font-size:.75rem;color:var(--gold);letter-spacing:.08em;margin-top:auto;padding-top:.8rem;border-top:1px solid var(--border)}
+.s-space{flex:1}
+.s-dim-num{font-size:2.5rem;font-family:'Playfair Display',serif;color:var(--gold);opacity:.15;position:absolute;right:1.5rem;top:3rem;font-weight:700}
+.s-dim-name{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--white);margin-bottom:.5rem}
+.s-dim-desc{font-size:.78rem;color:#999;line-height:1.6}
+.s-dim-phrase{font-size:.82rem;color:var(--gold);font-style:italic;margin-top:.8rem;padding-top:.8rem;border-top:1px solid #222}
+</style>
+</head>
+<body>
+<div class="viewer">
+  <div class="slide-wrap">
+
+    <!-- SLIDE 1 — PORTADA -->
+    <div class="slide active" id="s1">
+      <div class="s-logo"><div class="s-logo-mark"></div><div class="s-logo-text">Endonautas</div><div class="s-num">1/10</div></div>
+      <div class="s-eyebrow">El método</div>
+      <div class="s-hook">"Hay 12 dimensiones en tu interior que llevas toda la vida habitando sin un mapa."</div>
+      <div class="s-cta">→ Desliza para ver el sistema completo</div>
+    </div>
+
+    <!-- SLIDE 2 — Intro -->
+    <div class="slide" id="s2">
+      <div class="s-logo"><div class="s-logo-mark"></div><div class="s-logo-text">Endonautas</div><div class="s-num">2/10</div></div>
+      <div class="s-space"></div>
+      <div class="s-hook-sm">La mayoría del autoconocimiento solo explora 2 o 3 dimensiones.</div>
+      <div class="s-divider"></div>
+      <div class="s-body">Endonautica trabaja con las 12.<br><br>Porque el ser humano es un sistema complejo.<br>Y un mapa incompleto genera rutas equivocadas.</div>
+      <div class="s-space"></div>
+    </div>
+
+    <!-- SLIDE 3 — Dim 1 y 2 -->
+    <div class="slide" id="s3">
+      <div class="s-logo"><div class="s-logo-mark"></div><div class="s-logo-text">Endonautas</div><div class="s-num">3/10</div></div>
+      <div class="s-space"></div>
+      <div class="s-body" style="font-size:.65rem;color:#444;letter-spacing:.15em;text-transform:uppercase">Dimensiones 1 — 2</div>
+      <div style="margin-top:.8rem">
+        <div style="margin-bottom:1rem">
+          <div class="s-dim-name" style="font-size:1.1rem">Cuerpo</div>
+          <div class="s-dim-desc">Tu historia emocional vive aquí.<br>El cuerpo recuerda lo que la mente olvidó.</div>
+        </div>
+        <div class="s-divider"></div>
+        <div>
+          <div class="s-dim-name" style="font-size:1.1rem">Emoción</div>
+          <div class="s-dim-desc">La información más honesta que tienes.<br>No se controla — se integra.</div>
+        </div>
+      </div>
+      <div class="s-space"></div>
+    </div>
+
+    <!-- SLIDE 4 — Dim 3 y 4 -->
+    <div class="slide" id="s4">
+      <div class="s-logo"><div class="s-logo-mark"></div><div class="s-logo-text">Endonautas</div><div class="s-num">4/10</div></div>
+      <div class="s-space"></div>
+      <div class="s-body" style="font-size:.65rem;color:#444;letter-spacing:.15em;text-transform:uppercase">Dimensiones 3 — 4</div>
+      <div style="margin-top:.8rem">
+        <div style="margin-bottom:1rem">
+          <div class="s-dim-name" style="font-size:1.1rem">Identidad</div>
+          <div class="s-dim-desc">Quién crees que eres vs. quién realmente eres.<br>La brecha ahí es donde empieza el trabajo.</div>
+        </div>
+        <div class="s-divider"></div>
+        <div>
+          <div class="s-dim-name" style="font-size:1.1rem">Sombra</div>
+          <div class="s-dim-desc">Lo que niegas de ti te controla<br>más que lo que aceptas.</div>
+        </div>
+      </div>
+      <div class="s-space"></div>
+    </div>
+
+    <!-- SLIDE 5 — Dim 5 y 6 -->
+    <div class="slide" id="s5">
+      <div class="s-logo"><div class="s-logo-mark"></div><div class="s-logo-text">Endonautas</div><div class="s-num">5/10</div></div>
+      <div class="s-space"></div>
+      <div class="s-body" style="font-size:.65rem;color:#444;letter-spacing:.15em;text-transform:uppercase">Dimensiones 5 — 6</div>
+      <div style="margin-top:.8rem">
+        <div style="margin-bottom:1rem">
+          <div class="s-dim-name" style="font-size:1.1rem">Propósito</div>
+          <div class="s-dim-desc">No se encuentra — se construye.<br>Es una dirección, no un destino fijo.</div>
+        </div>
+        <div class="s-divider"></div>
+        <div>
+          <div class="s-dim-name" style="font-size:1.1rem">Relación</div>
+          <div class="s-dim-desc">Cómo te vinculas revela cómo te ves a ti mismo.<br>Todo conflicto externo tiene una raíz interna.</div>
+        </div>
+      </div>
+      <div class="s-space"></div>
+    </div>
+
+    <!-- SLIDE 6 — Dim 7 y 8 -->
+    <div class="slide" id="s6">
+      <div class="s-logo"><div class="s-logo-mark"></div><div class="s-logo-text">Endonautas</div><div class="s-num">6/10</div></div>
+      <div class="s-space"></div>
+      <div class="s-body" style="font-size:.65rem;color:#444;letter-spacing:.15em;text-transform:uppercase">Dimensiones 7 — 8</div>
+      <div style="margin-top:.8rem">
+        <div style="margin-bottom:1rem">
+          <div class="s-dim-name" style="font-size:1.1rem">Creencia</div>
+          <div class="s-dim-desc">Lo que crees sobre el mundo determina<br>lo que te permites vivir en él.</div>
+        </div>
+        <div class="s-divider"></div>
+        <div>
+          <div class="s-dim-name" style="font-size:1.1rem">Herida</div>
+          <div class="s-dim-desc">No una etiqueta para quedarse ahí.<br>Una puerta de entrada a la comprensión de ti.</div>
+        </div>
+      </div>
+      <div class="s-space"></div>
+    </div>
+
+    <!-- SLIDE 7 — Dim 9 y 10 -->
+    <div class="slide" id="s7">
+      <div class="s-logo"><div class="s-logo-mark"></div><div class="s-logo-text">Endonautas</div><div class="s-num">7/10</div></div>
+      <div class="s-space"></div>
+      <div class="s-body" style="font-size:.65rem;color:#444;letter-spacing:.15em;text-transform:uppercase">Dimensiones 9 — 10</div>
+      <div style="margin-top:.8rem">
+        <div style="margin-bottom:1rem">
+          <div class="s-dim-name" style="font-size:1.1rem">Tiempo</div>
+          <div class="s-dim-desc">Vives más en el pasado o el futuro que en el presente.<br>El autoconocimiento ancla el tiempo.</div>
+        </div>
+        <div class="s-divider"></div>
+        <div>
+          <div class="s-dim-name" style="font-size:1.1rem">Máscara</div>
+          <div class="s-dim-desc">La construcción que hiciste para sobrevivir.<br>Brillante. Funcional. Pero no eres tú.</div>
+        </div>
+      </div>
+      <div class="s-space"></div>
+    </div>
+
+    <!-- SLIDE 8 — Dim 11 y 12 -->
+    <div class="slide" id="s8">
+      <div class="s-logo"><div class="s-logo-mark"></div><div class="s-logo-text">Endonautas</div><div class="s-num">8/10</div></div>
+      <div class="s-space"></div>
+      <div class="s-body" style="font-size:.65rem;color:#444;letter-spacing:.15em;text-transform:uppercase">Dimensiones 11 — 12</div>
+      <div style="margin-top:.8rem">
+        <div style="margin-bottom:1rem">
+          <div class="s-dim-name" style="font-size:1.1rem">Esencia</div>
+          <div class="s-dim-desc">Lo que quedas cuando te quitas todo<br>lo que aprendiste que "debías" ser.</div>
+        </div>
+        <div class="s-divider"></div>
+        <div>
+          <div class="s-dim-name" style="font-size:1.1rem">Trascendencia</div>
+          <div class="s-dim-desc">El sentido que da coherencia<br>a todo el viaje interior.</div>
+        </div>
+      </div>
+      <div class="s-space"></div>
+    </div>
+
+    <!-- SLIDE 9 — El por qué del mapa -->
+    <div class="slide" id="s9">
+      <div class="s-logo"><div class="s-logo-mark"></div><div class="s-logo-text">Endonautas</div><div class="s-num">9/10</div></div>
+      <div class="s-space"></div>
+      <div class="s-hook-sm">Cuando empiezas a ver el mapa completo,</div>
+      <div class="s-divider"></div>
+      <div class="s-body">dejas de luchar contra partes de ti mismo<br>y empiezas a <em>integrarlas</em>.<br><br>Eso es Endonautica.<br>No es mejorar. Es completarse.</div>
+      <div class="s-space"></div>
+    </div>
+
+    <!-- SLIDE 10 — CTA -->
+    <div class="slide" id="s10">
+      <div class="s-logo"><div class="s-logo-mark"></div><div class="s-logo-text">Endonautas</div><div class="s-num">10/10</div></div>
+      <div class="s-space"></div>
+      <div class="s-eyebrow">Primer paso del mapa</div>
+      <div class="s-hook-sm">El primer paso es conocer<br>tu <em>Máscara</em>.</div>
+      <div class="s-divider"></div>
+      <div class="s-body">Comenta <em>MASCARA</em> y te enviamos<br>el test gratuito al DM.</div>
+      <div class="s-cta">@endonautas · Sin costo · Sin trampa</div>
+    </div>
+
+  </div>
+  <div class="progress" id="progress"></div>
+  <div class="nav-row">
+    <button class="btn" id="prev" onclick="changeSlide(-1)" disabled>← Anterior</button>
+    <button class="btn" id="next" onclick="changeSlide(1)">Siguiente →</button>
+  </div>
+  <div class="slide-counter" id="counter">1 / 10</div>
+  <button class="copy-slide" onclick="copyCurrentSlide()">Copiar texto de este slide</button>
+</div>
+
+<div class="panel">
+  <h2>C3 — Las 12 Dimensiones · Texto completo</h2>
+  <div class="all-text" id="allText"></div>
+  <div class="caption-box">
+    <h3>Caption para Instagram</h3>
+    <div class="caption-text">Hay 12 dimensiones en tu interior que llevas toda la vida habitando sin un mapa.
+
+La mayoría del autoconocimiento que existe explora 2 o 3 de ellas. Endonautica trabaja con las 12.
+
+Cuerpo, Emoción, Identidad, Sombra, Propósito, Relación, Creencia, Herida, Tiempo, Máscara, Esencia, Trascendencia.
+
+Cuando empiezas a ver el mapa completo, dejas de luchar contra ti mismo y empiezas a integrarte.
+
+¿Quieres explorar la primera? Comenta MASCARA y te envío el test de la Dimensión de la Máscara, gratis.
+
+.
+.
+.
+#endonautas #endonautica #autoconocimiento #12dimensiones #viajeinterior #sombra #mascara #herida #esencia #proposito #identidad #consciencia #psicologiajungiana #transformacion #francojerica</div>
+  </div>
+  <button class="download-btn" onclick="downloadAll()">Descargar todos los textos (.txt)</button>
+</div>
+
+<script>
+const slides=document.querySelectorAll('.slide');
+const dots=document.getElementById('progress');
+let current=0;
+const texts=[
+  `SLIDE 1 — PORTADA\n"Hay 12 dimensiones en tu interior que llevas toda la vida habitando sin un mapa."\n→ Desliza para ver el sistema completo`,
+  `SLIDE 2\nLa mayoría del autoconocimiento solo explora 2 o 3 dimensiones.\nEndonautica trabaja con las 12. Porque el ser humano es un sistema complejo. Y un mapa incompleto genera rutas equivocadas.`,
+  `SLIDE 3 — DIM 1-2\nCuerpo: Tu historia emocional vive aquí. El cuerpo recuerda lo que la mente olvidó.\nEmoción: La información más honesta que tienes. No se controla — se integra.`,
+  `SLIDE 4 — DIM 3-4\nIdentidad: Quién crees que eres vs. quién realmente eres. La brecha ahí es donde empieza el trabajo.\nSombra: Lo que niegas de ti te controla más que lo que aceptas.`,
+  `SLIDE 5 — DIM 5-6\nPropósito: No se encuentra — se construye. Es una dirección, no un destino fijo.\nRelación: Cómo te vinculas revela cómo te ves a ti mismo. Todo conflicto externo tiene una raíz interna.`,
+  `SLIDE 6 — DIM 7-8\nCreencia: Lo que crees sobre el mundo determina lo que te permites vivir en él.\nHerida: No una etiqueta para quedarse ahí. Una puerta de entrada a la comprensión de ti.`,
+  `SLIDE 7 — DIM 9-10\nTiempo: Vives más en el pasado o el futuro que en el presente. El autoconocimiento ancla el tiempo.\nMáscara: La construcción que hiciste para sobrevivir. Brillante. Funcional. Pero no eres tú.`,
+  `SLIDE 8 — DIM 11-12\nEsencia: Lo que quedas cuando te quitas todo lo que aprendiste que "debías" ser.\nTrascendencia: El sentido que da coherencia a todo el viaje interior.`,
+  `SLIDE 9\nCuando empiezas a ver el mapa completo, dejas de luchar contra partes de ti mismo y empiezas a integrarlas.\nEso es Endonautica. No es mejorar. Es completarse.`,
+  `SLIDE 10 — CTA\nEl primer paso es conocer tu Máscara.\nComenta MASCARA y te enviamos el test gratuito al DM.\n@endonautas · Sin costo · Sin trampa`
+];
+function buildDots(){dots.innerHTML='';slides.forEach((_,i)=>{const d=document.createElement('div');d.className='dot'+(i===0?' active':'');d.onclick=()=>goTo(i);dots.appendChild(d);})}
+function buildPanel(){const el=document.getElementById('allText');el.innerHTML=texts.map((t,i)=>`<span class="slide-label">— SLIDE ${i+1} —</span>${t}`).join('\n\n')}
+function goTo(n){slides[current].classList.remove('active');dots.children[current].classList.remove('active');current=n;slides[current].classList.add('active');dots.children[current].classList.add('active');document.getElementById('counter').textContent=`${current+1} / ${slides.length}`;document.getElementById('prev').disabled=current===0;document.getElementById('next').disabled=current===slides.length-1;}
+function changeSlide(dir){goTo(Math.max(0,Math.min(slides.length-1,current+dir)))}
+function copyCurrentSlide(){navigator.clipboard.writeText(texts[current]).then(()=>{const btn=document.querySelector('.copy-slide');btn.textContent='¡Copiado!';setTimeout(()=>btn.textContent='Copiar texto de este slide',1500)})}
+function downloadAll(){const content=`CARRUSEL C3 — LAS 12 DIMENSIONES\n${'='.repeat(50)}\n\n`+texts.map((t,i)=>`— SLIDE ${i+1} —\n${t}`).join('\n\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type:'text/plain'}));a.download='carrusel-C3-las-12-dimensiones.txt';a.click()}
+buildDots();buildPanel();
+</script>
+</body>
+</html>

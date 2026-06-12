@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700;900&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1080px; height: 1080px;
+    background: #04020C;
+    overflow: hidden; position: relative;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    color: #F0E8DC;
+  }
+
+  /* Base gradient */
+  .bg-grad {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 70% 55% at 80% 10%, #2A0E5C 0%, transparent 60%),
+      radial-gradient(ellipse 55% 50% at 10% 85%, #082E2E 0%, transparent 55%);
+  }
+
+  /* Stars — densa lluvia dispersa */
+  .stars { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+  /* Glow spots sutiles */
+  .glow {
+    position: absolute; border-radius: 50%;
+    filter: blur(55px); pointer-events: none;
+  }
+  .g1 { width: 460px; height: 460px; top: -100px; right: -60px; background: #4C1D95; opacity: 0.5; }
+  .g2 { width: 360px; height: 360px; bottom: -80px; left: -40px; background: #0F766E; opacity: 0.45; }
+
+  /* Content */
+  .content {
+    position: absolute; inset: 0;
+    padding: 72px 80px 64px;
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+
+  /* Top — logo */
+  .top {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo-wrap {
+    display: flex; align-items: center; gap: 14px;
+  }
+  .logo-img {
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    object-fit: cover;
+    opacity: 0.92;
+  }
+  .logo-text {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 19px;
+    letter-spacing: -0.01em;
+    background: linear-gradient(135deg, #7ecfa8, #7ec8cf);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .tag {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px; font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(126,207,168,0.6);
+    padding: 7px 16px;
+    border: 1px solid rgba(126,207,168,0.2);
+    border-radius: 100px;
+  }
+
+  /* Middle */
+  .middle {
+    flex: 1;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 24px 0;
+  }
+  .eyebrow {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px; font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(240,232,220,0.38);
+    margin-bottom: 24px;
+  }
+  h1 {
+    font-weight: 900;
+    font-size: 88px;
+    line-height: 0.88;
+    letter-spacing: -0.04em;
+    color: #F0E8DC;
+    margin-bottom: 32px;
+  }
+  h1 em {
+    font-style: italic;
+    background: linear-gradient(135deg, #7ecfa8, #7ec8cf);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .desc {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 20px;
+    line-height: 1.6;
+    color: rgba(240,232,220,0.52);
+    max-width: 560px;
+  }
+
+  /* Bottom */
+  .bottom {
+    display: flex; align-items: center; justify-content: space-between;
+    border-top: 1px solid rgba(240,232,220,0.08);
+    padding-top: 24px;
+  }
+  .swipe {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px; font-weight: 600;
+    color: rgba(126,207,168,0.65);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .slide-count {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px;
+    color: rgba(240,232,220,0.22);
+    letter-spacing: 0.1em;
+  }
+</style>
+</head>
+<body>
+  <div class="bg-grad"></div>
+  <div class="glow g1"></div>
+  <div class="glow g2"></div>
+
+  <!-- S1: Lluvia densa — muchas estrellas pequeñas, variedad de brillo -->
+  <svg class="stars" xmlns="http://www.w3.org/2000/svg">
+    <!-- Capa base: estrellas muy pequeñas, distribuidas -->
+    <circle cx="48"  cy="34"  r="0.7" fill="white" opacity="0.35"/>
+    <circle cx="128" cy="18"  r="0.6" fill="white" opacity="0.28"/>
+    <circle cx="196" cy="52"  r="0.8" fill="white" opacity="0.40"/>
+    <circle cx="274" cy="22"  r="0.6" fill="white" opacity="0.30"/>
+    <circle cx="352" cy="44"  r="0.9" fill="white" opacity="0.45"/>
+    <circle cx="440" cy="14"  r="0.7" fill="white" opacity="0.32"/>
+    <circle cx="512" cy="60"  r="0.8" fill="white" opacity="0.38"/>
+    <circle cx="594" cy="28"  r="0.6" fill="white" opacity="0.25"/>
+    <circle cx="668" cy="50"  r="0.9" fill="white" opacity="0.42"/>
+    <circle cx="748" cy="16"  r="0.7" fill="white" opacity="0.33"/>
+    <circle cx="824" cy="68"  r="0.8" fill="white" opacity="0.36"/>
+    <circle cx="908" cy="36"  r="0.6" fill="white" opacity="0.28"/>
+    <circle cx="984" cy="58"  r="0.9" fill="white" opacity="0.40"/>
+    <circle cx="72"  cy="96"  r="0.7" fill="white" opacity="0.30"/>
+    <circle cx="162" cy="112" r="0.8" fill="white" opacity="0.38"/>
+    <circle cx="248" cy="88"  r="0.6" fill="white" opacity="0.26"/>
+    <circle cx="332" cy="128" r="0.9" fill="white" opacity="0.44"/>
+    <circle cx="418" cy="96"  r="0.7" fill="white" opacity="0.32"/>
+    <circle cx="506" cy="132" r="0.8" fill="white" opacity="0.38"/>
+    <circle cx="582" cy="104" r="0.6" fill="white" opacity="0.28"/>
+    <circle cx="660" cy="148" r="0.9" fill="white" opacity="0.42"/>
+    <circle cx="742" cy="108" r="0.7" fill="white" opacity="0.34"/>
+    <circle cx="820" cy="152" r="0.8" fill="white" opacity="0.36"/>
+    <circle cx="900" cy="120" r="0.6" fill="white" opacity="0.27"/>
+    <circle cx="976" cy="144" r="0.9" fill="white" opacity="0.41"/>
+    <circle cx="30"  cy="178" r="0.7" fill="white" opacity="0.28"/>
+    <circle cx="118" cy="196" r="0.8" fill="white" opacity="0.35"/>
+    <circle cx="222" cy="168" r="0.6" fill="white" opacity="0.24"/>
+    <circle cx="308" cy="200" r="0.9" fill="white" opacity="0.40"/>
+    <circle cx="396" cy="178" r="0.7" fill="white" opacity="0.30"/>
+    <circle cx="480" cy="216" r="0.8" fill="white" opacity="0.36"/>
+    <circle cx="560" cy="188" r="0.6" fill="white" opacity="0.25"/>
+    <circle cx="640" cy="224" r="0.9" fill="white" opacity="0.39"/>
+    <circle cx="720" cy="196" r="0.7" fill="white" opacity="0.31"/>
+    <circle cx="800" cy="232" r="0.8" fill="white" opacity="0.35"/>
+    <circle cx="880" cy="204" r="0.6" fill="white" opacity="0.26"/>
+    <circle cx="1020" cy="220" r="0.9" fill="white" opacity="0.38"/>
+    <circle cx="56"  cy="268" r="0.7" fill="white" opacity="0.28"/>
+    <circle cx="144" cy="288" r="0.8" fill="white" opacity="0.33"/>
+    <circle cx="460" cy="310" r="0.7" fill="white" opacity="0.28"/>
+    <circle cx="920" cy="290" r="0.8" fill="white" opacity="0.32"/>
+    <circle cx="1050" cy="320" r="0.6" fill="white" opacity="0.24"/>
+    <!-- Zona inferior -->
+    <circle cx="64"  cy="820" r="0.7" fill="white" opacity="0.28"/>
+    <circle cx="180" cy="840" r="0.8" fill="white" opacity="0.33"/>
+    <circle cx="290" cy="860" r="0.6" fill="white" opacity="0.24"/>
+    <circle cx="410" cy="830" r="0.9" fill="white" opacity="0.38"/>
+    <circle cx="520" cy="870" r="0.7" fill="white" opacity="0.30"/>
+    <circle cx="630" cy="850" r="0.8" fill="white" opacity="0.35"/>
+    <circle cx="740" cy="880" r="0.6" fill="white" opacity="0.25"/>
+    <circle cx="850" cy="840" r="0.9" fill="white" opacity="0.40"/>
+    <circle cx="960" cy="870" r="0.7" fill="white" opacity="0.30"/>
+    <circle cx="100" cy="920" r="0.8" fill="white" opacity="0.28"/>
+    <circle cx="220" cy="950" r="0.6" fill="white" opacity="0.22"/>
+    <circle cx="360" cy="940" r="0.9" fill="white" opacity="0.36"/>
+    <circle cx="480" cy="960" r="0.7" fill="white" opacity="0.28"/>
+    <circle cx="600" cy="930" r="0.8" fill="white" opacity="0.32"/>
+    <circle cx="720" cy="955" r="0.6" fill="white" opacity="0.24"/>
+    <circle cx="840" cy="940" r="0.9" fill="white" opacity="0.35"/>
+    <circle cx="960" cy="960" r="0.7" fill="white" opacity="0.26"/>
+
+    <!-- Estrellas medianas -->
+    <circle cx="88"  cy="44"  r="1.4" fill="white" opacity="0.62"/>
+    <circle cx="386" cy="22"  r="1.3" fill="white" opacity="0.55"/>
+    <circle cx="704" cy="58"  r="1.5" fill="white" opacity="0.64"/>
+    <circle cx="942" cy="28"  r="1.2" fill="white" opacity="0.50"/>
+    <circle cx="210" cy="116" r="1.4" fill="white" opacity="0.58"/>
+    <circle cx="566" cy="92"  r="1.3" fill="white" opacity="0.54"/>
+    <circle cx="860" cy="130" r="1.5" fill="white" opacity="0.60"/>
+    <circle cx="38"  cy="198" r="1.3" fill="white" opacity="0.52"/>
+    <circle cx="780" cy="212" r="1.4" fill="white" opacity="0.56"/>
+    <circle cx="982" cy="174" r="1.3" fill="white" opacity="0.50"/>
+    <circle cx="440" cy="850" r="1.4" fill="white" opacity="0.55"/>
+    <circle cx="760" cy="920" r="1.3" fill="white" opacity="0.50"/>
+    <circle cx="200" cy="960" r="1.5" fill="white" opacity="0.58"/>
+
+    <!-- Estrellas brillantes jade/blancas -->
+    <circle cx="534" cy="36"  r="2.2" fill="white" opacity="0.92"/>
+    <circle cx="178" cy="72"  r="1.9" fill="#7ecfa8" opacity="0.85"/>
+    <circle cx="872" cy="54"  r="2.4" fill="white" opacity="0.88"/>
+    <circle cx="328" cy="158" r="2.0" fill="white" opacity="0.84"/>
+    <circle cx="692" cy="140" r="1.8" fill="#7ecfa8" opacity="0.80"/>
+    <circle cx="1032" cy="96" r="2.2" fill="white" opacity="0.86"/>
+    <circle cx="64"  cy="148" r="1.9" fill="white" opacity="0.80"/>
+    <circle cx="900" cy="960" r="2.0" fill="white" opacity="0.75"/>
+    <circle cx="540" cy="950" r="2.2" fill="#7ecfa8" opacity="0.70"/>
+    <circle cx="150" cy="900" r="1.8" fill="white" opacity="0.72"/>
+
+    <!-- Cruce de brillo en las más grandes — pequeña cruz -->
+    <line x1="532" y1="32" x2="532" y2="40" stroke="white" stroke-width="0.6" opacity="0.5"/>
+    <line x1="528" y1="36" x2="536" y2="36" stroke="white" stroke-width="0.6" opacity="0.5"/>
+    <line x1="870" y1="50" x2="870" y2="58" stroke="white" stroke-width="0.6" opacity="0.45"/>
+    <line x1="866" y1="54" x2="874" y2="54" stroke="white" stroke-width="0.6" opacity="0.45"/>
+  </svg>
+
+  <div class="content">
+    <div class="top">
+      <div class="logo-wrap">
+        <img class="logo-img" src="file:///home/nikka/Proyectos/endonautas/assets/logo.png" alt="Logo Endonautas">
+        <span class="logo-text">Endonautas</span>
+      </div>
+      <div class="tag">Autoconocimiento</div>
+    </div>
+
+    <div class="middle">
+      <div class="eyebrow">Vínculos · Patrones</div>
+      <h1>La pelea<br>no fue por<br>lo que <em>dijiste.</em></h1>
+      <p class="desc">Fue por lo que eso activó. Y eso tiene un origen que vale la pena encontrar.</p>
+    </div>
+
+    <div class="bottom">
+      <div class="swipe">Desliza para ver →</div>
+      <div class="slide-count">01 / 09</div>
+    </div>
+  </div>
+</body>
+</html>

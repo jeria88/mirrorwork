@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700;900&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1080px; height: 1080px;
+    background: #04020C;
+    overflow: hidden; position: relative;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    color: #F0E8DC;
+  }
+  .bg-grad {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 70% 55% at 80% 10%, #2A0E5C 0%, transparent 60%),
+      radial-gradient(ellipse 55% 50% at 10% 85%, #082E2E 0%, transparent 55%);
+  }
+  .stars { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .glow { position: absolute; border-radius: 50%; filter: blur(55px); pointer-events: none; }
+  .g1 { width: 460px; height: 460px; top: -100px; right: -60px; background: #4C1D95; opacity: 0.5; }
+  .g2 { width: 360px; height: 360px; bottom: -80px; left: -40px; background: #0F766E; opacity: 0.45; }
+  .content { position: absolute; inset: 0; padding: 72px 80px 64px; display: flex; flex-direction: column; justify-content: space-between; }
+  .top { display: flex; align-items: center; justify-content: space-between; }
+  .logo-wrap { display: flex; align-items: center; gap: 14px; }
+  .logo-img { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; opacity: 0.92; }
+  .logo-text { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 19px; letter-spacing: -0.01em; background: linear-gradient(135deg, #7ecfa8, #7ec8cf); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .tag { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(126,207,168,0.6); padding: 7px 16px; border: 1px solid rgba(126,207,168,0.2); border-radius: 100px; }
+  .middle { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 24px 0; }
+  .eyebrow { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(240,232,220,0.38); margin-bottom: 24px; }
+  h1 { font-weight: 900; font-size: 88px; line-height: 0.88; letter-spacing: -0.04em; color: #F0E8DC; margin-bottom: 32px; }
+  h1 em { font-style: italic; background: linear-gradient(135deg, #7ecfa8, #7ec8cf); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .desc { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; line-height: 1.6; color: rgba(240,232,220,0.52); max-width: 560px; }
+  .bottom { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(240,232,220,0.08); padding-top: 24px; }
+  .swipe { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 600; color: rgba(126,207,168,0.65); letter-spacing: 0.1em; text-transform: uppercase; }
+  .slide-count { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; color: rgba(240,232,220,0.22); letter-spacing: 0.1em; }
+</style>
+</head>
+<body>
+  <div class="bg-grad"></div>
+  <div class="glow g1"></div>
+  <div class="glow g2"></div>
+
+  <!-- S3: Pocas estrellas grandes con halos de brillo — dramático, profundo -->
+  <svg class="stars" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="halo1" cx="50%" cy="50%" r="50%">
+        <stop offset="0%"   stop-color="white" stop-opacity="0.6"/>
+        <stop offset="40%"  stop-color="white" stop-opacity="0.12"/>
+        <stop offset="100%" stop-color="white" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="halo2" cx="50%" cy="50%" r="50%">
+        <stop offset="0%"   stop-color="#7ecfa8" stop-opacity="0.7"/>
+        <stop offset="35%"  stop-color="#7ecfa8" stop-opacity="0.15"/>
+        <stop offset="100%" stop-color="#7ecfa8" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="halo3" cx="50%" cy="50%" r="50%">
+        <stop offset="0%"   stop-color="#7ec8cf" stop-opacity="0.65"/>
+        <stop offset="35%"  stop-color="#7ec8cf" stop-opacity="0.12"/>
+        <stop offset="100%" stop-color="#7ec8cf" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+
+    <!-- Estrella 1 — grande, arriba centro-derecha, halo blanco -->
+    <circle cx="680" cy="52"  r="48" fill="url(#halo1)"/>
+    <circle cx="680" cy="52"  r="18" fill="url(#halo1)"/>
+    <circle cx="680" cy="52"  r="3.5" fill="white" opacity="0.95"/>
+    <!-- Cruz de difracción -->
+    <line x1="680" y1="38" x2="680" y2="66" stroke="white" stroke-width="0.8" opacity="0.55"/>
+    <line x1="666" y1="52" x2="694" y2="52" stroke="white" stroke-width="0.8" opacity="0.55"/>
+    <line x1="670" y1="42" x2="690" y2="62" stroke="white" stroke-width="0.5" opacity="0.28"/>
+    <line x1="690" y1="42" x2="670" y2="62" stroke="white" stroke-width="0.5" opacity="0.28"/>
+
+    <!-- Estrella 2 — jade, arriba izquierda -->
+    <circle cx="148" cy="88"  r="38" fill="url(#halo2)"/>
+    <circle cx="148" cy="88"  r="14" fill="url(#halo2)"/>
+    <circle cx="148" cy="88"  r="2.8" fill="#7ecfa8" opacity="0.98"/>
+    <line x1="148" y1="76" x2="148" y2="100" stroke="#7ecfa8" stroke-width="0.7" opacity="0.50"/>
+    <line x1="136" y1="88" x2="160" y2="88"  stroke="#7ecfa8" stroke-width="0.7" opacity="0.50"/>
+
+    <!-- Estrella 3 — teal, esquina superior derecha -->
+    <circle cx="998" cy="34"  r="32" fill="url(#halo3)"/>
+    <circle cx="998" cy="34"  r="12" fill="url(#halo3)"/>
+    <circle cx="998" cy="34"  r="2.5" fill="#7ec8cf" opacity="0.95"/>
+    <line x1="998" y1="24" x2="998" y2="44" stroke="#7ec8cf" stroke-width="0.7" opacity="0.48"/>
+    <line x1="988" y1="34" x2="1008" y2="34" stroke="#7ec8cf" stroke-width="0.7" opacity="0.48"/>
+
+    <!-- Estrella 4 — blanca, abajo derecha -->
+    <circle cx="920" cy="960" r="36" fill="url(#halo1)"/>
+    <circle cx="920" cy="960" r="13" fill="url(#halo1)"/>
+    <circle cx="920" cy="960" r="3.0" fill="white" opacity="0.90"/>
+    <line x1="920" y1="948" x2="920" y2="972" stroke="white" stroke-width="0.7" opacity="0.48"/>
+    <line x1="908" y1="960" x2="932" y2="960" stroke="white" stroke-width="0.7" opacity="0.48"/>
+
+    <!-- Estrella 5 — jade, abajo izquierda -->
+    <circle cx="160" cy="940" r="30" fill="url(#halo2)"/>
+    <circle cx="160" cy="940" r="11" fill="url(#halo2)"/>
+    <circle cx="160" cy="940" r="2.4" fill="#7ecfa8" opacity="0.92"/>
+
+    <!-- Estrellas pequeñas dispersas (pocas, de apoyo) -->
+    <circle cx="340" cy="28"  r="1.4" fill="white" opacity="0.55"/>
+    <circle cx="520" cy="18"  r="1.2" fill="white" opacity="0.48"/>
+    <circle cx="830" cy="44"  r="1.6" fill="white" opacity="0.58"/>
+    <circle cx="44"  cy="44"  r="1.3" fill="white" opacity="0.45"/>
+    <circle cx="430" cy="92"  r="1.5" fill="#7ecfa8" opacity="0.52"/>
+    <circle cx="860" cy="120" r="1.4" fill="white" opacity="0.50"/>
+    <circle cx="1048" cy="148" r="1.3" fill="white" opacity="0.44"/>
+    <circle cx="36"  cy="180" r="1.5" fill="white" opacity="0.42"/>
+    <circle cx="290" cy="940" r="1.4" fill="white" opacity="0.45"/>
+    <circle cx="560" cy="970" r="1.6" fill="#7ec8cf" opacity="0.50"/>
+    <circle cx="740" cy="950" r="1.3" fill="white" opacity="0.44"/>
+    <circle cx="1020" cy="920" r="1.5" fill="white" opacity="0.46"/>
+  </svg>
+
+  <div class="content">
+    <div class="top">
+      <div class="logo-wrap">
+        <img class="logo-img" src="file:///home/nikka/Proyectos/endonautas/assets/logo.png" alt="Logo Endonautas">
+        <span class="logo-text">Endonautas</span>
+      </div>
+      <div class="tag">Autoconocimiento</div>
+    </div>
+    <div class="middle">
+      <div class="eyebrow">Vínculos · Patrones</div>
+      <h1>La pelea<br>no fue por<br>lo que <em>dijiste.</em></h1>
+      <p class="desc">Fue por lo que eso activó. Y eso tiene un origen que vale la pena encontrar.</p>
+    </div>
+    <div class="bottom">
+      <div class="swipe">Desliza para ver →</div>
+      <div class="slide-count">01 / 09</div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Endonautas — Brandbook</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: var(--text-base); line-height: var(--leading-normal); }
+
+  .cover { min-height: 100vh; display: flex; flex-direction: column; justify-content: flex-end; padding: var(--pad); background: var(--color-primary); color: var(--color-neutral-50); border-bottom: 4px solid var(--color-accent); }
+  .cover__label { font-size: var(--text-sm); text-transform: uppercase; letter-spacing: var(--tracking-widest); color: var(--color-neutral-400); margin-bottom: var(--space-6); }
+  .cover__title { font-family: var(--font-display); font-size: clamp(3rem, 8vw, 7rem); font-weight: 300; line-height: var(--leading-tight); letter-spacing: var(--tracking-tight); }
+  .cover__title em { font-style: italic; color: var(--color-accent-soft); }
+  .cover__sub { margin-top: var(--space-6); font-size: var(--text-lg); color: var(--color-neutral-400); max-width: 480px; }
+  .cover__meta { margin-top: var(--space-16); font-size: var(--text-sm); color: var(--color-neutral-600); }
+
+  .section { padding: clamp(60px, 8vw, 120px) var(--pad); border-bottom: 1px solid var(--border); }
+  .section__label { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: var(--tracking-widest); color: var(--text-muted); margin-bottom: var(--space-12); }
+  .section__title { font-family: var(--font-display); font-size: var(--text-4xl); font-weight: 300; line-height: var(--leading-snug); margin-bottom: var(--space-8); }
+
+  .statement { font-family: var(--font-display); font-size: clamp(1.4rem, 3vw, 2.2rem); font-weight: 300; line-height: 1.5; color: var(--color-primary); max-width: 820px; font-style: italic; }
+  .tagline-box { margin-top: var(--space-12); padding: var(--space-8) var(--space-10); background: var(--color-primary); color: var(--color-neutral-50); display: inline-block; border-radius: var(--radius-md); }
+  .tagline-box span { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 300; letter-spacing: var(--tracking-tight); }
+
+  .matrix { width: 100%; border-collapse: collapse; margin-top: var(--space-8); }
+  .matrix th { text-align: left; font-size: var(--text-xs); text-transform: uppercase; letter-spacing: var(--tracking-wide); color: var(--text-muted); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border); font-weight: 500; }
+  .matrix td { padding: var(--space-4); border-bottom: 1px solid var(--border); font-size: var(--text-sm); vertical-align: top; }
+  .matrix td:first-child { font-weight: 600; width: 140px; white-space: nowrap; }
+  .matrix tr:last-child td { border-bottom: none; }
+
+  /* PALETA */
+  .palette { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: var(--space-4); margin-top: var(--space-8); }
+  .swatch { border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border); }
+  .swatch__color { height: 100px; }
+  .swatch__info { padding: var(--space-3) var(--space-4); background: var(--bg-surface); }
+  .swatch__name { font-weight: 600; font-size: var(--text-sm); }
+  .swatch__hex { font-size: var(--text-xs); color: var(--text-muted); font-family: var(--font-mono); }
+
+  /* TIPOGRAFÍA */
+  .type-demo { margin-top: var(--space-8); display: flex; flex-direction: column; gap: var(--space-8); }
+  .type-row { display: flex; align-items: baseline; gap: var(--space-6); padding: var(--space-6) 0; border-bottom: 1px solid var(--border); }
+  .type-row__meta { width: 120px; flex-shrink: 0; font-size: var(--text-xs); color: var(--text-muted); font-family: var(--font-mono); line-height: 1.4; }
+  .type-row__sample { font-family: var(--font-display); }
+
+  /* TONO */
+  .tone-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); margin-top: var(--space-8); }
+  .tone-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-6); }
+  .tone-card__label { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: var(--tracking-widest); color: var(--text-muted); margin-bottom: var(--space-4); }
+  .tone-card__words { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .word { padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); font-size: var(--text-sm); }
+  .word--yes { background: rgba(61,122,94,.12); color: var(--color-success); }
+  .word--no  { background: rgba(168,75,60,.1); color: var(--color-error); text-decoration: line-through; }
+
+  .eje { display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-4); font-size: var(--text-sm); }
+  .eje__label { width: 100px; color: var(--text-muted); }
+  .eje__track { flex: 1; height: 6px; background: var(--border); border-radius: var(--radius-full); position: relative; }
+  .eje__fill { height: 100%; border-radius: var(--radius-full); background: var(--color-accent); }
+  .eje__end { width: 100px; text-align: right; color: var(--text-muted); }
+
+  /* EJEMPLOS ANTES/DESPUÉS */
+  .examples { margin-top: var(--space-8); display: flex; flex-direction: column; gap: var(--space-6); }
+  .example { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  .example__header { padding: var(--space-3) var(--space-6); background: var(--bg-muted); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: var(--tracking-wide); color: var(--text-muted); font-weight: 500; }
+  .example__body { display: grid; grid-template-columns: 1fr 1fr; }
+  .example__col { padding: var(--space-6); }
+  .example__col:first-child { border-right: 1px solid var(--border); }
+  .example__tag { font-size: var(--text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-3); }
+  .example__tag--no  { color: var(--color-error); }
+  .example__tag--yes { color: var(--color-success); }
+  .example__text { font-size: var(--text-base); line-height: var(--leading-normal); }
+
+  /* LOGO CONCEPTOS */
+  .logo-concepts { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-6); margin-top: var(--space-8); }
+  .logo-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-8); }
+  .logo-card__letter { font-size: var(--text-5xl); font-family: var(--font-display); font-weight: 300; color: var(--color-primary); margin-bottom: var(--space-4); line-height: 1; }
+  .logo-card__name { font-weight: 600; margin-bottom: var(--space-3); }
+  .logo-card__desc { font-size: var(--text-sm); color: var(--text-muted); line-height: var(--leading-normal); margin-bottom: var(--space-4); }
+  .logo-card__briefing { font-size: var(--text-xs); font-family: var(--font-mono); background: var(--bg-muted); padding: var(--space-3); border-radius: var(--radius-md); color: var(--text-muted); }
+
+  /* PERSONAS */
+  .personas { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); margin-top: var(--space-8); }
+  .persona-card { border-radius: var(--radius-xl); padding: var(--space-8); }
+  .persona-card--claudia { background: var(--color-accent-muted); border: 1px solid var(--color-accent-soft); }
+  .persona-card--valentina { background: #e8f0f1; border: 1px solid #b8d0d4; }
+  .persona-card__name { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 400; margin-bottom: var(--space-2); }
+  .persona-card__sub { font-size: var(--text-sm); color: var(--text-muted); margin-bottom: var(--space-6); }
+  .persona-card__row { display: flex; gap: var(--space-3); margin-bottom: var(--space-3); font-size: var(--text-sm); }
+  .persona-card__row strong { width: 100px; flex-shrink: 0; font-weight: 600; }
+  .pill { display: inline-block; padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 600; }
+  .pill--b2c { background: rgba(196,129,58,.15); color: #7a4c10; }
+  .pill--b2b { background: rgba(46,74,78,.12); color: var(--color-primary); }
+</style>
+</head>
+<body>
+
+<!-- PORTADA -->
+<div class="cover">
+  <div class="cover__label">Brandbook v1 · Mayo 2026</div>
+  <h1 class="cover__title">Endo<em>nautas</em></h1>
+  <p class="cover__sub">El mapa del mundo interior.</p>
+  <div class="cover__meta">Basado en customer voice de Claudia + Valentina · Franco Jeria · Temuco, Chile</div>
+</div>
+
+<!-- POSICIONAMIENTO -->
+<div class="section">
+  <div class="section__label">01 — Posicionamiento</div>
+  <h2 class="section__title">El espacio que ocupamos</h2>
+
+  <table class="matrix">
+    <thead><tr><th>Bloque</th><th>Endonautas</th></tr></thead>
+    <tbody>
+      <tr><td>Categoría</td><td>Sistema de autoconocimiento</td></tr>
+      <tr><td>Enemigo</td><td>La autoayuda de positividad forzada y la terapia clínica que no llega al origen</td></tr>
+      <tr><td>Audiencia</td><td>Personas que ya probaron libros, retiros y terapia — pero sienten que aún no vieron el fondo</td></tr>
+      <tr><td>Promesa</td><td>Entender el patrón debajo de todos tus patrones</td></tr>
+      <tr><td>Mecanismo</td><td>Un mapa conceptual propio, desarrollado en más de una década de práctica clínica</td></tr>
+      <tr><td>Prueba</td><td>Franco Jeria: terapeuta en salud integrativa, autor de Endonautica</td></tr>
+    </tbody>
+  </table>
+
+  <div style="margin-top: var(--space-12);">
+    <p class="statement">"Para personas que ya probaron la autoayuda y la terapia pero sienten que no llegaron al fondo, <strong>Endonautas</strong> es el sistema de autoconocimiento que revela el patrón debajo de todos tus patrones — sin positivismo vacío ni frialdad clínica."</p>
+  </div>
+
+  <div class="tagline-box" style="margin-top: var(--space-8);">
+    <span>"El mapa del mundo interior."</span>
+  </div>
+</div>
+
+<!-- PERSONAS -->
+<div class="section">
+  <div class="section__label">02 — Personas</div>
+  <h2 class="section__title">Dos puertas, una marca</h2>
+  <div class="personas">
+    <div class="persona-card persona-card--claudia">
+      <div class="persona-card__name">La Claudia</div>
+      <div class="persona-card__sub">30–40 años · <span class="pill pill--b2c">B2C</span></div>
+      <div class="persona-card__row"><strong>Dolor:</strong> Exitosa afuera, vacía adentro. Repite patrones sin entender por qué.</div>
+      <div class="persona-card__row"><strong>Intentó:</strong> Terapia (fría), retiros (superficiales), libros de autoayuda (vacíos).</div>
+      <div class="persona-card__row"><strong>JTBD:</strong> Sentir que su vida le pertenece.</div>
+      <div class="persona-card__row"><strong>Trigger:</strong> Cumplir 35, una ruptura, sensación de "algo no cuadra".</div>
+      <div class="persona-card__row"><strong>Canal:</strong> Instagram, comunidad, boca a boca.</div>
+      <div class="persona-card__row"><strong>Precio:</strong> $30–60 USD</div>
+    </div>
+    <div class="persona-card persona-card--valentina">
+      <div class="persona-card__name">La Valentina</div>
+      <div class="persona-card__sub">32–48 años · terapeuta/coach · <span class="pill pill--b2b">B2B</span></div>
+      <div class="persona-card__row"><strong>Dolor:</strong> Su caja de herramientas ya no alcanza. Quiere diferenciarse.</div>
+      <div class="persona-card__row"><strong>Fue:</strong> Una Claudia primero — su camino personal la llevó a este trabajo.</div>
+      <div class="persona-card__row"><strong>JTBD:</strong> Integrar un marco nuevo en su práctica y recomendarlo a clientes.</div>
+      <div class="persona-card__row"><strong>Trigger:</strong> Cliente que no avanza con métodos actuales.</div>
+      <div class="persona-card__row"><strong>Canal:</strong> LinkedIn, comunidades de terapeutas, referidos.</div>
+      <div class="persona-card__row"><strong>Precio:</strong> $150–400 USD (formación/licencia)</div>
+    </div>
+  </div>
+</div>
+
+<!-- TONO DE VOZ -->
+<div class="section">
+  <div class="section__label">03 — Tono de voz</div>
+  <h2 class="section__title">Cómo hablamos</h2>
+
+  <div style="max-width: 480px; margin-top: var(--space-8);">
+    <div class="eje"><span class="eje__label">Formal</span><div class="eje__track"><div class="eje__fill" style="width:60%"></div></div><span class="eje__end">Coloquial</span></div>
+    <div class="eje"><span class="eje__label">Serio</span><div class="eje__track"><div class="eje__fill" style="width:35%"></div></div><span class="eje__end">Humorístico</span></div>
+    <div class="eje"><span class="eje__label">Respetuoso</span><div class="eje__track"><div class="eje__fill" style="width:35%"></div></div><span class="eje__end">Irreverente</span></div>
+    <div class="eje"><span class="eje__label">Técnico</span><div class="eje__track"><div class="eje__fill" style="width:55%"></div></div><span class="eje__end">Divulgativo</span></div>
+  </div>
+
+  <div class="tone-grid" style="margin-top: var(--space-10);">
+    <div class="tone-card">
+      <div class="tone-card__label">Vocabulario Sí</div>
+      <div class="tone-card__words">
+        <span class="word word--yes">patrón</span>
+        <span class="word word--yes">origen</span>
+        <span class="word word--yes">integrar</span>
+        <span class="word word--yes">mapa</span>
+        <span class="word word--yes">navegar</span>
+        <span class="word word--yes">sombra</span>
+        <span class="word word--yes">máscara</span>
+        <span class="word word--yes">proceso</span>
+        <span class="word word--yes">mundo interior</span>
+        <span class="word word--yes">cartografía</span>
+        <span class="word word--yes">herida</span>
+        <span class="word word--yes">fractal</span>
+        <span class="word word--yes">etapa</span>
+      </div>
+    </div>
+    <div class="tone-card">
+      <div class="tone-card__label">Vocabulario No</div>
+      <div class="tone-card__words">
+        <span class="word word--no">transformar</span>
+        <span class="word word--no">sanar completamente</span>
+        <span class="word word--no">despertar</span>
+        <span class="word word--no">vibración</span>
+        <span class="word word--no">manifestar</span>
+        <span class="word word--no">tóxico</span>
+        <span class="word word--no">empoderar</span>
+        <span class="word word--no">superar</span>
+        <span class="word word--no">positivo</span>
+        <span class="word word--no">abundancia</span>
+        <span class="word word--no">exitoso</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="examples">
+    <div class="example">
+      <div class="example__header">Landing — headline principal</div>
+      <div class="example__body">
+        <div class="example__col">
+          <div class="example__tag example__tag--no">✗ No</div>
+          <div class="example__text">"Transforma tu vida y despierta tu mejor versión"</div>
+        </div>
+        <div class="example__col">
+          <div class="example__tag example__tag--yes">✓ Sí</div>
+          <div class="example__text">"Para los que ya saben que el problema no es el problema."</div>
+        </div>
+      </div>
+    </div>
+    <div class="example">
+      <div class="example__header">Email de bienvenida</div>
+      <div class="example__body">
+        <div class="example__col">
+          <div class="example__tag example__tag--no">✗ No</div>
+          <div class="example__text">"¡Bienvenido/a! Estamos emocionados de tenerte en esta comunidad increíble 🎉"</div>
+        </div>
+        <div class="example__col">
+          <div class="example__tag example__tag--yes">✓ Sí</div>
+          <div class="example__text">"Llegaste acá por alguna razón. Tal vez no la tienes clara todavía. Eso también es parte del mapa."</div>
+        </div>
+      </div>
+    </div>
+    <div class="example">
+      <div class="example__header">Error 404</div>
+      <div class="example__body">
+        <div class="example__col">
+          <div class="example__tag example__tag--no">✗ No</div>
+          <div class="example__text">"¡Oops! Esta página no existe 😅"</div>
+        </div>
+        <div class="example__col">
+          <div class="example__tag example__tag--yes">✓ Sí</div>
+          <div class="example__text">"Esta página no está. A veces el camino equivocado también enseña algo."</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PALETA -->
+<div class="section">
+  <div class="section__label">04 — Sistema Visual</div>
+  <h2 class="section__title">Paleta de color</h2>
+  <div class="palette">
+    <div class="swatch"><div class="swatch__color" style="background:#1C2B2D"></div><div class="swatch__info"><div class="swatch__name">Tinta profunda</div><div class="swatch__hex">#1C2B2D · Primario</div></div></div>
+    <div class="swatch"><div class="swatch__color" style="background:#2E4A4E"></div><div class="swatch__info"><div class="swatch__name">Bosque</div><div class="swatch__hex">#2E4A4E · Primario mid</div></div></div>
+    <div class="swatch"><div class="swatch__color" style="background:#C4813A"></div><div class="swatch__info"><div class="swatch__name">Ámbar tierra</div><div class="swatch__hex">#C4813A · Acento</div></div></div>
+    <div class="swatch"><div class="swatch__color" style="background:#E8C99A"></div><div class="swatch__info"><div class="swatch__name">Arena dorada</div><div class="swatch__hex">#E8C99A · Acento suave</div></div></div>
+    <div class="swatch"><div class="swatch__color" style="background:#F5F1EB"></div><div class="swatch__info"><div class="swatch__name">Hueso</div><div class="swatch__hex">#F5F1EB · Fondo claro</div></div></div>
+    <div class="swatch"><div class="swatch__color" style="background:#9C9589"></div><div class="swatch__info"><div class="swatch__name">Piedra</div><div class="swatch__hex">#9C9589 · Texto muted</div></div></div>
+    <div class="swatch"><div class="swatch__color" style="background:#1A1916"></div><div class="swatch__info"><div class="swatch__name">Carbón</div><div class="swatch__hex">#1A1916 · Texto</div></div></div>
+    <div class="swatch"><div class="swatch__color" style="background:#3D7A5E"></div><div class="swatch__info"><div class="swatch__name">Musgo</div><div class="swatch__hex">#3D7A5E · Success</div></div></div>
+    <div class="swatch"><div class="swatch__color" style="background:#A84B3C"></div><div class="swatch__info"><div class="swatch__name">Terracota</div><div class="swatch__hex">#A84B3C · Error</div></div></div>
+  </div>
+
+  <!-- TIPOGRAFÍA -->
+  <h3 style="font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 300; margin-top: var(--space-16); margin-bottom: var(--space-2);">Tipografía</h3>
+  <p style="color: var(--text-muted); font-size: var(--text-sm); margin-bottom: var(--space-8);">Display: Fraunces · Body: Inter</p>
+
+  <div style="display: flex; flex-direction: column; gap: var(--space-6);">
+    <div style="padding: var(--space-6) 0; border-bottom: 1px solid var(--border); display: flex; align-items: baseline; gap: var(--space-6);">
+      <span style="width:120px;font-size:var(--text-xs);color:var(--text-muted);font-family:var(--font-mono);">5xl / 61px<br>Fraunces 300</span>
+      <span style="font-family:var(--font-display);font-size:var(--text-5xl);font-weight:300;line-height:1.1;letter-spacing:-0.02em;">Endonautas</span>
+    </div>
+    <div style="padding: var(--space-6) 0; border-bottom: 1px solid var(--border); display: flex; align-items: baseline; gap: var(--space-6);">
+      <span style="width:120px;font-size:var(--text-xs);color:var(--text-muted);font-family:var(--font-mono);">3xl / 39px<br>Fraunces 300i</span>
+      <span style="font-family:var(--font-display);font-size:var(--text-3xl);font-weight:300;font-style:italic;">El mapa del mundo interior.</span>
+    </div>
+    <div style="padding: var(--space-6) 0; border-bottom: 1px solid var(--border); display: flex; align-items: baseline; gap: var(--space-6);">
+      <span style="width:120px;font-size:var(--text-xs);color:var(--text-muted);font-family:var(--font-mono);">xl / 25px<br>Fraunces 400</span>
+      <span style="font-family:var(--font-display);font-size:var(--text-xl);">Para los que ya saben que el problema no es el problema.</span>
+    </div>
+    <div style="padding: var(--space-6) 0; border-bottom: 1px solid var(--border); display: flex; align-items: baseline; gap: var(--space-6);">
+      <span style="width:120px;font-size:var(--text-xs);color:var(--text-muted);font-family:var(--font-mono);">base / 16px<br>Inter 400</span>
+      <span style="max-width:600px;">Llegaste acá por alguna razón. Tal vez no la tienes clara todavía. Eso también es parte del mapa. El trabajo del Endonauta no es llegar a un destino — es aprender a leer el terreno.</span>
+    </div>
+    <div style="padding: var(--space-6) 0; display: flex; align-items: baseline; gap: var(--space-6);">
+      <span style="width:120px;font-size:var(--text-xs);color:var(--text-muted);font-family:var(--font-mono);">xs / 10px<br>Inter 500 caps</span>
+      <span style="font-size:var(--text-xs);text-transform:uppercase;letter-spacing:0.12em;font-weight:500;color:var(--text-muted);">Autoconocimiento · Proceso · Profundidad</span>
+    </div>
+  </div>
+</div>
+
+<!-- LOGO CONCEPTOS -->
+<div class="section">
+  <div class="section__label">05 — Concepto de logo</div>
+  <h2 class="section__title">3 direcciones</h2>
+  <div class="logo-concepts">
+    <div class="logo-card">
+      <div class="logo-card__letter">⊕</div>
+      <div class="logo-card__name">A — La Brújula Interior</div>
+      <div class="logo-card__desc">Instrumento de navegación sin norte fijo. Geométrico, limpio, funcional. Sugiere orientación sin destino predeterminado.</div>
+      <div class="logo-card__briefing">minimal compass logo, no fixed north, thin lines, dark teal, editorial style</div>
+    </div>
+    <div class="logo-card">
+      <div class="logo-card__letter" style="font-size:3rem;">❋</div>
+      <div class="logo-card__name">B — El Fractal</div>
+      <div class="logo-card__desc">Patrón que se repite a distintas escalas. El concepto central de Franco: autosimilaridad. Espiral u hoja orgánica.</div>
+      <div class="logo-card__briefing">fractal organic symbol, self-similar pattern, dark teal and amber, minimalist, SVG-style</div>
+    </div>
+    <div class="logo-card">
+      <div class="logo-card__letter" style="font-family:var(--font-display);font-size:2rem;font-weight:300;letter-spacing:0.08em;">Endo<br>nautas</div>
+      <div class="logo-card__name">C — Solo tipografía</div>
+      <div class="logo-card__desc">Fraunces 300, tracking abierto. La palabra ya contiene todo: "endo" + "nautas". Confiado, literario. Sin ícono.</div>
+      <div class="logo-card__briefing">La palabra es el logo. Fraunces light, color tinta profunda.</div>
+    </div>
+  </div>
+</div>
+
+<!-- PREVIEW DARK -->
+<div style="background: var(--color-primary); color: var(--color-neutral-50); padding: clamp(60px,8vw,120px) var(--pad); border-top: 1px solid #2E4A4E;">
+  <div style="font-size:var(--text-xs);text-transform:uppercase;letter-spacing:var(--tracking-widest);color:var(--color-neutral-400);margin-bottom:var(--space-8);">Preview dark mode</div>
+  <h2 style="font-family:var(--font-display);font-size:clamp(2rem,5vw,4rem);font-weight:300;line-height:1.2;max-width:700px;margin-bottom:var(--space-8);">Llevas años buscando.<br><em style="color:var(--color-accent-soft);">Lo que buscas no es lo que crees que buscas.</em></h2>
+  <button style="background:var(--color-accent);color:#fff;border:none;padding:var(--space-4) var(--space-8);border-radius:var(--radius-md);font-size:var(--text-base);font-family:var(--font-body);font-weight:500;cursor:pointer;">Comenzar el mapa</button>
+</div>
+
+<div style="padding: var(--space-8) var(--pad); font-size: var(--text-xs); color: var(--text-muted); border-top: 1px solid var(--border);">
+  Endonautas · Brandbook v1 · Mayo 2026 · Franco Jeria · Temuco, Chile
+</div>
+
+</body>
+</html>

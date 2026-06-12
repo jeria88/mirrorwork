@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B10 — Síntoma vs Mapa · Endonautas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,600&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --gold: #c9a84c;
+  --gold-dim: rgba(201,168,76,0.25);
+  --white: #ffffff;
+  --muted: rgba(255,255,255,0.50);
+  --dim: rgba(255,255,255,0.20);
+}
+
+body { background: #0d0d0d; font-family: 'Outfit', sans-serif; display: flex; min-height: 100vh; }
+
+/* ── VIEWER ── */
+.viewer {
+  flex: 0 0 460px;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 2.5rem 1.5rem 2rem;
+  background: #080808;
+  border-right: 1px solid #1a1a1a;
+  gap: 1.2rem;
+}
+
+.slide-wrap {
+  position: relative; width: 400px; height: 500px;
+  border-radius: 14px; overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 30px 90px rgba(0,0,0,0.9);
+}
+
+/* ── SLIDES ── */
+.slide {
+  position: absolute; inset: 0; display: none;
+  flex-direction: column; padding: 1.8rem 2rem;
+  background-size: cover; background-position: center;
+}
+.slide.active { display: flex; }
+.slide::before { content: ''; position: absolute; inset: 0; z-index: 0; }
+.slide > * { position: relative; z-index: 1; }
+
+.slide-portada {
+  background-image: url('https://images.pexels.com/photos/14256347/pexels-photo-14256347.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940');
+}
+.slide-portada::before {
+  background: linear-gradient(168deg, rgba(0,0,0,0.38) 0%, rgba(0,0,0,0.62) 45%, rgba(0,0,0,0.94) 100%);
+}
+
+.slide-content {
+  background-image: url('https://images.pexels.com/photos/36013160/pexels-photo-36013160.png?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940');
+}
+.slide-content::before { background: rgba(4,4,4,0.91); }
+
+.slide-cta {
+  background-image: url('https://images.pexels.com/photos/14256347/pexels-photo-14256347.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940');
+}
+.slide-cta::before {
+  background: linear-gradient(180deg, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.97) 100%);
+}
+
+/* ── TOP BAR ── */
+.top-bar { display: flex; align-items: center; justify-content: space-between; }
+.brand { display: flex; align-items: center; gap: 0.45rem; }
+.brand-logo { height: 20px; width: 20px; object-fit: contain; opacity: 0.88; }
+.brand-name {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.56rem; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--gold); opacity: 0.82;
+}
+.slide-num { font-size: 0.56rem; letter-spacing: 0.16em; color: var(--dim); }
+
+/* ── PORTADA ── */
+.spacer { flex: 1; }
+.eyebrow {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.56rem; letter-spacing: 0.28em;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 0.9rem;
+}
+.hook {
+  font-family: 'Fraunces', serif; font-optical-sizing: auto;
+  font-weight: 600; font-size: 1.5rem;
+  line-height: 1.2; color: var(--white); margin-bottom: 0.5rem;
+}
+.hook em { color: var(--gold); font-style: italic; }
+.sub {
+  font-family: 'Fraunces', serif; font-optical-sizing: auto;
+  font-weight: 600; font-style: italic;
+  font-size: 0.95rem; color: var(--muted); margin-bottom: 1.4rem;
+}
+.swipe {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.6rem; letter-spacing: 0.14em; color: var(--muted);
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.swipe::after { content: ''; width: 24px; height: 1px; background: var(--gold); opacity: 0.4; }
+
+/* ── CONTENT ── */
+.content-body { flex: 1; display: flex; flex-direction: column; justify-content: center; padding-top: 0.5rem; }
+.c-label {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.54rem; letter-spacing: 0.28em;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 0.9rem;
+}
+.c-title {
+  font-family: 'Fraunces', serif; font-optical-sizing: auto;
+  font-weight: 600; font-size: 1.28rem;
+  line-height: 1.26; color: var(--white); margin-bottom: 0.9rem;
+}
+.c-title em { color: var(--gold); font-style: italic; }
+.c-rule { width: 28px; height: 1.5px; background: var(--gold); opacity: 0.4; margin-bottom: 1rem; }
+.c-body {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.83rem; line-height: 1.78;
+  color: rgba(255,255,255,0.70); font-weight: 300;
+}
+.c-body em { color: var(--white); font-style: normal; font-weight: 500; }
+.c-footer {
+  margin-top: auto; padding-top: 1rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.58rem; letter-spacing: 0.12em; color: rgba(255,255,255,0.18);
+}
+
+/* ── CTA SLIDE ── */
+.cta-body { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.cta-save {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.58rem; letter-spacing: 0.24em;
+  text-transform: uppercase; color: var(--gold);
+  margin-bottom: 1.4rem; opacity: 0.7;
+}
+.cta-quote {
+  font-family: 'Fraunces', serif; font-optical-sizing: auto;
+  font-weight: 600; font-style: italic;
+  font-size: 1.15rem; line-height: 1.5; color: var(--white);
+  border-left: 2px solid var(--gold);
+  padding-left: 1.2rem; margin-bottom: 2rem;
+}
+.cta-question {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.78rem; line-height: 1.6;
+  color: rgba(255,255,255,0.55); font-weight: 300;
+  margin-bottom: 1.4rem;
+}
+.cta-question em { color: var(--gold); font-style: normal; font-weight: 500; }
+.cta-handle {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.6rem; letter-spacing: 0.14em; color: var(--muted);
+}
+
+/* ── PROGRESS & NAV ── */
+.progress { display: flex; gap: 6px; align-items: center; }
+.dot {
+  width: 6px; height: 6px; border-radius: 3px;
+  background: #2a2a2a; cursor: pointer; transition: all 0.3s;
+}
+.dot.active { background: var(--gold); width: 22px; }
+
+.nav-row { display: flex; gap: 0.8rem; }
+.btn {
+  padding: 0.45rem 1.1rem;
+  border: 1px solid var(--gold-dim); border-radius: 8px;
+  background: transparent; color: var(--gold);
+  font-size: 0.75rem; font-family: 'Outfit', sans-serif;
+  cursor: pointer; transition: all 0.2s; letter-spacing: 0.04em;
+}
+.btn:hover { background: var(--gold); color: #000; }
+.btn:disabled { opacity: 0.2; cursor: default; pointer-events: none; }
+
+.copy-btn {
+  padding: 0.3rem 0.9rem; border: 1px solid #252525; border-radius: 6px;
+  background: transparent; color: #484848;
+  font-size: 0.68rem; font-family: 'Outfit', sans-serif;
+  cursor: pointer; transition: all 0.2s;
+}
+.copy-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
+
+/* ── PANEL ── */
+.panel { flex: 1; padding: 2.5rem 2.8rem; overflow-y: auto; background: #070707; }
+.panel-title {
+  font-family: 'Fraunces', serif; font-optical-sizing: auto;
+  color: var(--gold); font-size: 1rem; font-weight: 600;
+  margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #181818;
+}
+.text-label {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.54rem; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--gold); opacity: 0.65;
+  margin-top: 1.8rem; margin-bottom: 0.4rem; display: block;
+}
+.all-text { font-size: 0.82rem; color: #484848; line-height: 1.8; white-space: pre-wrap; font-family: 'Outfit', sans-serif; }
+
+.caption-box {
+  margin-top: 3rem; padding: 1.6rem;
+  border: 1px solid #181818; border-radius: 12px; background: #0c0c0c;
+}
+.caption-label {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.54rem; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--gold); opacity: 0.75;
+  margin-bottom: 1rem; display: block;
+}
+.caption-text { font-size: 0.8rem; color: #484848; line-height: 1.78; white-space: pre-wrap; font-family: 'Outfit', sans-serif; }
+
+.download-btn {
+  display: block; margin-top: 1.5rem; padding: 0.75rem; width: 100%;
+  border: 1px solid #1e1e1e; border-radius: 8px;
+  background: transparent; color: #3a3a3a;
+  font-size: 0.75rem; font-family: 'Outfit', sans-serif;
+  cursor: pointer; text-align: center; transition: all 0.2s; letter-spacing: 0.06em;
+}
+.download-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
+</style>
+</head>
+<body>
+
+<div class="viewer">
+  <div class="slide-wrap">
+
+    <!-- SLIDE 1 — PORTADA -->
+    <div class="slide slide-portada active" id="s1">
+      <div class="top-bar">
+        <div class="brand">
+          <img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt="">
+          <span class="brand-name">Endonautas</span>
+        </div>
+        <span class="slide-num">1 / 5</span>
+      </div>
+      <div class="spacer"></div>
+      <div class="eyebrow">Endonautas · método</div>
+      <div class="hook">¿Estás trabajando el síntoma<br>o el <em>mapa</em>?</div>
+      <div class="sub">Tres señales para saberlo.</div>
+      <div class="swipe">Desliza </div>
+    </div>
+
+    <!-- SLIDE 2 — SEÑAL 1 -->
+    <div class="slide slide-content" id="s2">
+      <div class="top-bar">
+        <div class="brand">
+          <img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt="">
+          <span class="brand-name">Endonautas</span>
+        </div>
+        <span class="slide-num">2 / 5</span>
+      </div>
+      <div class="content-body">
+        <div class="c-label">Señal 01</div>
+        <div class="c-title">El patrón vuelve<br>cuando hay <em>estrés</em>.</div>
+        <div class="c-rule"></div>
+        <div class="c-body">Desaparece cuando todo va bien.<br>Regresa cuando hay presión.<br><br><em>El mapa no cambia con el contexto.</em></div>
+      </div>
+      <div class="c-footer">@endonautas</div>
+    </div>
+
+    <!-- SLIDE 3 — SEÑAL 2 -->
+    <div class="slide slide-content" id="s3">
+      <div class="top-bar">
+        <div class="brand">
+          <img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt="">
+          <span class="brand-name">Endonautas</span>
+        </div>
+        <span class="slide-num">3 / 5</span>
+      </div>
+      <div class="content-body">
+        <div class="c-label">Señal 02</div>
+        <div class="c-title">Cambias la conducta.<br>La tensión <em>no cambia</em>.</div>
+        <div class="c-rule"></div>
+        <div class="c-body">Dejas de hacer X.<br>Pero la sensación interna sigue igual.<br><br><em>La conducta era solo la expresión.</em><br>El patrón de origen sigue intacto.</div>
+      </div>
+      <div class="c-footer">@endonautas</div>
+    </div>
+
+    <!-- SLIDE 4 — SEÑAL 3 -->
+    <div class="slide slide-content" id="s4">
+      <div class="top-bar">
+        <div class="brand">
+          <img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt="">
+          <span class="brand-name">Endonautas</span>
+        </div>
+        <span class="slide-num">4 / 5</span>
+      </div>
+      <div class="content-body">
+        <div class="c-label">Señal 03</div>
+        <div class="c-title">Tienes que<br><em>recordártelo</em> siempre.</div>
+        <div class="c-rule"></div>
+        <div class="c-body">Si requiere esfuerzo consciente<br>para no volver al patrón,<br><br><em>el mapa no ha cambiado.</em><br>Solo hay fuerza de voluntad encima.</div>
+      </div>
+      <div class="c-footer">@endonautas</div>
+    </div>
+
+    <!-- SLIDE 5 — CTA -->
+    <div class="slide slide-cta" id="s5">
+      <div class="top-bar">
+        <div class="brand">
+          <img class="brand-logo" src="file:///home/nikka/Proyectos/endonautas/assets/logo-alt.png" alt="">
+          <span class="brand-name">Endonautas</span>
+        </div>
+        <span class="slide-num">5 / 5</span>
+      </div>
+      <div class="cta-body">
+        <div class="cta-save">↓ Guarda esto</div>
+        <div class="cta-quote">Cuando el mapa cambia,<br>el comportamiento<br>cambia solo.</div>
+        <div class="cta-question">¿Cuál de las tres señales<br>reconociste en <em>ti</em>?</div>
+        <div class="cta-handle">@endonautas</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="progress" id="progress"></div>
+  <div class="nav-row">
+    <button class="btn" id="btnPrev" onclick="go(-1)" disabled>← Anterior</button>
+    <button class="btn" id="btnNext" onclick="go(1)">Siguiente →</button>
+  </div>
+  <button class="copy-btn" onclick="copySlide()">Copiar texto de este slide</button>
+</div>
+
+<div class="panel">
+  <div class="panel-title">B10 — Síntoma vs Mapa</div>
+  <div id="allText"></div>
+
+  <div class="caption-box">
+    <span class="caption-label">Caption · CTA Tipo A + C</span>
+    <div class="caption-text" id="captionText">¿Llevas tiempo trabajando en ti mismo pero los mismos patrones siguen apareciendo?
+
+Puede que no sea falta de esfuerzo.
+Puede que estés trabajando el síntoma, no el mapa.
+
+La diferencia es profunda — y una vez que la ves, no puedes des-verla.
+
+¿Cuál de las 3 señales reconociste en ti? Escríbela en los comentarios.
+
+.
+.
+.
+#autoconocimiento #procesointerior #patrones #endonautas #psicologiaprofunda #trabajointerior #sombra #consciencia #mapadelinterior #saludintegrativa</div>
+  </div>
+
+  <button class="download-btn" onclick="dlAll()">↓ Descargar todos los textos (.txt)</button>
+</div>
+
+<script>
+const SLIDES = [
+  { label: 'Slide 1 — Portada', text: '¿Estás trabajando el síntoma o el mapa?\nTres señales para saberlo.\n\nDesliza →' },
+  { label: 'Slide 2 — Señal 01', text: 'Señal 01\n\nEl patrón vuelve cuando hay estrés.\n\nDesaparece cuando todo va bien. Regresa cuando hay presión.\nEl mapa no cambia con el contexto.' },
+  { label: 'Slide 3 — Señal 02', text: 'Señal 02\n\nCambias la conducta. La tensión no cambia.\n\nDejas de hacer X. Pero la sensación interna sigue igual.\nLa conducta era solo la expresión. El patrón de origen sigue intacto.' },
+  { label: 'Slide 4 — Señal 03', text: 'Señal 03\n\nTienes que recordártelo siempre.\n\nSi requiere esfuerzo consciente para no volver al patrón, el mapa no ha cambiado.\nSolo hay fuerza de voluntad encima.' },
+  { label: 'Slide 5 — CTA', text: '↓ Guarda esto\n\n"Cuando el mapa cambia,\nel comportamiento cambia solo."\n\n¿Cuál de las tres señales reconociste en ti?\n\n@endonautas' },
+];
+
+let cur = 0;
+const N = SLIDES.length;
+
+function buildDots() {
+  const p = document.getElementById('progress');
+  SLIDES.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.onclick = () => goTo(i);
+    p.appendChild(d);
+  });
+}
+
+function buildPanel() {
+  const el = document.getElementById('allText');
+  SLIDES.forEach(s => {
+    const lbl = document.createElement('span');
+    lbl.className = 'text-label';
+    lbl.textContent = s.label;
+    el.appendChild(lbl);
+    const txt = document.createElement('div');
+    txt.className = 'all-text';
+    txt.textContent = s.text;
+    el.appendChild(txt);
+  });
+}
+
+function goTo(idx) {
+  document.getElementById('s'+(cur+1)).classList.remove('active');
+  document.querySelectorAll('.dot')[cur].classList.remove('active');
+  cur = idx;
+  document.getElementById('s'+(cur+1)).classList.add('active');
+  document.querySelectorAll('.dot')[cur].classList.add('active');
+  document.getElementById('btnPrev').disabled = cur === 0;
+  document.getElementById('btnNext').disabled = cur === N-1;
+}
+
+function go(d) { const n=cur+d; if(n>=0&&n<N) goTo(n); }
+
+function copySlide() {
+  navigator.clipboard.writeText(SLIDES[cur].text).then(() => {
+    const b = document.querySelector('.copy-btn');
+    b.textContent = '¡Copiado!';
+    setTimeout(() => b.textContent = 'Copiar texto de este slide', 1500);
+  });
+}
+
+function dlAll() {
+  let t = 'B10 — SÍNTOMA VS MAPA · ENDONAUTAS\n' + '='.repeat(38) + '\n\n';
+  SLIDES.forEach(s => { t += '— ' + s.label.toUpperCase() + ' —\n\n' + s.text + '\n\n' + '-'.repeat(30) + '\n\n'; });
+  t += '\nCAPTION:\n\n' + document.getElementById('captionText').textContent;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([t], {type:'text/plain'}));
+  a.download = 'B10-sintoma-vs-mapa.txt';
+  a.click();
+}
+
+buildDots();
+buildPanel();
+</script>
+</body>
+</html>

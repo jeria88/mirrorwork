@@ -1,0 +1,19 @@
+<line x1="129" y1="194" x2="346" y2="86" stroke="rgba(126,207,168,.22)" stroke-width=".6" fill="none"/>
+    <line x1="346" y1="86" x2="594" y2="238" stroke="rgba(126,207,168,.22)" stroke-width=".6" fill="none"/>
+    <line x1="594" y1="238" x2="842" y2="130" stroke="rgba(126,207,168,.22)" stroke-width=".6" fill="none"/>
+    <line x1="194" y1="626" x2="454" y2="518" stroke="rgba(126,207,168,.22)" stroke-width=".6" fill="none"/>
+    <line x1="454" y1="518" x2="734" y2="670" stroke="rgba(126,207,168,.22)" stroke-width=".6" fill="none"/>
+    <line x1="734" y1="670" x2="950" y2="562" stroke="rgba(126,207,168,.22)" stroke-width=".6" fill="none"/>
+    <line x1="86" y1="842" x2="302" y2="778" stroke="rgba(126,207,168,.22)" stroke-width=".6" fill="none"/>
+    <line x1="302" y1="778" x2="626" y2="907" stroke="rgba(126,207,168,.22)" stroke-width=".6" fill="none"/>
+    <circle cx="129" cy="194" r="2.5" fill="rgba(126,207,168,.65)" filter="url(#nd)"/>
+    <circle cx="346" cy="86" r="1.8" fill="rgba(126,200,207,.32)"/>
+    <circle cx="594" cy="238" r="2.5" fill="rgba(126,207,168,.65)" filter="url(#nd)"/>
+    <circle cx="842" cy="130" r="1.8" fill="rgba(126,200,207,.32)"/>
+    <circle cx="194" cy="626" r="2.5" fill="rgba(126,207,168,.65)" filter="url(#nd)"/>
+    <circle cx="454" cy="518" r="1.8" fill="rgba(126,200,207,.32)"/>
+    <circle cx="734" cy="670" r="2.5" fill="rgba(126,207,168,.65)" filter="url(#nd)"/>
+    <circle cx="950" cy="562" r="1.8" fill="rgba(126,200,207,.32)"/>
+    <circle cx="86" cy="842" r="2.5" fill="rgba(126,207,168,.65)" filter="url(#nd)"/>
+    <circle cx="302" cy="778" r="1.8" fill="rgba(126,200,207,.32)"/>
+    <circle cx="626" cy="907" r="2.5" fill="rgba(126,207,168,.65)" filter="url(#nd)"/>

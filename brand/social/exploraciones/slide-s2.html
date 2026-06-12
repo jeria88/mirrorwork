@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700;900&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1080px; height: 1080px;
+    background: #04020C;
+    overflow: hidden; position: relative;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    color: #F0E8DC;
+  }
+  .bg-grad {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 70% 55% at 80% 10%, #2A0E5C 0%, transparent 60%),
+      radial-gradient(ellipse 55% 50% at 10% 85%, #082E2E 0%, transparent 55%);
+  }
+  .stars { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .glow { position: absolute; border-radius: 50%; filter: blur(55px); pointer-events: none; }
+  .g1 { width: 460px; height: 460px; top: -100px; right: -60px; background: #4C1D95; opacity: 0.5; }
+  .g2 { width: 360px; height: 360px; bottom: -80px; left: -40px; background: #0F766E; opacity: 0.45; }
+  .content { position: absolute; inset: 0; padding: 72px 80px 64px; display: flex; flex-direction: column; justify-content: space-between; }
+  .top { display: flex; align-items: center; justify-content: space-between; }
+  .logo-wrap { display: flex; align-items: center; gap: 14px; }
+  .logo-img { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; opacity: 0.92; }
+  .logo-text { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 19px; letter-spacing: -0.01em; background: linear-gradient(135deg, #7ecfa8, #7ec8cf); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .tag { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(126,207,168,0.6); padding: 7px 16px; border: 1px solid rgba(126,207,168,0.2); border-radius: 100px; }
+  .middle { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 24px 0; }
+  .eyebrow { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(240,232,220,0.38); margin-bottom: 24px; }
+  h1 { font-weight: 900; font-size: 88px; line-height: 0.88; letter-spacing: -0.04em; color: #F0E8DC; margin-bottom: 32px; }
+  h1 em { font-style: italic; background: linear-gradient(135deg, #7ecfa8, #7ec8cf); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .desc { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; line-height: 1.6; color: rgba(240,232,220,0.52); max-width: 560px; }
+  .bottom { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(240,232,220,0.08); padding-top: 24px; }
+  .swipe { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 600; color: rgba(126,207,168,0.65); letter-spacing: 0.1em; text-transform: uppercase; }
+  .slide-count { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; color: rgba(240,232,220,0.22); letter-spacing: 0.1em; }
+</style>
+</head>
+<body>
+  <div class="bg-grad"></div>
+  <div class="glow g1"></div>
+  <div class="glow g2"></div>
+
+  <!-- S2: Constelaciones — pocas estrellas pero conectadas con líneas -->
+  <svg class="stars" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="cl1" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#7ecfa8" stop-opacity="0.5"/>
+        <stop offset="100%" stop-color="white" stop-opacity="0.1"/>
+      </linearGradient>
+      <linearGradient id="cl2" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="white" stop-opacity="0.1"/>
+        <stop offset="50%" stop-color="#7ec8cf" stop-opacity="0.35"/>
+        <stop offset="100%" stop-color="white" stop-opacity="0.1"/>
+      </linearGradient>
+    </defs>
+
+    <!-- Constelación superior -->
+    <line x1="92"  y1="48"  x2="234" y2="28"  stroke="url(#cl2)" stroke-width="0.8"/>
+    <line x1="234" y1="28"  x2="412" y2="62"  stroke="url(#cl2)" stroke-width="0.8"/>
+    <line x1="412" y1="62"  x2="588" y2="38"  stroke="url(#cl2)" stroke-width="0.8"/>
+    <line x1="588" y1="38"  x2="764" y2="72"  stroke="url(#cl2)" stroke-width="0.8"/>
+    <line x1="764" y1="72"  x2="910" y2="44"  stroke="url(#cl2)" stroke-width="0.8"/>
+    <line x1="910" y1="44"  x2="1018" y2="68" stroke="url(#cl2)" stroke-width="0.8"/>
+
+    <!-- Constelación zona media-alta (solo esquinas) -->
+    <line x1="48"  y1="148" x2="158" y2="112" stroke="url(#cl1)" stroke-width="0.7"/>
+    <line x1="158" y1="112" x2="294" y2="162" stroke="url(#cl1)" stroke-width="0.7"/>
+    <line x1="874" y1="120" x2="982" y2="148" stroke="url(#cl1)" stroke-width="0.7"/>
+    <line x1="982" y1="148" x2="1060" y2="118" stroke="url(#cl1)" stroke-width="0.7"/>
+
+    <!-- Constelación inferior -->
+    <line x1="82"  y1="894" x2="226" y2="918" stroke="url(#cl2)" stroke-width="0.8"/>
+    <line x1="226" y1="918" x2="388" y2="896" stroke="url(#cl2)" stroke-width="0.8"/>
+    <line x1="640" y1="910" x2="790" y2="882" stroke="url(#cl2)" stroke-width="0.8"/>
+    <line x1="790" y1="882" x2="942" y2="924" stroke="url(#cl2)" stroke-width="0.8"/>
+    <line x1="942" y1="924" x2="1040" y2="898" stroke="url(#cl2)" stroke-width="0.8"/>
+
+    <!-- Nodos de constelación superior -->
+    <circle cx="92"   cy="48"  r="2.8" fill="#7ecfa8" opacity="0.9"/>
+    <circle cx="234"  cy="28"  r="2.0" fill="white" opacity="0.75"/>
+    <circle cx="412"  cy="62"  r="3.2" fill="white" opacity="0.85"/>
+    <circle cx="588"  cy="38"  r="2.4" fill="#7ecfa8" opacity="0.80"/>
+    <circle cx="764"  cy="72"  r="2.8" fill="white" opacity="0.82"/>
+    <circle cx="910"  cy="44"  r="2.2" fill="#7ec8cf" opacity="0.78"/>
+    <circle cx="1018" cy="68"  r="2.6" fill="white" opacity="0.80"/>
+
+    <!-- Nodos zona media -->
+    <circle cx="48"  cy="148" r="2.0" fill="white" opacity="0.70"/>
+    <circle cx="158" cy="112" r="2.4" fill="#7ecfa8" opacity="0.75"/>
+    <circle cx="294" cy="162" r="2.2" fill="white" opacity="0.68"/>
+    <circle cx="874" cy="120" r="2.0" fill="white" opacity="0.68"/>
+    <circle cx="982" cy="148" r="2.6" fill="#7ec8cf" opacity="0.74"/>
+    <circle cx="1060" cy="118" r="2.2" fill="white" opacity="0.70"/>
+
+    <!-- Nodos zona inferior -->
+    <circle cx="82"  cy="894" r="2.4" fill="white" opacity="0.65"/>
+    <circle cx="226" cy="918" r="2.8" fill="#7ecfa8" opacity="0.72"/>
+    <circle cx="388" cy="896" r="2.2" fill="white" opacity="0.62"/>
+    <circle cx="640" cy="910" r="2.0" fill="white" opacity="0.60"/>
+    <circle cx="790" cy="882" r="3.0" fill="#7ecfa8" opacity="0.75"/>
+    <circle cx="942" cy="924" r="2.4" fill="white" opacity="0.65"/>
+    <circle cx="1040" cy="898" r="2.2" fill="#7ec8cf" opacity="0.68"/>
+
+    <!-- Estrellas sueltas — pocas, estratégicas -->
+    <circle cx="320" cy="18"  r="1.6" fill="white" opacity="0.60"/>
+    <circle cx="698" cy="14"  r="1.4" fill="white" opacity="0.55"/>
+    <circle cx="820" cy="162" r="1.8" fill="white" opacity="0.58"/>
+    <circle cx="36"  cy="280" r="1.5" fill="white" opacity="0.45"/>
+    <circle cx="1040" cy="260" r="1.6" fill="white" opacity="0.48"/>
+    <circle cx="480" cy="960" r="1.8" fill="white" opacity="0.50"/>
+    <circle cx="720" cy="970" r="1.5" fill="white" opacity="0.45"/>
+  </svg>
+
+  <div class="content">
+    <div class="top">
+      <div class="logo-wrap">
+        <img class="logo-img" src="file:///home/nikka/Proyectos/endonautas/assets/logo.png" alt="Logo Endonautas">
+        <span class="logo-text">Endonautas</span>
+      </div>
+      <div class="tag">Autoconocimiento</div>
+    </div>
+    <div class="middle">
+      <div class="eyebrow">Vínculos · Patrones</div>
+      <h1>La pelea<br>no fue por<br>lo que <em>dijiste.</em></h1>
+      <p class="desc">Fue por lo que eso activó. Y eso tiene un origen que vale la pena encontrar.</p>
+    </div>
+    <div class="bottom">
+      <div class="swipe">Desliza para ver →</div>
+      <div class="slide-count">01 / 09</div>
+    </div>
+  </div>
+</body>
+</html>
