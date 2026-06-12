@@ -255,6 +255,38 @@ class Command(BaseCommand):
                     obj = Comment(**clean_c)
                     obj.save(force_insert=True)
 
+                # Reset PostgreSQL sequences
+                from django.db import connection
+                if connection.vendor == 'postgresql':
+                    self.stdout.write("Sincronizando secuencias de PostgreSQL...")
+                    tables = [
+                        'accounts_user',
+                        'accounts_userprofile',
+                        'tokens_tokenbalance',
+                        'tokens_tokentransaction',
+                        'mirror_conflictsession',
+                        'mirror_espejomemoria',
+                        'psychometrics_testresult',
+                        'community_sharedinsight',
+                        'community_reaction',
+                        'community_comment',
+                    ]
+                    with connection.cursor() as cursor:
+                        for table in tables:
+                            try:
+                                cursor.execute(f"SELECT pg_get_serial_sequence('{table}', 'id')")
+                                seq_name = cursor.fetchone()[0]
+                                if seq_name:
+                                    cursor.execute(f"SELECT COALESCE(MAX(id), 0) FROM {table}")
+                                    max_id = cursor.fetchone()[0]
+                                    if max_id > 0:
+                                        cursor.execute(f"SELECT setval('{seq_name}', {max_id}, true)")
+                                        self.stdout.write(f"  ✓ Secuencia reseteada para {table}: {seq_name} (max_id={max_id})")
+                                else:
+                                    self.stdout.write(self.style.WARNING(f"No se encontró secuencia serial para {table}"))
+                            except Exception as e:
+                                self.stdout.write(self.style.WARNING(f"Error resincronizando secuencia para {table}: {e}"))
+
             self.stdout.write(self.style.SUCCESS("Migración finalizada con éxito."))
 
         finally:
