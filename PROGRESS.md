@@ -15,13 +15,20 @@
 - **Estrategia de Persistencia**: Documentado el esquema de montaje de volúmenes persistentes en Railway para resguardar la base de datos de JSONs y los archivos multimedia generados (`/app/studio/data`, `/app/contenido/carruseles/pngs`, `/app/contenido/reels/mp4`, `/app/contenido/reels/scripts`).
 
 #### Soporte Cloudflare R2
-- **Integración de S3**: Añadidas las librerías `django-storages[s3]` y `boto3` a [requirements.txt](file:///home/nikka/Proyectos/endonautas/mirrorwork/requirements.txt) y cargadas en el entorno local.
-- **Configuración Dinámica**: Modificado [settings.py](file:///home/nikka/Proyectos/endonautas/mirrorwork/config/settings.py) para utilizar el backend `S3Storage` apuntando a Cloudflare R2 únicamente si las variables de entorno AWS están presentes. Si no lo están, el sistema realiza un fallback automático al sistema de archivos local (`FileSystemStorage`).
+- **Integración de S3 (Django)**: Añadidas las librerías `django-storages[s3]` y `boto3` a [requirements.txt](file:///home/nikka/Proyectos/endonautas/mirrorwork/requirements.txt) y cargadas en el entorno local.
+- **Configuración Dinámica (Django)**: Modificado [settings.py](file:///home/nikka/Proyectos/endonautas/mirrorwork/config/settings.py) para utilizar el backend `S3Storage` apuntando a Cloudflare R2 únicamente si las variables de entorno AWS están presentes. Si no lo están, el sistema realiza un fallback automático al sistema de archivos local (`FileSystemStorage`).
 - **Variables de Entorno**: Registradas las credenciales y el dominio del bucket público `pub-d9b36e28a45945e0bc585b34b4647451.r2.dev` en el archivo [.env](file:///home/nikka/Proyectos/endonautas/mirrorwork/.env).
+- **Subida Directa en Content Studio (NodeJS)**: Añadida la dependencia `@aws-sdk/client-s3` en [package.json](file:///home/nikka/Proyectos/endonautas/mirrorwork/studio/package.json) e integrada en [server.mjs](file:///home/nikka/Proyectos/endonautas/mirrorwork/studio/server.mjs).
+  - **Reels renderizados**: Se suben automáticamente a R2 bajo la ruta virtual `cgm/reels/mp4/` al completarse el proceso de renderizado.
+  - **PNGs de carruseles**: Se suben automáticamente a R2 bajo la ruta virtual `cgm/carruseles/pngs/` tras ser generados con Puppeteer.
+  - **Assets subidos**: El endpoint de subida Multer guarda las imágenes cargadas por el usuario directo a R2 bajo la ruta `cgm/assets/`.
+  - **Sincronización de base de datos JSON**: Al guardar carruseles o reels, la base de datos JSON se respalda en R2. Al iniciar el servidor, se descarga y restaura automáticamente.
+  - **Redirección de previsualizaciones**: Las rutas de previsualización de video y fotos redirigen mediante HTTP 302 directamente al dominio del CDN de R2, liberando recursos del servidor y eliminando la necesidad de montar volúmenes persistentes en Railway.
 
 ### 🔶 Pendiente
 - Configurar las variables de entorno de Cloudflare R2 en el panel de control de Railway.
 - Monitorear el despliegue automático de Railway tras el push a `main`.
+
 
 
 ---
