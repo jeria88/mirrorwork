@@ -5,8 +5,20 @@
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <style>
   .etapas-bar {
-    display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 2rem;
+    display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.25rem;
   }
+  .filter-bar {
+    display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border); padding-bottom: 1rem;
+  }
+  .filter-btn {
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    font-size: 0.75rem; font-weight: 500; cursor: pointer;
+    padding: 0.4rem 0.9rem; border-radius: 999px; transition: all 0.15s;
+    font-family: var(--font-ui);
+  }
+  .filter-btn:hover { color: var(--text); border-color: var(--border2); }
+  .filter-btn.active { color: var(--gold); border-color: var(--gold); background: var(--gold-glow); }
   .etapa-pill {
     display: flex; align-items: center; gap: 0.5rem;
     background: var(--surface); border: 1px solid var(--border);
@@ -136,6 +148,14 @@
     {% endfor %}
   </div>
 
+  <!-- Filtro de Etapas -->
+  <div class="filter-bar">
+    <button class="filter-btn active" data-stage="all">Todas las fases</button>
+    {% for k, v in etapa_choices %}
+    <button class="filter-btn" data-stage="{{ k }}">{{ v }}</button>
+    {% endfor %}
+  </div>
+
   <!-- Kanban -->
   <div class="kanban">
 
@@ -227,19 +247,15 @@
 <script>
 const CSRF = '{{ csrf_token }}';
 
-function getCounts() {
-  return {
-    pendiente: document.getElementById('col-pendiente').children.length,
-    en_curso:  document.getElementById('col-en_curso').children.length,
-    listo:     document.getElementById('col-listo').children.length,
-  };
-}
-
 function updateCounts() {
-  const c = getCounts();
-  document.getElementById('cnt-pendiente').textContent = c.pendiente;
-  document.getElementById('cnt-en_curso').textContent  = c.en_curso;
-  document.getElementById('cnt-listo').textContent     = c.listo;
+  const activeFilter = document.querySelector('.filter-btn.active');
+  const stage = activeFilter ? activeFilter.dataset.stage : 'all';
+
+  ['pendiente', 'en_curso', 'listo'].forEach(estado => {
+    const colBody = document.getElementById('col-' + estado);
+    const count = Array.from(colBody.children).filter(c => stage === 'all' || c.dataset.etapa === stage).length;
+    document.getElementById('cnt-' + estado).textContent = count;
+  });
 }
 
 function celebrateCard(el) {
@@ -293,5 +309,23 @@ function eliminarTarea(id, btn) {
     }
   });
 }
+
+// Interactive Stage Filtering
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const stage = btn.dataset.stage;
+    document.querySelectorAll('.tarea-card').forEach(card => {
+      if (stage === 'all' || card.dataset.etapa === stage) {
+        card.style.display = 'block';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+    updateCounts();
+  });
+});
 </script>
 {% endblock %}

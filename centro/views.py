@@ -10,15 +10,15 @@ from django.views.decorators.http import require_POST
 from .models import IdeaCongelada, MetricaSemana, PostContenido, SesionRegistro, SetupItem, Tarea
 
 ETAPA_LABELS = {
-    '0': 'Etapa 0',
-    '1': 'Etapa 1',
-    '2': 'Etapa 2',
-    'backlog': 'Backlog',
+    '0': 'Pre-Lanzamiento',
+    '1': 'Lanzamiento y Captación',
+    '2': 'Análisis e Iteración',
+    'backlog': 'Backlog / Futuro',
 }
 
 ETAPA_COLORS = {
     '0': '#4ecdc4',
-    '1': '#EAB308',
+    '1': '#7ecfa8',
     '2': '#a78bfa',
     'backlog': '#52525b',
 }
@@ -45,6 +45,29 @@ def _etapa_progress(etapa_key):
 def index(request):
     today = date.today()
     weekday = today.weekday()  # 0=Monday … 6=Sunday
+
+    # Dynamic metrics from across apps
+    from wagtail.models import Page
+    from blog.models import BlogPost, BlogSubmission
+    from crm.models import Subscriber, SentEmail
+    from accounts.models import User
+    from psychometrics.models import TestResult
+    from mirror.models import ConflictSession
+
+    cms_stats = {
+        'total_pages': Page.objects.count(),
+        'live_posts': BlogPost.objects.live().count(),
+        'submissions': BlogSubmission.objects.count(),
+    }
+    crm_stats = {
+        'active_subscribers': Subscriber.objects.filter(is_active=True).count(),
+        'sent_emails': SentEmail.objects.count(),
+    }
+    app_stats = {
+        'total_users': User.objects.count(),
+        'completed_tests': TestResult.objects.count(),
+        'espejo_chats': ConflictSession.objects.count(),
+    }
 
     setup_total, setup_done, setup_pct = _setup_progress()
     e0_total, e0_done, e0_pct = _etapa_progress('0')
@@ -87,6 +110,9 @@ def index(request):
         'sugerencia': sugerencia,
         'ideas_count': ideas_count,
         'ultima_sesion': ultima_sesion,
+        'cms_stats': cms_stats,
+        'crm_stats': crm_stats,
+        'app_stats': app_stats,
     })
 
 

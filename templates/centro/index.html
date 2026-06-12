@@ -8,7 +8,7 @@
   .hero-title span { color: var(--gold); }
 
   .sugerencia {
-    border: 1px solid rgba(234,179,8,0.25);
+    border: 1px solid var(--border);
     background: var(--gold-glow);
     border-radius: var(--r);
     padding: 1.1rem 1.4rem;
@@ -19,24 +19,92 @@
   .sugerencia-text { font-size: 0.9rem; }
   .sugerencia-text strong { color: var(--gold); }
 
-  .dash-grid {
+  /* ── Unified Dashboard Layers Grid ── */
+  .layers-grid {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 1rem;
-    margin-bottom: 2rem;
+    gap: 1.25rem;
+    margin-bottom: 2.5rem;
   }
 
-  .stat-card {
+  .layer-card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--r);
-    padding: 1.25rem;
-    display: flex; flex-direction: column; gap: 0.5rem;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .layer-card:hover {
+    border-color: var(--border2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
   }
 
-  .urgentes-section { margin-top: 2rem; }
+  .layer-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+  .layer-icon {
+    font-size: 1.4rem;
+    color: var(--gold);
+    background: var(--gold-dim);
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .layer-title {
+    font-family: var(--font-h);
+    font-size: 1.25rem;
+    font-weight: 400;
+  }
+
+  .layer-metrics {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+  .metric-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    padding-bottom: 0.5rem;
+  }
+  .metric-label {
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+  .metric-val {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  /* ── Progress & Kanban Summary ── */
+  .dashboard-columns {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .urgentes-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
   .urgente-item {
-    display: flex; align-items: center; gap: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
     padding: 0.65rem 0.75rem;
     border-radius: var(--r-sm);
     transition: background 0.15s;
@@ -48,11 +116,40 @@
   .urgente-titulo { font-size: 0.85rem; flex: 1; }
   .urgente-etapa  { font-size: 0.68rem; color: var(--muted); flex-shrink: 0; }
 
+  .empty-urgentes {
+    text-align: center; padding: 3rem 1.5rem;
+    color: var(--muted); font-size: 0.85rem;
+  }
+
+  .summary-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+  .summary-stat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .summary-num {
+    font-family: var(--font-h);
+    font-size: 1.8rem;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  /* ── Acceso rápido ── */
+  .quick-actions-section {
+    margin-top: 1.5rem;
+  }
   .accesos {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     gap: 0.75rem;
-    margin-top: 2rem;
   }
   .acceso-btn {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -70,15 +167,11 @@
     color: var(--gold);
   }
   .acceso-icon { font-size: 1.3rem; }
-  .acceso-label { font-size: 0.72rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+  .acceso-label { font-size: 0.7rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
 
-  .empty-urgentes {
-    text-align: center; padding: 2rem;
-    color: var(--muted); font-size: 0.85rem;
-  }
-
-  @media (max-width: 768px) {
-    .dash-grid { grid-template-columns: 1fr 1fr; }
+  @media (max-width: 992px) {
+    .layers-grid { grid-template-columns: 1fr; }
+    .dashboard-columns { grid-template-columns: 1fr; }
     .accesos { grid-template-columns: repeat(3, 1fr); }
   }
 </style>
@@ -103,96 +196,218 @@
   </div>
   {% endif %}
 
-  <!-- Stats -->
-  <div class="dash-grid">
-    <div class="stat-card">
-      <div class="card-title">Setup Etapa 0</div>
-      <div class="stat-num" id="setup-pct">{{ setup_pct }}%</div>
-      <div class="stat-label">{{ setup_done }}/{{ setup_total }} configuradas</div>
-      <div class="progress-wrap">
-        <div class="progress-bar">
-          <div class="progress-fill" style="width:{{ setup_pct }}%"></div>
+  <!-- ── 1. UNIDADES OPERATIVAS DE LA PLATAFORMA ── -->
+  <h2 class="card-title" style="margin-bottom: 1rem; letter-spacing: 0.15em;">Unidades de la Plataforma</h2>
+  <div class="layers-grid">
+    
+    <!-- Capa 1: Frontend & CMS (Wagtail) -->
+    <div class="layer-card">
+      <div>
+        <div class="layer-header">
+          <div class="layer-icon">📄</div>
+          <h3 class="layer-title">Frontend & CMS</h3>
+        </div>
+        <p style="font-size:0.78rem; color:var(--muted); margin-bottom:1.25rem;">
+          Capa pública del portal: blog indexado, artículos informativos y control editorial.
+        </p>
+        <div class="layer-metrics">
+          <div class="metric-item">
+            <span class="metric-label">Páginas Totales</span>
+            <span class="metric-val">{{ cms_stats.total_pages }}</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Artículos Publicados</span>
+            <span class="metric-val">{{ cms_stats.live_posts }}</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Postulaciones Blog</span>
+            <span class="metric-val">{{ cms_stats.submissions }}</span>
+          </div>
         </div>
       </div>
-      <a href="{% url 'centro:setup' %}" class="btn btn-ghost btn-sm" style="margin-top:0.5rem">Ver checklist →</a>
+      <a href="/cms/" target="_blank" class="btn btn-ghost btn-sm" style="width:100%; justify-content:center;">
+        Wagtail CMS Admin ↗
+      </a>
     </div>
 
-    <div class="stat-card">
-      <div class="card-title">Hoja de Ruta — Etapa 0</div>
-      <div class="stat-num">{{ e0_pct }}%</div>
-      <div class="stat-label">{{ e0_done }}/{{ e0_total }} tareas listas</div>
-      <div class="progress-wrap">
-        <div class="progress-bar">
-          <div class="progress-fill teal" style="width:{{ e0_pct }}%"></div>
+    <!-- Capa 2: CRM & Automatización (n8n & Email) -->
+    <div class="layer-card">
+      <div>
+        <div class="layer-header">
+          <div class="layer-icon">✉</div>
+          <h3 class="layer-title">CRM & Email</h3>
+        </div>
+        <p style="font-size:0.78rem; color:var(--muted); margin-bottom:1.25rem;">
+          Nutrición de leads, campañas informativas, secuencias autoresponder y SMTP.
+        </p>
+        <div class="layer-metrics">
+          <div class="metric-item">
+            <span class="metric-label">Suscriptores Activos</span>
+            <span class="metric-val">{{ crm_stats.active_subscribers }}</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Emails Enviados</span>
+            <span class="metric-val">{{ crm_stats.sent_emails }}</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Integración</span>
+            <span class="metric-val" style="color:var(--green)">Brevo Activo</span>
+          </div>
         </div>
       </div>
-      <a href="{% url 'centro:hoja_de_ruta' %}" class="btn btn-ghost btn-sm" style="margin-top:0.5rem">Ver kanban →</a>
+      <a href="{% url 'crm:dashboard' %}" class="btn btn-ghost btn-sm" style="width:100%; justify-content:center;">
+        Ver CRM Dashboard ↗
+      </a>
     </div>
 
-    <div class="stat-card">
-      <div class="card-title">Ideas congeladas</div>
-      <div class="stat-num">{{ ideas_count }}</div>
-      <div class="stat-label">pendientes de revisar en mes 3</div>
-      {% if ultima_sesion %}
-      <div style="margin-top:auto; font-size:0.75rem; color:var(--muted);">
-        Última sesión: {{ ultima_sesion.get_tipo_display }} {{ ultima_sesion.fecha|date:"j/m" }}
+    <!-- Capa 3: App Core & Base de Datos -->
+    <div class="layer-card">
+      <div>
+        <div class="layer-header">
+          <div class="layer-icon">⚙</div>
+          <h3 class="layer-title">Portal & App Core</h3>
+        </div>
+        <p style="font-size:0.78rem; color:var(--muted); margin-bottom:1.25rem;">
+          Autenticación, motor del Espejo de IA, tests psicométricos y economía de Fractones.
+        </p>
+        <div class="layer-metrics">
+          <div class="metric-item">
+            <span class="metric-label">Usuarios Registrados</span>
+            <span class="metric-val">{{ app_stats.total_users }}</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Tests Completados</span>
+            <span class="metric-val">{{ app_stats.completed_tests }}</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Sesiones del Espejo</span>
+            <span class="metric-val">{{ app_stats.espejo_chats }}</span>
+          </div>
+        </div>
+      </div>
+      <a href="/admin/" target="_blank" class="btn btn-ghost btn-sm" style="width:100%; justify-content:center;">
+        Django Admin Panel ↗
+      </a>
+    </div>
+
+  </div>
+
+  <!-- ── 2. METAS, SETUP Y TAREAS EN CURSO ── -->
+  <div class="dashboard-columns">
+    
+    <!-- Tareas en Curso -->
+    <div class="urgentes-section card">
+      <div class="card-title" style="margin-bottom:1.25rem">
+        Tareas en curso
+        {% if tareas_urgentes %}— <span style="color:var(--gold)">{{ tareas_urgentes|length }}</span>{% endif %}
+      </div>
+
+      <div>
+        {% if tareas_urgentes %}
+          {% for tarea in tareas_urgentes %}
+          <div class="urgente-item">
+            <div class="etapa-dot"
+              style="background:{% if tarea.etapa == '0' %}var(--teal){% elif tarea.etapa == '1' %}var(--gold){% elif tarea.etapa == '2' %}var(--purple){% else %}var(--dim){% endif %}">
+            </div>
+            <div class="urgente-titulo">{{ tarea.titulo }}</div>
+            <div class="urgente-etapa">{{ tarea.get_etapa_display }}</div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-urgentes">
+            Sin tareas en curso — todo al día.<br>
+            <a href="{% url 'centro:hoja_de_ruta' %}" style="color:var(--gold); text-decoration:none; font-size:0.8rem; margin-top: 0.5rem; display: inline-block;">
+              Revisar Hoja de Ruta →
+            </a>
+          </div>
+        {% endif %}
+      </div>
+      
+      {% if tareas_urgentes %}
+      <div style="margin-top:1.5rem; border-top:1px solid var(--border); padding-top:0.75rem;">
+        <a href="{% url 'centro:hoja_de_ruta' %}" class="btn btn-ghost btn-sm" style="width:100%; justify-content:center;">
+          Ir al Tablero Kanban
+        </a>
       </div>
       {% endif %}
-      <a href="{% url 'centro:ideas' %}" class="btn btn-ghost btn-sm" style="margin-top:0.5rem">Ver ideas →</a>
-    </div>
-  </div>
-
-  <!-- Tareas en curso -->
-  <div class="urgentes-section card">
-    <div class="card-title" style="margin-bottom:1rem">
-      Tareas en curso
-      {% if tareas_urgentes %}— <span style="color:var(--gold)">{{ tareas_urgentes|length }}</span>{% endif %}
     </div>
 
-    {% if tareas_urgentes %}
-      {% for tarea in tareas_urgentes %}
-      <div class="urgente-item">
-        <div class="etapa-dot"
-          style="background:{% if tarea.etapa == '0' %}var(--teal){% elif tarea.etapa == '1' %}var(--gold){% elif tarea.etapa == '2' %}var(--purple){% else %}var(--dim){% endif %}">
+    <!-- Progreso y Resúmenes -->
+    <div class="summary-card">
+      <div class="card-title" style="margin-bottom:0">Progreso del Lanzamiento</div>
+
+      <div>
+        <div class="summary-stat">
+          <span class="metric-label">Setup (Etapa 0)</span>
+          <span class="summary-num">{{ setup_pct }}%</span>
         </div>
-        <div class="urgente-titulo">{{ tarea.titulo }}</div>
-        <div class="urgente-etapa">{{ tarea.get_etapa_display }}</div>
+        <div class="progress-wrap">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width:{{ setup_pct }}%"></div>
+          </div>
+        </div>
+        <span style="font-size:0.72rem; color:var(--muted)">{{ setup_done }} de {{ setup_total }} completados</span>
       </div>
-      {% endfor %}
-    {% else %}
-      <div class="empty-urgentes">
-        Sin tareas en curso — todo limpio.<br>
-        <a href="{% url 'centro:hoja_de_ruta' %}" style="color:var(--gold); text-decoration:none; font-size:0.8rem;">Ir al kanban →</a>
+
+      <div>
+        <div class="summary-stat">
+          <span class="metric-label">Ruta (Etapa 0)</span>
+          <span class="summary-num">{{ e0_pct }}%</span>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-bar">
+            <div class="progress-fill" style="background:var(--teal); width:{{ e0_pct }}%"></div>
+          </div>
+        </div>
+        <span style="font-size:0.72rem; color:var(--muted)">{{ e0_done }} de {{ e0_total }} tareas listas</span>
       </div>
-    {% endif %}
+
+      <div style="border-top: 1px solid var(--border); padding-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <span class="metric-label" style="display:block;">Ideas en Espera</span>
+          <span style="font-size:0.72rem; color:var(--muted)">Planificación mes 3</span>
+        </div>
+        <span class="summary-num">{{ ideas_count }}</span>
+      </div>
+
+      {% if ultima_sesion %}
+      <div style="font-size:0.72rem; color:var(--muted); text-align:center; margin-top:auto;">
+        Última sesión: {{ ultima_sesion.get_tipo_display }} el {{ ultima_sesion.fecha|date:"d/m" }}
+      </div>
+      {% endif %}
+    </div>
+
   </div>
 
-  <!-- Acceso rápido -->
-  <div class="accesos">
-    <a href="{% url 'centro:hoja_de_ruta' %}" class="acceso-btn">
-      <span class="acceso-icon">◈</span>
-      <span class="acceso-label">Hoja de Ruta</span>
-    </a>
-    <a href="{% url 'centro:setup' %}" class="acceso-btn">
-      <span class="acceso-icon">✓</span>
-      <span class="acceso-label">Setup</span>
-    </a>
-    <a href="{% url 'centro:calendario' %}" class="acceso-btn">
-      <span class="acceso-icon">◷</span>
-      <span class="acceso-label">Calendario</span>
-    </a>
-    <a href="{% url 'centro:metricas' %}" class="acceso-btn">
-      <span class="acceso-icon">↗</span>
-      <span class="acceso-label">Métricas</span>
-    </a>
-    <a href="{% url 'centro:chequeo_semanal' %}" class="acceso-btn">
-      <span class="acceso-icon">◎</span>
-      <span class="acceso-label">Chequeo</span>
-    </a>
-    <a href="{% url 'centro:sesion_quincenal' %}" class="acceso-btn">
-      <span class="acceso-icon">✦</span>
-      <span class="acceso-label">Quincenal</span>
-    </a>
+  <!-- ── 3. ACCESOS RÁPIDOS ── -->
+  <div class="quick-actions-section">
+    <h2 class="card-title" style="margin-bottom:1rem; letter-spacing: 0.15em;">Herramientas Administrativas</h2>
+    <div class="accesos">
+      <a href="{% url 'centro:hoja_de_ruta' %}" class="acceso-btn">
+        <span class="acceso-icon">◈</span>
+        <span class="acceso-label">Hoja de Ruta</span>
+      </a>
+      <a href="{% url 'centro:setup' %}" class="acceso-btn">
+        <span class="acceso-icon">✓</span>
+        <span class="acceso-label">Setup</span>
+      </a>
+      <a href="{% url 'centro:calendario' %}" class="acceso-btn">
+        <span class="acceso-icon">◷</span>
+        <span class="acceso-label">Calendario</span>
+      </a>
+      <a href="{% url 'centro:metricas' %}" class="acceso-btn">
+        <span class="acceso-icon">↗</span>
+        <span class="acceso-label">Métricas</span>
+      </a>
+      <a href="{% url 'centro:chequeo_semanal' %}" class="acceso-btn">
+        <span class="acceso-icon">◎</span>
+        <span class="acceso-label">Chequeo</span>
+      </a>
+      <a href="{% url 'centro:sesion_quincenal' %}" class="acceso-btn">
+        <span class="acceso-icon">✦</span>
+        <span class="acceso-label">Quincenal</span>
+      </a>
+    </div>
   </div>
 
 </div>

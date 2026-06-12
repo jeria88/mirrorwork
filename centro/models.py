@@ -33,10 +33,10 @@ class Tarea(models.Model):
         ('listo', 'Listo'),
     ]
     ETAPA_CHOICES = [
-        ('0', 'Etapa 0'),
-        ('1', 'Etapa 1'),
-        ('2', 'Etapa 2'),
-        ('backlog', 'Backlog'),
+        ('0', 'Pre-Lanzamiento'),
+        ('1', 'Lanzamiento y Captación'),
+        ('2', 'Análisis e Iteración'),
+        ('backlog', 'Backlog / Futuro'),
     ]
     titulo = models.CharField(max_length=200)
     descripcion = models.TextField(blank=True)
