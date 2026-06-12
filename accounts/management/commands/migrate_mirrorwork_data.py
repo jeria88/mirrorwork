@@ -97,8 +97,6 @@ class Command(BaseCommand):
 
                 # 2. Perfiles de usuario
                 for p in profiles:
-                    if UserProfile.objects.filter(id=p['id']).exists():
-                        continue
                     if not User.objects.filter(id=p['user_id']).exists():
                         continue
                     
@@ -109,18 +107,35 @@ class Command(BaseCommand):
                         p['onboarding_nucleo'] = json.loads(p['onboarding_nucleo'])
                         
                     clean_p = clean_record(UserProfile, p)
-                    obj = UserProfile(**clean_p)
-                    obj.save(force_insert=True)
+                    
+                    # Al ser OneToOne, si ya existe el perfil del usuario (creado por signals), lo actualizamos
+                    existing_p = UserProfile.objects.filter(user_id=p['user_id']).first()
+                    if existing_p:
+                        for key, val in clean_p.items():
+                            if key != 'id':
+                                setattr(existing_p, key, val)
+                        existing_p.save()
+                    else:
+                        obj = UserProfile(**clean_p)
+                        obj.save(force_insert=True)
 
                 # 3. Balances de Fractones
                 for b in balances:
-                    if TokenBalance.objects.filter(id=b['id']).exists():
-                        continue
                     if not User.objects.filter(id=b['user_id']).exists():
                         continue
+                    
                     clean_b = clean_record(TokenBalance, b)
-                    obj = TokenBalance(**clean_b)
-                    obj.save(force_insert=True)
+                    
+                    # Al ser OneToOne, si ya existe el balance (creado por signals), lo actualizamos
+                    existing_b = TokenBalance.objects.filter(user_id=b['user_id']).first()
+                    if existing_b:
+                        for key, val in clean_b.items():
+                            if key != 'id':
+                                setattr(existing_b, key, val)
+                        existing_b.save()
+                    else:
+                        obj = TokenBalance(**clean_b)
+                        obj.save(force_insert=True)
 
                 # 4. Transacciones
                 for t in transactions:
