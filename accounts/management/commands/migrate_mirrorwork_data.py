@@ -65,6 +65,17 @@ class Command(BaseCommand):
                 from psychometrics.models import TestResult
                 from community.models import SharedInsight, Reaction, Comment
 
+                # Helper to filter keys matching active Django model fields
+                def clean_record(model, data):
+                    valid_keys = {f.name for f in model._meta.get_fields()}
+                    clean_data = {}
+                    for k, v in data.items():
+                        if k in valid_keys:
+                            clean_data[k] = v
+                        elif k.endswith('_id') and k[:-3] in valid_keys:
+                            clean_data[k] = v
+                    return clean_data
+
                 # 1. Usuarios
                 for u in users:
                     if User.objects.filter(id=u['id']).exists():
@@ -79,7 +90,8 @@ class Command(BaseCommand):
                     u['is_staff'] = bool(u.get('is_staff'))
                     u['is_active'] = bool(u.get('is_active'))
                     
-                    obj = User(**u)
+                    clean_u = clean_record(User, u)
+                    obj = User(**clean_u)
                     obj.save(force_insert=True)
                     self.stdout.write(f"  ✓ Importado usuario: {u['email']}")
 
@@ -96,7 +108,8 @@ class Command(BaseCommand):
                     if isinstance(p.get('onboarding_nucleo'), str):
                         p['onboarding_nucleo'] = json.loads(p['onboarding_nucleo'])
                         
-                    obj = UserProfile(**p)
+                    clean_p = clean_record(UserProfile, p)
+                    obj = UserProfile(**clean_p)
                     obj.save(force_insert=True)
 
                 # 3. Balances de Fractones
@@ -105,7 +118,8 @@ class Command(BaseCommand):
                         continue
                     if not User.objects.filter(id=b['user_id']).exists():
                         continue
-                    obj = TokenBalance(**b)
+                    clean_b = clean_record(TokenBalance, b)
+                    obj = TokenBalance(**clean_b)
                     obj.save(force_insert=True)
 
                 # 4. Transacciones
@@ -114,7 +128,8 @@ class Command(BaseCommand):
                         continue
                     if not User.objects.filter(id=t['user_id']).exists():
                         continue
-                    obj = TokenTransaction(**t)
+                    clean_t = clean_record(TokenTransaction, t)
+                    obj = TokenTransaction(**clean_t)
                     obj.save(force_insert=True)
 
                 # 5. Sesiones de Conflicto
@@ -127,7 +142,8 @@ class Command(BaseCommand):
                     if isinstance(s.get('messages'), str):
                         s['messages'] = json.loads(s['messages'])
                         
-                    obj = ConflictSession(**s)
+                    clean_s = clean_record(ConflictSession, s)
+                    obj = ConflictSession(**clean_s)
                     obj.save(force_insert=True)
                     self.stdout.write(f"  ✓ Importada sesión del espejo: {s['title'] or s['id']}")
 
@@ -141,7 +157,8 @@ class Command(BaseCommand):
                         m['sesion_origen_id'] = None
                         
                     m['activa'] = bool(m.get('activa'))
-                    obj = EspejoMemoria(**m)
+                    clean_m = clean_record(EspejoMemoria, m)
+                    obj = EspejoMemoria(**clean_m)
                     obj.save(force_insert=True)
 
                 # 7. Resultados de Tests
@@ -159,7 +176,8 @@ class Command(BaseCommand):
                     if isinstance(r.get('metadata'), str):
                         r['metadata'] = json.loads(r['metadata'])
                         
-                    obj = TestResult(**r)
+                    clean_r = clean_record(TestResult, r)
+                    obj = TestResult(**clean_r)
                     obj.save(force_insert=True)
 
                 # 8. Posts de comunidad (SharedInsight)
@@ -176,11 +194,8 @@ class Command(BaseCommand):
                     if 'is_free' in po:
                         po.pop('is_free')
                         
-                    # Filter keys to match model fields
-                    valid_keys = {f.name for f in SharedInsight._meta.get_fields()}
-                    filtered_po = {k: v for k, v in po.items() if k in valid_keys or k + '_id' in valid_keys}
-                    
-                    obj = SharedInsight(**filtered_po)
+                    clean_po = clean_record(SharedInsight, po)
+                    obj = SharedInsight(**clean_po)
                     obj.save(force_insert=True)
 
                 # 9. Likes (Reaction)
@@ -194,10 +209,8 @@ class Command(BaseCommand):
                     if 'type' not in l:
                         l['type'] = 'resonó'
                         
-                    valid_keys = {f.name for f in Reaction._meta.get_fields()}
-                    filtered_l = {k: v for k, v in l.items() if k in valid_keys or k + '_id' in valid_keys}
-                    
-                    obj = Reaction(**filtered_l)
+                    clean_l = clean_record(Reaction, l)
+                    obj = Reaction(**clean_l)
                     obj.save(force_insert=True)
 
                 # 10. Comentarios (Comment)
@@ -209,10 +222,8 @@ class Command(BaseCommand):
                     if 'post_id' in c_item and 'insight_id' not in c_item:
                         c_item['insight_id'] = c_item.pop('post_id')
                         
-                    valid_keys = {f.name for f in Comment._meta.get_fields()}
-                    filtered_c = {k: v for k, v in c_item.items() if k in valid_keys or k + '_id' in valid_keys}
-                    
-                    obj = Comment(**filtered_c)
+                    clean_c = clean_record(Comment, c_item)
+                    obj = Comment(**clean_c)
                     obj.save(force_insert=True)
 
             self.stdout.write(self.style.SUCCESS("Migración finalizada con éxito."))
