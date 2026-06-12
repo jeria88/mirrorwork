@@ -29,11 +29,11 @@ urlpatterns = [
     path('cgm/', include('blog.urls_cgm', namespace='cgm')),
     path('blog/api/', include('blog.urls')),
     path('search/', include('search.urls')),
-    path('contacto/', include('home.urls')),
-
-    # Wagtail pages — debe ir último (captura slug suelto)
-    path('', include(wagtail_urls)),
+    path('', include('home.urls')),
 
     # Público (landing sin prefijo)
     path('', include('accounts.urls_public')),
+
+    # Wagtail pages — debe ir último (captura slug suelto)
+    path('', include(wagtail_urls)),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

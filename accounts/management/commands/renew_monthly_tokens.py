@@ -24,7 +24,7 @@ class Command(BaseCommand):
                 continue
 
             config = settings.TOKEN_PLANS.get(perfil.plan, {})
-            monthly = config.get('monthly_tokens', 0)
+            monthly = config.get('monthly_fractones', 0)
             if not monthly:
                 continue
 

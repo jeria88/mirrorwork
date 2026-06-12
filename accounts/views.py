@@ -35,6 +35,12 @@ class LoginForm(forms.Form):
 
 
 def home(request):
+    host = request.get_host().split(':')[0].lower()
+    # Si no es la app (ej. no empieza con "app" o no es el puerto de la app local con ?app=1), delegar a Wagtail
+    if not (host.startswith('app.') or host.startswith('app-') or (host in ('localhost', '127.0.0.1') and request.GET.get('app') == '1')):
+        from wagtail.views import serve as wagtail_serve
+        return wagtail_serve(request, '')
+
     if request.user.is_authenticated:
         return redirect('dashboard')
     return render(request, 'home.html')
