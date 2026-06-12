@@ -4,5 +4,6 @@ providers = ["python", "node"]
 NIXPKGS_ALLOW_UNFREE = "1"
 
 [phases.setup]
-nixPkgs = ["...", "chromium", "google-chrome", "ffmpeg"]
+nixPkgs = ["...", "chromium", "ffmpeg"]
+
 
