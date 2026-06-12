@@ -11,6 +11,10 @@ python manage.py migrate --fake-initial
 echo "==> Running data migration"
 python manage.py migrate_mirrorwork_data
 
+echo "==> Syncing old reels/carruseles to JSON"
+python manage.py sync_cgm_to_studio
+
+
 echo "==> Running seeds"
 python manage.py seed_wagtail
 python manage.py seed_centro
