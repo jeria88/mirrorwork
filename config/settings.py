@@ -8,7 +8,7 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-cambiar-en-produccion')
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
+DEBUG = os.getenv('DEBUG', 'True').lower() in ['true', '1', 'yes', 'y']
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,testserver').split(',')
 # Railway injects RAILWAY_PUBLIC_DOMAIN automatically
 _railway_domain = os.getenv('RAILWAY_PUBLIC_DOMAIN', '')
@@ -130,6 +130,8 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
+MEDIA_ROOT = BASE_DIR / 'media'
+
 # ── Configuración de Almacenamiento (Cloudflare R2 / Local fallback) ──
 if os.getenv('AWS_ACCESS_KEY_ID'):
     STORAGES = {
@@ -162,7 +164,7 @@ else:
         },
     }
     MEDIA_URL = '/media/'
-    MEDIA_ROOT = BASE_DIR / 'media'
+
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
