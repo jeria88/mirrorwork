@@ -11,7 +11,7 @@ def create_user_profile(sender, instance, created, **kwargs):
         from tokens.models import TokenBalance
         TokenBalance.objects.create(
             user=instance,
-            balance=settings.TOKEN_PLANS['free']['monthly_fractones']
+            monthly=settings.TOKEN_PLANS['free']['monthly_fractones']
         )
 
         # Registrar al usuario en el CRM

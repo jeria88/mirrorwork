@@ -180,3 +180,16 @@ def pp_webhook(request):
     ok, msg = process_webhook(payload, request.headers)
     logger.info(f"[PP] webhook: {msg}")
     return JsonResponse({"ok": ok, "msg": msg}, status=200 if ok else 422)
+
+
+@login_required
+def planes(request):
+    """Muestra la página de planes de suscripción de Hotmart."""
+    try:
+        profile = request.user.profile
+    except Exception:
+        profile = None
+    return render(request, "tokens/planes.html", {
+        "profile": profile,
+        "hotmart_urls": settings.HOTMART_CHECKOUT_URLS,
+    })

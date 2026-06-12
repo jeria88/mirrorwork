@@ -5,6 +5,7 @@ app_name = "tokens"
 
 urlpatterns = [
     path("",                    views.tienda,           name="tienda"),
+    path("planes/",             views.planes,           name="planes"),
     path("fractones/",          views.balance,          name="balance"),
 
     # Mercado Pago

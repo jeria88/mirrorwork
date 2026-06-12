@@ -229,6 +229,12 @@ POST_OFFICE = {
     'DEFAULT_FROM_EMAIL': DEFAULT_FROM_EMAIL,
 }
 
+# ── Hotmart Checkouts ──────────────────────────────────────────────────────
+HOTMART_CHECKOUT_URLS = {
+    'navegante':   os.getenv('HOTMART_CHECKOUT_NAVEGANTE', os.getenv('HOTMART_CHECKOUT_BASIC', '#')),
+    'practicante': os.getenv('HOTMART_CHECKOUT_PRACTICANTE', os.getenv('HOTMART_CHECKOUT_SEED', '#')),
+}
+
 # ── Celery Config ──────────────────────────────────────────────────────────
 CELERY_BROKER_URL = os.getenv("REDIS_URL", "django-db://")
 CELERY_RESULT_BACKEND = "django-db"
