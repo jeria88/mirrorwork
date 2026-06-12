@@ -14,6 +14,10 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,testserver').spl
 _railway_domain = os.getenv('RAILWAY_PUBLIC_DOMAIN', '')
 if _railway_domain and _railway_domain not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(_railway_domain)
+# Custom domain (Cloudflare DNS → Railway)
+for _custom in ['endonautas.cl', 'www.endonautas.cl']:
+    if _custom not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(_custom)
 
 CSRF_TRUSTED_ORIGINS = [
     f'https://{h}' for h in ALLOWED_HOSTS if h not in ('localhost', '127.0.0.1', 'testserver', '')
