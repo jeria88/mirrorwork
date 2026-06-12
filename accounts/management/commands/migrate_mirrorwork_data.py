@@ -53,6 +53,10 @@ class Command(BaseCommand):
                     rows = cursor.fetchall()
                     return [dict(zip(columns, row)) for row in rows]
                 except Exception as e:
+                    try:
+                        conn.rollback()
+                    except Exception:
+                        pass
                     self.stdout.write(self.style.WARNING(f"No se pudo leer la tabla {table}: {e}"))
                     return []
 
