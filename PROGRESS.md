@@ -1,5 +1,25 @@
 # MirrorWork — Registro de progreso
 
+## 2026-06-12 — Integración Content Studio (CGM), Sincronización e Inicio en Railway
+
+### ✅ Completado
+
+#### Content Studio & Previsualización de Activos
+- **Filtro de cabeceras en Proxy**: Corregido el error `500 AssertionError` al previsualizar videos (.mp4) y carruseles (.png) mediante el proxy de Django. Se filtraron cabeceras *hop-by-hop* (`Connection`, `Keep-Alive`, `Proxy-Authenticate`, `Proxy-Authorization`, `TE`, `Trailers`, `Transfer-Encoding`, `Upgrade`) y `Content-Encoding` en [views_studio.py](file:///home/nikka/Proyectos/endonautas/mirrorwork/centro/views_studio.py).
+- **Ruta de Login de Centro**: Corregidas las redirecciones de inicio de sesión de `/django-admin/login/` a `/admin/login/` en [views.py](file:///home/nikka/Proyectos/endonautas/mirrorwork/centro/views.py).
+- **Control estricto de HTTP**: Modificado el proxy para filtrar cabeceras con valores vacíos (e.g. `Content-Length: ''` en peticiones GET) que causaban errores `400 Bad Request` en el servidor Express.
+
+#### Sincronización de Base de Datos
+- **Sincronización a JSON**: Creado el comando de gestión Django `sync_cgm_to_studio` en [sync_cgm_to_studio.py](file:///home/nikka/Proyectos/endonautas/mirrorwork/blog/management/commands/sync_cgm_to_studio.py). Este script importa automáticamente los artículos (`GeneratedArticle` slides_data) y posts (`SocialPost`) almacenados en PostgreSQL y los integra en `studio/data/reels_data.json` y `studio/data/carruseles_data.json`.
+- **Automatización en el arranque**: Agregado el paso `python manage.py sync_cgm_to_studio` en el archivo de inicio [start.sh](file:///home/nikka/Proyectos/endonautas/mirrorwork/scripts/start.sh) para reconstruir los archivos JSON dinámicamente en Railway con cada arranque del contenedor.
+- **Estrategia de Persistencia**: Documentado el esquema de montaje de volúmenes persistentes en Railway para resguardar la base de datos de JSONs y los archivos multimedia generados (`/app/studio/data`, `/app/contenido/carruseles/pngs`, `/app/contenido/reels/mp4`, `/app/contenido/reels/scripts`).
+
+### 🔶 Pendiente
+- Monitorear el despliegue automático de Railway tras el push a `main`.
+- Montar los Railway Volumes en el dashboard de producción de Railway para asegurar que los videos/imágenes generados en vivo no se eliminen en futuros despliegues.
+
+---
+
 ## 2026-06-03 — Fix migraciones + Community posts nativos
 
 ### ✅ Completado

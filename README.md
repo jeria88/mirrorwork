@@ -35,6 +35,7 @@ App de autoconocimiento profundo. 35 tests psicométricos, Espejo de Conflictos 
 | `reports` | `/reportes/` | Dashboard de progreso por dimensión |
 | `sensorial` | `/sensorial/` | Ejercicios sensoriales (respiración guiada) |
 | `vr` | `/vr/` | MirrorWork VR — staff only |
+| `studio` | `/cgm/` | Content Studio / CGM — Editor y previsualización de Reels y Carruseles generados (staff only) |
 
 ---
 
@@ -152,9 +153,24 @@ HOTMART_CHECKOUT_PRACTICANTE=
 
 ## Deploy (Railway)
 
-Procfile: `migrate → seed_tests → seed_missions → seed_mirror_kb → collectstatic → gunicorn`
+El despliegue está configurado mediante Nixpacks, utilizando el script de inicio [scripts/start.sh](file:///home/nikka/Proyectos/endonautas/mirrorwork/scripts/start.sh). 
 
-Procfile: `migrate → seed_tests → seed_missions → collectstatic → gunicorn`
+#### Ciclo de arranque del Contenedor:
+1. `prepare_db` y `migrate --fake-initial` (Django migrations).
+2. Migración de datos heredados (`migrate_mirrorwork_data`).
+3. Sincronización de base de datos a JSON del Content Studio (`sync_cgm_to_studio`).
+4. Inicialización de seeds (Wagtail, Centro, Misiones, Tests, KB, etc.).
+5. Recopilación de estáticos (`collectstatic`).
+6. Ejecución en background del servidor Express del Content Studio (`node studio/server.mjs &`).
+7. Ejecución principal de Gunicorn (`gunicorn config.wsgi`).
+
+#### Persistencia (Railway Volumes):
+El sistema de archivos de Railway es efímero. Para asegurar la persistencia del Content Studio, se deben crear y montar los siguientes volúmenes en el dashboard de Railway:
+
+- `/app/studio/data` — Datos de configuración y base de datos local JSON (Reels, Carruseles y estados).
+- `/app/contenido/carruseles/pngs` — Directorio de imágenes generadas para carruseles.
+- `/app/contenido/reels/mp4` — Directorio de videos MP4 generados para reels.
+- `/app/contenido/reels/scripts` — Directorio de transcripciones y scripts generados.
 
 Webhook Hotmart: `https://app.endonautas.cl/tokens/hotmart-webhook/`
 
