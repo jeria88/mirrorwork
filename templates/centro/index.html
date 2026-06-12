@@ -22,7 +22,7 @@
   /* ── Unified Dashboard Layers Grid ── */
   .layers-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: repeat(4, 1fr);
     gap: 1.25rem;
     margin-bottom: 2.5rem;
   }
@@ -148,7 +148,7 @@
   }
   .accesos {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
     gap: 0.75rem;
   }
   .acceso-btn {
@@ -169,10 +169,12 @@
   .acceso-icon { font-size: 1.3rem; }
   .acceso-label { font-size: 0.7rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
 
-  @media (max-width: 992px) {
+  @media (max-width: 1200px) {
+    .layers-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 768px) {
     .layers-grid { grid-template-columns: 1fr; }
     .dashboard-columns { grid-template-columns: 1fr; }
-    .accesos { grid-template-columns: repeat(3, 1fr); }
   }
 </style>
 {% endblock %}
@@ -290,6 +292,36 @@
       </a>
     </div>
 
+    <!-- Capa 4: Content Studio (CGM) -->
+    <div class="layer-card">
+      <div>
+        <div class="layer-header">
+          <div class="layer-icon">✦</div>
+          <h3 class="layer-title">Content Studio</h3>
+        </div>
+        <p style="font-size:0.78rem; color:var(--muted); margin-bottom:1.25rem;">
+          Generador de contenido con IA, copys para redes sociales y renderizado de carruseles.
+        </p>
+        <div class="layer-metrics">
+          <div class="metric-item">
+            <span class="metric-label">Artículos Generados</span>
+            <span class="metric-val">{{ studio_stats.generated_articles }}</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Publicaciones RRSS</span>
+            <span class="metric-val">{{ studio_stats.social_posts }}</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Por Revisar</span>
+            <span class="metric-val" {% if studio_stats.pending_review > 0 %}style="color:var(--gold)"{% endif %}>{{ studio_stats.pending_review }}</span>
+          </div>
+        </div>
+      </div>
+      <a href="{% url 'cgm:dashboard' %}" class="btn btn-ghost btn-sm" style="width:100%; justify-content:center;">
+        Ir a Content Studio ↗
+      </a>
+    </div>
+
   </div>
 
   <!-- ── 2. METAS, SETUP Y TAREAS EN CURSO ── -->
@@ -398,6 +430,10 @@
       <a href="{% url 'centro:metricas' %}" class="acceso-btn">
         <span class="acceso-icon">↗</span>
         <span class="acceso-label">Métricas</span>
+      </a>
+      <a href="{% url 'cgm:dashboard' %}" class="acceso-btn">
+        <span class="acceso-icon">✦</span>
+        <span class="acceso-label">Studio</span>
       </a>
       <a href="{% url 'centro:chequeo_semanal' %}" class="acceso-btn">
         <span class="acceso-icon">◎</span>

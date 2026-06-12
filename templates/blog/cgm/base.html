@@ -135,6 +135,7 @@ body { background: var(--cgm-bg); color: var(--cgm-text); font-family: 'Plus Jak
     <a href="{% url 'cgm:dashboard' %}" class="{% if tab == 'dashboard' %}active{% endif %}">Dashboard</a>
     <a href="{% url 'cgm:articles' %}" class="{% if tab == 'articles' %}active{% endif %}">Artículos</a>
     <a href="{% url 'cgm:rrss' %}" class="{% if tab == 'rrss' %}active{% endif %}">RRSS</a>
+    <a href="{% url 'centro:index' %}" style="margin-left: auto; color: var(--cgm-accent); font-weight: 500;">← Volver al Centro</a>
   </nav>
 
   {% block cgm_content %}{% endblock %}

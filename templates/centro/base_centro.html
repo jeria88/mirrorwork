@@ -290,6 +290,7 @@
     <li><a href="{% url 'centro:calendario' %}" {% if request.resolver_match.url_name == 'calendario' %}class="active"{% endif %}>Calendario</a></li>
     <li><a href="{% url 'centro:metricas' %}" {% if request.resolver_match.url_name == 'metricas' %}class="active"{% endif %}>Métricas</a></li>
     <li><a href="{% url 'centro:ideas' %}" {% if request.resolver_match.url_name == 'ideas' %}class="active"{% endif %}>Ideas</a></li>
+    <li><a href="{% url 'cgm:dashboard' %}" {% if request.resolver_match.namespace == 'cgm' %}class="active"{% endif %}>Studio</a></li>
   </ul>
   <div class="c-nav-ext">
     <a href="{% url 'centro:chequeo_semanal' %}">Chequeo ↗</a>

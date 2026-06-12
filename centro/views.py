@@ -48,7 +48,7 @@ def index(request):
 
     # Dynamic metrics from across apps
     from wagtail.models import Page
-    from blog.models import BlogPost, BlogSubmission
+    from blog.models import BlogPost, BlogSubmission, GeneratedArticle, SocialPost
     from crm.models import Subscriber, SentEmail
     from accounts.models import User
     from psychometrics.models import TestResult
@@ -67,6 +67,11 @@ def index(request):
         'total_users': User.objects.count(),
         'completed_tests': TestResult.objects.count(),
         'espejo_chats': ConflictSession.objects.count(),
+    }
+    studio_stats = {
+        'generated_articles': GeneratedArticle.objects.count(),
+        'social_posts': SocialPost.objects.count(),
+        'pending_review': GeneratedArticle.objects.filter(status=GeneratedArticle.STATUS_REVIEW).count(),
     }
 
     setup_total, setup_done, setup_pct = _setup_progress()
@@ -113,6 +118,7 @@ def index(request):
         'cms_stats': cms_stats,
         'crm_stats': crm_stats,
         'app_stats': app_stats,
+        'studio_stats': studio_stats,
     })
 
 
