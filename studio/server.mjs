@@ -2,13 +2,32 @@ import express from 'express';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import fs from 'fs';
-import { spawn } from 'child_process';
+import { spawn, execSync } from 'child_process';
 import Anthropic from '@anthropic-ai/sdk';
 import multer from 'multer';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = 3847;
+
+function getChromeExecutable() {
+  const possiblePaths = [
+    '/usr/bin/google-chrome',
+    '/usr/bin/google-chrome-stable',
+    '/usr/bin/chromium',
+    '/usr/bin/chromium-browser',
+  ];
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p)) return p;
+  }
+  for (const cmd of ['google-chrome', 'google-chrome-stable', 'chromium', 'chromium-browser']) {
+    try {
+      const p = execSync(`which ${cmd}`, { stdio: [] }).toString().trim();
+      if (p) return p;
+    } catch (e) {}
+  }
+  return 'google-chrome'; // fallback
+}
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -1298,6 +1317,7 @@ app.post('/api/render/:id', (req, res) => {
   if (!r)  return res.status(404).json({ error: 'Reel no encontrado' });
   res.json({ started: true });
   broadcast('log', { text: `▶ Renderizando ${id} — ${r.title}...\n`, type: 'info' });
+  const chromePath = getChromeExecutable().replace(/\\/g, '\\\\');
   const script = `
 import{bundle}from'@remotion/bundler';
 import{renderMedia,selectComposition}from'@remotion/renderer';
@@ -1311,8 +1331,8 @@ const ffmpegPath=require('ffmpeg-static');
 const outDir=path.join(__dirname,'..','mp4');
 fs.mkdirSync(outDir,{recursive:true});
 const b=await bundle({entryPoint:path.resolve(__dirname,'src/index.jsx'),webpackOverride:c=>c,enableCaching:true});
-const comp=await selectComposition({serveUrl:b,id:'${id}',browserExecutable:'/usr/bin/google-chrome'});
-await renderMedia({composition:comp,serveUrl:b,codec:'h264',outputLocation:path.join(outDir,'${id}.mp4'),ffmpegPath,browserExecutable:'/usr/bin/google-chrome',puppeteerArgs:['--no-sandbox','--disable-setuid-sandbox','--disable-dev-shm-usage','--disable-gpu'],onProgress:({progress})=>{process.stdout.write('PROGRESS:'+Math.round(progress*100)+'\\n');},chromiumOptions:{disableWebSecurity:true}});
+const comp=await selectComposition({serveUrl:b,id:'${id}',browserExecutable:'${chromePath}'});
+await renderMedia({composition:comp,serveUrl:b,codec:'h264',outputLocation:path.join(outDir,'${id}.mp4'),ffmpegPath,browserExecutable:'${chromePath}',puppeteerArgs:['--no-sandbox','--disable-setuid-sandbox','--disable-dev-shm-usage','--disable-gpu'],onProgress:({progress})=>{process.stdout.write('PROGRESS:'+Math.round(progress*100)+'\\n');},chromiumOptions:{disableWebSecurity:true}});
 console.log('DONE');`;
   const tmp = path.join(REELS_DIR, `_tmp_${id}.mjs`);
   fs.writeFileSync(tmp, script);

@@ -1,8 +1,28 @@
 const puppeteer = require('puppeteer-core');
 const path = require('path');
 const fs = require('fs');
+const { execSync } = require('child_process');
 
-const CHROME = '/usr/bin/google-chrome';
+function getChromeExecutable() {
+  const possiblePaths = [
+    '/usr/bin/google-chrome',
+    '/usr/bin/google-chrome-stable',
+    '/usr/bin/chromium',
+    '/usr/bin/chromium-browser',
+  ];
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p)) return p;
+  }
+  for (const cmd of ['google-chrome', 'google-chrome-stable', 'chromium', 'chromium-browser']) {
+    try {
+      const p = execSync(`which ${cmd}`, { stdio: [] }).toString().trim();
+      if (p) return p;
+    } catch (e) {}
+  }
+  return 'google-chrome'; // fallback
+}
+
+const CHROME = getChromeExecutable();
 const BASE = __dirname;
 const DATA_FILE = path.join(BASE, '../../studio/data/carruseles_data.json');
 const PNGS_DIR = path.join(BASE, 'pngs');
