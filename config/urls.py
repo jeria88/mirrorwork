@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path, re_path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic import RedirectView
 from wagtail import urls as wagtail_urls
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail.documents import urls as wagtaildocs_urls
@@ -37,7 +38,8 @@ urlpatterns = [
     re_path(r'^brand-assets/(?P<path>.*)$', studio_proxy),
 
     path('crm/', include('crm.urls')),
-    path('cgm/', include('blog.urls_cgm', namespace='cgm')),
+    path('cgm/', RedirectView.as_view(url='/centro/studio/', permanent=True)),
+    re_path(r'^cgm/(?P<path>.*)$', RedirectView.as_view(url='/centro/studio/%(path)s', permanent=True)),
     path('blog/api/', include('blog.urls')),
     path('search/', include('search.urls')),
     path('', include('home.urls')),
