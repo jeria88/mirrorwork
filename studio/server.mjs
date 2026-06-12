@@ -121,7 +121,14 @@ function loadState() {
   try { return JSON.parse(fs.readFileSync(STATE_F, 'utf8')); }
   catch { return {}; }
 }
-function saveState(s) { fs.writeFileSync(STATE_F, JSON.stringify(s, null, 2)); }
+function saveState(s) {
+  fs.writeFileSync(STATE_F, JSON.stringify(s, null, 2));
+  if (process.env.AWS_ACCESS_KEY_ID) {
+    uploadFileToR2(STATE_F, 'cgm/data/state.json', 'application/json').catch(err => {
+      console.error('Error uploading state.json to R2:', err);
+    });
+  }
+}
 
 // ── Content definitions (Dynamic JSON Database) ───────────────────
 const CAROUSELS_DATA_F = path.join(__dirname, 'data', 'carruseles_data.json');
@@ -156,8 +163,9 @@ function saveReels(data) {
 
 // Download data from R2 on start if available
 if (process.env.AWS_ACCESS_KEY_ID) {
-  console.log("[R2] Restoring JSON databases from Cloudflare R2...");
+  console.log("[R2] Restoring JSON databases and state from Cloudflare R2...");
   try {
+    await downloadDataFromR2('cgm/data/state.json', STATE_F);
     await downloadDataFromR2('cgm/data/carruseles_data.json', CAROUSELS_DATA_F);
     await downloadDataFromR2('cgm/data/reels_data.json', REELS_DATA_F);
     await downloadDataFromR2('cgm/data/reels_data.json', REMOTION_REELS_DATA_F);
@@ -274,11 +282,14 @@ app.get('/api/status', (req, res) => {
 
   const carousels = carouselsData.map(c => {
     const hasHtml  = true; // Dynamic template served
+    const s = state[c.id] || {};
     const pngDir   = path.join(CONTENIDO, 'carruseles', 'pngs', `${c.id}-${c.file}`);
-    const pngCount = fs.existsSync(pngDir) ? fs.readdirSync(pngDir).filter(f=>f.endsWith('.png')).length : 0;
+    let pngCount   = fs.existsSync(pngDir) ? fs.readdirSync(pngDir).filter(f=>f.endsWith('.png')).length : 0;
+    if (pngCount === 0 && s.pngCount !== undefined) {
+      pngCount = s.pngCount;
+    }
     const assetDir = path.join(ASSETS_DIR, c.id);
     const assets   = fs.existsSync(assetDir) ? fs.readdirSync(assetDir).filter(f=>/\.(jpg|jpeg|png|webp|gif)$/i.test(f)) : [];
-    const s = state[c.id] || {};
     return {
       id: c.id,
       title: c.title,
@@ -298,8 +309,13 @@ app.get('/api/status', (req, res) => {
     const scriptDir = path.join(CONTENIDO, 'reels', 'scripts');
     const hasScript = (fs.existsSync(scriptDir) && fs.readdirSync(scriptDir).some(f=>f.startsWith(`reel-${r.id}-`))) || (r.scenes && r.scenes.length > 0);
     const mp4Path   = path.join(CONTENIDO, 'reels', 'mp4', `${r.id}.mp4`);
-    const hasVideo  = fs.existsSync(mp4Path);
-    const videoSize = hasVideo ? (fs.statSync(mp4Path).size/1024/1024).toFixed(1) : null;
+    const s = state[r.id] || {};
+    let hasVideo  = fs.existsSync(mp4Path);
+    let videoSize = hasVideo ? (fs.statSync(mp4Path).size/1024/1024).toFixed(1) : null;
+    if (!hasVideo && s.hasVideo) {
+      hasVideo = s.hasVideo;
+      videoSize = s.videoSize;
+    }
     const voiceDir  = path.join(BASE, 'voice');
     const hasVoice  = fs.existsSync(voiceDir) && fs.readdirSync(voiceDir).some(f=>f.toLowerCase().startsWith(r.id.toLowerCase()));
     const s = state[r.id] || {};
@@ -1418,16 +1434,26 @@ app.post('/api/generate-pngs', (req, res) => {
         if (fs.existsSync(pngDir)) {
           const folders = fs.readdirSync(pngDir).filter(f => fs.statSync(path.join(pngDir, f)).isDirectory());
           let count = 0;
+          const state = loadState();
           for (const folder of folders) {
             const folderPath = path.join(pngDir, folder);
             const files = fs.readdirSync(folderPath).filter(f => f.endsWith('.png'));
+            const parts = folder.split('-');
+            const carouselId = parts[0].toUpperCase();
+            
             for (const file of files) {
               const filePath = path.join(folderPath, file);
               const r2Key = `cgm/carruseles/pngs/${folder}/${file}`;
               await uploadFileToR2(filePath, r2Key, 'image/png');
               count++;
             }
+            
+            state[carouselId] = {
+              ...state[carouselId],
+              pngCount: files.length
+            };
           }
+          saveState(state);
           broadcast('log', { text: `[R2] ✓ Se subieron ${count} PNGs con éxito a R2.\n`, type: 'success' });
         }
       } catch (err) {
@@ -1486,6 +1512,13 @@ console.log('DONE');`;
         const r2Url = await uploadFileToR2(mp4Path, r2Key, 'video/mp4');
         if (r2Url) {
           broadcast('log', { text: `[R2] ✓ Reel subido con éxito a R2: ${r2Url}\n`, type: 'success' });
+          const state = loadState();
+          state[id] = {
+            ...state[id],
+            hasVideo: true,
+            videoSize: (fs.statSync(mp4Path).size/1024/1024).toFixed(1)
+          };
+          saveState(state);
         } else {
           broadcast('log', { text: `[R2] ✗ Error al subir el Reel a R2.\n`, type: 'error' });
         }
