@@ -129,10 +129,41 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# ── Configuración de Almacenamiento (Cloudflare R2 / Local fallback) ──
+if os.getenv('AWS_ACCESS_KEY_ID'):
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3.S3Storage",
+            "OPTIONS": {
+                "access_key": os.getenv("AWS_ACCESS_KEY_ID"),
+                "secret_key": os.getenv("AWS_SECRET_ACCESS_KEY"),
+                "bucket_name": os.getenv("AWS_STORAGE_BUCKET_NAME"),
+                "endpoint_url": os.getenv("AWS_S3_ENDPOINT_URL"),
+                "custom_domain": os.getenv("AWS_S3_CUSTOM_DOMAIN"),
+                "region_name": "auto",  # R2 requiere "auto"
+                "signature_version": "s3v4",
+                "file_overwrite": False,
+            },
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+    # En producción usando R2, los media apuntan al dominio público del CDN/R2
+    MEDIA_URL = f"https://{os.getenv('AWS_S3_CUSTOM_DOMAIN')}/"
+else:
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = BASE_DIR / 'media'
+
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
