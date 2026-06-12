@@ -1,4 +1,5 @@
 import json
+import os
 import sqlite3
 from django.core.management.base import BaseCommand
 from django.db import transaction
@@ -10,10 +11,13 @@ class Command(BaseCommand):
     help = 'Migra usuarios, perfiles, fractones, tests y sesiones del Espejo desde una base de datos de mirrorwork antigua'
 
     def add_arguments(self, parser):
-        parser.add_argument('old_db_url', type=str, help='DATABASE_URL o ruta al archivo sqlite de la BD vieja')
+        parser.add_argument('old_db_url', type=str, nargs='?', default=None, help='DATABASE_URL o ruta al archivo sqlite de la BD vieja')
 
     def handle(self, *args, **options):
-        old_db_url = options['old_db_url']
+        old_db_url = options['old_db_url'] or os.getenv('OLD_DATABASE_URL')
+        if not old_db_url:
+            self.stdout.write("Variable de entorno 'OLD_DATABASE_URL' no configurada. Omitiendo migración de datos.")
+            return
         
         # Conectar a la base de datos vieja
         if old_db_url.startswith('postgres://') or old_db_url.startswith('postgresql://'):
