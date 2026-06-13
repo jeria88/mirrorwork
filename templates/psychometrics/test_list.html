@@ -107,35 +107,98 @@
 
 {% block content %}
 <div class="list-wrap">
-  <div class="page-title">Explorar</div>
-  <p class="page-sub">Cada test es un mapa, no un juicio. Explora a tu ritmo.</p>
+  <div class="page-title">Bitácora del Viaje del Héroe</div>
+  <p class="page-sub">Sigue los portales evolutivos para profundizar en tu conciencia interior. Desbloquea portales completando los tests previos o con un plan activo.</p>
 
-  {% for key, tests in by_dimension.items %}
-  <div class="dim-section" id="dim-{{ key.0 }}">
-    <div class="dim-title">{{ key.1 }}</div>
-
-    {% for test in tests %}
-    <a href="{% url 'psychometrics:test_take' test.slug %}" class="test-row">
-      <div class="test-main">
-        <div class="test-name">
-          {% if test.id in completed_ids %}<span class="done-mark" title="Completado"></span>{% endif %}
-          {{ test.name }}
-          {% if test.instrument_type == 'clinical' %}
-            <span class="badge badge-validado">Validado</span>
-          {% elif test.instrument_type == 'adapted' %}
-            <span class="badge badge-adaptado">Adaptado</span>
-          {% else %}
-            <span class="badge badge-endonauta">Endonauta</span>
-          {% endif %}
+  {% for portal in portals %}
+  <div class="dim-section" style="margin-bottom: 3.5rem;">
+    
+    <!-- Cabecera de Portal -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; {% if not portal.unlocked %}opacity: 0.6;{% endif %}">
+      <div>
+        <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.18em; color: {% if portal.unlocked %}#ffe8d0{% else %}var(--muted){% endif %}; font-weight: 700;">
+          {{ portal.name }}
         </div>
-        <div class="test-desc">{{ test.description|truncatechars:90 }}</div>
+        <p style="font-size: 0.8rem; color: var(--muted); margin: 0.25rem 0 0 0; line-height: 1.4;">
+          {{ portal.desc }}
+        </p>
       </div>
-      <div class="test-meta">
-        {{ test.estimated_minutes }} min
+      
+      {% if not portal.unlocked %}
+        <span class="badge" style="background: rgba(224, 80, 80, 0.15); color: #e05050; border: 1px solid rgba(224, 80, 80, 0.2); font-weight: 700; display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.65rem; padding: 0.2rem 0.6rem;">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Bloqueado
+        </span>
+      {% else %}
+        <span class="badge" style="background: rgba(78, 205, 196, 0.15); color: var(--accent); border: 1px solid rgba(78, 205, 196, 0.2); font-weight: 700; display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.65rem; padding: 0.2rem 0.6rem;">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+          Desbloqueado
+        </span>
+      {% endif %}
+    </div>
+
+    <!-- Requerimientos si está bloqueado -->
+    {% if not portal.unlocked %}
+      <div style="background: rgba(224, 80, 80, 0.05); border: 1px solid rgba(224, 80, 80, 0.1); border-radius: 8px; padding: 0.6rem 0.85rem; font-size: 0.78rem; color: #e05050; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem; line-height: 1.4;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span>
+          Para desbloquear requiere completar al menos 3 tests del portal anterior (Progreso: {{ portal.prev_completed }}/3) o adquirir un <a href="{% url 'reports:dashboard' %}" style="color: #e05050; text-decoration: underline; font-weight: 700;">Plan Navegante</a>.
+        </span>
       </div>
-      <span class="test-arrow">→</span>
-    </a>
-    {% endfor %}
+    {% endif %}
+
+    <!-- Listado de tests -->
+    <div>
+      {% for test in portal.tests %}
+        {% if portal.unlocked or test.id in assigned_test_ids %}
+          <a href="{% url 'psychometrics:test_take' test.slug %}" class="test-row" style="{% if not portal.unlocked and test.id in assigned_test_ids %}border-color: var(--accent); background: rgba(78, 205, 196, 0.03); padding-left: 0.5rem; padding-right: 0.5rem; border-radius: 6px;{% endif %}">
+            <div class="test-main">
+              <div class="test-name">
+                {% if test.id in completed_ids %}<span class="done-mark" title="Completado"></span>{% endif %}
+                {{ test.name }}
+                {% if test.instrument_type == 'clinical' %}
+                  <span class="badge badge-validado">Validado</span>
+                {% elif test.instrument_type == 'adapted' %}
+                  <span class="badge badge-adaptado">Adaptado</span>
+                {% else %}
+                  <span class="badge badge-endonauta">Endonauta</span>
+                {% endif %}
+                {% if test.id in assigned_test_ids %}
+                  <span class="badge" style="background: rgba(78, 205, 196, 0.15); color: var(--accent); border: 1px solid rgba(78, 205, 196, 0.25); font-weight: 700;">Asignado</span>
+                {% endif %}
+              </div>
+              <div class="test-desc">{{ test.description|truncatechars:90 }}</div>
+            </div>
+            <div class="test-meta">
+              {{ test.estimated_minutes }} min
+            </div>
+            <span class="test-arrow">→</span>
+          </a>
+        {% else %}
+          <div class="test-row" style="cursor: not-allowed; pointer-events: none; opacity: 0.5;">
+            <div class="test-main">
+              <div class="test-name" style="color: var(--muted);">
+                {{ test.name }}
+                {% if test.instrument_type == 'clinical' %}
+                  <span class="badge badge-validado" style="opacity: 0.5;">Validado</span>
+                {% elif test.instrument_type == 'adapted' %}
+                  <span class="badge badge-adaptado" style="opacity: 0.5;">Adaptado</span>
+                {% else %}
+                  <span class="badge badge-endonauta" style="opacity: 0.5;">Endonauta</span>
+                {% endif %}
+              </div>
+              <div class="test-desc" style="color: var(--muted);">{{ test.description|truncatechars:90 }}</div>
+            </div>
+            <div class="test-meta" style="color: var(--muted);">
+              {{ test.estimated_minutes }} min
+            </div>
+            <span class="test-arrow" style="color: var(--border); display: inline-flex; align-items: center; justify-content: center; width: 20px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </span>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
   </div>
   {% empty %}
   <p style="color:var(--muted)">No hay tests disponibles.</p>

@@ -64,22 +64,178 @@ def _run_insight_thread(result_pk, test_name, instrument_type, evaluation):
 @login_required
 def test_list(request):
     tests = Test.objects.filter(active=True)
-    by_dimension = {}
-    for test in tests:
-        key = (test.dimension, test.get_dimension_display())
-        by_dimension.setdefault(key, []).append(test)
+    
+    # Define portals mapping
+    portal_1_slugs = [
+        'big-five-inventario-de-personalidad',
+        'tipologia-de-jung',
+        'riasec-perfil-vocacional-de-holland',
+        'rueda-de-la-vida-integracion'
+    ]
+    portal_2_slugs = [
+        'autosabotaje',
+        'heridas-de-la-infancia-lise-bourbeau',
+        'eneagrama-tipologia-de-caracter',
+        'phq-9-cuestionario-de-salud-del-paciente',
+        'gad-7-ansiedad-generalizada',
+        'dirty-dozen-triada-oscura',
+        'ibi-creencias-irracionales'
+    ]
+    portal_3_slugs = [
+        'maia-consciencia-interoceptiva',
+        'psqi-calidad-del-sueno-de-pittsburgh',
+        'ders-dificultades-en-regulacion-emocional',
+        'pss-10-estres-percibido',
+        'tas-20-alexitimia-escala-toronto',
+        'perfil-neurosensorial'
+    ]
+    
+    # Calculate user progress
     completed_ids = set(
         TestResult.objects.filter(user=request.user).values_list("test_id", flat=True)
     )
+    completed_slugs = set(
+        TestResult.objects.filter(user=request.user).values_list("test__slug", flat=True)
+    )
+    
+    # Retrieve assigned test ids
+    assigned_test_ids = set()
+    try:
+        if hasattr(request.user, 'claimed_profile'):
+            assigned_test_ids = set(request.user.claimed_profile.assigned_tests.values_list('id', flat=True))
+    except Exception:
+        pass
+    
+    # Count completions in each portal
+    p1_completed_count = sum(1 for slug in portal_1_slugs if slug in completed_slugs)
+    p2_completed_count = sum(1 for slug in portal_2_slugs if slug in completed_slugs)
+    p3_completed_count = sum(1 for slug in portal_3_slugs if slug in completed_slugs)
+    
+    # Subscribed check
+    has_active_plan = getattr(request.user, 'profile', None) and request.user.profile.plan in ('navegante', 'practicante', 'empresa')
+    
+    # Unlock logic
+    p1_unlocked = True
+    p2_unlocked = has_active_plan or p1_completed_count >= 3
+    p3_unlocked = has_active_plan or (p2_unlocked and p2_completed_count >= 3)
+    p4_unlocked = has_active_plan or (p3_unlocked and p3_completed_count >= 3)
+    
+    # Organize tests into portals
+    portals = [
+        {
+            "id": 1,
+            "name": "Portal I: La Máscara (Personalidad Externa)",
+            "desc": "Explora tu personalidad consciente, tu tipología y tu rol social.",
+            "unlocked": p1_unlocked,
+            "required_prev": 0,
+            "prev_completed": 0,
+            "tests": [],
+        },
+        {
+            "id": 2,
+            "name": "Portal II: El Descenso (La Sombra)",
+            "desc": "Conoce tus patrones de autosabotaje, tus heridas de infancia y tus respuestas ante el estrés.",
+            "unlocked": p2_unlocked,
+            "required_prev": 3,
+            "prev_completed": p1_completed_count,
+            "tests": [],
+        },
+        {
+            "id": 3,
+            "name": "Portal III: El Templo Interno (Regulación)",
+            "desc": "Profundiza en tu conciencia corporal, la calidad de tu sueño y tu regulación emocional.",
+            "unlocked": p3_unlocked,
+            "required_prev": 3,
+            "prev_completed": p2_completed_count,
+            "tests": [],
+        },
+        {
+            "id": 4,
+            "name": "Portal IV: La Integración (Luz y Trascendencia)",
+            "desc": "El potencial de tu ser unificado: fortalezas, chakras, sueños y trascendencia.",
+            "unlocked": p4_unlocked,
+            "required_prev": 3,
+            "prev_completed": p3_completed_count,
+            "tests": [],
+        }
+    ]
+    
+    for test in tests:
+        if test.slug in portal_1_slugs:
+            portals[0]["tests"].append(test)
+        elif test.slug in portal_2_slugs:
+            portals[1]["tests"].append(test)
+        elif test.slug in portal_3_slugs:
+            portals[2]["tests"].append(test)
+        else:
+            portals[3]["tests"].append(test)
+ 
+    # Sort tests in each portal by their 'order' field
+    for p in portals:
+        p["tests"].sort(key=lambda t: t.order)
+            
     return render(request, "psychometrics/test_list.html", {
-        "by_dimension": by_dimension,
+        "portals": portals,
         "completed_ids": completed_ids,
+        "assigned_test_ids": assigned_test_ids,
+        "has_active_plan": has_active_plan,
     })
-
-
+ 
+ 
 @login_required
 def test_take(request, slug):
     test = get_object_or_404(Test, slug=slug, active=True)
+    
+    # Check if test is assigned to bypass lock
+    is_assigned = False
+    try:
+        if hasattr(request.user, 'claimed_profile'):
+            is_assigned = request.user.claimed_profile.assigned_tests.filter(slug=slug).exists()
+    except Exception:
+        pass
+    
+    # Check if test is locked
+    completed_slugs = set(
+        TestResult.objects.filter(user=request.user).values_list("test__slug", flat=True)
+    )
+    has_active_plan = getattr(request.user, 'profile', None) and request.user.profile.plan in ('navegante', 'practicante', 'empresa')
+    
+    # Define portal mapping
+    portal_1_slugs = ['big-five-inventario-de-personalidad', 'tipologia-de-jung', 'riasec-perfil-vocacional-de-holland', 'rueda-de-la-vida-integracion']
+    portal_2_slugs = ['autosabotaje', 'heridas-de-la-infancia-lise-bourbeau', 'eneagrama-tipologia-de-caracter', 'phq-9-cuestionario-de-salud-del-paciente', 'gad-7-ansiedad-generalizada', 'dirty-dozen-triada-oscura', 'ibi-creencias-irracionales']
+    portal_3_slugs = ['maia-consciencia-interoceptiva', 'psqi-calidad-del-sueno-de-pittsburgh', 'ders-dificultades-en-regulacion-emocional', 'pss-10-estres-percibido', 'tas-20-alexitimia-escala-toronto', 'perfil-neurosensorial']
+    
+    p1_completed_count = sum(1 for s in portal_1_slugs if s in completed_slugs)
+    p2_completed_count = sum(1 for s in portal_2_slugs if s in completed_slugs)
+    
+    is_locked = False
+    error_msg = ""
+    
+    if is_assigned:
+        # assigned tests bypass lock logic
+        pass
+    else:
+        if slug in portal_2_slugs and not has_active_plan and p1_completed_count < 3:
+            is_locked = True
+            error_msg = "El Portal II (La Sombra) está bloqueado. Requiere completar al menos 3 tests del Portal I o tener un plan activo."
+        elif slug in portal_3_slugs and not has_active_plan:
+            p2_unlocked = p1_completed_count >= 3
+            if not p2_unlocked or p2_completed_count < 3:
+                is_locked = True
+                error_msg = "El Portal III (El Templo Interno) está bloqueado. Requiere completar al menos 3 tests del Portal II o tener un plan activo."
+        elif slug not in portal_1_slugs and slug not in portal_2_slugs and slug not in portal_3_slugs and not has_active_plan:
+            p2_unlocked = p1_completed_count >= 3
+            p3_unlocked = p2_unlocked and p2_completed_count >= 3
+            p3_completed_count = sum(1 for s in portal_3_slugs if s in completed_slugs)
+            if not p3_unlocked or p3_completed_count < 3:
+                is_locked = True
+                error_msg = "El Portal IV (La Integración) está bloqueado. Requiere completar al menos 3 tests del Portal III o tener un plan activo."
+            
+    if is_locked:
+        from django.contrib import messages
+        messages.error(request, error_msg)
+        return redirect("psychometrics:test_list")
+ 
     questions = test.questions.all()
     return render(request, "psychometrics/test_take.html", {
         "test": test,

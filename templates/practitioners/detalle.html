@@ -43,9 +43,22 @@
   .result-row-name { font-size: 0.92rem; font-weight: 600; }
   .result-row-date { font-size: 0.78rem; color: var(--muted); }
   .empty-results { padding: 2rem; text-align: center; color: var(--muted); font-size: 0.9rem; }
+
+  /* New styles for B2B SaaS layout */
+  .detalle-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+  @media (min-width: 768px) {
+    .detalle-grid {
+      grid-template-columns: 1.2fr 1fr;
+    }
+  }
 </style>
 
-<div class="container" style="max-width:760px">
+<div class="container" style="max-width:1000px">
   <div style="font-size:0.8rem;color:var(--muted);margin-bottom:1rem;">
     <a href="{% url 'practitioners:lista' %}" style="color:var(--muted);">← Perfiles</a>
   </div>
@@ -55,7 +68,7 @@
       <div class="detalle-alias">{{ profile.alias }}</div>
       <div class="detalle-meta">
         Creado el {{ profile.created_at|date:"d M Y" }}
-        · Tokens: {{ profile.tokens_used }} / {{ profile.token_allocation }} usados
+        · Estado: {% if profile.claimed_by %}<span style="color:var(--accent);">Vinculado ({{ profile.claimed_by.email }})</span>{% else %}<span style="color:#e05050;">Pendiente de vinculación</span>{% endif %}
         {% if profile.notes %}<br>{{ profile.notes }}{% endif %}
       </div>
     </div>
@@ -64,6 +77,16 @@
       <button type="submit" class="btn btn-ghost" style="font-size:0.8rem" onclick="return confirm('¿Archivar este perfil?')">Archivar</button>
     </form>
   </div>
+
+  {% if messages %}
+    <div style="margin-bottom: 1.5rem;">
+      {% for message in messages %}
+        <div class="badge" style="background: rgba(78, 205, 196, 0.1); color: var(--accent); border: 1px solid rgba(78, 205, 196, 0.2); padding: 0.75rem 1rem; font-size: 0.85rem; border-radius: 8px; width: 100%; box-sizing: border-box; display: block; margin-bottom: 0.5rem;">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
 
   <div class="share-box">
     <div class="share-box-title">Enlace de acceso para el cliente</div>
@@ -74,24 +97,80 @@
     </button>
   </div>
 
-  <div style="font-size:0.85rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1rem;">
-    Resultados de tests ({{ results|length }})
-  </div>
-
-  {% if results %}
-  <div class="results-list">
-    {% for r in results %}
-    <div class="result-row">
-      <div>
-        <div class="result-row-name">{{ r.test.name }}</div>
-        <div class="result-row-date">{{ r.completed_at|date:"d M Y, H:i" }}</div>
+  <div class="detalle-grid">
+    <!-- Left Column: Test Results and Assignment -->
+    <div>
+      <div style="font-size:0.85rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1rem;">
+        Resultados de tests ({{ results|length }})
       </div>
-      <a href="{% url 'psychometrics:test_result' r.pk %}" class="btn btn-ghost" style="font-size:0.8rem;padding:0.35rem 0.75rem">Ver resultado</a>
+
+      {% if results %}
+      <div class="results-list">
+        {% for r in results %}
+        <div class="result-row">
+          <div>
+            <div class="result-row-name">{{ r.test.name }}</div>
+            <div class="result-row-date">{{ r.completed_at|date:"d M Y, H:i" }}</div>
+          </div>
+          <a href="{% url 'psychometrics:test_result' r.pk %}" class="btn btn-ghost" style="font-size:0.8rem;padding:0.35rem 0.75rem">Ver resultado</a>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-results">Este perfil aún no ha completado ningún test.</div>
+      {% endif %}
+
+      <!-- Test Assignment Section -->
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1.5rem; margin-top:2.5rem;">
+        <h3 style="font-size:1.05rem; font-weight:700; margin-bottom:0.25rem;">Asignar Cuestionarios</h3>
+        <p style="font-size:0.8rem; color:var(--muted); margin-bottom:1rem; line-height:1.4;">
+          Selecciona los cuestionarios recomendados para este paciente. Aparecerán destacados en su panel y desbloqueados de forma prioritaria.
+        </p>
+        <form method="post" action="{% url 'practitioners:asignar' profile.pk %}">
+          {% csrf_token %}
+          <div style="max-height: 250px; overflow-y: auto; padding: 0.5rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface2); margin-bottom: 1.25rem;">
+            {% for t in all_tests %}
+              <label style="display:flex; align-items:center; gap:0.5rem; padding:0.45rem 0.6rem; font-size:0.85rem; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.03); transition: background-color 0.15s;">
+                <input type="checkbox" name="assigned_tests" value="{{ t.id }}" {% if t.id in assigned_test_ids %}checked{% endif %}>
+                <span>{{ t.name }}</span>
+              </label>
+            {% endfor %}
+          </div>
+          <button type="submit" class="btn btn-primary" style="font-size:0.82rem; width:100%;">Guardar asignación</button>
+        </form>
+      </div>
     </div>
-    {% endfor %}
+
+    <!-- Right Column: AI Clinical Summary -->
+    <div>
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1.5rem; position: sticky; top: 2rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; gap: 0.5rem;">
+          <h3 style="font-size:1.05rem; font-weight:700; margin-bottom:0;">Ficha Clínica con IA</h3>
+          <form method="post" action="{% url 'practitioners:resumen_clinico' profile.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary" style="font-size:0.8rem; padding:0.4rem 0.8rem;" 
+                    onclick="this.disabled=true; this.textContent='Generando...'; this.form.submit();">
+              {% if profile.clinical_summary %}Actualizar ficha{% else %}Generar ficha{% endif %}
+            </button>
+          </form>
+        </div>
+        
+        {% if profile.clinical_summary %}
+          <div class="clinical-summary-content" style="font-size:0.88rem; line-height:1.6; color:var(--text); background:var(--surface2); padding:1rem; border-radius:8px; border:1px solid rgba(255,255,255,0.03); max-height:500px; overflow-y:auto;">
+            {{ profile.clinical_summary|linebreaks }}
+          </div>
+          <div style="font-size:0.75rem; color:var(--muted); margin-top:0.5rem; text-align:right;">
+            Última actualización: {{ profile.clinical_summary_updated_at|date:"d M Y, H:i" }}
+          </div>
+        {% else %}
+          <div style="text-align:center; padding:3rem 1rem; color:var(--muted); border:1px dashed var(--border); border-radius:8px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom:0.75rem; opacity:0.6;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            <p style="font-size:0.85rem; margin-bottom:0.5rem; font-weight:600;">Ficha clínica vacía</p>
+            <p style="font-size:0.78rem; line-height:1.4;">Una vez que el paciente complete cuestionarios, presiona el botón superior para sintetizar un reporte clínico con focos de indagación y preguntas clave.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
   </div>
-  {% else %}
-  <div class="empty-results">Este perfil aún no ha completado ningún test.</div>
-  {% endif %}
 </div>
 {% endblock %}

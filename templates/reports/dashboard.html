@@ -61,6 +61,15 @@
 
 {% block content %}
 <div class="progress-wrap">
+  {% if messages %}
+    <div style="margin-bottom: 1.5rem;">
+      {% for message in messages %}
+        <div class="badge" style="background: rgba(78, 205, 196, 0.1); color: var(--accent); border: 1px solid rgba(78, 205, 196, 0.2); padding: 0.75rem 1rem; font-size: 0.85rem; border-radius: 8px; width: 100%; box-sizing: border-box; display: block; margin-bottom: 0.5rem; text-align: left;">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
   <div class="reports-title">Mi progreso</div>
 
   <div class="stats-row">
@@ -94,27 +103,42 @@
       </div>
       
       <div style="align-self: center;">
-        {% if soul_report %}
-          {% if soul_report.status == 'completed' %}
-            <a href="{% url 'reports:bitacora_view' %}" class="btn" style="background: linear-gradient(135deg, #7c6dfa 0%, #4ecdc4 100%); color: #fff; border: none; padding: 0.6rem 1.25rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem; border-radius: 8px; font-size: 0.88rem;">
-              Leer Bitácora
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            </a>
-          {% elif soul_report.status == 'generating' %}
-            <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--muted); font-size: 0.88rem; font-weight: 500;">
-              <span class="spinner" style="width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.1); border-top-color: var(--accent); border-radius: 50%; display: inline-block; animation: spin 1s linear infinite;"></span>
-              Compilando bitácora...
-            </div>
+        {% if can_generate %}
+          {% if soul_report %}
+            {% if soul_report.status == 'completed' %}
+              <a href="{% url 'reports:bitacora_view' %}" class="btn" style="background: linear-gradient(135deg, #7c6dfa 0%, #4ecdc4 100%); color: #fff; border: none; padding: 0.6rem 1.25rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem; border-radius: 8px; font-size: 0.88rem;">
+                Leer Bitácora
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              </a>
+            {% elif soul_report.status == 'generating' %}
+              <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--muted); font-size: 0.88rem; font-weight: 500;">
+                <span class="spinner" style="width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.1); border-top-color: var(--accent); border-radius: 50%; display: inline-block; animation: spin 1s linear infinite;"></span>
+                Compilando bitácora...
+              </div>
+            {% else %}
+              <button id="btn-generar" class="btn" style="background: #f0c040; color: #000; border: none; padding: 0.6rem 1.25rem; font-weight: 700; border-radius: 8px; font-size: 0.88rem; cursor: pointer;">
+                Reintentar Generar
+              </button>
+            {% endif %}
           {% else %}
-            <button id="btn-generar" class="btn" style="background: #f0c040; color: #000; border: none; padding: 0.6rem 1.25rem; font-weight: 700; border-radius: 8px; font-size: 0.88rem; cursor: pointer;">
-              Reintentar Generar
-            </button>
+            {% if has_enough_info %}
+              <button id="btn-generar" class="btn" style="background: linear-gradient(135deg, #f0c040 0%, #ffe8d0 100%); color: #000; border: none; padding: 0.6rem 1.25rem; font-weight: 700; border-radius: 8px; font-size: 0.88rem; cursor: pointer;">
+                Generar Bitácora
+              </button>
+            {% else %}
+              <button class="btn btn-disabled" style="background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid rgba(255,255,255,0.05); padding: 0.6rem 1.25rem; border-radius: 8px; font-size: 0.88rem; cursor: not-allowed;" disabled>
+                Información Insuficiente
+              </button>
+            {% endif %}
           {% endif %}
         {% else %}
           {% if has_enough_info %}
-            <button id="btn-generar" class="btn" style="background: linear-gradient(135deg, #f0c040 0%, #ffe8d0 100%); color: #000; border: none; padding: 0.6rem 1.25rem; font-weight: 700; border-radius: 8px; font-size: 0.88rem; cursor: pointer;">
-              Generar Bitácora
-            </button>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-end;">
+              <a href="{% url 'reports:mock_checkout' %}" class="btn" style="background: linear-gradient(135deg, #f0c040 0%, #ff8c00 100%); color: #000; border: none; padding: 0.6rem 1.25rem; font-weight: 800; border-radius: 8px; font-size: 0.88rem; text-decoration: none; text-align: center; display: inline-block;">
+                Adquirir Bitácora ($25 USD)
+              </a>
+              <span style="font-size: 0.72rem; color: var(--muted);">Acceso gratuito con Plan Navegante</span>
+            </div>
           {% else %}
             <button class="btn btn-disabled" style="background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid rgba(255,255,255,0.05); padding: 0.6rem 1.25rem; border-radius: 8px; font-size: 0.88rem; cursor: not-allowed;" disabled>
               Información Insuficiente

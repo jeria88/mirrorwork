@@ -86,13 +86,22 @@
     <div class="profile-card">
       <div class="profile-alias">{{ p.alias }}</div>
       {% if p.notes %}<div class="profile-notes">{{ p.notes|truncatechars:80 }}</div>{% endif %}
-      <div>
-        <div class="token-info">
-          <span>Tokens</span>
-          <span>{{ p.tokens_used }} / {{ p.token_allocation }}</span>
+      <div style="font-size:0.8rem; color:var(--muted); display:flex; flex-direction:column; gap:0.35rem; margin:0.5rem 0; background:rgba(255,255,255,0.02); padding:0.6rem 0.8rem; border-radius:6px; border:1px solid rgba(255,255,255,0.05);">
+        <div>
+          <strong>Estado:</strong> 
+          {% if p.claimed_by %}
+            <span style="color:var(--accent);">Vinculado ({{ p.claimed_by.first_name|default:p.claimed_by.username }})</span>
+          {% else %}
+            <span style="color:#e05050; font-size:0.75rem;">Pendiente de vinculación</span>
+          {% endif %}
         </div>
-        <div class="token-bar-wrap">
-          <div class="token-bar-fill" style="width:{% widthratio p.tokens_used p.token_allocation 100 %}%"></div>
+        <div style="display:flex; justify-content:space-between;">
+          <span><strong>Tests completados:</strong></span>
+          <span class="badge" style="background:rgba(78,205,196,0.1); color:var(--accent);">{{ p.tests_completed_count }}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+          <span><strong>Tests asignados:</strong></span>
+          <span class="badge" style="background:rgba(255,255,255,0.1); color:var(--text);">{{ p.tests_assigned_count }}</span>
         </div>
       </div>
       <div class="profile-actions">
@@ -128,10 +137,7 @@
           <label>Notas internas (opcional)</label>
           <textarea name="notes" rows="2" placeholder="Contexto relevante…"></textarea>
         </div>
-        <div class="form-group">
-          <label>Tokens asignados</label>
-          <input type="number" name="token_allocation" value="150" min="0" max="9999">
-        </div>
+
         <div class="modal-actions">
           <button type="button" class="btn btn-ghost" onclick="document.getElementById('modal-nuevo').classList.remove('open')">Cancelar</button>
           <button type="submit" class="btn btn-primary">Crear perfil</button>

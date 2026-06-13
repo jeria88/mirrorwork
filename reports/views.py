@@ -43,6 +43,10 @@ def dashboard(request):
     tests_pct = min(100, int((completed_tests_count / required_tests) * 100)) if required_tests > 0 else 0
     sessions_pct = min(100, int((mirror_sessions / required_sessions) * 100)) if required_sessions > 0 else 0
 
+    has_active_plan = getattr(request.user, 'profile', None) and request.user.profile.plan in ('navegante', 'practicante', 'empresa')
+    is_paid = soul_report.is_paid if soul_report else False
+    can_generate = has_active_plan or is_paid
+
     return render(request, "reports/dashboard.html", {
         "total_tests": completed_tests_count,
         "mirror_sessions": mirror_sessions,
@@ -54,12 +58,23 @@ def dashboard(request):
         "required_sessions": required_sessions,
         "tests_pct": tests_pct,
         "sessions_pct": sessions_pct,
+        "has_active_plan": has_active_plan,
+        "is_paid": is_paid,
+        "can_generate": can_generate,
     })
 
 
 @login_required
 @require_POST
 def generar_bitacora(request):
+    # Check subscription plan or individual purchase
+    has_active_plan = getattr(request.user, 'profile', None) and request.user.profile.plan in ('navegante', 'practicante', 'empresa')
+    
+    report, created = SoulReport.objects.get_or_create(user=request.user)
+    
+    if not has_active_plan and not report.is_paid:
+        return JsonResponse({"error": "Debes adquirir la Bitácora de Sombras o tener un plan activo para generarla."}, status=403)
+
     results = TestResult.objects.filter(user=request.user)
     mirror_sessions = ConflictSession.objects.filter(user=request.user).exclude(status="archived")
     
@@ -69,11 +84,6 @@ def generar_bitacora(request):
     if results.count() < required_tests or mirror_sessions.count() < required_sessions:
         return JsonResponse({"error": "Información insuficiente para compilar la bitácora."}, status=400)
     
-    # Create or update report to generating
-    report, created = SoulReport.objects.get_or_create(
-        user=request.user,
-        defaults={'status': SoulReport.STATUS_GENERATING}
-    )
     report.status = SoulReport.STATUS_GENERATING
     report.save()
     
@@ -86,6 +96,92 @@ def generar_bitacora(request):
         report.status = SoulReport.STATUS_FAILED
         report.save()
         return JsonResponse({"error": "Error al compilar la Bitácora con la IA."}, status=500)
+
+
+@login_required
+def mock_checkout(request):
+    """
+    Simulación de pasarela de pago (Mercado Pago / Hotmart).
+    Marca la Bitácora del usuario actual como pagada.
+    """
+    report, _ = SoulReport.objects.get_or_create(user=request.user)
+    report.is_paid = True
+    report.save(update_fields=["is_paid"])
+    
+    from django.contrib import messages
+    messages.success(request, "¡Pago simulado con éxito! Tu Bitácora de Sombras ha sido desbloqueada para su generación.")
+    return redirect("reports:dashboard")
+
+
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+@require_POST
+def webhook_receiver(request):
+    """
+    Webhook unificado para Hotmart, Mercado Pago o integraciones personalizadas.
+    Procesa suscripciones y compras individuales de la Bitácora de Sombras.
+    """
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+        
+    email = None
+    product_name = ""
+    
+    # 1. Detección de Hotmart
+    if "event" in data and "data" in data:
+        buyer = data["data"].get("buyer", {})
+        email = buyer.get("email")
+        product = data["data"].get("product", {})
+        product_name = product.get("name", "")
+        
+    # 2. Detección de Mercado Pago o Formato Genérico/Simplificado
+    else:
+        email = data.get("email") or data.get("buyer_email")
+        product_name = data.get("product_name") or data.get("item_title") or data.get("product", "")
+
+    if not email:
+        return JsonResponse({"error": "No email provided in payload"}, status=400)
+        
+    email = email.strip().lower()
+    from accounts.models import User, UserProfile
+    
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return JsonResponse({"status": "user_not_found"}, status=200)
+        
+    profile, _ = UserProfile.objects.get_or_create(user=user)
+    product_name_lower = product_name.lower()
+    
+    # Caso A: Compra de la Bitácora de Sombras
+    if "bitacora" in product_name_lower or "sombra" in product_name_lower or "reporte" in product_name_lower:
+        report, _ = SoulReport.objects.get_or_create(user=user)
+        report.is_paid = True
+        report.save(update_fields=["is_paid"])
+        
+    # Caso B: Suscripción a Planes
+    elif "navegante" in product_name_lower:
+        profile.plan = "navegante"
+        from django.utils import timezone
+        profile.plan_active_since = timezone.now().date()
+        profile.save(update_fields=["plan", "plan_active_since"])
+        
+    elif "facilitador" in product_name_lower or "practicante" in product_name_lower:
+        profile.plan = "practicante"
+        from django.utils import timezone
+        profile.plan_active_since = timezone.now().date()
+        profile.save(update_fields=["plan", "plan_active_since"])
+        
+    elif "empresa" in product_name_lower:
+        profile.plan = "empresa"
+        from django.utils import timezone
+        profile.plan_active_since = timezone.now().date()
+        profile.save(update_fields=["plan", "plan_active_since"])
+        
+    return JsonResponse({"status": "processed"})
 
 
 @login_required
