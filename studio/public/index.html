@@ -3457,9 +3457,24 @@ async function saveEditorData() {
   });
   
   if (res.ok) {
+    const responseData = await res.json();
     showToast('✓ Cambios guardados con éxito', 'success');
-    // Reload sidebar lists and keep edit mode
-    originalEditorData = dataList;
+    
+    if (responseData && responseData.data) {
+      originalEditorData = responseData.data;
+      if (responseData.mappings && responseData.mappings[editorActiveId]) {
+        const oldId = editorActiveId;
+        editorActiveId = responseData.mappings[editorActiveId];
+        if (editorItemData) {
+          editorItemData.id = editorActiveId;
+        }
+        document.getElementById('editorSidebarTitle').innerText = `${editorActiveId} Workspace`;
+        console.log(`Mapped temporary ID ${oldId} to database ID ${editorActiveId}`);
+      }
+    } else {
+      originalEditorData = dataList;
+    }
+    
     renderEditorSidebar();
     loadSelectedSlideOrScene();
     refreshDashboard();

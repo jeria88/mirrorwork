@@ -130,35 +130,150 @@ function saveState(s) {
   }
 }
 
-// ── Content definitions (Dynamic JSON Database) ───────────────────
+// ── Content definitions (Dynamic JSON Database & Django API integration) ───────────
 const CAROUSELS_DATA_F = path.join(__dirname, 'data', 'carruseles_data.json');
 const REELS_DATA_F = path.join(__dirname, 'data', 'reels_data.json');
 const REMOTION_REELS_DATA_F = path.join(BASE, 'contenido', 'reels', 'remotion', 'src', 'reels_data.json');
 
-function loadCarousels() {
+async function fetchDjango(urlPath, options = {}) {
+  const ports = process.env.PORT ? [process.env.PORT] : ['8001', '8000'];
+  let lastError = null;
+  for (const port of ports) {
+    try {
+      const url = `http://127.0.0.1:${port}${urlPath}`;
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), 2000); // 2 seconds timeout for fast fallback
+      const res = await fetch(url, { ...options, signal: controller.signal });
+      clearTimeout(id);
+      return res;
+    } catch (err) {
+      lastError = err;
+    }
+  }
+  throw lastError || new Error('Django API unreachable');
+}
+
+async function loadCarousels() {
+  try {
+    const res = await fetchDjango('/blog/api/carruseles/');
+    if (res.ok) {
+      const data = await res.json();
+      try {
+        fs.writeFileSync(CAROUSELS_DATA_F, JSON.stringify(data, null, 2));
+      } catch (e) {
+        console.error('Error updating local carruseles cache:', e);
+      }
+      return data;
+    } else {
+      console.warn(`Django API loadCarousels returned status ${res.status}. Falling back to local cache.`);
+    }
+  } catch (err) {
+    console.error('Failed to load carousels from Django API:', err.message);
+  }
   try { return JSON.parse(fs.readFileSync(CAROUSELS_DATA_F, 'utf8')); }
   catch { return []; }
 }
-function saveCarousels(data) {
-  fs.writeFileSync(CAROUSELS_DATA_F, JSON.stringify(data, null, 2));
-  uploadFileToR2(CAROUSELS_DATA_F, 'cgm/data/carruseles_data.json', 'application/json').catch(err => {
-    console.error('Error uploading carruseles_data.json to R2:', err);
+
+async function saveCarousels(data) {
+  let mappings = {};
+  try {
+    const res = await fetchDjango('/blog/api/carruseles/', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (res.ok) {
+      const respData = await res.json();
+      mappings = respData.mappings || {};
+      console.log('Successfully saved carousels to Django DB.');
+    } else {
+      console.error(`Django API saveCarousels returned status ${res.status}`);
+    }
+  } catch (err) {
+    console.error('Failed to save carousels to Django DB:', err.message);
+  }
+
+  const mappedData = data.map(item => {
+    if (mappings[item.id]) {
+      return { ...item, id: mappings[item.id] };
+    }
+    return item;
   });
+
+  try {
+    fs.writeFileSync(CAROUSELS_DATA_F, JSON.stringify(mappedData, null, 2));
+    uploadFileToR2(CAROUSELS_DATA_F, 'cgm/data/carruseles_data.json', 'application/json').catch(err => {
+      console.error('Error uploading carruseles_data.json to R2:', err);
+    });
+  } catch (err) {
+    console.error('Error writing local carruseles data:', err);
+  }
+
+  return { ok: true, data: mappedData, mappings };
 }
-function loadReels() {
+
+async function loadReels() {
+  try {
+    const res = await fetchDjango('/blog/api/reels/');
+    if (res.ok) {
+      const data = await res.json();
+      try {
+        fs.writeFileSync(REELS_DATA_F, JSON.stringify(data, null, 2));
+      } catch (e) {
+        console.error('Error updating local reels cache:', e);
+      }
+      return data;
+    } else {
+      console.warn(`Django API loadReels returned status ${res.status}. Falling back to local cache.`);
+    }
+  } catch (err) {
+    console.error('Failed to load reels from Django API:', err.message);
+  }
   try { return JSON.parse(fs.readFileSync(REELS_DATA_F, 'utf8')); }
   catch { return []; }
 }
-function saveReels(data) {
-  fs.writeFileSync(REELS_DATA_F, JSON.stringify(data, null, 2));
+
+async function saveReels(data) {
+  let mappings = {};
   try {
-    fs.writeFileSync(REMOTION_REELS_DATA_F, JSON.stringify(data, null, 2));
+    const res = await fetchDjango('/blog/api/reels/', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (res.ok) {
+      const respData = await res.json();
+      mappings = respData.mappings || {};
+      console.log('Successfully saved reels to Django DB.');
+    } else {
+      console.error(`Django API saveReels returned status ${res.status}`);
+    }
   } catch (err) {
-    console.error('Error syncing Remotion reels_data.json:', err);
+    console.error('Failed to save reels to Django DB:', err.message);
   }
-  uploadFileToR2(REELS_DATA_F, 'cgm/data/reels_data.json', 'application/json').catch(err => {
-    console.error('Error uploading reels_data.json to R2:', err);
+
+  const mappedData = data.map(item => {
+    if (mappings[item.id]) {
+      return { ...item, id: mappings[item.id] };
+    }
+    return item;
   });
+
+  try {
+    fs.writeFileSync(REELS_DATA_F, JSON.stringify(mappedData, null, 2));
+    try {
+      fs.writeFileSync(REMOTION_REELS_DATA_F, JSON.stringify(mappedData, null, 2));
+    } catch (err) {
+      console.error('Error syncing Remotion reels_data.json:', err);
+    }
+    uploadFileToR2(REELS_DATA_F, 'cgm/data/reels_data.json', 'application/json').catch(err => {
+      console.error('Error uploading reels_data.json to R2:', err);
+    });
+  } catch (err) {
+    console.error('Error writing local reels data:', err);
+  }
+
+  return { ok: true, data: mappedData, mappings };
 }
 
 // Download data from R2 on start if available
@@ -275,10 +390,10 @@ function broadcast(event, data) {
 }
 
 // ── Status ────────────────────────────────────────────────────────
-app.get('/api/status', (req, res) => {
+app.get('/api/status', async (req, res) => {
   const state = loadState();
-  const carouselsData = loadCarousels();
-  const reelsData = loadReels();
+  const carouselsData = await loadCarousels();
+  const reelsData = await loadReels();
 
   const carousels = carouselsData.map(c => {
     const hasHtml  = true; // Dynamic template served
@@ -372,18 +487,18 @@ app.patch('/api/state/:id', (req, res) => {
 });
 
 // ── Static file serves ────────────────────────────────────────────
-app.get('/preview/carousel/:id', (req, res) => {
+app.get('/preview/carousel/:id', async (req, res) => {
   const id = req.params.id.toUpperCase();
-  const carousels = loadCarousels();
+  const carousels = await loadCarousels();
   const c = carousels.find(x => x.id === id);
   if (!c) return res.status(404).send('Not found');
   const f = path.join(CONTENIDO, 'carruseles', 'html', 'dynamic-carrusel.html');
   if (!fs.existsSync(f)) return res.status(404).send('HTML no generado');
   res.sendFile(f);
 });
-app.get('/preview/png/:id/:slide', (req, res) => {
+app.get('/preview/png/:id/:slide', async (req, res) => {
   const id = req.params.id.toUpperCase();
-  const carousels = loadCarousels();
+  const carousels = await loadCarousels();
   const c = carousels.find(x => x.id === id);
   if (!c) return res.status(404).send('Not found');
 
@@ -396,9 +511,9 @@ app.get('/preview/png/:id/:slide', (req, res) => {
   if (!fs.existsSync(f)) return res.status(404).send('PNG no encontrado');
   res.sendFile(f);
 });
-app.get('/preview/script/:id', (req, res) => {
+app.get('/preview/script/:id', async (req, res) => {
   const id = req.params.id.toUpperCase();
-  const reels = loadReels();
+  const reels = await loadReels();
   const r = reels.find(x => x.id === id);
   if (!r) return res.status(404).send('Not found');
   
@@ -445,27 +560,27 @@ app.use('/fondos-pexels', express.static(path.join(BASE, 'brand', 'social', 'pla
 app.use('/brand-assets', express.static(path.join(BASE, 'brand', 'social', 'plantilla', '_assets')));
 
 // ── Editor APIs ───────────────────────────────────────────────────
-app.get('/api/editor/carruseles', (req, res) => {
-  res.json(loadCarousels());
+app.get('/api/editor/carruseles', async (req, res) => {
+  res.json(await loadCarousels());
 });
-app.put('/api/editor/carruseles', (req, res) => {
+app.put('/api/editor/carruseles', async (req, res) => {
   if (!Array.isArray(req.body)) return res.status(400).json({ error: 'Body must be an array' });
-  saveCarousels(req.body);
+  const result = await saveCarousels(req.body);
   broadcast('state-update', {});
-  res.json({ ok: true });
+  res.json(result || { ok: true });
 });
-app.get('/api/editor/reels', (req, res) => {
-  res.json(loadReels());
+app.get('/api/editor/reels', async (req, res) => {
+  res.json(await loadReels());
 });
-app.put('/api/editor/reels', (req, res) => {
+app.put('/api/editor/reels', async (req, res) => {
   if (!Array.isArray(req.body)) return res.status(400).json({ error: 'Body must be an array' });
-  saveReels(req.body);
+  const result = await saveReels(req.body);
   broadcast('state-update', {});
-  res.json({ ok: true });
+  res.json(result || { ok: true });
 });
-app.get('/api/carousel-data/:id', (req, res) => {
+app.get('/api/carousel-data/:id', async (req, res) => {
   const id = req.params.id.toUpperCase();
-  const carousels = loadCarousels();
+  const carousels = await loadCarousels();
   const c = carousels.find(x => x.id === id);
   if (!c) return res.status(404).json({ error: 'Carrusel no encontrado' });
   res.json(c);
@@ -1081,7 +1196,7 @@ Responde SOLO con un objeto JSON válido (sin markdown, sin texto extra):
     fs.mkdirSync(repoPath, { recursive: true });
 
     // Load current editable carousels
-    const currentCarousels = loadCarousels();
+    const currentCarousels = await loadCarousels();
     let nextNum = 10;
     currentCarousels.forEach(c => {
       const match = c.id.match(/^C(\d+)$/);
@@ -1108,7 +1223,7 @@ Responde SOLO con un objeto JSON válido (sin markdown, sin texto extra):
     });
 
     // Save to dynamic editable carousels database!
-    saveCarousels([...currentCarousels, ...carousels.map(c => ({
+    await saveCarousels([...currentCarousels, ...carousels.map(c => ({
       id: c.id,
       title: c.title,
       file: c.file,
@@ -1197,7 +1312,7 @@ app.post('/api/postiz/publish', async (req, res) => {
   let isReel = !id.startsWith('C');
 
   if (!isReel) {
-    const carousels = loadCarousels();
+    const carousels = await loadCarousels();
     const c = carousels.find(x => x.id === id);
     if (!c) return res.status(404).json({ error: 'Carrusel no encontrado' });
     const pngDir = path.join(CONTENIDO, 'carruseles', 'pngs', `${c.id}-${c.file}`);
@@ -1209,7 +1324,7 @@ app.post('/api/postiz/publish', async (req, res) => {
       return res.status(400).json({ error: 'No se encontraron PNGs generados para este carrusel. Genéralos primero.' });
     }
   } else {
-    const reels = loadReels();
+    const reels = await loadReels();
     const r = reels.find(x => x.id === id);
     if (!r) return res.status(404).json({ error: 'Reel no encontrado' });
     const mp4Path = path.join(CONTENIDO, 'reels', 'mp4', `${r.id}.mp4`);
@@ -1336,7 +1451,7 @@ app.post('/api/make/publish', async (req, res) => {
   let isReel = !id.startsWith('C');
 
   if (!isReel) {
-    const carousels = loadCarousels();
+    const carousels = await loadCarousels();
     const c = carousels.find(x => x.id === id);
     if (!c) return res.status(404).json({ error: 'Carrusel no encontrado' });
     const pngDir = path.join(CONTENIDO, 'carruseles', 'pngs', `${c.id}-${c.file}`);
@@ -1348,7 +1463,7 @@ app.post('/api/make/publish', async (req, res) => {
       return res.status(400).json({ error: 'No se encontraron PNGs generados para este carrusel. Genéralos primero.' });
     }
   } else {
-    const reels = loadReels();
+    const reels = await loadReels();
     const r = reels.find(x => x.id === id);
     if (!r) return res.status(404).json({ error: 'Reel no encontrado' });
     const mp4Path = path.join(CONTENIDO, 'reels', 'mp4', `${r.id}.mp4`);
@@ -1464,10 +1579,10 @@ app.post('/api/generate-pngs', (req, res) => {
   });
 });
 
-app.post('/api/render/:id', (req, res) => {
+app.post('/api/render/:id', async (req, res) => {
   if (activeProcess) return res.status(409).json({ error: 'Proceso activo en curso' });
   const id = req.params.id.toUpperCase();
-  const reels = loadReels();
+  const reels = await loadReels();
   const r  = reels.find(x => x.id === id);
   if (!r)  return res.status(404).json({ error: 'Reel no encontrado' });
   res.json({ started: true });
