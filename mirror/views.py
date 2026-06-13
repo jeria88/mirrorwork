@@ -746,9 +746,11 @@ def espejo_send(request):
     is_first_exchange = len(sesion.messages) <= 2
 
     # Primera sesión del usuario = gratis (no descuenta fractones)
+    # Suscriptores (navegante, practicante, empresa) = gratis (no descuenta fractones)
     from tokens.service import spend, credit_mission, has_balance
+    has_active_plan = getattr(request.user, 'profile', None) and request.user.profile.plan in ('navegante', 'practicante', 'empresa')
     prior_sessions = ConflictSession.objects.filter(user=request.user).exclude(pk=sesion.pk).exists()
-    is_free_session = not prior_sessions
+    is_free_session = not prior_sessions or has_active_plan
 
     if not is_free_session:
         if not has_balance(request.user, 'espejo_exchange'):

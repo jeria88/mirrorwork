@@ -1,0 +1,291 @@
+{% extends "base.html" %}
+{% block title %}Bitácora de Sombras — Endonautas{% endblock %}
+
+{% block extra_head %}
+<style data-page-style>
+  .book-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    background: rgba(10, 10, 15, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 24px;
+    padding: 3.5rem 3rem;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Decorative glowing orb behind book */
+  .book-glow {
+    position: absolute;
+    top: -10%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 300px;
+    background: radial-gradient(circle, rgba(124, 109, 250, 0.08) 0%, rgba(78, 205, 196, 0.03) 50%, rgba(0,0,0,0) 80%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .book-header {
+    text-align: center;
+    margin-bottom: 4rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 2rem;
+  }
+  
+  .book-tag {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: #f0c040;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    display: inline-block;
+  }
+
+  .book-title {
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.5rem;
+  }
+
+  .book-subtitle {
+    font-size: 0.88rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  .chapter-section {
+    margin-bottom: 4rem;
+  }
+
+  .chapter-num {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .chapter-title {
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-size: 1.5rem;
+    color: #ffe8d0;
+    margin-bottom: 1.25rem;
+    border-left: 3px solid var(--accent);
+    padding-left: 1rem;
+    line-height: 1.2;
+  }
+
+  .chapter-content {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--text);
+    text-align: justify;
+    opacity: 0.92;
+  }
+
+  .list-item-trigger {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--text);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .trigger-bullet {
+    background: rgba(240, 192, 64, 0.15);
+    color: #f0c040;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+
+  .phase-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .phase-badge {
+    display: inline-block;
+    background: rgba(78, 205, 196, 0.1);
+    color: var(--accent);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+
+  .phase-exercise {
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--text);
+    opacity: 0.9;
+  }
+
+  .actions-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 2rem;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+
+  /* PRINT STYLE OPTIMIZATIONS */
+  @media print {
+    body {
+      background: white !important;
+      color: black !important;
+    }
+    #mandala-bg, #cosmos-bg, .btn, .actions-footer, .book-glow {
+      display: none !important;
+    }
+    .book-container {
+      max-width: 100% !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      background: transparent !important;
+    }
+    .book-title {
+      color: black !important;
+    }
+    .chapter-title {
+      color: black !important;
+      border-left-color: black !important;
+      page-break-after: avoid;
+    }
+    .chapter-section {
+      page-break-inside: avoid;
+    }
+    .list-item-trigger, .phase-card {
+      background: transparent !important;
+      border: 1px solid #ddd !important;
+      color: black !important;
+    }
+    .trigger-bullet {
+      background: #eee !important;
+      color: black !important;
+    }
+    .phase-badge {
+      background: #eee !important;
+      color: black !important;
+      border: 1px solid #ccc !important;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="book-container">
+  <div class="book-glow"></div>
+  
+  <div class="book-header">
+    <div class="book-tag">Registro Psico-Espiritual</div>
+    <div class="book-title">Bitácora de Sombras</div>
+    <div class="book-subtitle">Integración de Luz y Oscuridad para {{ request.user.email }}</div>
+  </div>
+
+  <!-- Prólogo / Introducción -->
+  <div class="chapter-section">
+    <div class="chapter-num">Prólogo</div>
+    <div class="chapter-title">El llamado del inconsciente</div>
+    <div class="chapter-content">
+      {{ data.introduccion|linebreaks }}
+    </div>
+  </div>
+
+  <!-- Capítulo 1: La Máscara -->
+  <div class="chapter-section">
+    <div class="chapter-num">Capítulo I</div>
+    <div class="chapter-title">La Máscara Social: {{ data.arquetipo_mascara.titulo }}</div>
+    <div class="chapter-content">
+      {{ data.arquetipo_mascara.descripcion|linebreaks }}
+    </div>
+  </div>
+
+  <!-- Capítulo 2: La Sombra -->
+  <div class="chapter-section">
+    <div class="chapter-num">Capítulo II</div>
+    <div class="chapter-title">La Sombra Inconsciente: {{ data.sombra_integrar.titulo }}</div>
+    <div class="chapter-content">
+      <p style="margin-bottom: 1.5rem;">
+        {{ data.sombra_integrar.descripcion }}
+      </p>
+      
+      <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 0.75rem; font-weight: 700;">
+        Detonadores Comunes de la Sombra:
+      </div>
+      
+      {% for trigger in data.sombra_integrar.disparadores %}
+      <div class="list-item-trigger">
+        <div class="trigger-bullet">{{ forloop.counter }}</div>
+        <div>{{ trigger }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Capítulo 3: La Luz -->
+  <div class="chapter-section">
+    <div class="chapter-num">Capítulo III</div>
+    <div class="chapter-title">La Luz: {{ data.fuerza_luz.titulo }}</div>
+    <div class="chapter-content">
+      {{ data.fuerza_luz.descripcion|linebreaks }}
+    </div>
+  </div>
+
+  <!-- Capítulo 4: Hoja de Ruta -->
+  <div class="chapter-section" style="margin-bottom: 2rem;">
+    <div class="chapter-num">Capítulo IV</div>
+    <div class="chapter-title">Ruta de Integración Diaria</div>
+    
+    {% for phase in data.hoja_ruta %}
+    <div class="phase-card">
+      <div class="phase-badge">{{ phase.fase }}</div>
+      <div class="phase-exercise">{{ phase.ejercicio }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Footer Actions -->
+  <div class="actions-footer">
+    <a href="{% url 'reports:dashboard' %}" class="btn btn-ghost" style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.6rem 1.2rem;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+      Volver al progreso
+    </a>
+    
+    <button onclick="window.print();" class="btn" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: var(--text); padding: 0.6rem 1.25rem; font-weight: 600; cursor: pointer; border-radius: 8px; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 0.5rem;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+      Imprimir / PDF
+    </button>
+  </div>
+</div>
+{% endblock %}
