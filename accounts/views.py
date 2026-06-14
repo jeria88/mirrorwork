@@ -36,8 +36,17 @@ class LoginForm(forms.Form):
 
 def home(request):
     host = request.get_host().split(':')[0].lower()
-    # Si no es la app (ej. no empieza con "app" o no es el puerto de la app local con ?app=1), delegar a Wagtail
+    # Si no es la app (ej. no empieza con "app" o no es el puerto de la app local con ?app=1), mostrar landing SPA
     if not (host.startswith('app.') or host.startswith('app-') or (host in ('localhost', '127.0.0.1') and request.GET.get('app') == '1')):
+        # Servir la HomePage de Wagtail (landing SPA nueva)
+        from home.models import HomePage
+        try:
+            homepage = HomePage.objects.live().first()
+            if homepage:
+                return homepage.serve(request)
+        except Exception:
+            pass
+        # Fallback a Wagtail serve
         from wagtail.views import serve as wagtail_serve
         return wagtail_serve(request, '')
 
@@ -91,32 +100,7 @@ def logout_view(request):
 
 @login_required
 def dashboard(request):
-    try:
-        if not request.user.profile.map_aesthetic:
-            return redirect('onboarding_mapa')
-    except Exception:
-        return redirect('onboarding_mapa')
-
-    from psychometrics.models import TestResult, Test
-    from tokens.models import TokenBalance
-    recent_results = TestResult.objects.filter(user=request.user).select_related('test')[:5]
-    try:
-        token_balance = request.user.token_balance
-    except Exception:
-        token_balance = None
-    total_tests = Test.objects.filter(active=True).count()
-    completed_tests = (
-        TestResult.objects.filter(user=request.user).values('test').distinct().count()
-    )
-    map_pct = round(completed_tests / total_tests * 100) if total_tests else 0
-    return render(request, 'dashboard.html', {
-        'recent_results': recent_results,
-        'token_balance': token_balance,
-        'map_aesthetic': request.user.profile.map_aesthetic,
-        'map_pct': map_pct,
-        'completed_tests': completed_tests,
-        'total_tests': total_tests,
-    })
+    return redirect('/#feed')
 
 
 _VALID_AESTHETICS = {'cosmos', 'mandala', 'psychedelic'}
@@ -921,3 +905,78 @@ def terminos(request):
 
 def privacidad(request):
     return render(request, 'privacidad.html')
+
+
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def api_login(request):
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'error': 'Método no permitido'}, status=405)
+    
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        data = request.POST
+        
+    email = data.get('email', '').strip().lower()
+    password = data.get('password', '')
+    
+    if not email or not password:
+        return JsonResponse({'ok': False, 'error': 'Faltan credenciales'}, status=400)
+        
+    user = authenticate(request, username=email, password=password)
+    if user:
+        login(request, user)
+        return JsonResponse({'ok': True})
+    return JsonResponse({'ok': False, 'error': 'Correo o contraseña incorrectos'}, status=400)
+
+
+@csrf_exempt
+def api_register(request):
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'error': 'Método no permitido'}, status=405)
+        
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        data = request.POST
+        
+    email = data.get('email', '').strip().lower()
+    first_name = data.get('first_name', '').strip()
+    password = data.get('password', '')
+    onboarding_source = data.get('onboarding_source', '')
+    
+    if not email or not first_name or not password:
+        return JsonResponse({'ok': False, 'error': 'Todos los campos son requeridos'}, status=400)
+        
+    if User.objects.filter(email=email).exists():
+        return JsonResponse({'ok': False, 'error': 'Ya existe una cuenta con este correo'}, status=400)
+        
+    if len(password) < 8:
+        return JsonResponse({'ok': False, 'error': 'La contraseña debe tener al menos 8 caracteres'}, status=400)
+        
+    user = User.objects.create_user(
+        username=email,
+        email=email,
+        first_name=first_name,
+        password=password,
+    )
+    
+    # Save source if provided
+    if onboarding_source:
+        try:
+            profile = user.profile
+            profile.onboarding_entry_point = onboarding_source
+            profile.save(update_fields=['onboarding_entry_point'])
+        except Exception:
+            from .models import UserProfile
+            UserProfile.objects.create(user=user, onboarding_entry_point=onboarding_source)
+            
+    # Grant initial free-plan monthly allocation
+    from tokens.service import renew_monthly
+    renew_monthly(user)
+    
+    login(request, user)
+    return JsonResponse({'ok': True})
+
