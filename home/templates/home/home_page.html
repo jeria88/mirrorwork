@@ -1,300 +1,1578 @@
-{% extends "base_editorial.html" %}
-{% load wagtailcore_tags wagtailimages_tags static %}
+{% load static wagtailcore_tags %}
+<!DOCTYPE html>
 
-{% block title %}Endonautas — El mapa del mundo interior{% endblock %}
-{% block meta_description %}Cartografía del autoconocimiento basada en el origen de los patrones. Tests psicométricos, IA reflectiva y metodología clínica para navegar tu mundo interior.{% endblock %}
-{% block og_title %}Endonautas{% endblock %}
-{% block og_description %}El mapa del mundo interior. Cartografía del autoconocimiento.{% endblock %}
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Endonautas — Ecosistema de Consciencia Somática</title>
+<!-- Three.js importmap — Carga Three.js y post-procesamiento desde CDN -->
+<script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+<!-- Google Fonts: Space Grotesk (Headers), Plus Jakarta Sans (UI/Body), EB Garamond (Editorial/Book) -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..700;1,400..700&amp;family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&amp;family=Space+Grotesk:wght@300..700&amp;display=swap" rel="stylesheet"/>
+<!-- Estilos base y Bento grid -->
+<link href="{% static 'css/app.css' %}" rel="stylesheet"/>
+<style>
 
-{% block structured_data %}
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": "Endonautas",
-  "url": "https://endonautas.cl",
-  "description": "Cartografía del autoconocimiento basada en el origen de los patrones.",
-  "publisher": {
-    "@type": "Person",
-    "name": "Franco Jeria Castro"
-  }
+.section { 
+    position: relative; 
+    min-height: 100vh !important; 
+    overflow: hidden; 
+    padding: 10vh 0 !important; 
+    display: flex; 
+    align-items: center; 
 }
-</script>
-{% endblock %}
+.container { 
+    position: relative;
+    display: flex !important; flex-direction: column; gap: 2vh; 
+    padding: 40px !important;
+}
 
-{% block extra_head %}
-<style data-page-style>
+.tab-center {
+    margin: 0 auto; transform: translate(0, 50px); opacity: 0; width: 100vw; max-width: 1000px;
+    background: transparent !important; backdrop-filter: none !important; border: none !important; box-shadow: none !important;
+    transition: all 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    align-items: center; text-align: center;
+}
+.tab-center h1, .tab-center p, .tab-center .eyebrow {
+    text-shadow: 0 4px 20px rgba(0,0,0,0.8), 0 0 40px rgba(0,0,0,0.8);
+}
+.tab-center.active-tab { transform: translate(0, 0); opacity: 1; }
 
-  /* ── Hero ── */
-  .hero {
-    min-height: 92vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 8rem 1.5rem 6rem;
-  }
-  .hero-eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 0.68rem;
-    font-weight: 500;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 2rem;
-  }
-  .hero-eyebrow::before {
-    content: '';
-    display: block;
-    width: 24px;
-    height: 1px;
-    background: var(--dim);
-  }
-  .hero-title {
-    font-family: var(--font-heading);
-    font-size: clamp(3rem, 8vw, 6rem);
-    font-weight: 700;
-    line-height: 1.08;
-    color: var(--text);
-    max-width: 820px;
-    margin-bottom: 1.6rem;
-    letter-spacing: -0.03em;
-  }
-  .hero-title em {
-    font-style: normal;
-    animation: p5 5s ease-in-out infinite;
-  }
-  .hero-tagline {
-    font-size: clamp(1rem, 2vw, 1.15rem);
-    color: var(--muted);
-    max-width: 520px;
-    margin-bottom: 3rem;
-    line-height: 1.7;
-    font-weight: 400;
-  }
-  .hero-ctas {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
+.tab-left {
+    margin-right: auto; margin-left: 0; transform: translate(-10%, 0); opacity: 0; width: 42vw;
+    background: rgba(10,10,15,0.7); backdrop-filter: blur(40px); border-radius: 0 40px 40px 0; border: 1px solid rgba(255,255,255,0.08); border-left: none;
+    transition: all 1s cubic-bezier(0.25, 0.8, 0.25, 1); padding: 4vh 4vw !important; box-shadow: 20px 0 60px rgba(0,0,0,0.5);
+}
+.tab-left.active-tab { transform: translate(0, 0); opacity: 1; }
 
-  /* ── Segmentación ── */
-  .segment {
-    padding: 6rem 1.5rem;
-  }
-  .segment-header {
-    text-align: center;
-    margin-bottom: 3.5rem;
-  }
-  .segment-title {
-    font-family: var(--font-heading);
-    font-size: clamp(1.8rem, 3.5vw, 2.6rem);
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 0.6rem;
-    letter-spacing: -0.02em;
-  }
-  .segment-sub {
-    color: var(--muted);
-    font-size: 0.95rem;
-    max-width: 480px;
-    margin: 0 auto;
-    line-height: 1.7;
-  }
-  .segment-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.25rem;
-    max-width: 1100px;
-    margin: 0 auto;
-  }
-  .segment-card {
-    background: #0b0b14;
-    border-left: 2px solid;
-    border-radius: 0 16px 16px 0;
-    padding: 2rem 1.75rem 2rem 2rem;
-    animation: p5-border-left 5s ease-in-out infinite;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    transition: transform 0.2s;
-  }
-  .segment-card:hover {
-    transform: translateY(-2px);
-  }
-  .segment-card-quote {
-    font-family: var(--font-heading);
-    font-size: 1rem;
-    font-style: italic;
-    color: var(--text);
-    line-height: 1.55;
-    opacity: 0.9;
-  }
-  .segment-card-cta {
-    font-family: var(--font-ui);
-    font-size: 0.88rem;
-    font-weight: 600;
-    color: var(--text);
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    transition: gap 0.2s;
-  }
-  .segment-card-cta:hover {
-    gap: 0.7rem;
-  }
+.tab-right {
+    margin-left: auto; margin-right: 0; transform: translate(10%, 0); opacity: 0; width: 42vw;
+    background: rgba(10,10,15,0.7); backdrop-filter: blur(40px); border-radius: 40px 0 0 40px; border: 1px solid rgba(255,255,255,0.08); border-right: none;
+    transition: all 1s cubic-bezier(0.25, 0.8, 0.25, 1); padding: 4vh 4vw !important; box-shadow: -20px 0 60px rgba(0,0,0,0.5);
+}
+.tab-right.active-tab { transform: translate(0, 0); opacity: 1; }
 
-  /* ── App section ── */
-  .app-section {
-    padding: 6rem 1.5rem;
-    text-align: center;
-    background: linear-gradient(180deg, transparent, rgba(126,207,168,0.03) 50%, transparent);
-  }
-  .app-title {
-    font-family: var(--font-heading);
-    font-size: clamp(1.8rem, 3.5vw, 2.6rem);
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 0.6rem;
-    letter-spacing: -0.02em;
-  }
-  .app-sub {
-    color: var(--muted);
-    font-size: 0.95rem;
-    max-width: 480px;
-    margin: 0 auto 2.5rem;
-    line-height: 1.7;
-  }
-  .app-features {
-    display: flex;
-    justify-content: center;
-    gap: 2rem;
-    flex-wrap: wrap;
-    margin-bottom: 2.5rem;
-  }
-  .app-feature {
-    font-family: var(--font-ui);
-    font-size: 0.85rem;
-    color: var(--muted);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  .app-feature::before {
-    content: '';
-    display: block;
-    width: 5px;
-    height: 5px;
-    background: var(--text);
-    border-radius: 50%;
-    opacity: 0.3;
-  }
+/* Responsive text for tabs */
+.tab-left h2, .tab-right h2, .tab-center h2 { font-size: clamp(1.5rem, 3vh, 2rem) !important; margin-bottom: 1.5vh !important; }
+.tab-left p, .tab-right p, .tab-center p { font-size: clamp(0.9rem, 1.8vh, 1.05rem) !important; margin-bottom: 2vh !important; line-height: 1.6; }
+.tab-left .eyebrow, .tab-right .eyebrow { margin-bottom: 8px !important; }
 
-  /* ── Footer CTA ── */
-  .footer-cta {
-    padding: 6rem 1.5rem;
-    text-align: center;
-  }
-  .footer-cta-title {
-    font-family: var(--font-heading);
-    font-size: clamp(1.6rem, 3vw, 2.2rem);
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 0.6rem;
-    letter-spacing: -0.02em;
-  }
-  .footer-cta-sub {
-    color: var(--muted);
-    font-size: 0.9rem;
-    max-width: 440px;
-    margin: 0 auto;
-    line-height: 1.7;
-  }
+/* Smaller SVGs inside tabs */
+.mockup-glass { padding: 2vh !important; display: flex; justify-content: center; }
+.mockup-glass svg { height: 20vh !important; width: auto !important; margin: 0 auto; display: block; }
 
-  @media (max-width: 600px) {
-    .segment-grid { grid-template-columns: 1fr; }
-    .hero { padding: 7rem 1.25rem 5rem; }
-  }
+
+.mockup-glass { background: rgba(0,0,0,0.4) !important; border-radius: 20px !important; }
+
+
+/* Grayscale to Color Reveal on hover for images */
+.bw-reveal {
+    filter: grayscale(100%) opacity(0.7);
+    transition: filter 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+    cursor: pointer;
+}
+.bw-reveal:hover {
+    filter: grayscale(0%) opacity(1);
+}
+
 </style>
-{% endblock %}
+<script>
+  window.ENDONAUTAS_CONFIG = {
+    isAuthenticated: {% if user.is_authenticated %}true{% else %}false{% endif %},
+    activeTab: "{% if user.is_authenticated %}feed{% else %}landing{% endif %}",
+    userName: "{% if user.is_authenticated %}{{ user.first_name|escapejs }}{% else %}Franco Jeria{% endif %}",
+    userPlan: "{% if user.is_authenticated %}{% if user.profile.plan == 'free' %}Mi Cuenta{% else %}{{ user.profile.get_plan_display }}{% endif %}{% else %}Mi Cuenta{% endif %}",
+    fractons: {{ token_balance_val|default:450 }},
+    completedTests: {{ completed_tests_val|default:4 }},
+    totalTests: {{ total_tests_val|default:12 }},
+    mapPct: {{ map_pct_val|default:33 }}
+  };
+</script>
+</head>
+<body class="{% if not user.is_authenticated %}not-logged-in{% endif %}">
+<!-- Canvas para la animación cósmica Three.js (Agujero Negro Kepleriano) -->
+<div id="cosmos-bg-container">
+<div id="cosmos-overlay"></div>
+</div>
+<!-- Contenedor Principal (App Shell) -->
+<div class="app-container">
+<!-- Sidebar de Navegación Estilo Cuarzo -->
+<aside class="app-sidebar">
+<div class="sidebar-brand">
+<div class="brand-logo">
+<img src="{% static 'img/logo-alt.png' %}" style="width: 28px; height: auto; display: inline-block; vertical-align: middle;" alt="Endonautas">
+</div>
+<div class="brand-text">
+<h1>Endonautas</h1>
+<span>Soma y Consciencia Sistémica</span>
+</div>
+</div>
+<nav class="sidebar-menu">
+<div class="menu-label">Social</div>
+<a class="menu-item" data-tab="feed" href="#feed">
+<svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+<span>Inicio</span>
+</a>
+<a class="menu-item" data-tab="perfil-social" href="#perfil">
+<svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
+<span>Perfil</span>
+</a>
+<a class="menu-item" data-tab="foros" href="#foros">
+<svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z"></path><path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"></path></svg>
+<span>Foros</span>
+</a>
+<a class="menu-item" data-tab="inbox" href="#inbox">
+<svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+<span>Mensajes</span>
+</a>
 
-{% block content %}
+<div class="menu-label">Espacio Personal</div>
+<a class="menu-item" data-tab="perfil" href="#configuracion">
+<svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+<span>Configuración</span>
+</a>
+<a class="menu-item" data-tab="mapainterior" href="#mapainterior">
+<svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+<span>Mapa Interior</span>
+</a>
+<a class="menu-item" data-tab="espejo" href="#espejo">
+<svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+<span>Espejo</span>
+</a>
+<a class="menu-item" data-tab="regulacion" href="#regulacion">
+<svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M12 6v6l4 2"></path></svg>
+<span>Regulación</span>
+</a>
+<a class="menu-item" data-tab="suenos" href="#suenos">
+<svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+<span>Diario de Sueños</span>
+</a>
 
-<!-- Hero -->
-<section class="hero">
-  <p class="hero-eyebrow reveal">El método endonauta</p>
-  <h1 class="hero-title reveal" style="transition-delay:0.15s">
-    Entiende tu mundo interior.<br>
-    <em>No lo que tus traumas te dicen de él.</em>
-  </h1>
-  <p class="hero-tagline reveal" style="transition-delay:0.3s">
-    Tests psicométricos validados, el Espejo de Conflictos IA y lecturas de nacimiento — para que el autoconocimiento tenga mapa, lenguaje y dirección.
-  </p>
-  <div class="hero-ctas reveal" style="transition-delay:0.45s">
-    <a href="#segmentar" class="btn-primary">Guías gratuitas →</a>
-    <a href="https://app.endonautas.cl/accounts/registro/" class="btn-ghost">Explorar la app</a>
-  </div>
+<div class="menu-label">Profesionales</div>
+<a class="menu-item" data-tab="saas" href="#saas">
+<svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+<span>Portal del Terapeuta</span>
+</a>
+</nav>
+<div class="sidebar-user-footer" style="position: relative; display: flex; align-items: center; justify-content: space-between;">
+<div onclick="window.app.switchTab('perfil')" style="display:flex; align-items:center; gap:12px; cursor:pointer; flex: 1;">
+<img alt="Avatar Usuario" class="user-avatar" src="{% if user.is_authenticated and user.profile.avatar %}{{ user.profile.avatar.url }}{% else %}https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&amp;fit=crop&amp;w=80&amp;h=80&amp;q=80{% endif %}"/>
+<div class="user-info">
+<h4>{% if user.is_authenticated %}{{ user.first_name }}{% else %}Franco Jeria{% endif %}</h4>
+<span class="user-plan">{% if user.is_authenticated %}{% if user.profile.plan == 'free' %}Mi Cuenta{% else %}{{ user.profile.get_plan_display }}{% endif %}{% else %}Mi Cuenta{% endif %}</span>
+</div>
+</div>
+<button class="btn btn-outline btn-sm" id="theme-toggle" style="padding: 6px; min-width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: transparent; cursor: pointer; margin-left: auto;" title="Cambiar Tema">
+<svg class="theme-icon" fill="none" height="14" id="theme-toggle-dark-icon" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="14" xmlns="http://www.w3.org/2000/svg"><path d="M12 3a6.364 6.364 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
+<svg class="theme-icon" fill="none" height="14" id="theme-toggle-light-icon" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" style="display:none;" viewbox="0 0 24 24" width="14" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
+</button>
+<button class="btn btn-outline btn-sm" id="sidebar-logout-btn" style="padding: 6px; min-width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: transparent; cursor: pointer; margin-left: 8px;" title="Cerrar Sesión">
+<svg fill="none" height="14" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="14" xmlns="http://www.w3.org/2000/svg"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg>
+</button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="app-main-content">
+<!-- Public Landing Navbar -->
+<nav class="public-navbar">
+<div class="navbar-container">
+<div class="navbar-logo" onclick="document.getElementById('page-landing').scrollTop = 0">
+<img src="{% static 'img/logo-alt.png' %}" style="width: 28px; height: auto; display: inline-block; vertical-align: middle;" alt="Endonautas">
+<span class="logo-text" style="font-family: var(--font-display); font-weight: 700; color: #fff; margin-left: 8px;">Endonautas</span>
+</div>
+<div class="navbar-links">
+<a class="nav-link" href="#inicio" onclick="event.preventDefault(); document.getElementById('page-landing').scrollTop = 0">Inicio</a>
+<a class="nav-link" href="#blog" onclick="event.preventDefault();">Blog</a>
+<a class="nav-link" href="#nosotros" onclick="event.preventDefault();">Sobre Mí</a>
+<a class="nav-link" href="#contacto" onclick="event.preventDefault();">Contacto</a>
+</div>
+<div class="navbar-actions">
+<button class="btn btn-outline btn-sm" id="btn-login-trigger" onclick="window.app.openAuthModal('login')">Iniciar Sesión</button>
+<button class="btn btn-primary btn-sm" id="btn-register-trigger" onclick="window.app.openAuthModal('register')">Registrarse</button>
+</div>
+</div>
+</nav>
+
+<!-- ════════════════ PAGE: LANDING (HOME) ════════════════ -->
+<section class="app-page {% if not user.is_authenticated %}active{% endif %}" id="page-landing" style="padding: 0;">
+
+  
+    <!-- HERO -->
+    <section class="section" style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 120px 5%; position: relative;">
+        <div class="container" class="container side-tab">
+            <div class="hero" style="text-align: center; display: flex; flex-direction: column; align-items: center;">
+                <span class="eyebrow" style="color: var(--calipso); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 3px; font-weight: 700; margin-bottom: 16px; display: inline-block;">NUEVO MÉTODO DE AUTOCONOCIMIENTO</span>
+                <h1 style="font-family: var(--font-display); font-size: clamp(3rem, 6vw, 6rem); line-height: 1.1; margin-bottom: 24px; font-weight: 700; letter-spacing: -2px; color: #fff;">Rompe el ciclo del<br>autosabotaje.</h1>
+                <p style="font-size: clamp(1.1rem, 2vw, 1.4rem); color: var(--text); max-width: 800px; margin-bottom: 3vh; font-weight: 500;">Desmantela las ilusiones de tu mente. Endonautas te da las herramientas precisas para exponer tus creencias limitantes y reprogramar tu forma de actuar.</p>
+                
+                <div style="display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; margin-bottom: 48px;">
+                    <div style="display:flex; align-items:center; gap:8px; color: #fff; font-size:0.95rem; font-weight:500; background:rgba(0,0,0,0.3); padding:8px 16px; border-radius:12px; backdrop-filter:blur(4px); border: 1px solid var(--border);">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--calipso)" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Libérate de patrones repetitivos
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px; color: #fff; font-size:0.95rem; font-weight:500; background:rgba(0,0,0,0.3); padding:8px 16px; border-radius:12px; backdrop-filter:blur(4px); border: 1px solid var(--border);">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--calipso)" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Corta de raíz la parálisis
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px; color: #fff; font-size:0.95rem; font-weight:500; background:rgba(0,0,0,0.3); padding:8px 16px; border-radius:12px; backdrop-filter:blur(4px); border: 1px solid var(--border);">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--calipso)" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Expande tu autoconocimiento
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+                    <a href="#espejo" class="btn btn-primary btn-lg" style="padding: 16px 32px; border-radius: 50px; text-decoration: none; font-weight: 600; font-size: 1rem; cursor: pointer; border: none; background: var(--calipso); color: #000; box-shadow: 0 0 20px rgba(0,0,0,0.5), 0 0 40px var(--calipso-glow);">Iniciar Diagnóstico Gratuito</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ESPEJO -->
+    <section class="section" id="espejo" style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 120px 5%; position: relative;">
+        <div class="container side-tab tab-left">
+            <div style="width: 100%; display: flex; justify-content: center; align-items: center; margin-bottom: 2vh;">
+                <img src="{% static 'img/laberinto.png' %}" class="bw-reveal" style="width: 100%; max-width: 500px; height: auto; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); object-fit: contain;">
+            </div>
+            <div class="content-block">
+                <span class="eyebrow" style="color: var(--calipso); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 3px; font-weight: 700; margin-bottom: 16px; display: inline-block;">01. El Espejo IA</span>
+                <h2 style="font-family: var(--font-display); font-size: clamp(3rem, 5vw, 4.5rem); line-height: 1.1; margin-bottom: 2vh; color: #fff; text-shadow: 0 0 20px var(--calipso-glow);">Encuentra la salida del laberinto.</h2>
+                <p style="font-size: clamp(0.95rem, 1.8vh, 1.1rem); color: var(--text); margin-bottom: 2.5vh; opacity: 0.9;">Chatea con una Inteligencia Artificial entrenada en psicología profunda que analiza tu estado emocional en tiempo real. En lugar de darte consejos genéricos, te formula las preguntas exactas para que encuentres la raíz de tus bloqueos.</p>
+                <ul style="list-style: none; padding: 0; margin-bottom: 2.5vh; display: flex; flex-direction: column; gap: 12px; color: var(--text);">
+                    <li style="display: flex; gap: 12px; align-items: flex-start;"><strong style="color:var(--calipso);">✓</strong> Chat interactivo que detecta tus sesgos cognitivos.</li>
+                    <li style="display: flex; gap: 12px; align-items: flex-start;"><strong style="color:var(--calipso);">✓</strong> Historial de resoluciones para rastrear tu progreso.</li>
+                    <li style="display: flex; gap: 12px; align-items: flex-start;"><strong style="color:var(--calipso);">✓</strong> Ejercicios de escritura guiada para liberar tensión mental.</li>
+                </ul>
+                <div style="width: 100%; display: flex; justify-content: center; margin-top: 16px;">
+                    <button class="btn btn-primary" onclick="window.app.openAuthModal('register', 'Espejo')" style="padding: 12px 24px; font-size: 1.1rem; border-radius: 30px; font-weight: 700; background: var(--calipso); color: #000; box-shadow: 0 0 20px rgba(0,0,0,0.5), 0 0 40px var(--calipso-glow); border: none; cursor: pointer;">Probar el Espejo IA</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TESTS -->
+    <section class="section" id="tests" style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 120px 5%; position: relative;">
+        <div class="container side-tab tab-left">
+            <div style="width: 100%; display: flex; justify-content: center; align-items: center; margin-bottom: 2vh;">
+                <img src="{% static 'img/dashboard.png' %}" class="bw-reveal" style="width: 100%; max-width: 500px; height: auto; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); object-fit: contain;">
+            </div>
+            <div class="content-block">
+                <span class="eyebrow" style="color: var(--amber); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 3px; font-weight: 700; margin-bottom: 16px; display: inline-block;">02. Tests y Métricas</span>
+                <h2 style="font-family: var(--font-display); font-size: clamp(3rem, 5vw, 4.5rem); line-height: 1.1; margin-bottom: 2vh; color: #fff; text-shadow: 0 0 20px var(--amber-glow);">Tus coordenadas exactas de hoy.</h2>
+                <p style="font-size: clamp(0.95rem, 1.8vh, 1.1rem); color: var(--text); margin-bottom: 2.5vh; opacity: 0.9;">Mide el estado de tu psique a través de evaluaciones estandarizadas. Obtén un perfil de resultados instantáneo que cuantifica tu nivel de estrés, ansiedad, adaptabilidad y rigidez mental con gráficos interactivos.</p>
+                <ul style="list-style: none; padding: 0; margin-bottom: 2.5vh; display: flex; flex-direction: column; gap: 12px; color: var(--text);">
+                    <li style="display: flex; gap: 12px; align-items: flex-start;"><strong style="color:var(--amber);">✓</strong> Tests paramétricos con resultados inmediatos.</li>
+                    <li style="display: flex; gap: 12px; align-items: flex-start;"><strong style="color:var(--amber);">✓</strong> Gráficos de araña para visualizar tus áreas de mejora.</li>
+                    <li style="display: flex; gap: 12px; align-items: flex-start;"><strong style="color:var(--amber);">✓</strong> Recomendaciones de regulación basadas en tu puntaje.</li>
+                </ul>
+                <div style="width: 100%; display: flex; justify-content: center; margin-top: 16px;">
+                    <button class="btn btn-primary" onclick="window.app.openAuthModal('register', 'Tests')" style="padding: 12px 24px; font-size: 1.1rem; border-radius: 30px; font-weight: 700; background: var(--amber); color: #000; box-shadow: 0 0 20px rgba(0,0,0,0.5), 0 0 40px var(--amber-glow); border: none; cursor: pointer;">Realizar mi primera evaluación</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MAPA NACIMIENTO -->
+    <section class="section" id="mapa" style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 120px 5%; position: relative;">
+        <div class="container side-tab tab-left">
+            <div style="width: 100%; display: flex; justify-content: center; align-items: center; margin-bottom: 2vh;">
+                <img src="{% static 'img/birth.png' %}" class="bw-reveal" style="width: 100%; max-width: 500px; height: auto; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); object-fit: contain;">
+            </div>
+            <div class="content-block">
+                <span class="eyebrow" style="color: var(--violet); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 3px; font-weight: 700; margin-bottom: 16px; display: inline-block;">03. Tu Origen Fractal</span>
+                <h2 style="font-family: var(--font-display); font-size: clamp(3rem, 5vw, 4.5rem); line-height: 1.1; margin-bottom: 2vh; color: #fff; text-shadow: 0 0 20px var(--violet-glow);">No es un destino.<br>Es una coordenada.</h2>
+                <p style="font-size: clamp(0.95rem, 1.8vh, 1.1rem); color: var(--text); margin-bottom: 2.5vh; opacity: 0.9;">Ingresa tus datos de nacimiento y obtén un esquema visual interactivo de tu configuración arquetípica. El sistema calcula las posiciones astrológicas exactas y te entrega un reporte pragmático sobre tus patrones innatos de comportamiento.</p>
+                <ul style="list-style: none; padding: 0; margin-bottom: 2.5vh; display: flex; flex-direction: column; gap: 12px; color: var(--text);">
+                    <li style="display: flex; gap: 12px; align-items: flex-start;"><strong style="color:var(--violet);">✓</strong> Cálculo preciso de tu carta natal y esquema fractal.</li>
+                    <li style="display: flex; gap: 12px; align-items: flex-start;"><strong style="color:var(--violet);">✓</strong> Reportes escritos sobre tu sombra y mecanismos de defensa.</li>
+                    <li style="display: flex; gap: 12px; align-items: flex-start;"><strong style="color:var(--violet);">✓</strong> Calendario de tránsitos para anticipar ciclos emocionales.</li>
+                </ul>
+                <div style="width: 100%; display: flex; justify-content: center; margin-top: 16px;">
+                    <button class="btn btn-primary" onclick="window.app.openAuthModal('register', 'Mapa Fractal')" style="padding: 12px 24px; font-size: 1.1rem; border-radius: 30px; font-weight: 700; background: var(--violet); color: #fff; box-shadow: 0 0 20px rgba(0,0,0,0.5), 0 0 40px var(--violet-glow); border: none; cursor: pointer;">Calcular mi Mapa Fractal</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- LIBRO -->
+    <section class="section" id="libro" style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 120px 5%; ">
+        <div class="container side-tab tab-left">
+            <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+                <img src="{% static 'img/epic-ebook.png' %}" class="bw-reveal" style="width: 100%; height: auto; border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); margin-bottom: 2.5vh; object-fit: cover;">
+                <span class="eyebrow" style="color: var(--calipso); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 3px; font-weight: 700; margin-bottom: 8px; display: inline-block;">04. PARA IR MÁS PROFUNDO</span>
+                <h2 style="font-family: var(--font-display); font-size: clamp(1.5rem, 3vh, 2rem); line-height: 1.1; margin-bottom: 16px; color: var(--text);">Endonautica: El Manual del Viajero.</h2>
+                <p style="font-size: clamp(0.9rem, 1.8vh, 1.05rem); color: var(--text); margin-bottom: 2.5vh; opacity: 0.9;">Si prefieres entender el *porqué* antes de usar la app, el libro te explica exactamente cómo funciona tu mente, por qué repites patrones y cómo liberarte de ellos.</p>
+                <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+                    <button class="btn btn-primary btn-lg" onclick="window.app.openAuthModal('register')" style="font-size: clamp(0.9rem, 1.8vh, 1.05rem); padding: 16px 32px; border-radius: 50px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">Descargar E-Book ($9.99)</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AUTOR -->
+    <section class="section" id="autor" style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 120px 5%;  ">
+        <div class="container side-tab tab-right" style="align-items: center;">
+            <div style="width: 100%; margin: 0 auto 2.5vh auto; border-radius: 16px; border: 1px solid rgba(126, 204, 205, 0.2); box-shadow: 0 10px 40px rgba(0,0,0,0.8); overflow: hidden; flex-shrink: 0;">
+                <img src="{% static 'img/franco-jeria.jpeg' %}" class="bw-reveal" style="width: 100%; height: auto; display: block; object-fit: cover;">
+            </div>
+            <div class="content-block" style="margin-bottom:0;">
+                <span class="eyebrow" style="color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 3px; font-weight: 700; margin-bottom: 16px; display: inline-block;">DETRÁS DEL MÉTODO</span>
+                <h2 style="font-family: var(--font-display); font-size: clamp(2.5rem, 4vw, 3.5rem); line-height: 1.1; margin-bottom: 2vh; color: var(--text);">Franco Jeria</h2>
+                <p style="font-size: clamp(0.95rem, 1.8vh, 1.1rem); color: var(--text); margin-bottom: 2vh; opacity: 0.9;">Creador de Endonautas. Después de años estudiando psicología profunda, filosofía y neurociencia, creó este sistema para ayudar a las personas a conocerse a sí mismas de forma real y medible.</p>
+                <p style="font-size: clamp(0.95rem, 1.8vh, 1.1rem); color: var(--text); margin-bottom: 2vh; opacity: 0.9;">El objetivo: ofrecer herramientas pragmáticas, sin misticismos ni creencias ciegas. Solo tecnología y psicología unidas para revelar los patrones ocultos de tu comportamiento y devolverte el control de tus decisiones.</p>
+            </div>
+        </div>
+    </section>
+
+  <!-- Footer Profesional -->
+  <!-- Footer Profesional Corto -->
+  <footer class="public-footer" style="background: rgba(5, 5, 10, 0.95); border-top: 1px solid rgba(255,255,255,0.05); padding: 60px 24px; margin-top: auto; width: 100%;">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 32px;">
+      
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <img src="{% static 'img/logo-alt.png' %}" style="width: 32px;" alt="Endonautas">
+        <span style="font-family: var(--font-display); font-weight: 700; color: #fff; font-size: 1.4rem;">Endonautas</span>
+      </div>
+
+      <div style="display: flex; gap: 32px; flex-wrap: wrap; justify-content: center;">
+        
+        
+        
+      </div>
+
+      <div style="display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.05); width: 100%;">
+        <span style="color: var(--dim); font-size: 0.85rem;">&copy; 2026 Endonautas Ecosystem. Todos los derechos reservados.</span>
+        <span style="color: var(--dim); font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+          <svg fill="none" height="14" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="14"><rect height="18" rx="2" ry="2" width="18" x="3" y="3"></rect><line x1="9" x2="15" y1="9" y2="9"></line><line x1="9" x2="15" y1="15" y2="15"></line></svg>
+          Seguridad Clínica / Datos Cifrados
+        </span>
+      </div>
+
+    </div>
+  </footer>
 </section>
 
-<hr class="divider">
 
-<!-- Segmentación -->
-<section class="segment" id="segmentar">
-  <div class="segment-header">
-    <h2 class="segment-title reveal">Elige dónde empezar.<br>No hay un solo punto de entrada.</h2>
-    <p class="segment-sub reveal">Cada guía, cada herramienta, cada paso — apunta al mismo territorio. Elige el que resuene con tu momento.</p>
+<!-- ════════════════ PAGE: MAPA INTERIOR ════════════════ -->
+<section class="app-page" id="page-mapainterior"><div class="page-container">
+<div class="page-header">
+<h2>Mapa Interior</h2>
+<p>Explora tus fundamentos, navega por tu sombra y registra tu viaje personal.</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 40px;">
+<!-- SECTION A: ORIGEN Y NACIMIENTO -->
+<div class="perfil-subsection">
+<h3 style="color: var(--calipso); margin-bottom: 2vh; border-bottom: 1px solid var(--border); padding-bottom: 10px;">Origen y Nacimiento</h3>
+<div class="dashboard-grid">
+<div class="card profile-card telemetry-console-border" style="flex: 1;">
+<span class="card-tag tag-violet">MAPA FUNDACIONAL</span>
+<h3>Tests Base</h3>
+<p class="card-subtitle">Conoce las raíces de tu estructura psíquica y somática.</p>
+<div class="tests-list" style="margin-top: 16px;">
+<div class="test-item-row resolved">
+<span>Eneagrama</span>
+<span class="status-badge">Completado</span>
+</div>
+<div class="test-item-row active">
+<span>Carta Natal Somática</span>
+<button class="btn btn-outline btn-sm">Explorar</button>
+</div>
+<div class="test-item-row locked">
+<span>Diseño Humano</span>
+<span class="status-badge">Bloqueado</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SECTION B: EXPLORACIÓN DE SOMBRAS -->
+<div class="perfil-subsection" style="grid-column: 1 / -1;">
+<h3 style="color: var(--calipso); margin-bottom: 2vh; border-bottom: 1px solid var(--border); padding-bottom: 10px;">Exploración de Sombras</h3>
+<!-- Constellation Map Deck Panel -->
+<div class="card constellation-map-panel telemetry-console-border">
+<div class="constellation-header">
+<h4>Recorrido de Evaluaciones de Franco Jeria</h4>
+<span class="telemetry-badge-nominal" id="constellation-telemetry-badge">CAMINOS PSÍQUICOS CONECTADOS</span>
+</div>
+<p class="constellation-instructions">Haz clic en un nodo de la constelación para ver los cuestionarios correspondientes en el panel inferior.</p>
+<div class="constellation-svg-container">
+<svg class="constellation-svg" viewbox="0 0 900 220">
+<defs>
+<marker id="arrow" markerheight="6" markerwidth="6" orient="auto-start-reverse" refx="22" refy="5" viewbox="0 0 10 10">
+<path d="M 0 2 L 8 5 L 0 8 z" fill="rgba(255,255,255,0.15)"></path>
+</marker>
+<marker id="arrow-unlocked" markerheight="6" markerwidth="6" orient="auto-start-reverse" refx="22" refy="5" viewbox="0 0 10 10">
+<path d="M 0 2 L 8 5 L 0 8 z" fill="var(--calipso)"></path>
+</marker>
+</defs>
+<!-- Connecting lines showing progressive path -->
+<path class="constellation-line line-unlocked" d="M 150 110 L 350 170" marker-end="url(#arrow-unlocked)"></path>
+<path class="constellation-line line-locked" d="M 350 170 L 550 110" id="line-portal-2" marker-end="url(#arrow)"></path>
+<path class="constellation-line line-locked" d="M 550 110 L 750 170" id="line-portal-3" marker-end="url(#arrow)"></path>
+<path class="constellation-line line-dashed line-assigned" d="M 350 170 L 350 50" id="line-assignment"></path>
+<!-- Portal 1 Node (La Máscara) -->
+<g class="constellation-node unlocked active" data-portal="1" onclick="window.app.selectConstellationNode(1, this)">
+<circle class="node-glow" cx="150" cy="110" r="14"></circle>
+<circle class="node-core" cx="150" cy="110" r="7"></circle>
+<text class="node-label" x="150" y="140">PORTAL I: LA MÁSCARA</text>
+</g>
+<!-- Portal 2 Node (El Descenso) -->
+<g class="constellation-node locked" data-portal="2" id="node-portal-2" onclick="window.app.selectConstellationNode(2, this)">
+<circle class="node-glow" cx="350" cy="170" r="12"></circle>
+<circle class="node-core" cx="350" cy="170" r="6"></circle>
+<text class="node-label" x="350" y="200">PORTAL II: EL DESCENSO</text>
+</g>
+<!-- Portal 3 Node (El Templo Interno) -->
+<g class="constellation-node locked" data-portal="3" id="node-portal-3" onclick="window.app.selectConstellationNode(3, this)">
+<circle class="node-glow" cx="550" cy="110" r="12"></circle>
+<circle class="node-core" cx="550" cy="110" r="6"></circle>
+<text class="node-label" x="550" y="80">PORTAL III: REGULACIÓN</text>
+</g>
+<!-- Portal 4 Node (La Integración) -->
+<g class="constellation-node locked" data-portal="4" id="node-portal-4" onclick="window.app.selectConstellationNode(4, this)">
+<circle class="node-glow" cx="750" cy="170" r="12"></circle>
+<circle class="node-core" cx="750" cy="170" r="6"></circle>
+<text class="node-label" x="750" y="200">PORTAL IV: INTEGRACIÓN</text>
+</g>
+<!-- Assigned Therapist Test Node -->
+<g class="constellation-node assigned pulsing-assigned-node" id="node-phq9" onclick="window.app.selectConstellationNode('phq9', this)">
+<circle class="node-glow" cx="350" cy="50" r="12"></circle>
+<polygon class="node-core-star" points="350,44 353,50 359,50 354,54 356,60 350,56 344,60 346,54 341,50 347,50"></polygon>
+<text class="node-label node-label-calipso" x="350" y="28">MISION: PHQ-9 (CORTISOL)</text>
+</g>
+</svg>
+</div>
+<div class="constellation-legend">
+<span>🔵 Estado Integrado</span>
+<span>🟣 Órbita Bloqueada (Sombra)</span>
+<span>🟢 Misión Remota (Profesionales)</span>
+</div>
+</div>
+<!-- Alerta de Tests Asignados por Terapeuta -->
+<div class="therapist-assigned-banner" id="assigned-tests-section">
+<div class="assigned-badge">ASIGNADO POR TU TERAPEUTA</div>
+<div class="assigned-details">
+<div class="assigned-info-header">
+<svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" x2="12" y1="9" y2="13"></line><line x1="12" x2="12.01" y1="17" y2="17"></line></svg>
+<h5>[Asignado] PHQ-9 — Autodiagnóstico de Estrés Laboral</h5>
+</div>
+<p>Tu terapeuta (Sofía G.) asignó este test para evaluar tu sintomatología actual. Al completarlo, actualizarás tu estado y recibirás fractones.</p>
+</div>
+<div class="assigned-actions">
+<button class="btn btn-calipso btn-sm" onclick="window.app.startMockTest('PHQ-9')">Comenzar</button>
+</div>
+</div>
+<div class="portals-catalog-grid">
+<!-- PORTAL I -->
+<div class="portal-box card telemetry-console-border" id="portal-box-1">
+<div class="portal-header">
+<span class="portal-num">PORTAL I</span>
+<h3>La Máscara (Tu Armadura Social)</h3>
+</div>
+<p class="portal-desc">Cómo te presentas ante los demás para protegerte. Los sistemas de defensa conscientes a través de los cuales interactúas con tu entorno social.</p>
+<div class="tests-list">
+<div class="test-item-row resolved">
+<span>BFI-44 (Personalidad)</span>
+<span class="status-badge">Completado</span>
+</div>
+<div class="test-item-row resolved">
+<span>Eneagrama (Sombra Primaria)</span>
+<span class="status-badge">Completado</span>
+</div>
+<div class="test-item-row active">
+<span>Arquetipos Jung</span>
+<button class="btn btn-outline btn-sm">Comenzar</button>
+</div>
+</div>
+</div>
+<!-- PORTAL II -->
+<div class="portal-box card locked telemetry-console-border" id="portal-box-2">
+<div class="portal-header">
+<span class="portal-num">PORTAL II</span>
+<h3>El Descenso (Tu Sombra)</h3>
+</div>
+<p class="portal-desc">Tus puntos ciegos. Lo que ocultas porque temes ser rechazado. Las dinámicas de evasión inconscientes y el autosabotaje.</p>
+<div class="tests-list">
+<div class="test-item-row locked">
+<span>Autosabotaje y Defensa Fiel</span>
+<span class="status-badge">Bloqueado</span>
+</div>
+<div class="test-item-row locked">
+<span>Esquemas de Heridas Infantiles</span>
+<span class="status-badge">Bloqueado</span>
+</div>
+<div class="test-item-row locked">
+<span>DERS-16 (Desregulación)</span>
+<span class="status-badge">Bloqueado</span>
+</div>
+</div>
+</div>
+<!-- PORTAL III -->
+<div class="portal-box card locked telemetry-console-border" id="portal-box-3">
+<div class="portal-header">
+<span class="portal-num">PORTAL III</span>
+<h3>El Templo (Tu Cuerpo/Soma)</h3>
+</div>
+<p class="portal-desc">Dónde se almacena y procesa físicamente la tensión acumulada. El registro directo de tus respuestas orgánicas ante la fricción emocional.</p>
+<div class="tests-list">
+<div class="test-item-row locked">
+<span>MAIA (Escala de Conciencia Corporal)</span>
+<span class="status-badge">Bloqueado</span>
+</div>
+<div class="test-item-row locked">
+<span>PSQI (Calidad de Descanso Corporal)</span>
+<span class="status-badge">Bloqueado</span>
+</div>
+<div class="test-item-row locked">
+<span>Evitación Cognitiva (Ansiedad GAD-7)</span>
+<span class="status-badge">Bloqueado</span>
+</div>
+</div>
+</div>
+<!-- PORTAL IV -->
+<div class="portal-box card locked telemetry-console-border" id="portal-box-4">
+<div class="portal-header">
+<span class="portal-num">PORTAL IV</span>
+<h3>La Integración (Acción Colectiva)</h3>
+</div>
+<p class="portal-desc">Cómo aplicas tu consciencia integrada para operar en tu comunidad. El retorno del héroe para influir de forma madura y responsable en tus círculos.</p>
+<div class="tests-list">
+<div class="test-item-row locked">
+<span>Fortalezas Prosociales (VIA)</span>
+<span class="status-badge">Bloqueado</span>
+</div>
+<div class="test-item-row locked">
+<span>SWB (Escala de Bienestar General)</span>
+<span class="status-badge">Bloqueado</span>
+</div>
+<div class="test-item-row locked">
+<span>Coherencia Sistémica y Prosocialidad</span>
+<span class="status-badge">Bloqueado</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SECTION C: BITÁCORA DE EXPERIENCIAS -->
+<div class="perfil-subsection">
+<h3 style="color: var(--calipso); margin-bottom: 2vh; border-bottom: 1px solid var(--border); padding-bottom: 10px;">Bitácora de Experiencias</h3>
+<div class="card telemetry-console-border">
+<div style="display: flex; flex-direction: column; gap: 16px;">
+<div class="chat-input-area" style="padding: 0; background: transparent; border: none;">
+<textarea placeholder="Registra tus reflexiones, sueños o descubrimientos de tu viaje interior..." style="min-height: 80px; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); resize: vertical; font-family: var(--font-body); outline: none;"></textarea>
+</div>
+<button class="btn btn-primary" style="align-self: flex-end;">Guardar Registro</button>
+<div class="feed-posts" style="display: flex; flex-direction: column; gap: 12px; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
+<div class="feed-post" style="padding: 12px; background: rgba(255,255,255,0.02); border-radius: 8px; border-left: 2px solid var(--calipso);">
+<span style="font-size: 0.75rem; color: var(--muted); display: block; margin-bottom: 4px;">Hoy, 14:30</span>
+<p style="font-size: 0.9rem; margin: 0; color: var(--text);">He notado que cuando evito la confrontación, mi respiración se vuelve más superficial.</p>
+</div>
+<div class="feed-post" style="padding: 12px; background: rgba(255,255,255,0.02); border-radius: 8px; border-left: 2px solid var(--violet);">
+<span style="font-size: 0.75rem; color: var(--muted); display: block; margin-bottom: 4px;">Ayer, 09:15</span>
+<p style="font-size: 0.9rem; margin: 0; color: var(--text);">Descubrí mi patrón de autoexigencia conectado con la rigidez en el cuello.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div></section>
+<!-- ════════════════ PAGE: ESPEJO DE CONFLICTOS ════════════════ -->
+<section class="app-page" id="page-espejo"><div class="page-container">
+<div class="page-header">
+<h2>Espejo</h2>
+<p>Espejo de conflictos y rebote de sombra. Registra sensaciones para procesar la resistencia.</p>
+</div>
+<div class="espejo-layout" style="display: grid; grid-template-columns: 280px 1fr; gap: 24px; align-items: start; min-height: calc(100vh - 160px);">
+  
+  <!-- Sidebar de Conversaciones -->
+  <div class="card telemetry-console-border" style="display: flex; flex-direction: column; gap: 16px; height: calc(100vh - 160px);">
+    <button class="btn btn-primary" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;">
+      <svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><line x1="12" x2="12" y1="5" y2="19"></line><line x1="5" x2="19" y1="12" y2="12"></line></svg>
+      Nueva Sesión
+    </button>
+    
+    <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 8px;">
+      <span style="font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; padding-left: 4px; margin-top: 8px;">Hoy</span>
+      <div class="history-item active" style="padding: 12px; border-radius: 8px; background: rgba(126,204,205,0.1); border-left: 2px solid var(--calipso); cursor: pointer;">
+        <div style="font-size: 0.85rem; font-weight: 600; color: #fff;">Resistencia Respiración</div>
+        <div style="font-size: 0.7rem; color: var(--muted); margin-top: 4px;">10:45 AM</div>
+      </div>
+      <span style="font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; padding-left: 4px; margin-top: 16px;">Ayer</span>
+      <div class="history-item" style="padding: 12px; border-radius: 8px; background: transparent; border-left: 2px solid transparent; cursor: pointer; transition: background 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
+        <div style="font-size: 0.85rem; font-weight: 500; color: var(--text);">Límite con mi jefe</div>
+        <div style="font-size: 0.7rem; color: var(--muted); margin-top: 4px;">16:30 PM</div>
+      </div>
+      <div class="history-item" style="padding: 12px; border-radius: 8px; background: transparent; border-left: 2px solid transparent; cursor: pointer; transition: background 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
+        <div style="font-size: 0.85rem; font-weight: 500; color: var(--text);">Evasión en el cuerpo</div>
+        <div style="font-size: 0.7rem; color: var(--muted); margin-top: 4px;">09:15 AM</div>
+      </div>
+    </div>
   </div>
 
-  <div class="segment-grid">
-    <a href="/mascara/" class="segment-card reveal" style="text-decoration:none;">
-      <p class="segment-card-quote">"Tengo la sensación de que siempre me pasa lo mismo, pero no sé por dónde partir."</p>
-      <span class="segment-card-cta">Ponle nombre a lo que ya sabes que se repite →</span>
-    </a>
+<!-- Chat Window -->
+<div class="chat-mirror-card card telemetry-console-border" style="height: calc(100vh - 160px); display: flex; flex-direction: column;">
+<div class="chat-header">
+<span class="indicator-led status-nominal green-pulse"></span>
+<span>ESPEJO DE RESONANCIA SOMÁTICA — INTERFAZ TELEMÉTRICA</span>
+</div>
+<div class="chat-messages" id="chat-messages-box">
+<div class="chat-msg ai">
+<div class="msg-avatar">E</div>
+<div class="msg-bubble">
+<p>Iniciando secuencia de interacción del Espejo. ¿Dónde se encuentra localizada la molestia física que estás intentando evadir hoy?</p>
+</div>
+</div>
+</div>
+<div class="chat-input-area">
+<button class="chat-attach-btn" title="Adjuntar Archivo">
+  <svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+</button>
+<button class="chat-attach-btn" title="Subir Imagen">
+  <svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><rect height="18" rx="2" ry="2" width="18" x="3" y="3"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+</button>
+<textarea disabled="" id="chat-textarea" placeholder="Escribe tu mensaje..."></textarea>
+<button class="chat-attach-btn" title="Nota de Voz">
+  <svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg>
+</button>
+<button class="btn btn-primary" disabled="" id="btn-chat-send" onclick="window.app.sendChatMessage()">
+<svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><line x1="22" x2="11" y1="2" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+</button>
+</div>
+</div>
+</div>
+</div></section>
+<!-- ════════════════ PAGE: REGULACIÓN SOMÁTICA ════════════════ -->
+<section class="app-page" id="page-regulacion"><div class="page-container">
+<div class="page-header">
+<h2>Regulación Somática</h2>
+<p>Calibra tu sistema nervioso y registra la tensión corporal.</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2vh; align-items: stretch; min-height: calc(100vh - 160px);">
+<!-- Somatic Body Map Telemetry -->
+<div class="card telemetry-console-border" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; text-align: center;">
+<h5>Sensores de Tensión (Cuerpo)</h5>
+<p class="body-map-subtitle" style="margin: 10px auto;">Selecciona las zonas del cuerpo donde experimentas tensión para iniciar el registro:</p>
+<div class="body-map-wrapper" style="transform: scale(1.3); transform-origin: center; margin: 30px 0;">
+<svg class="somatic-body-svg" viewbox="0 0 160 210">
+<!-- Head -->
+<path class="body-silhouette-head" d="M 68 28 C 68 8, 92 8, 92 28 C 92 35, 90 40, 85 45 C 80 49, 80 50, 80 54 L 80 58 L 74 58 L 74 54 C 74 50, 74 49, 69 45 C 64 40, 68 35, 68 28 Z"></path>
+<!-- Torso & neck -->
+<path class="body-silhouette-torso" d="M 74 58 L 86 58 L 88 62 L 112 70 L 115 88 L 105 130 L 100 178 L 94 206 L 66 206 L 60 178 L 55 130 L 45 88 L 48 70 L 72 62 Z"></path>
+<!-- Hotspot: Mandíbula (Jaw) -->
+<g onclick="window.app.triggerSomaticHotspot('mandibula')">
+<circle class="soma-hotspot jaw-node" cx="80" cy="42" r="5"></circle>
+<text class="soma-hotspot-label" x="90" y="45">Mandíbula</text>
+</g>
+<!-- Hotspot: Diafragma -->
+<g onclick="window.app.triggerSomaticHotspot('diafragma')">
+<circle class="soma-hotspot chest-node" cx="80" cy="85" r="5"></circle>
+<text class="soma-hotspot-label" x="90" y="88">Diafragma</text>
+</g>
+<!-- Hotspot: Plexo Solar -->
+<g onclick="window.app.triggerSomaticHotspot('plexo')">
+<circle class="soma-hotspot plexus-node" cx="80" cy="108" r="5"></circle>
+<text class="soma-hotspot-label" x="90" y="111">Plexo</text>
+</g>
+<!-- Hotspot: Extremidades (limbs) -->
+<g onclick="window.app.triggerSomaticHotspot('extremidades')">
+<circle class="soma-hotspot limbs-node" cx="50" cy="115" r="5"></circle>
+<text class="soma-hotspot-label" x="18" y="118">Brazos/Manos</text>
+</g>
+</svg>
+</div>
+</div>
+<!-- Breathing Guide -->
+<div class="card telemetry-console-border breathing-guide-section" style="min-height: 400px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+<h5 style="margin-bottom: 2vh;">Calibración de Flujo O₂ / Cortisol</h5>
+<span class="telemetry-badge-nominal" id="breathing-telemetry-badge" style="margin-bottom: 2.5vh;">REGULADO</span>
+<div class="breathing-circle-container" style="transform: scale(1.4);">
+<div class="breathing-circle" id="breathing-circle"></div>
+<div class="breathing-text" id="breathing-text">LISTO</div>
+</div>
+<p class="breathing-desc" style="font-size:0.85rem; color:var(--muted); line-height:1.5; margin-top:40px;">El círculo se expande para inhalación (4s), retención (2s) y exhalación (4s) para regular cortisol.</p>
+</div>
+</div>
+</div></section>
+<!-- ════════════════ PAGE: BITÁCORA DE SOMBRAS ════════════════ -->
+<!-- ════════════════ PAGE: COMUNIDAD / ESPACIO COLECTIVO ════════════════ -->
+<section class="app-page {% if user.is_authenticated %}active{% endif %}" id="page-feed"><div class="page-container">
+<div class="page-header" style="padding-bottom: 20px;">
+<h2>Inicio / Feed</h2>
+<p>Bitácora colectiva de navegantes.</p>
+</div>
+<div class="feed-layout" style="display: flex; flex-direction: column; gap: 24px;">
+<!-- Crear Post -->
+<div class="card telemetry-console-border" style="padding: 16px;">
+<div style="display: flex; gap: 12px; align-items: flex-start;">
+<img alt="Avatar Usuario" src="{% if user.is_authenticated and user.profile.avatar %}{{ user.profile.avatar.url }}{% else %}https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&amp;fit=crop&amp;w=40&amp;h=40&amp;q=80{% endif %}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;"/>
+<div style="flex: 1;">
+<textarea id="feed-post-textarea" placeholder="¿Qué sensaciones corporales o resistencias notas hoy?" style="background: transparent; border: none; color: var(--text); resize: none; outline: none; font-family: var(--font-body); font-size: 0.95rem; min-height: 60px; width: 100%;"></textarea>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;  padding-top: 12px;">
+<button class="btn btn-outline btn-sm" style="border: none; padding: 4px 8px; color: var(--calipso);">
+<svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" style="margin-right: 4px; vertical-align: middle;" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg> <span style="vertical-align: middle; font-size: 0.8rem;">Añadir registro somático</span>
+</button>
+<button id="btn-feed-post-submit" class="btn btn-calipso btn-sm">Crear bitácora</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Feed Posts -->
+<div class="feed-posts" style="display: flex; flex-direction: column; gap: 20px;">
+{% for insight in feed_insights %}
+<div class="card feed-post telemetry-console-border" style="padding: 20px;">
+<div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+{% if insight.user.profile.avatar %}
+<img src="{{ insight.user.profile.avatar.url }}" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;" alt="Avatar">
+{% else %}
+<div style="width: 36px; height: 36px; border-radius: 50%; background: var(--calipso-glow); display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--calipso);">
+  {{ insight.user.first_name|default:"N"|slice:":1"|upper }}
+</div>
+{% endif %}
+<div>
+<h5 style="margin: 0; font-size: 0.9rem; color: #fff;">{{ insight.user.first_name|default:insight.user.email }}</h5>
+<span style="font-size: 0.75rem; color: var(--muted);">{{ insight.created_at|timesince }} • {{ insight.source_title }}</span>
+</div>
+</div>
+<p style="font-size: 0.95rem; color: var(--text); line-height: 1.5; margin-bottom: 16px;">{{ insight.display_text }}</p>
+{% if insight.image %}
+<div style="margin-bottom: 16px; border-radius: 8px; overflow: hidden; max-height: 300px;">
+  <img src="{{ insight.image.url }}" style="width: 100%; object-fit: cover;" alt="Publicación">
+</div>
+{% endif %}
+<div style="display: flex; gap: 16px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;">
+<button onclick="window.app.resonateInsight({{ insight.pk }}, this)" style="background: none; border: none; color: {% if user in insight.resonated_users %}var(--calipso){% else %}var(--muted){% endif %}; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 0.8rem;">
+<svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg> {{ insight.reactions.count }} Resonar
+                </button>
+<button onclick="window.app.toggleComments({{ insight.pk }})" style="background: none; border: none; color: var(--muted); cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 0.8rem;">
+<svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg> {{ insight.comments.count }} Comentar
+                </button>
+</div>
+</div>
+{% empty %}
+<div class="card telemetry-console-border" style="padding: 20px; text-align: center; color: var(--muted);">
+  Aún no hay publicaciones en la bitácora colectiva. ¡Sé el primero en compartir tu experiencia!
+</div>
+{% endfor %}
+</div>
+</div>
+</div></section>
+<!-- ════════════════ PAGE: INBOX (MENSAJES) ════════════════ -->
 
-    <a href="/viaje/" class="segment-card reveal" style="text-decoration:none; transition-delay:0.1s;">
-      <p class="segment-card-quote">"Quiero empezar a conocerme, pero no sé cómo se hace esto del viaje interior."</p>
-      <span class="segment-card-cta">El viaje interior no es un destino. Es una dirección →</span>
-    </a>
+<!-- ════════════════ PAGE: FOROS ════════════════ -->
+<section class="app-page" id="page-foros"><div class="page-container">
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <h2>Comunidad y Foros</h2>
+            <p>Conecta con otros endonautas, comparte integraciones y únete a foros temáticos.</p>
+        </div>
+        <button class="btn btn-primary" style="padding: 10px 20px; font-size: 0.9rem; border-radius: 8px;">+ Crear Foro</button>
+    </div>
 
-    <a href="/hacks/" class="segment-card reveal" style="text-decoration:none; transition-delay:0.2s;">
-      <p class="segment-card-quote">"Ya leí sobre sombra, patrones y máscaras — quiero algo que me ayude a ver lo que no estoy viendo."</p>
-      <span class="segment-card-cta">Un hack no es un truco. Es un atajo consciente →</span>
-    </a>
+    <!-- Buscador -->
+    <div style="margin-bottom: 30px;">
+        <input type="text" placeholder="Buscar temas, arquetipos, sombras..." style="width: 100%; padding: 12px 20px; border-radius: 12px; border: 1px solid var(--border); background: rgba(0,0,0,0.2); color: var(--text);">
+    </div>
 
-    <a href="/endonautica/" class="segment-card reveal" style="text-decoration:none; transition-delay:0.3s;">
-      <p class="segment-card-quote">"Quiero el mapa completo. No la introducción."</p>
-      <span class="segment-card-cta">Quiero el libro →</span>
-    </a>
-  </div>
-</section>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+        <!-- Mis Foros -->
+        <div class="perfil-subsection" style="grid-column: span 1;">
+            <h3 style="color: var(--calipso); margin-bottom: 2vh; border-bottom: 1px solid var(--border); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                Mis Foros <span style="background: var(--calipso); color: #000; font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; font-weight: bold;">2 Nuevos</span>
+            </h3>
+            
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 12px; cursor: pointer; transition: background 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='rgba(255,255,255,0.02)'">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <strong style="color: var(--text);">Integración de Eneagrama 5</strong>
+                    <span style="width: 8px; height: 8px; background: var(--calipso); border-radius: 50%; display: inline-block;"></span>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 12px;">Último post: "¿Cómo salir de la cueva mental y actuar?"</p>
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 0.75rem; color: var(--dim);">
+                    <span>145 Miembros</span> • <span>Activo hace 2 min</span>
+                </div>
+            </div>
 
-<hr class="divider">
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 12px; cursor: pointer; transition: background 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='rgba(255,255,255,0.02)'">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <strong style="color: var(--text);">Tránsitos Plutonianos</strong>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 12px;">Último post: "Destrucción y renacimiento de estructuras."</p>
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 0.75rem; color: var(--dim);">
+                    <span>89 Miembros</span> • <span>Activo hace 4 horas</span>
+                </div>
+            </div>
+        </div>
 
-<!-- App -->
-<section class="app-section">
-  <h2 class="app-title reveal">Las guías te dan la información.<br>La app te da las herramientas.</h2>
-  <div class="app-features reveal" style="transition-delay:0.1s;">
-    <span class="app-feature">Tests psicométricos</span>
-    <span class="app-feature">Espejo de Conflictos</span>
-    <span class="app-feature">Mapa Interior</span>
-    <span class="app-feature">Lecturas de nacimiento</span>
-  </div>
-  <a href="https://app.endonautas.cl/accounts/registro/" class="btn-primary reveal" style="transition-delay:0.2s;">Crear cuenta gratuita →</a>
-</section>
+        <!-- Descubrir Foros -->
+        <div class="perfil-subsection" style="grid-column: span 2;">
+            <h3 style="color: var(--amber); margin-bottom: 2vh; border-bottom: 1px solid var(--border); padding-bottom: 10px;">Foros Destacados</h3>
+            
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <!-- Foro Item -->
+                <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                    <div style="flex: 1; min-width: 250px;">
+                        <h4 style="color: var(--text); margin-bottom: 4px;">Sueños Lúcidos y Sombra</h4>
+                        <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 8px;">Foro dedicado al análisis de pesadillas recurrentes y símbolos del inconsciente.</p>
+                        <div style="display: flex; align-items: center; gap: 12px; font-size: 0.8rem; color: var(--dim);">
+                            <span>🔥 Tendencia</span> • <span>3.2k Miembros</span> • <span>120 posts hoy</span>
+                        </div>
+                    </div>
+                    <button class="btn" style="background: transparent; border: 1px solid var(--amber); color: var(--amber); padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; cursor: pointer;" onmouseover="this.style.background='var(--amber)'; this.style.color='#000';" onmouseout="this.style.background='transparent'; this.style.color='var(--amber)';">Unirme</button>
+                </div>
 
-<hr class="divider">
+                <!-- Foro Item -->
+                <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                    <div style="flex: 1; min-width: 250px;">
+                        <h4 style="color: var(--text); margin-bottom: 4px;">Regulación del Sistema Nervioso</h4>
+                        <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 8px;">Técnicas somáticas, respiración y experiencias de liberación de trauma.</p>
+                        <div style="display: flex; align-items: center; gap: 12px; font-size: 0.8rem; color: var(--dim);">
+                            <span>1.8k Miembros</span> • <span>45 posts hoy</span>
+                        </div>
+                    </div>
+                    <button class="btn" style="background: transparent; border: 1px solid var(--amber); color: var(--amber); padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; cursor: pointer;" onmouseover="this.style.background='var(--amber)'; this.style.color='#000';" onmouseout="this.style.background='transparent'; this.style.color='var(--amber)';">Unirme</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div></section>
 
-<!-- Footer CTA -->
-<section class="footer-cta">
-  <h2 class="footer-cta-title reveal">No es autoayuda. No es terapia clínica.<br>Es cartografía del mundo interior.</h2>
-  <p class="footer-cta-sub reveal">
-    Creado por Franco Jeria Castro, terapeuta en salud integrativa y autor de Endonautica. Desde 2019 construyendo herramientas para que el viaje interior tenga estructura real.
-  </p>
-</section>
+<section class="app-page" id="page-inbox"><div class="page-container">
+<div class="page-header">
+<h2>Mensajes</h2>
+<p>Bandeja de entrada y comunicaciones directas.</p>
+</div>
+<style>
+          @media (max-width: 768px) {
+            .inbox-layout {
+              flex-direction: column !important;
+            }
+            .inbox-contacts {
+              flex: 0 0 200px !important;
+              border-right: none !important;
+              border-bottom: 1px solid var(--border) !important;
+            }
+          }
+        
+/* Grayscale to Color Reveal on hover for images */
+.bw-reveal {
+    filter: grayscale(100%) opacity(0.7);
+    transition: filter 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+    cursor: pointer;
+}
+.bw-reveal:hover {
+    filter: grayscale(0%) opacity(1);
+}
 
-{% endblock %}
+</style>
+<div class="inbox-layout card telemetry-console-border" style="display: flex; height: 70vh; min-height: 500px; padding: 0; overflow: hidden;">
+<!-- Contact List (Left) -->
+<div class="inbox-contacts" style="flex: 0 0 300px; border-right: 1px solid var(--border); display: flex; flex-direction: column; background: rgba(0,0,0,0.2);">
+<div style="padding: 16px; border-bottom: 1px solid var(--border);">
+<input placeholder="Buscar mensajes..." style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: #fff; outline: none; font-family: var(--font-body);" type="text"/>
+</div>
+<div style="flex: 1; overflow-y: auto;">
+<!-- Contact Item Active -->
+<div class="contact-item active" style="padding: 16px; display: flex; gap: 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.02); background: rgba(255,255,255,0.05);">
+<div style="width: 48px; height: 48px; border-radius: 50%; background: var(--calipso-glow); display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--calipso); flex-shrink: 0;">AM</div>
+<div style="overflow: hidden;">
+<div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+<strong style="color: #fff; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Alejandra M. (Terapeuta)</strong>
+<span style="color: var(--muted); font-size: 0.75rem; flex-shrink: 0;">10:42</span>
+</div>
+<p style="color: var(--muted); font-size: 0.85rem; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">En la sesión de mañana exploraremos...</p>
+</div>
+</div>
+<!-- Contact Item -->
+<div class="contact-item" style="padding: 16px; display: flex; gap: 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.02);">
+<div style="width: 48px; height: 48px; border-radius: 50%; background: var(--violet-glow); display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--violet); flex-shrink: 0;">
+<svg fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+</div>
+<div style="overflow: hidden;">
+<div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+<strong style="color: #fff; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Soporte Endonautas</strong>
+<span style="color: var(--muted); font-size: 0.75rem; flex-shrink: 0;">Ayer</span>
+</div>
+<p style="color: var(--muted); font-size: 0.85rem; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Cuenta inicializada. Fractones cargados...</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Chat Window (Right) -->
+<div class="inbox-chat" style="flex: 1; display: flex; flex-direction: column; background: transparent;">
+<!-- Chat Header -->
+<div style="padding: 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.1);">
+<div style="width: 40px; height: 40px; border-radius: 50%; background: var(--calipso-glow); display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--calipso);">AM</div>
+<div>
+<h4 style="margin: 0; color: #fff; font-size: clamp(0.9rem, 1.8vh, 1.05rem);">Alejandra M. (Terapeuta)</h4>
+<span style="color: var(--calipso); font-size: 0.8rem; display: flex; align-items: center; gap: 4px;">
+<span style="width: 6px; height: 6px; background: var(--calipso); border-radius: 50%; display: inline-block;"></span> En línea
+                </span>
+</div>
+<div style="margin-left: auto; display: flex; gap: 12px;">
+<button class="btn btn-outline btn-sm" style="padding: 6px 12px;">
+<svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+</button>
+<button class="btn btn-outline btn-sm" style="padding: 6px 12px;">
+<svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+</button>
+</div>
+</div>
+<!-- Chat Messages -->
+<div class="chat-messages" style="flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px;">
+<div class="chat-msg ai" style="margin-bottom: 0;">
+<div class="msg-avatar" style="background: var(--calipso-glow); color: var(--calipso); border-color: var(--calipso);">AM</div>
+<div class="msg-bubble">
+<p>Hola Franco, estaba revisando tu telemetría de esta semana y noté un patrón interesante en tus registros somáticos.</p>
+</div>
+</div>
+<div class="chat-msg ai" style="margin-top: -8px;">
+<div class="msg-avatar" style="visibility: hidden;">AM</div>
+<div class="msg-bubble">
+<p>Vi tu registro de diafragma en tu estado general. En la sesión de mañana exploraremos el calor intercostal al recordar la última crítica de tu superior. ¿Te parece bien?</p>
+<span style="font-size: 0.7rem; color: var(--muted); display: block; margin-top: 4px; text-align: right;">10:42</span>
+</div>
+</div>
+<div class="chat-msg user">
+<div class="msg-bubble">
+<p>Hola Alejandra. Sí, me parece bien. Hoy intenté el ejercicio de respiración y noté mucha resistencia.</p>
+<span style="font-size: 0.7rem; color: rgba(255,255,255,0.5); display: block; margin-top: 4px; text-align: right;">10:45</span>
+</div>
+</div>
+</div>
+<!-- Chat Input -->
+<div class="chat-input-area">
+<button class="chat-attach-btn" title="Adjuntar Archivo">
+  <svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+</button>
+<button class="chat-attach-btn" title="Subir Imagen">
+  <svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><rect height="18" rx="2" ry="2" width="18" x="3" y="3"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+</button>
+<textarea placeholder="Escribe un mensaje..."></textarea>
+<button class="chat-attach-btn" title="Nota de Voz">
+  <svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg>
+</button>
+<button class="btn btn-primary">
+<svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><line x1="22" x2="11" y1="2" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+</button>
+</div>
+</div>
+</div>
+</div></section>
+<!-- ════════════════ PAGE: SUEÑOS Y REALIDAD ════════════════ -->
+<section class="app-page" id="page-suenos"><div class="page-container">
+<div class="page-header">
+<h2>Sueños</h2>
+<p>Registra tus ciclos de sueño y chequeos de realidad.</p>
+</div>
+<div class="card telemetry-console-border" style="min-height: calc(100vh - 160px);">
+<h4 style="color: #fff; margin-bottom: 12px;">Recordatorios de Chequeos de Realidad</h4>
+<p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 2vh;">Activa notificaciones periódicas para preguntarte: "¿Estoy soñando?" y anclar tu conciencia.</p>
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+<strong style="color: #fff;">Chequeos de Realidad</strong>
+<label class="switch" style="position: relative; display: inline-block; width: 40px; height: 24px;">
+<input style="opacity: 0; width: 0; height: 0;" type="checkbox"/>
+<span class="slider round" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border); transition: .4s; border-radius: 24px;">
+<span style="position: absolute; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%;"></span>
+</span>
+</label>
+</div>
+<style>
+            .switch input:checked + .slider { background-color: var(--calipso); }
+            .switch input:checked + .slider > span { transform: translateX(16px); }
+          
+/* Grayscale to Color Reveal on hover for images */
+.bw-reveal {
+    filter: grayscale(100%) opacity(0.7);
+    transition: filter 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+    cursor: pointer;
+}
+.bw-reveal:hover {
+    filter: grayscale(0%) opacity(1);
+}
+
+</style>
+<div style="margin-top: 24px;">
+<button class="btn btn-primary">Registrar Sueño Nuevo</button>
+</div>
+</div>
+</div></section>
+<!-- ════════════════ PAGE: PERFIL DEL NAVEGANTE ════════════════ -->
+<section class="app-page" id="page-perfil"><div class="page-container">
+<div class="page-header">
+<h2>Configuración</h2>
+<p>Estado general, exploración de sombras, bitácora y configuración.</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 40px;">
+<!-- SUBSECTION: ESTADO -->
+<div class="perfil-subsection">
+<h3 style="color: var(--calipso); margin-bottom: 2vh; border-bottom: 1px solid var(--border); padding-bottom: 10px;">Estado de Consciencia</h3>
+<div class="dashboard-grid">
+<!-- Tarjeta de Perfil & Escala Hawkins -->
+<div class="card profile-card telemetry-console-border">
+<div class="profile-main">
+<div class="profile-glow"></div>
+<span class="card-tag tag-calipso">INTEGRACIÓN EMOCIONAL</span>
+<h3>Estado de Consciencia (Hawkins)</h3>
+<div class="hawkins-level">
+<span class="level-num" id="val-integracion-global">69%</span>
+<span class="level-label">Aceptación (250)</span>
+</div>
+<p class="level-desc">Estado de regulación corporal y mental estable, con bajos niveles de evasión.</p>
+</div>
+<!-- Flight deck style system indicators -->
+<div class="flight-deck-indicators" style="margin-top:20px;  padding-top:16px;">
+<div class="indicator-row" style="display:flex; align-items:center; gap:10px; margin-bottom:8px; font-size:0.75rem;">
+<span class="indicator-led status-nominal green-pulse" id="telemetry-soma-led"></span>
+<span class="indicator-text" id="telemetry-soma-text">ESPEJO DE CONFLICTOS: REGISTRO PENDIENTE</span>
+</div>
+<div class="indicator-row" style="display:flex; align-items:center; gap:10px; font-size:0.75rem;">
+<span class="indicator-led status-nominal"></span>
+<span class="indicator-text">SINTOMATOLOGÍA DE ESTRÉS (PHQ-9): ESTABLE</span>
+</div>
+</div>
+<div class="profile-stats">
+<div class="stat-item">
+<span class="stat-value" id="stats-missions">4</span>
+<span class="stat-label">Portales Completados</span>
+</div>
+<div class="stat-item">
+<span class="stat-value" id="stats-fractons">450 FK</span>
+<span class="stat-label">Fractones (FK)</span>
+</div>
+<div class="stat-item">
+<span class="stat-value" style="color:var(--amber)">Activa</span>
+<span class="stat-label">Espejo Emocional</span>
+</div>
+</div>
+</div>
+<!-- Polaridades Somáticas (Luz vs Sombra) -->
+<div class="card polarities-card telemetry-console-border">
+<span class="card-tag tag-violet">REGISTRO SOMÁTICO</span>
+<h3>Polaridades e Integración</h3>
+<p class="card-subtitle">Evolución de tus perfiles clínicos. Haz clic en cualquier barra para iniciar tu registro corporal.</p>
+<div class="polarity-bars">
+<!-- Conciencia Corporal -->
+<div class="bar-group clickable-polarity" onclick="window.app.calibrateSomaticSystem('conciencia')">
+<div class="bar-info">
+<span>Conciencia Corporal</span>
+<span class="val-teal">65% <span class="calibration-trigger">[CALIBRAR]</span></span>
+</div>
+<div class="bar-track">
+<div class="bar-fill bar-luz" id="bar-conciencia" style="width: 65%"></div>
+</div>
+</div>
+<!-- Apertura Cognitiva -->
+<div class="bar-group clickable-polarity" onclick="window.app.calibrateSomaticSystem('apertura')">
+<div class="bar-info">
+<span>Apertura Cognitiva</span>
+<span class="val-teal">70% <span class="calibration-trigger">[CALIBRAR]</span></span>
+</div>
+<div class="bar-track">
+<div class="bar-fill bar-luz" id="bar-apertura" style="width: 70%"></div>
+</div>
+</div>
+<!-- Rigidez -->
+<div class="bar-group clickable-polarity" onclick="window.app.calibrateSomaticSystem('rigidez')">
+<div class="bar-info">
+<span>Rigidez Somática (Sombra)</span>
+<span class="val-purple">45% <span class="calibration-trigger">[REGULAR]</span></span>
+</div>
+<div class="bar-track">
+<div class="bar-fill bar-sombra" id="bar-rigidez" style="width: 45%"></div>
+</div>
+</div>
+<!-- Evasión -->
+<div class="bar-group clickable-polarity" onclick="window.app.calibrateSomaticSystem('evasion')">
+<div class="bar-info">
+<span>Evitación Somática (Sombra Dominante)</span>
+<span class="val-rose">55% <span class="calibration-trigger">[REGULAR]</span></span>
+</div>
+<div class="bar-track">
+<div class="bar-fill bar-sombra-dom" id="bar-evasion" style="width: 55%"></div>
+</div>
+</div>
+</div>
+<!-- Dashboard Console Log Box -->
+<div class="console-box" style="margin-top:20px;">
+<span class="console-title" style="font-size:0.65rem; color:var(--muted); letter-spacing:0.1em; display:block; margin-bottom:6px; font-weight:700;">REGISTRO EN TIEMPO REAL</span>
+<div class="console-log-box" id="calibration-log">
+<span class="console-log-line">&gt; Sistema listo. Registra tu estado para iniciar.</span>
+</div>
+</div>
+<div class="polarities-footer">
+<span class="pill-info">💡 Nota: Registrar tus polaridades fomenta la autoconciencia y acumula Fractones (FK) en el ecosistema.</span>
+</div>
+</div>
+<!-- Banner CTA Bitácora Compilada -->
+<div class="card card-wide bitacora-cta-card telemetry-console-border" id="bitacora-promo-card">
+<div class="bitacora-promo-content">
+<span class="promo-tag">ANÁLISIS DE SOMBRA COMPILADO</span>
+<h3>Compila tu Bitácora de Sombras (PDF)</h3>
+<p>Desbloquea tu reporte editorial de 45 páginas estructuradas sobre tu perfil clínico profundo. Un mapa preciso para la reconciliación con tu entorno.</p>
+<div class="promo-pricing">
+<div class="price-box">
+<span class="price-val">$25</span>
+<span class="price-currency">USD</span>
+</div>
+<button class="btn btn-gold" id="btn-comprar-bitacora">Pagar y Compilar Reporte</button>
+</div>
+</div>
+<div class="bitacora-promo-book-preview">
+<div class="mock-book">
+<div class="mock-book-cover">
+<span class="cover-title">BITÁCORA</span>
+<span class="cover-subtitle">FRANCO JERIA</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Panel de Misiones Activas -->
+<div class="card card-wide misiones-card telemetry-console-border">
+<span class="card-tag tag-amber">CUESTIONARIOS Y EVALUACIONES ACTIVAS</span>
+<h4>Registro de Misiones de Autogestión</h4>
+<div class="misiones-list">
+<div class="mision-row completed">
+<div class="mision-status-dot">✔</div>
+<div class="mision-info">
+<h5>BFI-44 (Personalidad Externa)</h5>
+<p>Misión completada. Datos integrados a tu telemetría general.</p>
+</div>
+<span class="mision-reward">+15 FK</span>
+</div>
+<div class="mision-row completed">
+<div class="mision-status-dot">✔</div>
+<div class="mision-info">
+<h5>Eneagrama (Sombra Primaria)</h5>
+<p>Misión completada. Identificado perfil E1 (Rigidez de Deber).</p>
+</div>
+<span class="mision-reward">+20 FK</span>
+</div>
+<div class="mision-row active">
+<div class="mision-status-dot">➔</div>
+<div class="mision-info">
+<h5>MAIA (Regulación Emocional y Soma)</h5>
+<p>Misión recomendada por el sistema para actualizar sensor diafragmático.</p>
+</div>
+<button class="btn btn-calipso btn-sm" onclick="document.querySelector('.constellation-map-panel').scrollIntoView({ behavior: 'smooth', block: 'start' })">Comenzar</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SUBSECTION: BITÁCORA DE SOMBRAS -->
+<div class="perfil-subsection" style="position: relative;">
+<h3 style="color: var(--calipso); margin-bottom: 2vh; border-bottom: 1px solid var(--border); padding-bottom: 10px;">Bitácora de Sombras</h3>
+<!-- Bloqueo Dinámico (B2C Checkout) -->
+<div class="bitacora-locked-overlay" id="bitacora-locked-overlay">
+<div class="lock-card card">
+<div class="lock-icon">🔒</div>
+<h3>Bitácora Editorial Bloqueada</h3>
+<p>Para ver el reporte clínico editorial completo de tu sombra (45 páginas estructuradas), realiza el pago de compilación.</p>
+<button class="btn btn-gold" id="btn-desbloquear-bitacora-directo">Pagar y Compilar ($25 USD)</button>
+</div>
+</div>
+<!-- Book-like presentation grid -->
+<div class="book-pages-wrapper">
+<div class="book-pages-grid">
+<!-- Left Page -->
+<div class="book-page left">
+<div class="page-num">12</div>
+<h4 class="book-chapter-title">I. LA ESTRUCTURA DEL DEBER</h4>
+<h3 class="book-main-title">El Filtro Obsesivo de la Máscara</h3>
+<div class="book-text-content">
+<p>En el caso del navegante Franco Jeria, la rigidez estructural es el filtro primario de su ego. La máscara de "perfección y deber" (Eneagrama Tipo 1) funciona como una coraza protectora. Al estar su diafragma tensionado, el flujo intercostal se bloquea para impedir que el usuario exprese descontento o rabia contra la autoridad laboral.</p>
+<p>La mente de Franco prefiere procesar el problema de forma teórica. "Mi jefe no es profesional", piensa. Sin embargo, su cuerpo registra vasoconstricción y taquicardia ligera. La introspección lógica solo incrementa el control intelectual, evitando la sensación somática que resolvería la contracción celular de raíz.</p>
+<blockquote>
+                  "No busques resolver el conflicto en tus pensamientos. Calibra tus sensores en las costillas y respira profundamente."
+                </blockquote>
+</div>
+</div>
+<!-- Right Page -->
+<div class="book-page right">
+<div class="page-num">13</div>
+<h4 class="book-chapter-title">MÉTODO DE CALIBRACIÓN</h4>
+<h3 class="book-main-title">Estrategia de Vuelo Somático</h3>
+<div class="book-text-content">
+<p>Para disolver esta coraza defensiva, Franco debe seguir una ruta estricta de tres pasos somáticos, evitando todo tipo de justificación racional o explicaciones místicas:</p>
+<ul>
+<li><strong>1. Enfoque Corporal Inmediato:</strong> Al percibir la crítica laboral, detén el diálogo mental e identifica dónde está el vacío en tu plexo solar o mandíbula.</li>
+<li><strong>2. Respiración Prolongada:</strong> Respira a un ritmo de 10 segundos por ciclo (4s inhalación, 2s retención, 4s exhalación) hasta que el pulso periférico regrese a niveles nominales.</li>
+<li><strong>3. Acción Real / Decisión Concreta:</strong> Comunica tu desacuerdo de forma estructurada o retírate de la dinámica tóxica de inmediato, sin victimización.</li>
+</ul>
+<div class="book-footer-signature">
+<p>Compilado por IA de Endonautas</p>
+<span>Sofía G. (Practicante Clínico ID: 8872)</span>
+</div>
+</div>
+</div>
+</div>
+<div class="book-actions-bar">
+<button class="btn btn-outline btn-sm">
+<svg fill="none" height="14" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="14" xmlns="http://www.w3.org/2000/svg"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+              Guardar Reporte Local
+            </button>
+<button class="btn btn-outline btn-sm">
+<svg fill="none" height="14" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="14" xmlns="http://www.w3.org/2000/svg"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>
+              Descargar PDF Editorial
+            </button>
+</div>
+</div>
+</div>
+<!-- SUBSECTION: CONFIGURACIÓN Y SUSCRIPCIÓN -->
+<div class="perfil-subsection">
+<h3 style="color: var(--calipso); margin-bottom: 2vh; border-bottom: 1px solid var(--border); padding-bottom: 10px;">Ajustes de Cuenta</h3>
+<!-- The original perfil layout was inside a div -->
+<!-- <div class="page-header">
+          
+          
+        -->
+<div class="perfil-layout" style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px;">
+<!-- Ajustes de Cuenta & Suscripción -->
+<div class="card telemetry-console-border" style="display: flex; flex-direction: column; gap: 20px;">
+<div>
+<span class="card-tag tag-violet">VARIABLES DE ACCESO</span>
+<h4 style="margin-bottom: 12px; color: #fff;">Ajustes de Cuenta</h4>
+<form id="perfil-account-form" style="display: flex; flex-direction: column; gap: 12px;">
+<div class="form-group" style="display:flex; flex-direction:column; gap:6px;">
+<label for="perfil-email" style="font-size:0.8rem; color:var(--muted)">Correo Electrónico</label>
+<input disabled="" id="perfil-email" style="background:rgba(0,0,0,0.15); border:1px solid var(--border); padding:8px 12px; border-radius:6px; color:var(--text);" type="email" value="{% if user.is_authenticated %}{{ user.email }}{% else %}franco.jeria@endonautas.app{% endif %}"/>
+</div>
+<div class="form-group" style="display:flex; flex-direction:column; gap:6px;">
+<label for="perfil-password" style="font-size:0.8rem; color:var(--muted)">Firma Psíquica (Contraseña)</label>
+<input disabled="" id="perfil-password" style="background:rgba(0,0,0,0.15); border:1px solid var(--border); padding:8px 12px; border-radius:6px; color:var(--text);" type="password" value="••••••••••••"/>
+</div>
+</form>
+</div>
+<div style=" padding-top: 16px;">
+<span class="card-tag tag-calipso">CONFIGURACIÓN DEL PROCESO</span>
+<h4 style="margin-bottom: 8px; color: #fff;">Suscripción de Vuelo</h4>
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(126,204,205,0.05); border: 1px solid rgba(126,204,205,0.2); border-radius: 8px;">
+<div>
+<strong style="color:var(--calipso); display:block;">Mi Cuenta Integral</strong>
+<span style="font-size:0.75rem; color:var(--muted)">$10.00 USD / mensual</span>
+</div>
+<span class="badge" style="background:var(--calipso-glow); color:var(--calipso); border:1px solid var(--calipso); padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:700;">ACTIVO</span>
+</div>
+</div>
+</div>
+<!-- Estética del Mapa & Hawkins status -->
+<div class="card telemetry-console-border" style="display: flex; flex-direction: column; gap: 20px;">
+<div>
+<span class="card-tag tag-amber">VISUALIZACIÓN DEL MAPA</span>
+<h4 style="margin-bottom: 12px; color: #fff;">Estética del Mapa Interior</h4>
+<p class="card-subtitle" style="margin-bottom:12px;">Selecciona la representación espacial de tu Inconsciente.</p>
+<div class="estetica-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+<div class="estetica-card active" style="padding:12px; border:1px solid var(--calipso); background:var(--calipso-glow); border-radius:8px; text-align:center; cursor:pointer;">
+<strong style="color:var(--calipso); display:block; font-size:0.85rem;">Cosmos</strong>
+<span style="font-size:0.7rem; color:var(--text);">[ACTIVO]</span>
+</div>
+<div class="estetica-card" onclick="alert('Estética Mandala activada para tus mapas.')" style="padding:12px; border:1px solid var(--border); background:rgba(255,255,255,0.02); border-radius:8px; text-align:center; cursor:pointer;">
+<strong style="color:var(--text); display:block; font-size:0.85rem;">Mandala</strong>
+<span style="font-size:0.7rem; color:var(--muted);">Disponible</span>
+</div>
+<div class="estetica-card locked" style="padding:12px; border:1px solid var(--border); background:rgba(0,0,0,0.1); border-radius:8px; text-align:center; cursor:not-allowed; opacity:0.5;">
+<strong style="color:var(--muted); display:block; font-size:0.85rem;">Árbol 🔒</strong>
+<span style="font-size:0.7rem; color:var(--dim);">Nivel 300</span>
+</div>
+<div class="estetica-card locked" style="padding:12px; border:1px solid var(--border); background:rgba(0,0,0,0.1); border-radius:8px; text-align:center; cursor:not-allowed; opacity:0.5;">
+<strong style="color:var(--muted); display:block; font-size:0.85rem;">Archipiélago 🔒</strong>
+<span style="font-size:0.7rem; color:var(--dim);">Nivel 400</span>
+</div>
+</div>
+</div>
+<!-- Hawkins Gauge Card -->
+<div style=" padding-top: 16px;">
+<h4 style="margin-bottom: 8px; color: #fff;">Calibración de Consciencia</h4>
+<div style="display: flex; align-items: center; gap: 16px;">
+<div style="font-size: 2.2rem; font-weight: 700; color:#fff;">250</div>
+<div>
+<strong style="color:var(--calipso); display:block;">Nivel Hawkins: Aceptación</strong>
+<p style="font-size: 0.78rem; color: var(--muted); line-height: 1.3; margin: 0;">Ventana de tolerancia expandida. Capacidad para sostener la fricción somática sin recurrir a la huida intelectual.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div></section>
+<!-- ════════════════ PAGE: SAAS TERAPEUTAS (B2B) ════════════════ -->
+<section class="app-page" id="page-saas"><div class="page-container">
+<div class="page-header">
+<h2>Portal del Terapeuta</h2>
+<p>Herramientas de seguimiento clínico y asignación de ejercicios somáticos.</p>
+</div>
+<div class="saas-layout">
+<!-- Client List (Left Panel) -->
+<div class="saas-clients-sidebar card">
+<h4>Pacientes Activos</h4>
+<p class="box-subtitle">Pacientes vinculados a tu cuenta clínica.</p>
+<div class="clients-list">
+<div class="client-item active" data-client="franco">
+<div class="client-avatar">FM</div>
+<div class="client-brief">
+<h5>Franco Jeria</h5>
+<p>BFI-44, Eneagrama / Sombra E1</p>
+</div>
+<span class="badge badge-validado">Navegante</span>
+</div>
+<div class="client-item" data-client="sofia">
+<div class="client-avatar">SG</div>
+<div class="client-brief">
+<h5>Sofía G.</h5>
+<p>MAIA, DERS-16 / Inestabilidad</p>
+</div>
+<span class="badge badge-validado">Navegante</span>
+</div>
+<div class="client-item" data-client="mateo">
+<div class="client-avatar">MR</div>
+<div class="client-brief">
+<h5>Mateo R.</h5>
+<p>Sin datos psicométricos activos</p>
+</div>
+<span class="badge badge-gratis">Básico</span>
+</div>
+</div>
+<div class="saas-footer-cta">
+<button class="btn btn-outline btn-full-width" onclick="alert('Añadir flujo para invitar nuevo paciente...')">+ Invitar Paciente</button>
+</div>
+</div>
+<!-- Client details & interaction (Right Panel) -->
+<div class="saas-client-details card" id="practitioner-details-sheet">
+<div class="client-details-header">
+<div class="client-details-title">
+<h3>Franco Jeria</h3>
+<span>Ficha de Calibración Somática (IA)</span>
+</div>
+<span class="badge badge-validado">Navegante</span>
+</div>
+<div class="client-details-grid">
+<!-- Asignación Remota de Cuestionarios -->
+<div class="assignment-box">
+<h4>Asignación de Misiones Clínicas</h4>
+<p class="box-subtitle">Asigna cuestionarios de autodiagnóstico al paciente.</p>
+<form class="tests-checkbox-grid" id="assign-tests-form">
+<label class="checkbox-container">
+<input checked="" disabled="" name="test-bfi44" type="checkbox"/>
+<span class="checkmark"></span>
+<div>
+<strong>BFI-44</strong> <span class="lbl-status-done">(Completado)</span>
+</div>
+</label>
+<label class="checkbox-container">
+<input checked="" disabled="" name="test-jung" type="checkbox"/>
+<span class="checkmark"></span>
+<div>
+<strong>Arquetipos Jung</strong> <span class="lbl-status-done">(Completado)</span>
+</div>
+</label>
+<label class="checkbox-container">
+<input checked="" disabled="" name="test-eneagrama" type="checkbox"/>
+<span class="checkmark"></span>
+<div>
+<strong>Eneagrama</strong> <span class="lbl-status-done">(Completado)</span>
+</div>
+</label>
+<label class="checkbox-container">
+<input checked="" id="chk-phq9" name="test-phq9" type="checkbox"/>
+<span class="checkmark"></span>
+<div>
+<strong>PHQ-9 (Depresión)</strong> <span class="lbl-status-assigned" id="lbl-phq9-status">(Asignado)</span>
+</div>
+</label>
+<label class="checkbox-container">
+<input id="chk-gad7" name="test-gad7" type="checkbox"/>
+<span class="checkmark"></span>
+<div>
+<strong>GAD-7 (Ansiedad)</strong>
+</div>
+</label>
+<label class="checkbox-container">
+<input id="chk-maia" name="test-maia" type="checkbox"/>
+<span class="checkmark"></span>
+<div>
+<strong>MAIA (Soma-Físico)</strong>
+</div>
+</label>
+</form>
+<div class="assignment-actions">
+<button class="btn btn-calipso btn-sm" id="btn-save-assignment" onclick="window.app.updateTestAssignments()" type="button">Actualizar Asignación Remota</button>
+</div>
+</div>
+<!-- AI Clinical Summary -->
+<div class="clinical-summary-box">
+<div class="summary-header">
+<svg fill="none" height="16" stroke="#9b8ec4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" x2="12" y1="22.08" y2="12"></line></svg>
+<h4>Análisis de Vuelo Asistido por IA</h4>
+</div>
+<div class="summary-content">
+<p><strong>Perfil General:</strong> Franco presenta una polaridad de sombra enfocada en la represión de la agresividad y el control obsesivo (Eneagrama 1). Intelectualiza las heridas para evadir el procesamiento somático.</p>
+<p><strong>Observaciones Somáticas (Espejo):</strong> Alta correlación entre su malestar en entornos laborales jerárquicos y opresión de la caja torácica. En sus interacciones con el Espejo de Conflictos, el paciente tiende a responder a la guía somática deteniendo la escritura, lo que indica un mecanismo de defensa por saturación o parálisis corporal.</p>
+<p><strong>Recomendaciones para Sesión Presencial/Videollamada:</strong></p>
+<ul>
+<li>1. Indagar en el cuerpo el calor intercostal al recordar la última crítica de su superior.</li>
+<li>2. Evitar dinámicas de "soltar" o "fluir" (New Age) que Franco utiliza para evadir la molestia real.</li>
+<li>3. Validar los niveles de ansiedad (GAD-7) tan pronto como resuelva el test.</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div></section>
+</main>
+</div>
+<!-- Checkout / Billing Modal Simulation (Bitácora Purchase) -->
+<div class="modal-backdrop" id="checkout-modal">
+<div class="modal-card card">
+<button class="modal-close-btn" id="btn-close-modal">×</button>
+<div class="modal-header">
+<span class="modal-badge">MERCADO PAGO / HOTMART INTEGRACIÓN</span>
+<h3>Compilación Final de la Bitácora</h3>
+<p>Procesamiento automatizado de tu perfil psico-espiritual.</p>
+</div>
+<div class="modal-body">
+<div class="checkout-summary">
+<div class="summary-line">
+<span>Bitácora Digital (Franco Jeria)</span>
+<strong>$25.00 USD</strong>
+</div>
+<div class="summary-line">
+<span>Costo de Procesamiento DeepSeek/IA</span>
+<span class="tag-free">INCLUIDO</span>
+</div>
+<div class="summary-line total">
+<span>Total a Pagar</span>
+<strong>$25.00 USD</strong>
+</div>
+</div>
+<!-- Simulated Credit Card Form -->
+<form id="simulated-payment-form" onsubmit="event.preventDefault(); window.app.processSimulatedPayment();">
+<div class="form-group">
+<label for="card-holder">Nombre del Titular</label>
+<input id="card-holder" placeholder="FRANCO JERIA" required="" type="text" value="FRANCO JERIA"/>
+</div>
+<div class="form-group">
+<label for="card-number">Número de Tarjeta</label>
+<input id="card-number" placeholder="4557 •••• •••• 1289" required="" type="text" value="4557 1234 5678 1289"/>
+</div>
+<div class="form-row">
+<div class="form-group">
+<label for="card-expiry">Expiración</label>
+<input id="card-expiry" placeholder="MM/AA" required="" type="text" value="09/31"/>
+</div>
+<div class="form-group">
+<label for="card-cvc">CVC / CVV</label>
+<input id="card-cvc" placeholder="•••" required="" type="text" value="882"/>
+</div>
+</div>
+<button class="btn btn-gold btn-full-width" id="btn-submit-payment" type="submit">Pagar y Compilar Bitácora</button>
+</form>
+</div>
+</div>
+</div>
+<!-- Auth Modal (Glassmorphism Dialog) -->
+<dialog aria-labelledby="auth-modal-title" class="auth-dialog-modal" closedby="any" id="auth-modal">
+<div class="auth-modal-card">
+<button class="modal-close-btn" id="btn-close-auth-modal" onclick="window.app.closeAuthModal()">×</button>
+<div class="auth-modal-header">
+<img src="{% static 'img/logo-alt.png' %}" style="width: 28px; height: auto; display: inline-block; vertical-align: middle;" alt="Endonautas">
+<h3 id="auth-modal-title">Iniciar Sesión</h3>
+<p id="auth-modal-subtitle">Alinea tu bitácora de conciencia somática.</p>
+</div>
+<div class="auth-tabs">
+<button class="auth-tab active" id="tab-login" onclick="window.app.toggleAuthTab('login')">Iniciar Sesión</button>
+<button class="auth-tab" id="tab-register" onclick="window.app.toggleAuthTab('register')">Registrarse</button>
+</div>
+<div class="auth-forms">
+<form id="auth-form-element" onsubmit="event.preventDefault(); window.app.processAuth();">
+  {% csrf_token %}
+<div class="form-group" id="group-name" style="display: none; flex-direction: column; gap: 6px; margin-bottom: 12px;">
+<label for="auth-name" style="font-size: 0.8rem; color: var(--muted)">Nombre Completo</label>
+<input id="auth-name" placeholder="Franco Jeria" style="background: rgba(0,0,0,0.25); border: 1px solid var(--border); padding: 10px 14px; border-radius: 8px; color: var(--text);" type="text" value="Franco Jeria"/>
+</div>
+<div class="form-group" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px;">
+<label for="auth-email" style="font-size: 0.8rem; color: var(--muted)">Correo Electrónico</label>
+<input id="auth-email" placeholder="franco.jeria@endonautas.app" required="" style="background: rgba(0,0,0,0.25); border: 1px solid var(--border); padding: 10px 14px; border-radius: 8px; color: var(--text);" type="email" value="{% if user.is_authenticated %}{{ user.email }}{% else %}franco.jeria@endonautas.app{% endif %}"/>
+</div>
+<div class="form-group" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px;">
+<label for="auth-password" style="font-size: 0.8rem; color: var(--muted)">Firma Psíquica (Contraseña)</label>
+<input id="auth-password" placeholder="••••••••••••" required="" style="background: rgba(0,0,0,0.25); border: 1px solid var(--border); padding: 10px 14px; border-radius: 8px; color: var(--text);" type="password" value=""/>
+</div>
+<button class="btn btn-primary btn-full-width" id="btn-submit-auth" style="padding: 12px; font-weight: 700;" type="submit">Acceder a la Consola</button>
+</form>
+</div>
+</div>
+</dialog>
+<!-- Textura Somática Topográfica (Identidad Endonautas) -->
+<div class="somatic-texture-overlay"></div>
+<!-- Mobile Bottom Navigation -->
+<nav class="mobile-bottom-nav">
+<a class="menu-item active" data-tab="feed" href="#feed">
+<svg fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+<span>Inicio</span>
+</a>
+<a class="menu-item" data-tab="perfil" href="#perfil">
+<svg fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
+<span>Perfil</span>
+</a>
+<a class="menu-item" data-tab="foros" href="#foros">
+<svg fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z"></path><path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"></path></svg>
+<span>Foros</span>
+</a>
+<a class="menu-item" data-tab="inbox" href="#inbox">
+<svg fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+<span>Mensajes</span>
+</a>
+<a class="menu-item" data-tab="configuracion" href="#configuracion">
+<svg fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+<span>Config.</span>
+</a>
+<a class="menu-item" data-tab="mapainterior" href="#mapainterior">
+<svg fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+<span>Mapa</span>
+</a>
+<a class="menu-item" data-tab="espejo" href="#espejo">
+<svg fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+<span>Espejo</span>
+</a>
+<a class="menu-item" data-tab="regulacion" href="#regulacion">
+<svg fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M12 6v6l4 2"></path></svg>
+<span>Regul.</span>
+</a>
+<a class="menu-item" data-tab="suenos" href="#suenos">
+<svg fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+<span>Diario</span>
+</a>
+</nav>
+<!-- Transition Overlay (Glassmorphism Effect) -->
+<div class="transition-overlay-container" id="transition-overlay">
+<div class="transition-orb-wrapper">
+<div class="transition-pulsing-orb"></div>
+<div class="transition-glow-ring"></div>
+</div>
+<div class="transition-text-box">
+<h3 id="transition-message">Sincronizando pulso somático...</h3>
+<p class="transition-subtext">Alineando bitácora de conciencia</p>
+</div>
+</div>
+<!-- Toast Notification Box -->
+<div id="toast-container"></div>
+<!-- Three.js Library -->
+<script>
+  function openAuthModal(mode, source) {
+    if (window.app) {
+      window.app.openAuthModal(mode, source);
+    }
+  }
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+<script type="module" src="{% static 'js/app.js' %}"></script>
+</body>
+</html>
