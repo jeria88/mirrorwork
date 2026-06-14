@@ -1574,5 +1574,38 @@
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
 <script type="module" src="{% static 'js/app.js' %}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Assign alternating tab classes to landing sections
+    var allSections = document.querySelectorAll('.section');
+    allSections.forEach(function(sec, index) {
+        var container = sec.querySelector('.container');
+        if (!container) return;
+        if (index === 0) {
+            container.classList.add('tab-center');
+        } else if (index % 2 !== 0) {
+            container.classList.add('tab-right');
+        } else {
+            container.classList.add('tab-left');
+        }
+    });
+
+    // IntersectionObserver for scroll animations
+    var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+            var container = entry.target.querySelector('.container');
+            if (container) {
+                if (entry.isIntersecting) {
+                    container.classList.add('active-tab');
+                } else {
+                    container.classList.remove('active-tab');
+                }
+            }
+        });
+    }, { threshold: 0.35 });
+
+    allSections.forEach(function(sec) { observer.observe(sec); });
+});
+</script>
 </body>
 </html>
