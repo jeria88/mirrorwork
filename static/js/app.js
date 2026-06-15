@@ -1089,6 +1089,79 @@ if(mainContent) {
       enviarMensaje() {
         this.showToast('info', 'Función de mensajería en desarrollo.');
       }
+
+      // --- API: ESPEJO ---
+      async espejoSend(message, sessionId, enfoque) {
+        const resp = await fetch('/espejo/send/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': this.getCookie('csrftoken'),
+          },
+          body: JSON.stringify({ message, session_id: sessionId, enfoque }),
+        });
+        return resp.json();
+      }
+
+      async espejoNuevo() {
+        const resp = await fetch('/espejo/nuevo/', { method: 'POST', headers: {'X-CSRFToken': this.getCookie('csrftoken')} });
+        return resp.json();
+      }
+
+      async espejoSesiones() {
+        const resp = await fetch('/espejo/');
+        return resp.json();
+      }
+
+      // --- API: TESTS ---
+      async testsList() {
+        const resp = await fetch('/psychometrics/api/tests/');
+        return resp.json();
+      }
+
+      async testStart(testId) {
+        const resp = await fetch(`/psychometrics/api/tests/${testId}/start/`, { method: 'POST', headers: {'X-CSRFToken': this.getCookie('csrftoken')} });
+        return resp.json();
+      }
+
+      async testAnswer(testId, questionId, answer) {
+        const resp = await fetch(`/psychometrics/api/tests/${testId}/answer/`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json', 'X-CSRFToken': this.getCookie('csrftoken')},
+          body: JSON.stringify({ question_id: questionId, answer }),
+        });
+        return resp.json();
+      }
+
+      // API: COMMUNITY ---
+      async feedLoad() {
+        const resp = await fetch('/comunidad/api/feed/');
+        return resp.json();
+      }
+
+      async feedPost(text) {
+        const resp = await fetch('/comunidad/compartir/', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json', 'X-CSRFToken': this.getCookie('csrftoken')},
+          body: JSON.stringify({ text, source_type: 'native' }),
+        });
+        return resp.json();
+      }
+
+      // API: USER PROFILE ---
+      async loadUserProfile() {
+        const resp = await fetch('/accounts/api/profile/');
+        return resp.json();
+      }
+
+      async saveUserProfile(data) {
+        const resp = await fetch('/accounts/api/profile/', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json', 'X-CSRFToken': this.getCookie('csrftoken')},
+          body: JSON.stringify(data),
+        });
+        return resp.json();
+      }
     }
 
    // --- INICIALIZACIÓN DE THREE.JS E INTERACTIVIDAD ---
