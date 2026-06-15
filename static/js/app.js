@@ -492,46 +492,96 @@ if(mainContent) {
       }
 
       processAuth() {
-        this.closeAuthModal();
+        const emailInput = document.getElementById('auth-email');
+        const passwordInput = document.getElementById('auth-password');
+        const nameInput = document.getElementById('auth-name');
+        const submitBtn = document.getElementById('btn-submit-auth');
+        const email = emailInput?.value?.trim() || '';
+        const password = passwordInput?.value || '';
+        const firstName = nameInput?.value?.trim() || '';
+        const isRegister = document.getElementById('tab-register')?.classList.contains('active') || false;
 
-        // Active overlay transition
-        if (this.transitionOverlay) {
-          this.transitionOverlay.classList.add('active');
+        // Basic validation
+        if (!email || !password) {
+          this.showToast('error', 'Completa todos los campos obligatorios.');
+          return;
+        }
+        if (isRegister && !firstName) {
+          this.showToast('error', 'Ingresa tu nombre.');
+          return;
+        }
+        if (isRegister && password.length < 8) {
+          this.showToast('error', 'La contraseña debe tener al menos 8 caracteres.');
+          return;
         }
 
-        const msgEl = document.getElementById('transition-message');
-        if (msgEl) msgEl.innerText = "Estabilizando ritmo somático...";
+        // Disable button
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerText = 'Procesando...';
+        }
 
-        // Set cosmos background preset to transition (bloom intenso)
+        // Show transition overlay while authenticating
+        this.closeAuthModal();
+        if (this.transitionOverlay) this.transitionOverlay.classList.add('active');
+        const msgEl = document.getElementById('transition-message');
+        if (msgEl) msgEl.innerText = 'Estabilizando ritmo somático...';
         updateCosmosPreset('transition');
 
-        // Swap message in overlay half-way
-        setTimeout(() => {
-          if (msgEl) msgEl.innerText = "Alineando bitácora de conciencia...";
-        }, 1100);
+        const endpoint = isRegister ? '/accounts/api/register/' : '/accounts/api/login/';
+        const body = isRegister
+          ? { email, password, first_name: firstName, onboarding_source: this.authSource || '' }
+          : { email, password };
 
-        // Finalize login/register sequence after 2.2 seconds
-        setTimeout(() => {
-          if (this.transitionOverlay) {
-            this.transitionOverlay.classList.remove('active');
+        fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': this.getCookie('csrftoken'),
+          },
+          body: JSON.stringify(body),
+        })
+        .then(r => r.json())
+        .then(data => {
+          if (!data.ok) {
+            // Hide overlay, show error
+            if (this.transitionOverlay) this.transitionOverlay.classList.remove('active');
+            this.showToast('error', data.error || 'Error en la autenticación.');
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.innerText = isRegister ? 'Registrarse y Entrar' : 'Acceder a la Consola';
+            }
+            return;
           }
-
-          // Reset body class
-          document.body.classList.remove('not-logged-in');
-
-          // Switch tab to feed (this switches views & updates Three.js preset)
-          this.switchTab('feed');
-
-          // Grab the name from input
-          const nameInput = document.getElementById('auth-name')?.value || "Navegante";
-          const userH4 = document.querySelector('.user-info h4');
-          if (userH4 && nameInput) {
-            userH4.innerText = nameInput;
+          // Success! Reload page so server renders app with authenticated session
+          if (msgEl) msgEl.innerText = '¡Autenticado! Cargando tu espacio...';
+          setTimeout(() => {
+            window.location.reload();
+          }, 800);
+        })
+        .catch(() => {
+          if (this.transitionOverlay) this.transitionOverlay.classList.remove('active');
+          this.showToast('error', 'Error de conexión. Intenta nuevamente.');
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = isRegister ? 'Registrarse y Entrar' : 'Acceder a la Consola';
           }
+        });
+      }
 
-          // Welcome toast notification
-          this.showToast('success', `¡Bienvenido a tu bitácora de conciencia somática, ${nameInput}!`);
-        }, 2200);
+      getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
       }
 
       processLogout() {

@@ -3587,6 +3587,59 @@ body.not-logged-in .mobile-bottom-nav {
     filter: grayscale(0%) opacity(1);
 }
 
+/* ==========================================================================
+   RESPONSIVE MOBILE - LANDING
+   ========================================================================== */
+@media (max-width: 768px) {
+    .section {
+        min-height: 80vh !important;
+        padding: 6vh 4vw !important;
+    }
+    .container {
+        padding: 20px !important;
+        gap: 1.5vh;
+    }
+    .tab-center, .tab-left, .tab-right {
+        width: 92vw !important;
+        margin: 0 auto !important;
+        transform: translate(0, 30px) !important;
+        padding: 3vh 5vw !important;
+        border-radius: 20px !important;
+    }
+    .tab-center h1, .tab-left h1, .tab-right h1 {
+        font-size: clamp(2rem, 8vw, 3rem) !important;
+    }
+    .tab-center h2, .tab-left h2, .tab-right h2 {
+        font-size: clamp(1.5rem, 6vw, 2.2rem) !important;
+    }
+    .tab-center p, .tab-left p, .tab-right p {
+        font-size: clamp(0.85rem, 3.5vw, 1rem) !important;
+    }
+    .tab-center .container,
+    .tab-left .container,
+    .tab-right .container {
+        text-align: center;
+        align-items: center;
+    }
+    .tab-left.active-tab, .tab-right.active-tab, .tab-center.active-tab {
+        transform: translate(0, 0) !important;
+        opacity: 1 !important;
+    }
+    .mockup-glass img, .mockup-glass svg {
+        height: 15vh !important;
+    }
+    .public-navbar .navbar-links {
+        display: none;
+    }
+    .public-navbar .navbar-actions {
+        gap: 8px;
+    }
+    .public-navbar .navbar-actions button {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+    }
+}
+
 </style>
 <script>
   window.ENDONAUTAS_CONFIG = {
@@ -5201,9 +5254,17 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
             }
         });
-    }, { threshold: 0.35 });
+    }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
 
     allSections.forEach(function(sec) { observer.observe(sec); });
+
+    // Fallback: if IntersectionObserver not supported or sections are already visible
+    if (!('IntersectionObserver' in window)) {
+        allSections.forEach(function(sec) {
+            var container = sec.querySelector('.container');
+            if (container) container.classList.add('active-tab');
+        });
+    }
 });
 </script>
 </body>
