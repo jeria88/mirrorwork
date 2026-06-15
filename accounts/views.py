@@ -42,7 +42,7 @@ def home(request):
     if is_app_domain:
         if not request.user.is_authenticated:
             return redirect('https://endonautas.cl/')
-        # Usuario autenticado en app. → servir la app
+        # Usuario autenticado en app. → servir la app via Wagtail
         from wagtail.views import serve as wagtail_serve
         return wagtail_serve(request, '')
 
@@ -57,8 +57,9 @@ def home(request):
         homepage = HomePage.objects.live().first()
         if homepage:
             return homepage.serve(request)
-    except Exception:
-        pass
+    except Exception as e:
+        import logging
+        logging.error(f"HomePage serve error: {e}")
     from wagtail.views import serve as wagtail_serve
     return wagtail_serve(request, '')
 
