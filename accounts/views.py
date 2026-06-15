@@ -36,28 +36,36 @@ class LoginForm(forms.Form):
 
 def home(request):
     host = request.get_host().split(':')[0].lower()
-    # Si no es la app (ej. no empieza con "app" o no es el puerto de la app local con ?app=1), mostrar landing SPA
-    if not (host.startswith('app.') or host.startswith('app-') or (host in ('localhost', '127.0.0.1') and request.GET.get('app') == '1')):
-        # Servir la HomePage de Wagtail (landing SPA nueva)
-        from home.models import HomePage
-        try:
-            homepage = HomePage.objects.live().first()
-            if homepage:
-                return homepage.serve(request)
-        except Exception:
-            pass
-        # Fallback a Wagtail serve
+    is_app_domain = host.startswith('app.') or host.startswith('app-')
+
+    # App domain: si no está autenticado, redirigir a la landing
+    if is_app_domain:
+        if not request.user.is_authenticated:
+            return redirect('https://endonautas.cl/')
+        # Usuario autenticado en app. → servir la app
         from wagtail.views import serve as wagtail_serve
         return wagtail_serve(request, '')
 
+    # Landing domain (endonautas.cl)
+    # Si está autenticado, redirigir a la app
     if request.user.is_authenticated:
-        return redirect('dashboard')
-    return render(request, 'home.html')
+        return redirect('https://app.endonautas.cl/')
+
+    # No autenticado → servir landing SPA de Wagtail
+    from home.models import HomePage
+    try:
+        homepage = HomePage.objects.live().first()
+        if homepage:
+            return homepage.serve(request)
+    except Exception:
+        pass
+    from wagtail.views import serve as wagtail_serve
+    return wagtail_serve(request, '')
 
 
 def register_view(request):
     if request.user.is_authenticated:
-        return redirect('dashboard')
+        return redirect('https://app.endonautas.cl/')
     form = RegisterForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
         email = form.cleaned_data['email']
@@ -71,13 +79,13 @@ def register_view(request):
         from tokens.service import renew_monthly
         renew_monthly(user)
         login(request, user)
-        return redirect('onboarding_viaje')
+        return redirect('https://app.endonautas.cl/')
     return render(request, 'accounts/register.html', {'form': form})
 
 
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect('/')
+        return redirect('https://app.endonautas.cl/')
     form = LoginForm(request.POST or None)
     error = None
     if request.method == 'POST' and form.is_valid():
@@ -88,7 +96,7 @@ def login_view(request):
         )
         if user:
             login(request, user)
-            return redirect('/')
+            return redirect('https://app.endonautas.cl/')
         error = 'Correo o contraseña incorrectos.'
     return render(request, 'accounts/login.html', {'form': form, 'error': error})
 

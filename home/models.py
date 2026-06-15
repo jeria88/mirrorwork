@@ -58,24 +58,26 @@ class HomePage(Page):
 
     def get_context(self, request):
         context = super().get_context(request)
+        # Pass onboarding source from URL param (for redirects from landing login)
+        context['onboarding_source'] = request.GET.get('onboarding', '')
         if request.user.is_authenticated:
             from psychometrics.models import Test, TestResult
             from tokens.models import TokenBalance
             from mirror.models import ConflictSession
             from community.models import SharedInsight, Follow
             from community.views import _ranked, _get_facilitador
-            
+
             try:
                 token_balance = request.user.token_balance.balance
             except Exception:
                 token_balance = 0
-                
+
             total_tests = Test.objects.filter(active=True).count()
             completed_tests = TestResult.objects.filter(user=request.user).values('test').distinct().count()
             map_pct = round(completed_tests / total_tests * 100) if total_tests else 0
-            
+
             mirror_sessions = ConflictSession.objects.filter(user=request.user).order_by("-updated_at")[:10]
-            
+
             # Query community feed insights
             following_ids = Follow.objects.filter(follower=request.user).values_list('following_id', flat=True)
             facilitador = _get_facilitador(request.user)
@@ -83,7 +85,7 @@ class HomePage(Page):
             if facilitador:
                 author_ids.add(facilitador.pk)
             author_ids.add(request.user.pk)
-            
+
             qs = SharedInsight.objects.filter(user_id__in=author_ids, visibility=SharedInsight.VISIBILITY_PUBLIC)
             insights, facilitador = _ranked(qs, request.user)
             

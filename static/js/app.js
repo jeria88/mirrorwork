@@ -281,6 +281,10 @@ if(mainContent) {
         if (config.isAuthenticated) {
           this.activeTab = validTabs.includes(hash) ? hash : (config.activeTab || 'feed');
           this.switchTab(this.activeTab);
+          // Handle onboarding source from landing login
+          if (config.onboardingSource) {
+            this.mostrarOnboarding(config.onboardingSource);
+          }
         } else {
           this.activeTab = 'landing';
         }
@@ -553,10 +557,12 @@ if(mainContent) {
             }
             return;
           }
-          // Success! Reload page so server renders app with authenticated session
+          // Success! Redirect to app.endonautas.cl with onboarding source
           if (msgEl) msgEl.innerText = '¡Autenticado! Cargando tu espacio...';
           setTimeout(() => {
-            window.location.reload();
+            const source = this.authSource || '';
+            const onboarding = source ? '?onboarding=' + encodeURIComponent(source) : '';
+            window.location.href = 'https://app.endonautas.cl/' + onboarding;
           }, 800);
         })
         .catch(() => {
@@ -582,6 +588,21 @@ if(mainContent) {
           }
         }
         return cookieValue;
+      }
+
+      mostrarOnboarding(source) {
+        const sourceMap = {
+          'Espejo': 'espejo',
+          'Tests': 'mapainterior',
+          'Mapa Fractal': 'mapainterior',
+        };
+        const tab = sourceMap[source] || 'feed';
+        this.switchTab(tab);
+        const banner = document.createElement('div');
+        banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:var(--calipso);color:#000;padding:12px 24px;text-align:center;font-weight:600;font-size:0.9rem;';
+        banner.innerHTML = `¡Bienvenido! Estás en tu espacio de ${source || 'inicio'}. <a href="#" onclick="this.parentElement.remove();return false;" style="color:#000;margin-left:12px;text-decoration:underline;">Cerrar</a>`;
+        document.body.appendChild(banner);
+        setTimeout(() => banner.remove(), 8000);
       }
 
       processLogout() {

@@ -3650,7 +3650,8 @@ body.not-logged-in .mobile-bottom-nav {
     fractons: {{ token_balance_val|default:450 }},
     completedTests: {{ completed_tests_val|default:4 }},
     totalTests: {{ total_tests_val|default:12 }},
-    mapPct: {{ map_pct_val|default:33 }}
+    mapPct: {{ map_pct_val|default:33 }},
+    onboardingSource: "{{ onboarding_source|default:''|escapejs }}"
   };
 </script>
 </head>
