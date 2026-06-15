@@ -65,7 +65,7 @@ class HomePage(Page):
             from mirror.models import ConflictSession
             from community.models import SharedInsight, Follow
             from community.views import _ranked, _get_facilitador
-            from .models import UserProfile
+            from accounts.models import UserProfile
 
             # Ensure profile exists
             try:
@@ -104,6 +104,8 @@ class HomePage(Page):
                 'feed_insights': insights[:40],
                 'facilitador': facilitador,
                 'viewer_pk': request.user.pk,
+                'user_plan_val': profile.get_plan_display(),
+                'user_avatar_url': profile.avatar.url if profile.avatar else '',
             })
         else:
             context.update({
@@ -115,6 +117,7 @@ class HomePage(Page):
                 'feed_insights': [],
                 'facilitador': None,
                 'viewer_pk': None,
+                'user_plan_val': 'Mi Cuenta',
             })
         return context
 
