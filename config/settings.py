@@ -22,6 +22,7 @@ for _custom in ['endonautas.cl', 'www.endonautas.cl', 'app.endonautas.cl']:
 CSRF_TRUSTED_ORIGINS = [
     f'https://{h}' for h in ALLOWED_HOSTS if h not in ('localhost', '127.0.0.1', 'testserver', '')
 ]
+CSRF_COOKIE_DOMAIN = '.endonautas.cl'
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -126,6 +127,12 @@ LANGUAGE_CODE = 'es-cl'
 TIME_ZONE = 'America/Santiago'
 USE_I18N = True
 USE_TZ = True
+
+# Session cookie shared between endonautas.cl and app.endonautas.cl
+SESSION_COOKIE_DOMAIN = '.endonautas.cl'
+SESSION_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
