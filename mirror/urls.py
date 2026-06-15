@@ -12,4 +12,5 @@ urlpatterns = [
     path("cerebro/",                    views.espejo_cerebro,           name="cerebro"),
     path("cerebro/<int:pk>/restaurar/", views.espejo_cerebro_restaurar, name="cerebro_restaurar"),
     path("cerebro/actualizar/",         views.espejo_cerebro_actualizar, name="cerebro_actualizar"),
+    path("<int:pk>/mensajes/", views.api_get_session_messages, name="api_get_session_messages"),
 ]

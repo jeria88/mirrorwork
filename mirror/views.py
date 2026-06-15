@@ -652,41 +652,18 @@ def _extract_pattern_revealed(messages):
 
 @login_required
 def espejo_home(request):
-    sessions = ConflictSession.objects.filter(user=request.user).order_by("-updated_at")[:10]
-    session_id = request.GET.get("sesion")
-
-    active = None
-    if session_id:
-        active = get_object_or_404(ConflictSession, pk=session_id, user=request.user)
-    elif sessions.exists():
-        active = sessions.first()
-
-    from datetime import timedelta
-    from django.utils import timezone as _tz
-    hace_30 = _tz.now() - timedelta(days=30)
-    hace_40 = _tz.now() - timedelta(days=40)
-    pregunta_retorno = ConflictSession.objects.filter(
-        user=request.user, status='archived',
-        pregunta_cierre__gt='',
-        updated_at__range=(hace_40, hace_30),
-    ).first()
-
-    return render(request, "mirror/espejo.html", {
-        "sessions": sessions,
-        "active": active,
-        "pregunta_retorno": pregunta_retorno,
-    })
+    return redirect('/#espejo')
 
 
 @login_required
 @require_POST
 def espejo_nuevo(request):
-    sesion = ConflictSession.objects.create(
+    ConflictSession.objects.create(
         user=request.user,
         conflict_description="",
         title="Nueva conversación",
     )
-    return redirect(f"/espejo/?sesion={sesion.pk}")
+    return redirect('/#espejo')
 
 
 @login_required
@@ -920,3 +897,15 @@ def espejo_cerebro_actualizar(request):
         ).start()
         return JsonResponse({'ok': True, 'mensaje': 'Actualizando memoria…'})
     return JsonResponse({'error': 'sesion_pk requerido'}, status=400)
+
+
+@login_required
+def api_get_session_messages(request, pk):
+    sesion = get_object_or_404(ConflictSession, pk=pk, user=request.user)
+    return JsonResponse({
+        "ok": True,
+        "session_id": sesion.pk,
+        "title": sesion.title,
+        "messages": sesion.messages or []
+    })
+

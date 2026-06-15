@@ -28,4 +28,6 @@ urlpatterns = [
     # Blog bridge — prefill desde modelos locales, submit vía API a endonautas.cl
     path('blog/prefill/<str:source_type>/<int:source_id>/', views.blog_prefill, name='blog_prefill'),
     path('blog/submit/', views.blog_submit, name='blog_submit'),
+    path('api/login/', views.api_login, name='api_login'),
+    path('api/register/', views.api_register, name='api_register'),
 ]

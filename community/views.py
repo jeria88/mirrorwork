@@ -71,47 +71,12 @@ def _ranked(qs, viewer):
 
 @login_required
 def feed(request):
-    following_ids = Follow.objects.filter(follower=request.user).values_list('following_id', flat=True)
-    facilitador   = _get_facilitador(request.user)
-
-    author_ids = set(following_ids)
-    if facilitador:
-        author_ids.add(facilitador.pk)
-    author_ids.add(request.user.pk)  # include own posts in personal feed
-
-    qs = (
-        SharedInsight.objects
-        .filter(user_id__in=author_ids, visibility=SharedInsight.VISIBILITY_PUBLIC)
-    )
-    insights, facilitador = _ranked(qs, request.user)
-
-    return render(request, 'community/feed.html', {
-        'insights': insights[:40],
-        'facilitador': facilitador,
-        'tab': 'feed',
-        'reactions_choices': REACTIONS_CHOICES,
-        'viewer_pk': request.user.pk,
-    })
+    return redirect('/#feed')
 
 
 @login_required
 def explorar(request):
-    qs = (
-        SharedInsight.objects
-        .filter(
-            visibility=SharedInsight.VISIBILITY_PUBLIC,
-            user__profile__profile_public=True,
-        )
-        .exclude(user=request.user)
-    )
-    insights, _ = _ranked(qs, request.user)
-
-    return render(request, 'community/feed.html', {
-        'insights': insights[:40],
-        'tab': 'explorar',
-        'reactions_choices': REACTIONS_CHOICES,
-        'viewer_pk': request.user.pk,
-    })
+    return redirect('/#feed')
 
 
 # ── Mensajes directos ─────────────────────────────────────────────────────────

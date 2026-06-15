@@ -9,6 +9,7 @@ from wagtail.documents import urls as wagtaildocs_urls
 from wagtail.images import urls as wagtailimages_urls
 
 from centro.views_studio import studio_proxy
+from .api import api_router
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -40,6 +41,7 @@ urlpatterns = [
 
     path('crm/', include('crm.urls')),
     path('cgm/', include('centro.urls_studio', namespace='studio')),
+    path('api/v2/', api_router.urls),
     path('blog/api/', include('blog.urls')),
     path('search/', include('search.urls')),
     path('', include('home.urls')),
