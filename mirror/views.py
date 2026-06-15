@@ -8,6 +8,7 @@ import requests
 
 logger = logging.getLogger(__name__)
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
@@ -656,6 +657,7 @@ def espejo_home(request):
 
 
 @login_required
+@csrf_exempt
 @require_POST
 def espejo_nuevo(request):
     ConflictSession.objects.create(
@@ -667,6 +669,7 @@ def espejo_nuevo(request):
 
 
 @login_required
+@csrf_exempt
 @require_POST
 def espejo_send(request):
     """AJAX: recibe mensaje del usuario, llama a DeepSeek con RAG, devuelve respuesta estructurada."""
