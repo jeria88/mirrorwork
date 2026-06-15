@@ -337,6 +337,14 @@ if(mainContent) {
           });
         });
 
+        // Auth form submit — intercept and use fetch API
+        if (this.authForm) {
+          this.authForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.processAuth();
+          });
+        }
+
         // Checkout triggers
         if (this.btnComprarBitacora) {
           this.btnComprarBitacora.addEventListener('click', () => this.openCheckout());
