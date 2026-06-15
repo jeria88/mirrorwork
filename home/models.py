@@ -95,6 +95,13 @@ class HomePage(Page):
             qs = SharedInsight.objects.filter(user_id__in=author_ids, visibility=SharedInsight.VISIBILITY_PUBLIC)
             insights, facilitador = _ranked(qs, request.user)
             
+            # Build a set of completed test IDs for the template
+            completed_test_ids = set(
+                TestResult.objects.filter(user=request.user).values_list('test_id', flat=True).distinct()
+            )
+            # All active tests ordered for the map/interior page
+            tests_qs = Test.objects.filter(active=True).order_by('order', 'name')
+
             context.update({
                 'token_balance_val': token_balance,
                 'completed_tests_val': completed_tests,
@@ -106,6 +113,8 @@ class HomePage(Page):
                 'viewer_pk': request.user.pk,
                 'user_plan_val': profile.get_plan_display(),
                 'user_avatar_url': profile.avatar.url if profile.avatar else '',
+                'tests': tests_qs,
+                'completed_test_ids': completed_test_ids,
             })
         else:
             context.update({
@@ -118,6 +127,8 @@ class HomePage(Page):
                 'facilitador': None,
                 'viewer_pk': None,
                 'user_plan_val': 'Mi Cuenta',
+                'tests': [],
+                'completed_test_ids': set(),
             })
         return context
 

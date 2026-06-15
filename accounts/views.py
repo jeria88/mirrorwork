@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from django import forms
 from .models import User
 
@@ -917,6 +917,111 @@ def privacidad(request):
 
 
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST, require_GET
+from tokens.models import TokenBalance
+from psychometrics.models import TestResult
+from mirror.models import ConflictSession
+
+
+@login_required
+@require_GET
+def api_profile(request):
+    """GET /accounts/api/profile/ — Returns current user profile data as JSON."""
+    user = request.user
+    try:
+        profile = user.profile
+    except Exception:
+        from .models import UserProfile
+        profile = UserProfile.objects.create(user=user)
+
+    try:
+        tb = user.token_balance
+        fractons_balance = tb.balance
+    except Exception:
+        fractons_balance = 0
+
+    tests_completed = TestResult.objects.filter(user=user).values('test_id').distinct().count()
+    espejo_sessions = ConflictSession.objects.filter(user=user).count()
+
+    avatar_url = None
+    if profile.avatar:
+        try:
+            avatar_url = profile.avatar.url
+        except Exception:
+            avatar_url = None
+
+    return JsonResponse({
+        'id': user.id,
+        'email': user.email,
+        'first_name': user.first_name or '',
+        'last_name': user.last_name or '',
+        'avatar_url': avatar_url,
+        'plan': profile.plan,
+        'bio': profile.bio or '',
+        'pronouns': profile.pronouns if hasattr(profile, 'pronouns') else '',
+        'location': profile.location if hasattr(profile, 'location') else '',
+        'website': profile.website if hasattr(profile, 'website') else '',
+        'tests_completed': tests_completed,
+        'fractons_balance': fractons_balance,
+        'espejo_sessions': espejo_sessions,
+        'created_at': user.date_joined.isoformat() if user.date_joined else None,
+    })
+
+
+@login_required
+@csrf_exempt
+@require_POST
+def api_profile_update(request):
+    """POST /accounts/api/profile/ — Updates user profile."""
+    try:
+        profile = request.user.profile
+    except Exception:
+        from .models import UserProfile
+        profile = UserProfile.objects.create(user=request.user)
+
+    # Text fields from POST data
+    first_name = request.POST.get('first_name', '').strip()
+    last_name = request.POST.get('last_name', '').strip()
+    bio = request.POST.get('bio', '').strip()
+
+    if first_name:
+        request.user.first_name = first_name
+    if last_name:
+        request.user.last_name = last_name
+    request.user.save(update_fields=['first_name', 'last_name'])
+
+    update_fields = ['bio']
+    profile.bio = bio
+
+    # Optional fields (only update if the field exists on the model)
+    for field in ('pronouns', 'location', 'website'):
+        if hasattr(profile, field):
+            val = request.POST.get(field, '').strip()
+            setattr(profile, field, val)
+            update_fields.append(field)
+
+    # Avatar file upload
+    if 'avatar' in request.FILES:
+        profile.avatar = request.FILES['avatar']
+        update_fields.append('avatar')
+
+    profile.save(update_fields=update_fields)
+
+    avatar_url = None
+    if profile.avatar:
+        try:
+            avatar_url = profile.avatar.url
+        except Exception:
+            avatar_url = None
+
+    return JsonResponse({
+        'ok': True,
+        'avatar_url': avatar_url,
+        'first_name': request.user.first_name or '',
+        'last_name': request.user.last_name or '',
+        'bio': profile.bio or '',
+    })
+
 
 @csrf_exempt
 def api_login(request):

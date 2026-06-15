@@ -193,3 +193,28 @@ def planes(request):
         "profile": profile,
         "hotmart_urls": settings.HOTMART_CHECKOUT_URLS,
     })
+
+
+@login_required
+@require_GET
+def api_balance(request):
+    """GET /tokens/api/balance/ — Returns current user's token balance."""
+    balance_obj, _ = TokenBalance.objects.get_or_create(
+        user=request.user, defaults={"permanent": 0, "monthly": 0}
+    )
+    transactions = TokenTransaction.objects.filter(user=request.user)[:20]
+
+    tx_data = []
+    for tx in transactions:
+        tx_data.append({
+            'amount': tx.amount,
+            'reason': tx.reason or '',
+            'created_at': tx.created_at.isoformat() if tx.created_at else None,
+        })
+
+    return JsonResponse({
+        'balance': balance_obj.balance,
+        'permanent': balance_obj.permanent,
+        'monthly': balance_obj.monthly,
+        'transactions': tx_data,
+    })

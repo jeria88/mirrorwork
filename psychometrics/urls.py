@@ -12,4 +12,9 @@ urlpatterns = [
     path('resultado/<int:pk>/estado/', views.result_status, name='result_status'),
     path('resultado/<int:pk>/lectura/', views.insight_view, name='insight_view'),
     path('resultado/<int:pk>/revelar/', views.insight_reveal, name='insight_reveal'),
+    # API endpoints
+    path('api/tests/', views.api_test_list, name='api_test_list'),
+    path('api/tests/<slug:slug>/start/', views.api_test_start, name='api_test_start'),
+    path('api/tests/<slug:slug>/answer/', views.api_test_answer, name='api_test_answer'),
+    path('api/my-results/', views.api_my_results, name='api_my_results'),
 ]

@@ -413,6 +413,49 @@ if(mainContent) {
             this.closeAuthModal();
           });
         }
+
+        // Espejo: chat form submit
+        const espejoForm = document.getElementById('espejo-chat-form');
+        if (espejoForm) {
+          espejoForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.sendChatMessage();
+          });
+        }
+        // Espejo: allow Ctrl+Enter to send from textarea
+        if (this.chatTextarea) {
+          this.chatTextarea.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              this.sendChatMessage();
+            }
+          });
+        }
+        // Espejo: Nueva Sesión button
+        const btnNuevo = document.getElementById('btn-espejo-nuevo');
+        if (btnNuevo) {
+          btnNuevo.addEventListener('click', () => {
+            this.espejoNuevo().then(data => {
+              const box = document.getElementById('chat-messages-box');
+              if (box) box.innerHTML = '';
+              const titleEl = document.getElementById('espejo-chat-title');
+              if (data && data.session_id) {
+                this.currentSessionId = data.session_id;
+                if (titleEl && data.title) titleEl.textContent = (data.title || '').toUpperCase();
+              } else {
+                this.currentSessionId = null;
+                if (titleEl) titleEl.textContent = 'ESPEJO DE RESONANCIA SOMÁTICA — INTERFAZ TELEMÉTRICA';
+              }
+              this.addAIMessage('Iniciando secuencia de interacción del Espejo. ¿Dónde se encuentra localizada la molestia física que estás intentando evadir hoy?');
+              this.espejoLoadTarjetas();
+              this.chatTextarea.disabled = false;
+              this.btnChatSend.disabled = false;
+              this.chatTextarea.focus();
+            }).catch(() => {
+              this.showEspejoError('Error al crear nueva sesión.');
+            });
+          });
+        }
       }
 
       switchTab(tabName) {
@@ -445,6 +488,52 @@ if(mainContent) {
 
         // Cambiar preset de animación cósmica
         updateCosmosPreset(tabName);
+
+        // Perfil: ensure edit mode is reset when switching away
+        if (tabName !== 'perfil') {
+          const actions = document.getElementById('perfil-edit-actions');
+          const editBtn = document.getElementById('btn-edit-profile');
+          if (actions) actions.style.display = 'none';
+          if (editBtn) editBtn.style.display = 'inline-flex';
+          ['perfil-first-name', 'perfil-last-name', 'perfil-email', 'perfil-bio'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) { el.disabled = true; el.style.background = 'rgba(0,0,0,0.15)'; }
+          });
+        }
+
+        // Mapa Interior: scroll to top for better UX
+        if (tabName === 'mapainterior') {
+          const mainContent = document.querySelector('.app-main-content');
+          if (mainContent) mainContent.scrollTop = 0;
+        }
+
+        // Feed: dynamic refresh from API if needed
+        if (tabName === 'feed') {
+          const mainContent = document.querySelector('.app-main-content');
+          if (mainContent) mainContent.scrollTop = 0;
+          // Feed is rendered server-side; optionally refresh from API
+          // this.loadFeedFromAPI();
+        }
+
+        // Espejo: load tarjetas when switching to this tab
+        if (tabName === 'espejo') {
+          this.espejoLoadTarjetas();
+          // Enable chat input
+          if (this.chatTextarea) this.chatTextarea.disabled = false;
+          if (this.btnChatSend) this.btnChatSend.disabled = false;
+          // If we have a current session loaded, ensure chat is ready
+          if (this.currentSessionId) {
+            // Session already loaded, just focus
+            if (this.chatTextarea) this.chatTextarea.focus();
+          } else {
+            // Show initial AI greeting
+            const box = document.getElementById('chat-messages-box');
+            if (box && box.children.length === 0) {
+              this.addAIMessage('Iniciando secuencia de interacción del Espejo. ¿Dónde se encuentra localizada la molestia física que estás intentando evadir hoy?');
+            }
+            if (this.chatTextarea) this.chatTextarea.focus();
+          }
+        }
       }
 
       openAuthModal(mode = 'login', source = null) {
@@ -1098,7 +1187,7 @@ if(mainContent) {
             'Content-Type': 'application/json',
             'X-CSRFToken': this.getCookie('csrftoken'),
           },
-          body: JSON.stringify({ message, session_id: sessionId, enfoque }),
+          body: JSON.stringify({ mensaje: message, sesion_id: sessionId, enfoque }),
         });
         return resp.json();
       }
@@ -1111,6 +1200,175 @@ if(mainContent) {
       async espejoSesiones() {
         const resp = await fetch('/espejo/');
         return resp.json();
+      }
+
+      async espejoLoadTarjetas() {
+        const container = document.getElementById('espejo-tarjetas-list');
+        if (!container) return;
+        try {
+          const data = await fetch('/espejo/tarjetas/').then(r => r.json());
+          container.innerHTML = '';
+          const pending = data.pending || [];
+          const revealed = data.revealed || [];
+          if (pending.length === 0 && revealed.length === 0) {
+            container.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:0.85rem;">No hay tarjetas aún. Completa tests o reportes para generar insights.</div>';
+            return;
+          }
+          if (pending.length > 0) {
+            const label = document.createElement('span');
+            label.style.cssText = 'font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;padding-left:4px;margin-top:8px;';
+            label.textContent = 'Pendientes';
+            container.appendChild(label);
+            pending.forEach(c => {
+              const div = document.createElement('div');
+              div.className = 'espejo-tarjeta-item';
+              div.style.borderLeftColor = 'var(--amber)';
+              div.innerHTML = `<div style="font-size:0.85rem;font-weight:600;color:#fff;">${c.title}</div><div style="font-size:0.7rem;color:var(--muted);margin-top:4px;">${c.date || ''}</div>`;
+              if (c.id) {
+                div.dataset.sessionId = c.id;
+                div.onclick = () => {
+                  // Highlight selected tarjeta
+                  container.querySelectorAll('.espejo-tarjeta-item').forEach(t => t.classList.remove('active'));
+                  div.classList.add('active');
+                  this.espejoLoadSession(c.id);
+                };
+              } else if (c.url) {
+                div.onclick = () => window.location.href = c.url;
+              }
+              container.appendChild(div);
+            });
+          }
+          if (revealed.length > 0) {
+            const label = document.createElement('span');
+            label.style.cssText = 'font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;padding-left:4px;margin-top:16px;';
+            label.textContent = 'Revelados';
+            container.appendChild(label);
+            revealed.forEach(c => {
+              const div = document.createElement('div');
+              div.className = 'espejo-tarjeta-item';
+              div.style.borderLeftColor = 'var(--calipso)';
+              div.innerHTML = `<div style="font-size:0.85rem;font-weight:600;color:#fff;">${c.title}</div><div style="font-size:0.7rem;color:var(--muted);margin-top:4px;">${c.date || ''}</div>`;
+              if (c.id) {
+                div.dataset.sessionId = c.id;
+                div.onclick = () => {
+                  container.querySelectorAll('.espejo-tarjeta-item').forEach(t => t.classList.remove('active'));
+                  div.classList.add('active');
+                  this.espejoLoadSession(c.id);
+                };
+              } else if (c.url) {
+                div.onclick = () => window.location.href = c.url;
+              }
+              container.appendChild(div);
+            });
+          }
+        } catch (e) {
+          container.innerHTML = '<div style="padding:16px;text-align:center;color:var(--rose);font-size:0.85rem;">Error al cargar tarjetas.</div>';
+        }
+      }
+
+      async espejoLoadSession(sessionId) {
+        this.currentSessionId = sessionId;
+        const box = document.getElementById('chat-messages-box');
+        const titleEl = document.getElementById('espejo-chat-title');
+        if (!box) return;
+        box.innerHTML = '';
+        this.showAITypingIndicator();
+        try {
+          const data = await fetch(`/espejo/${sessionId}/mensajes/`).then(r => r.json());
+          this.removeTypingIndicator();
+          if (data.title && titleEl) titleEl.textContent = data.title.toUpperCase();
+          const msgs = data.messages || [];
+          if (msgs.length === 0) {
+            this.addAIMessage('Iniciando secuencia de interacción del Espejo. ¿Dónde se encuentra localizada la molestia física que estás intentando evadir hoy?');
+          } else {
+            msgs.forEach(m => {
+              if (m.role === 'user') this.addUserMessage(m.content);
+              else if (m.role === 'assistant') this.addAIMessage(m.content);
+            });
+          }
+          // Hide enfoques and error
+          const enfDiv = document.getElementById('espejo-enfoques');
+          if (enfDiv) enfDiv.style.display = 'none';
+          const errDiv = document.getElementById('espejo-error');
+          if (errDiv) errDiv.style.display = 'none';
+        } catch (e) {
+          this.removeTypingIndicator();
+          this.showEspejoError('Error al cargar la conversación.');
+        }
+      }
+
+      showEspejoError(msg) {
+        const errDiv = document.getElementById('espejo-error');
+        if (errDiv) {
+          errDiv.textContent = msg;
+          errDiv.style.display = 'block';
+        }
+        this.showToast('error', msg);
+      }
+
+      hideEspejoError() {
+        const errDiv = document.getElementById('espejo-error');
+        if (errDiv) errDiv.style.display = 'none';
+      }
+
+      renderEnfoques(enfoques) {
+        const enfDiv = document.getElementById('espejo-enfoques');
+        if (!enfDiv) return;
+        enfDiv.innerHTML = '';
+        if (!enfoques || !Array.isArray(enfoques) || enfoques.length === 0) {
+          enfDiv.style.display = 'none';
+          return;
+        }
+        enfDiv.style.display = 'flex';
+        enfoques.forEach(e => {
+          const btn = document.createElement('button');
+          btn.className = 'espejo-enfoque-btn';
+          btn.textContent = e.titulo || e.id || 'Enfoque';
+          btn.onclick = () => {
+            const text = `Quiero explorar el enfoque: ${e.titulo || e.id}`;
+            this.chatTextarea.value = text;
+            this.chatTextarea.focus();
+          };
+          enfDiv.appendChild(btn);
+        });
+      }
+
+      sendChatMessage() {
+        const text = this.chatTextarea.value.trim();
+        if (!text) return;
+        this.hideEspejoError();
+        this.addUserMessage(text);
+        this.chatTextarea.value = '';
+        this.chatTextarea.disabled = true;
+        this.btnChatSend.disabled = true;
+        this.showAITypingIndicator();
+        const enfDiv = document.getElementById('espejo-enfoques');
+        if (enfDiv) enfDiv.style.display = 'none';
+
+        this.espejoSend(text, this.currentSessionId, null)
+          .then(data => {
+            this.removeTypingIndicator();
+            this.chatTextarea.disabled = false;
+            this.btnChatSend.disabled = false;
+            this.chatTextarea.focus();
+            if (data.error) {
+              this.showEspejoError(data.error);
+              return;
+            }
+            if (data.respuesta) this.addAIMessage(data.respuesta);
+            if (data.sesion_id) this.currentSessionId = data.sesion_id;
+            if (data.sesion_titulo) {
+              const titleEl = document.getElementById('espejo-chat-title');
+              if (titleEl) titleEl.textContent = data.sesion_titulo.toUpperCase();
+            }
+            if (data.enfoques) this.renderEnfoques(data.enfoques);
+          })
+          .catch(err => {
+            this.removeTypingIndicator();
+            this.chatTextarea.disabled = false;
+            this.btnChatSend.disabled = false;
+            this.showEspejoError('Error de conexión con el Espejo. Intenta de nuevo.');
+          });
       }
 
       // --- API: TESTS ---
@@ -1161,6 +1419,66 @@ if(mainContent) {
           body: JSON.stringify(data),
         });
         return resp.json();
+      }
+
+      // --- PERFIL EDIT MODE ---
+      togglePerfilEdit() {
+        const fields = ['perfil-first-name', 'perfil-last-name', 'perfil-email', 'perfil-bio'];
+        const actions = document.getElementById('perfil-edit-actions');
+        const btn = document.getElementById('btn-edit-profile');
+        fields.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.disabled = false;
+          if (el) el.style.background = 'rgba(0,0,0,0.35)';
+        });
+        if (actions) actions.style.display = 'flex';
+        if (btn) btn.style.display = 'none';
+      }
+
+      cancelPerfilEdit() {
+        const fields = ['perfil-first-name', 'perfil-last-name', 'perfil-email', 'perfil-bio'];
+        const actions = document.getElementById('perfil-edit-actions');
+        const btn = document.getElementById('btn-edit-profile');
+        // Reset to original Django-rendered values by re-reading from DOM data
+        // The values are already the server-rendered ones, just re-disable
+        fields.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.disabled = true;
+          if (el) el.style.background = 'rgba(0,0,0,0.15)';
+        });
+        if (actions) actions.style.display = 'none';
+        if (btn) btn.style.display = 'inline-flex';
+      }
+
+      async savePerfil() {
+        const firstName = document.getElementById('perfil-first-name')?.value?.trim() || '';
+        const lastName = document.getElementById('perfil-last-name')?.value?.trim() || '';
+        const bio = document.getElementById('perfil-bio')?.value?.trim() || '';
+
+        const formData = new FormData();
+        formData.append('first_name', firstName);
+        formData.append('last_name', lastName);
+        formData.append('bio', bio);
+
+        try {
+          const resp = await fetch('/accounts/api/profile/update/', {
+            method: 'POST',
+            headers: {'X-CSRFToken': this.getCookie('csrftoken')},
+            body: formData,
+          });
+          const data = await resp.json();
+          if (data.ok) {
+            this.showToast('success', 'Perfil actualizado correctamente.');
+            this.cancelPerfilEdit();
+            // Update displayed name in sidebar
+            const sidebarName = document.querySelector('.user-info h4');
+            if (sidebarName) sidebarName.textContent = firstName || 'Navegante';
+          } else {
+            this.showToast('error', data.error || 'Error al guardar el perfil.');
+          }
+        } catch (e) {
+          this.showToast('error', 'Error de conexión al guardar el perfil.');
+        }
       }
     }
 

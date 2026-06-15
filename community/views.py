@@ -466,3 +466,52 @@ def api_buscar(request):
         })
 
     return JsonResponse({'results': results})
+
+
+@login_required
+@require_GET
+def api_feed(request):
+    """GET /comunidad/api/feed/ — Returns community feed as JSON."""
+    insights = (
+        SharedInsight.objects
+        .filter(visibility=SharedInsight.VISIBILITY_PUBLIC)
+        .select_related('user', 'user__profile', 'test_result__test', 'espejo_session')
+        .prefetch_related('reactions', 'comments')
+        .order_by('-created_at')[:50]
+    )
+
+    data = []
+    for insight in insights:
+        user = insight.user
+        profile = getattr(user, 'profile', None)
+
+        # Build reactions dict
+        reactions = {}
+        for r in insight.reactions.all():
+            reactions[r.type] = reactions.get(r.type, 0) + 1
+
+        # User avatar
+        avatar_url = None
+        if profile and profile.avatar:
+            try:
+                avatar_url = profile.avatar.url
+            except Exception:
+                avatar_url = None
+
+        user_name = user.first_name or user.username or user.email.split('@')[0]
+
+        data.append({
+            'id': insight.pk,
+            'user': {
+                'name': user_name,
+                'avatar': avatar_url,
+            },
+            'text': insight.display_text,
+            'source_type': insight.source_type,
+            'created_at': insight.created_at.isoformat() if insight.created_at else None,
+            'reactions': reactions,
+            'comments_count': insight.comments.count(),
+            'is_mine': user == request.user,
+        })
+
+    return JsonResponse(data, safe=False)

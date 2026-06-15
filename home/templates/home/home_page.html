@@ -3638,7 +3638,7 @@ body.not-logged-in .mobile-bottom-nav {
   window.ENDONAUTAS_CONFIG = {
     isAuthenticated: {% if user.is_authenticated %}true{% else %}false{% endif %},
     activeTab: "{% if user.is_authenticated %}feed{% else %}landing{% endif %}",
-    userName: "{% if user.is_authenticated %}{{ user.first_name|escapejs }}{% else %}Franco Jeria{% endif %}",
+    userName: "{% if user.is_authenticated %}{{ user.first_name|default:user.username|escapejs }}{% else %}Franco Jeria{% endif %}",
     userPlan: "{{ user_plan_val|default:'Mi Cuenta' }}",
     fractons: {{ token_balance_val|default:450 }},
     completedTests: {{ completed_tests_val|default:4 }},
@@ -3926,18 +3926,26 @@ body.not-logged-in .mobile-bottom-nav {
 <h3>Tests Base</h3>
 <p class="card-subtitle">Conoce las raíces de tu estructura psíquica y somática.</p>
 <div class="tests-list" style="margin-top: 16px;">
+{% if tests %}
+{% for test in tests|slice:":3" %}
+{% if test.pk in completed_test_ids %}
 <div class="test-item-row resolved">
-<span>Eneagrama</span>
+<span>{{ test.name }}</span>
 <span class="status-badge">Completado</span>
 </div>
+{% else %}
 <div class="test-item-row active">
-<span>Carta Natal Somática</span>
-<button class="btn btn-outline btn-sm">Explorar</button>
+<span>{{ test.name }}</span>
+<a class="btn btn-outline btn-sm" href="/tests/{{ test.slug }}/">Explorar</a>
 </div>
+{% endif %}
+{% endfor %}
+{% else %}
 <div class="test-item-row locked">
-<span>Diseño Humano</span>
-<span class="status-badge">Bloqueado</span>
+<span>Sin tests disponibles</span>
+<span class="status-badge">—</span>
 </div>
+{% endif %}
 </div>
 </div>
 </div>
@@ -3948,7 +3956,7 @@ body.not-logged-in .mobile-bottom-nav {
 <!-- Constellation Map Deck Panel -->
 <div class="card constellation-map-panel telemetry-console-border">
 <div class="constellation-header">
-<h4>Recorrido de Evaluaciones de Franco Jeria</h4>
+<h4>Recorrido de Evaluaciones de {{ user.first_name|default:"Navegante" }}</h4>
 <span class="telemetry-badge-nominal" id="constellation-telemetry-badge">CAMINOS PSÍQUICOS CONECTADOS</span>
 </div>
 <p class="constellation-instructions">Haz clic en un nodo de la constelación para ver los cuestionarios correspondientes en el panel inferior.</p>
@@ -4020,94 +4028,41 @@ body.not-logged-in .mobile-bottom-nav {
 </div>
 </div>
 <div class="portals-catalog-grid">
-<!-- PORTAL I -->
-<div class="portal-box card telemetry-console-border" id="portal-box-1">
+{% if tests %}
+{% regroup tests by dimension as dimension_list %}
+{% for dimension in dimension_list %}
+<div class="portal-box card telemetry-console-border" id="portal-box-{{ forloop.counter }}">
 <div class="portal-header">
-<span class="portal-num">PORTAL I</span>
-<h3>La Máscara (Tu Armadura Social)</h3>
+<span class="portal-num">PORTAL {{ forloop.counter }}</span>
+<h3>{{ dimension.grouper|default:"Dimensión" }}</h3>
 </div>
-<p class="portal-desc">Cómo te presentas ante los demás para protegerte. Los sistemas de defensa conscientes a través de los cuales interactúas con tu entorno social.</p>
+<p class="portal-desc">Explora los tests asociados a esta dimensión de tu mapa interior.</p>
 <div class="tests-list">
+{% for test in dimension.list %}
+{% if test.pk in completed_test_ids %}
 <div class="test-item-row resolved">
-<span>BFI-44 (Personalidad)</span>
+<span>{{ test.name }}</span>
 <span class="status-badge">Completado</span>
 </div>
-<div class="test-item-row resolved">
-<span>Eneagrama (Sombra Primaria)</span>
-<span class="status-badge">Completado</span>
-</div>
+{% else %}
 <div class="test-item-row active">
-<span>Arquetipos Jung</span>
-<button class="btn btn-outline btn-sm">Comenzar</button>
+<span>{{ test.name }}</span>
+<a class="btn btn-outline btn-sm" href="/tests/{{ test.slug }}/">Comenzar</a>
+</div>
+{% endif %}
+{% endfor %}
 </div>
 </div>
-</div>
-<!-- PORTAL II -->
-<div class="portal-box card locked telemetry-console-border" id="portal-box-2">
+{% endfor %}
+{% else %}
+<div class="portal-box card telemetry-console-border">
 <div class="portal-header">
-<span class="portal-num">PORTAL II</span>
-<h3>El Descenso (Tu Sombra)</h3>
+<span class="portal-num">—</span>
+<h3>Sin tests disponibles</h3>
 </div>
-<p class="portal-desc">Tus puntos ciegos. Lo que ocultas porque temes ser rechazado. Las dinámicas de evasión inconscientes y el autosabotaje.</p>
-<div class="tests-list">
-<div class="test-item-row locked">
-<span>Autosabotaje y Defensa Fiel</span>
-<span class="status-badge">Bloqueado</span>
+<p class="portal-desc">No hay tests activos en el sistema en este momento.</p>
 </div>
-<div class="test-item-row locked">
-<span>Esquemas de Heridas Infantiles</span>
-<span class="status-badge">Bloqueado</span>
-</div>
-<div class="test-item-row locked">
-<span>DERS-16 (Desregulación)</span>
-<span class="status-badge">Bloqueado</span>
-</div>
-</div>
-</div>
-<!-- PORTAL III -->
-<div class="portal-box card locked telemetry-console-border" id="portal-box-3">
-<div class="portal-header">
-<span class="portal-num">PORTAL III</span>
-<h3>El Templo (Tu Cuerpo/Soma)</h3>
-</div>
-<p class="portal-desc">Dónde se almacena y procesa físicamente la tensión acumulada. El registro directo de tus respuestas orgánicas ante la fricción emocional.</p>
-<div class="tests-list">
-<div class="test-item-row locked">
-<span>MAIA (Escala de Conciencia Corporal)</span>
-<span class="status-badge">Bloqueado</span>
-</div>
-<div class="test-item-row locked">
-<span>PSQI (Calidad de Descanso Corporal)</span>
-<span class="status-badge">Bloqueado</span>
-</div>
-<div class="test-item-row locked">
-<span>Evitación Cognitiva (Ansiedad GAD-7)</span>
-<span class="status-badge">Bloqueado</span>
-</div>
-</div>
-</div>
-<!-- PORTAL IV -->
-<div class="portal-box card locked telemetry-console-border" id="portal-box-4">
-<div class="portal-header">
-<span class="portal-num">PORTAL IV</span>
-<h3>La Integración (Acción Colectiva)</h3>
-</div>
-<p class="portal-desc">Cómo aplicas tu consciencia integrada para operar en tu comunidad. El retorno del héroe para influir de forma madura y responsable en tus círculos.</p>
-<div class="tests-list">
-<div class="test-item-row locked">
-<span>Fortalezas Prosociales (VIA)</span>
-<span class="status-badge">Bloqueado</span>
-</div>
-<div class="test-item-row locked">
-<span>SWB (Escala de Bienestar General)</span>
-<span class="status-badge">Bloqueado</span>
-</div>
-<div class="test-item-row locked">
-<span>Coherencia Sistémica y Prosocialidad</span>
-<span class="status-badge">Bloqueado</span>
-</div>
-</div>
-</div>
+{% endif %}
 </div>
 </div>
 <!-- SECTION C: BITÁCORA DE EXPERIENCIAS -->
@@ -4141,63 +4096,64 @@ body.not-logged-in .mobile-bottom-nav {
 <p>Espejo de conflictos y rebote de sombra. Registra sensaciones para procesar la resistencia.</p>
 </div>
 <div class="espejo-layout" style="display: grid; grid-template-columns: 280px 1fr; gap: 24px; align-items: start; min-height: calc(100vh - 160px);">
-  
-  <!-- Sidebar de Conversaciones -->
+
+  <!-- Sidebar: Tarjetas + Sesiones -->
   <div class="card telemetry-console-border" style="display: flex; flex-direction: column; gap: 16px; height: calc(100vh - 160px);">
-    <button class="btn btn-primary" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;">
+    <button class="btn btn-primary" id="btn-espejo-nuevo" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;">
       <svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><line x1="12" x2="12" y1="5" y2="19"></line><line x1="5" x2="19" y1="12" y2="12"></line></svg>
       Nueva Sesión
     </button>
-    
-    <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 8px;">
-      <span style="font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; padding-left: 4px; margin-top: 8px;">Hoy</span>
-      <div class="history-item active" style="padding: 12px; border-radius: 8px; background: rgba(126,204,205,0.1); border-left: 2px solid var(--calipso); cursor: pointer;">
-        <div style="font-size: 0.85rem; font-weight: 600; color: #fff;">Resistencia Respiración</div>
-        <div style="font-size: 0.7rem; color: var(--muted); margin-top: 4px;">10:45 AM</div>
+
+    <div id="espejo-tarjetas-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 8px;">
+      <!-- Tarjetas loaded dynamically from GET /espejo/tarjetas/ -->
+      <div class="espejo-skeleton" style="padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.03); animation: pulse 1.5s infinite;">
+        <div style="height: 14px; width: 70%; background: rgba(255,255,255,0.06); border-radius: 4px;"></div>
+        <div style="height: 10px; width: 40%; background: rgba(255,255,255,0.04); border-radius: 4px; margin-top: 8px;"></div>
       </div>
-      <span style="font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; padding-left: 4px; margin-top: 16px;">Ayer</span>
-      <div class="history-item" style="padding: 12px; border-radius: 8px; background: transparent; border-left: 2px solid transparent; cursor: pointer; transition: background 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
-        <div style="font-size: 0.85rem; font-weight: 500; color: var(--text);">Límite con mi jefe</div>
-        <div style="font-size: 0.7rem; color: var(--muted); margin-top: 4px;">16:30 PM</div>
+      <div class="espejo-skeleton" style="padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.03); animation: pulse 1.5s infinite 0.2s;">
+        <div style="height: 14px; width: 80%; background: rgba(255,255,255,0.06); border-radius: 4px;"></div>
+        <div style="height: 10px; width: 30%; background: rgba(255,255,255,0.04); border-radius: 4px; margin-top: 8px;"></div>
       </div>
-      <div class="history-item" style="padding: 12px; border-radius: 8px; background: transparent; border-left: 2px solid transparent; cursor: pointer; transition: background 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
-        <div style="font-size: 0.85rem; font-weight: 500; color: var(--text);">Evasión en el cuerpo</div>
-        <div style="font-size: 0.7rem; color: var(--muted); margin-top: 4px;">09:15 AM</div>
+      <div class="espejo-skeleton" style="padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.03); animation: pulse 1.5s infinite 0.4s;">
+        <div style="height: 14px; width: 60%; background: rgba(255,255,255,0.06); border-radius: 4px;"></div>
+        <div style="height: 10px; width: 50%; background: rgba(255,255,255,0.04); border-radius: 4px; margin-top: 8px;"></div>
       </div>
     </div>
   </div>
 
-<!-- Chat Window -->
-<div class="chat-mirror-card card telemetry-console-border" style="height: calc(100vh - 160px); display: flex; flex-direction: column;">
-<div class="chat-header">
-<span class="indicator-led status-nominal green-pulse"></span>
-<span>ESPEJO DE RESONANCIA SOMÁTICA — INTERFAZ TELEMÉTRICA</span>
+  <!-- Chat Window -->
+  <div class="chat-mirror-card card telemetry-console-border" style="height: calc(100vh - 160px); display: flex; flex-direction: column;">
+    <div class="chat-header">
+      <span class="indicator-led status-nominal green-pulse"></span>
+      <span id="espejo-chat-title">ESPEJO DE RESONANCIA SOMÁTICA — INTERFAZ TELEMÉTRICA</span>
+    </div>
+    <div class="chat-messages" id="chat-messages-box">
+      <!-- Messages loaded dynamically -->
+    </div>
+    <!-- Enfoques area: shown after AI response with focus options -->
+    <div id="espejo-enfoques" style="display: none; padding: 10px 16px; border-top: 1px solid var(--border); gap: 8px; flex-wrap: wrap;"></div>
+    <!-- Error area -->
+    <div id="espejo-error" style="display: none; padding: 8px 16px; background: rgba(201,123,132,0.12); border-top: 1px solid rgba(201,123,132,0.3); font-size: 0.82rem; color: var(--rose);"></div>
+    <form class="chat-input-area" id="espejo-chat-form" onsubmit="return false;">
+      <textarea id="chat-textarea" placeholder="Describe la molestia física o resistencia que sientes..."></textarea>
+      <button class="btn btn-primary" id="btn-chat-send" type="submit">
+        <svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><line x1="22" x2="11" y1="2" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+      </button>
+    </form>
+  </div>
 </div>
-<div class="chat-messages" id="chat-messages-box">
-<div class="chat-msg ai">
-<div class="msg-avatar">E</div>
-<div class="msg-bubble">
-<p>Iniciando secuencia de interacción del Espejo. ¿Dónde se encuentra localizada la molestia física que estás intentando evadir hoy?</p>
-</div>
-</div>
-</div>
-<div class="chat-input-area">
-<button class="chat-attach-btn" title="Adjuntar Archivo">
-  <svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
-</button>
-<button class="chat-attach-btn" title="Subir Imagen">
-  <svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><rect height="18" rx="2" ry="2" width="18" x="3" y="3"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-</button>
-<textarea disabled="" id="chat-textarea" placeholder="Escribe tu mensaje..."></textarea>
-<button class="chat-attach-btn" title="Nota de Voz">
-  <svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg>
-</button>
-<button class="btn btn-primary" disabled="" id="btn-chat-send" onclick="window.app.sendChatMessage()">
-<svg fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="18" xmlns="http://www.w3.org/2000/svg"><line x1="22" x2="11" y1="2" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-</button>
-</div>
-</div>
-</div>
+<style>
+  @keyframes pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+  .espejo-tarjeta-item { padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.03); border-left: 2px solid transparent; cursor: pointer; transition: background 0.3s; }
+  .espejo-tarjeta-item:hover { background: rgba(255,255,255,0.07) !important; }
+  .espejo-tarjeta-item.active { background: rgba(126,204,205,0.1); border-left: 2px solid var(--calipso); }
+  .espejo-enfoque-btn { background: rgba(155,142,196,0.12); border: 1px solid rgba(155,142,196,0.3); color: var(--violet); padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
+  .espejo-enfoque-btn:hover { background: rgba(155,142,196,0.25); border-color: var(--violet); }
+</style>
+</div></section>
 </div></section>
 <!-- ════════════════ PAGE: REGULACIÓN SOMÁTICA ════════════════ -->
 <section class="app-page" id="page-regulacion"><div class="page-container">
@@ -4568,13 +4524,13 @@ body.not-logged-in .mobile-bottom-nav {
 <div class="card profile-card telemetry-console-border">
 <div class="profile-main">
 <div class="profile-glow"></div>
-<span class="card-tag tag-calipso">INTEGRACIÓN EMOCIONAL</span>
+<span class="card-tag tag-calipso">INTEGRACION EMOCIONAL</span>
 <h3>Estado de Consciencia (Hawkins)</h3>
 <div class="hawkins-level">
-<span class="level-num" id="val-integracion-global">69%</span>
-<span class="level-label">Aceptación (250)</span>
+<span class="level-num" id="val-integracion-global">{% if total_tests_val > 0 %}{{ map_pct_val }}{% else %}0{% endif %}%</span>
+<span class="level-label">Nivel de Consciencia</span>
 </div>
-<p class="level-desc">Estado de regulación corporal y mental estable, con bajos niveles de evasión.</p>
+<p class="level-desc">Estado de regulacion corporal y mental. Exploracion de {{ completed_tests_val }} de {{ total_tests_val }} dimensiones evaluadas.</p>
 </div>
 <!-- Flight deck style system indicators -->
 <div class="flight-deck-indicators" style="margin-top:20px;  padding-top:16px;">
@@ -4589,15 +4545,15 @@ body.not-logged-in .mobile-bottom-nav {
 </div>
 <div class="profile-stats">
 <div class="stat-item">
-<span class="stat-value" id="stats-missions">4</span>
-<span class="stat-label">Portales Completados</span>
+<span class="stat-value" id="stats-missions">{{ completed_tests_val }}</span>
+<span class="stat-label">Tests Completados</span>
 </div>
 <div class="stat-item">
-<span class="stat-value" id="stats-fractons">450 FK</span>
+<span class="stat-value" id="stats-fractons">{{ token_balance_val }} FK</span>
 <span class="stat-label">Fractones (FK)</span>
 </div>
 <div class="stat-item">
-<span class="stat-value" style="color:var(--amber)">Activa</span>
+<span class="stat-value" style="color:var(--amber)">{% if user.is_authenticated %}Activa{% else %}Inactiva{% endif %}</span>
 <span class="stat-label">Espejo Emocional</span>
 </div>
 </div>
@@ -4678,7 +4634,7 @@ body.not-logged-in .mobile-bottom-nav {
 <div class="mock-book">
 <div class="mock-book-cover">
 <span class="cover-title">BITÁCORA</span>
-<span class="cover-subtitle">FRANCO JERIA</span>
+<span class="cover-subtitle">{{ user.first_name|default:"Navegante" }}</span>
 </div>
 </div>
 </div>
@@ -4737,8 +4693,8 @@ body.not-logged-in .mobile-bottom-nav {
 <h4 class="book-chapter-title">I. LA ESTRUCTURA DEL DEBER</h4>
 <h3 class="book-main-title">El Filtro Obsesivo de la Máscara</h3>
 <div class="book-text-content">
-<p>En el caso del navegante Franco Jeria, la rigidez estructural es el filtro primario de su ego. La máscara de "perfección y deber" (Eneagrama Tipo 1) funciona como una coraza protectora. Al estar su diafragma tensionado, el flujo intercostal se bloquea para impedir que el usuario exprese descontento o rabia contra la autoridad laboral.</p>
-<p>La mente de Franco prefiere procesar el problema de forma teórica. "Mi jefe no es profesional", piensa. Sin embargo, su cuerpo registra vasoconstricción y taquicardia ligera. La introspección lógica solo incrementa el control intelectual, evitando la sensación somática que resolvería la contracción celular de raíz.</p>
+<p>En el caso del navegante {{ user.first_name|default:"el navegante" }}, la rigidez estructural es el filtro primario de su ego. La máscara de "perfección y deber" (Eneagrama Tipo 1) funciona como una coraza protectora. Al estar su diafragma tensionado, el flujo intercostal se bloquea para impedir que el usuario exprese descontento o rabia contra la autoridad laboral.</p>
+<p>La mente de {{ user.first_name|default:"el navegante" }} prefiere procesar el problema de forma teórica. "Mi jefe no es profesional", piensa. Sin embargo, su cuerpo registra vasoconstricción y taquicardia ligera. La introspección lógica solo incrementa el control intelectual, evitando la sensación somática que resolvería la contracción celular de raíz.</p>
 <blockquote>
                   "No busques resolver el conflicto en tus pensamientos. Calibra tus sensores en las costillas y respira profundamente."
                 </blockquote>
@@ -4750,7 +4706,7 @@ body.not-logged-in .mobile-bottom-nav {
 <h4 class="book-chapter-title">MÉTODO DE CALIBRACIÓN</h4>
 <h3 class="book-main-title">Estrategia de Vuelo Somático</h3>
 <div class="book-text-content">
-<p>Para disolver esta coraza defensiva, Franco debe seguir una ruta estricta de tres pasos somáticos, evitando todo tipo de justificación racional o explicaciones místicas:</p>
+<p>Para disolver esta coraza defensiva, {{ user.first_name|default:"el navegante" }} debe seguir una ruta estricta de tres pasos somáticos, evitando todo tipo de justificación racional o explicaciones místicas:</p>
 <ul>
 <li><strong>1. Enfoque Corporal Inmediato:</strong> Al percibir la crítica laboral, detén el diálogo mental e identifica dónde está el vacío en tu plexo solar o mandíbula.</li>
 <li><strong>2. Respiración Prolongada:</strong> Respira a un ritmo de 10 segundos por ciclo (4s inhalación, 2s retención, 4s exhalación) hasta que el pulso periférico regrese a niveles nominales.</li>
@@ -4789,14 +4745,30 @@ body.not-logged-in .mobile-bottom-nav {
 <div>
 <span class="card-tag tag-violet">VARIABLES DE ACCESO</span>
 <h4 style="margin-bottom: 12px; color: #fff;">Ajustes de Cuenta</h4>
+<div style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
+<button class="btn btn-outline btn-sm" id="btn-edit-profile" type="button" onclick="window.app.togglePerfilEdit()">✏️ Editar</button>
+</div>
 <form id="perfil-account-form" style="display: flex; flex-direction: column; gap: 12px;">
+{% csrf_token %}
+<div class="form-group" style="display:flex; flex-direction:column; gap:6px;">
+<label for="perfil-first-name" style="font-size:0.8rem; color:var(--muted)">Nombre</label>
+<input disabled="" id="perfil-first-name" style="background:rgba(0,0,0,0.15); border:1px solid var(--border); padding:8px 12px; border-radius:6px; color:var(--text);" type="text" value="{% if user.is_authenticated %}{{ user.first_name }}{% endif %}"/>
+</div>
+<div class="form-group" style="display:flex; flex-direction:column; gap:6px;">
+<label for="perfil-last-name" style="font-size:0.8rem; color:var(--muted)">Apellido</label>
+<input disabled="" id="perfil-last-name" style="background:rgba(0,0,0,0.15); border:1px solid var(--border); padding:8px 12px; border-radius:6px; color:var(--text);" type="text" value="{% if user.is_authenticated %}{{ user.last_name }}{% endif %}"/>
+</div>
 <div class="form-group" style="display:flex; flex-direction:column; gap:6px;">
 <label for="perfil-email" style="font-size:0.8rem; color:var(--muted)">Correo Electrónico</label>
 <input disabled="" id="perfil-email" style="background:rgba(0,0,0,0.15); border:1px solid var(--border); padding:8px 12px; border-radius:6px; color:var(--text);" type="email" value="{% if user.is_authenticated %}{{ user.email }}{% else %}hola@endonautas.cl{% endif %}"/>
 </div>
 <div class="form-group" style="display:flex; flex-direction:column; gap:6px;">
-<label for="perfil-password" style="font-size:0.8rem; color:var(--muted)">Firma Psíquica (Contraseña)</label>
-<input disabled="" id="perfil-password" style="background:rgba(0,0,0,0.15); border:1px solid var(--border); padding:8px 12px; border-radius:6px; color:var(--text);" type="password" value="••••••••••••"/>
+<label for="perfil-bio" style="font-size:0.8rem; color:var(--muted)">Biografía</label>
+<textarea disabled="" id="perfil-bio" rows="3" style="background:rgba(0,0,0,0.15); border:1px solid var(--border); padding:8px 12px; border-radius:6px; color:var(--text); resize:vertical;">{% if user.is_authenticated and user.profile.bio %}{{ user.profile.bio }}{% endif %}</textarea>
+</div>
+<div id="perfil-edit-actions" style="display: none; gap: 8px; justify-content: flex-end;">
+<button class="btn btn-outline btn-sm" type="button" onclick="window.app.cancelPerfilEdit()">Cancelar</button>
+<button class="btn btn-primary btn-sm" type="button" onclick="window.app.savePerfil()">Guardar Cambios</button>
 </div>
 </form>
 </div>
@@ -4805,8 +4777,8 @@ body.not-logged-in .mobile-bottom-nav {
 <h4 style="margin-bottom: 8px; color: #fff;">Suscripción de Vuelo</h4>
 <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(126,204,205,0.05); border: 1px solid rgba(126,204,205,0.2); border-radius: 8px;">
 <div>
-<strong style="color:var(--calipso); display:block;">Mi Cuenta Integral</strong>
-<span style="font-size:0.75rem; color:var(--muted)">$10.00 USD / mensual</span>
+<strong style="color:var(--calipso); display:block;">{{ user_plan_val|default:"Mi Cuenta" }}</strong>
+<span style="font-size:0.75rem; color:var(--muted)">Plan activo</span>
 </div>
 <span class="badge" style="background:var(--calipso-glow); color:var(--calipso); border:1px solid var(--calipso); padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:700;">ACTIVO</span>
 </div>

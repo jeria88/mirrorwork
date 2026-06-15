@@ -30,4 +30,6 @@ urlpatterns = [
     path('blog/submit/', views.blog_submit, name='blog_submit'),
     path('api/login/', views.api_login, name='api_login'),
     path('api/register/', views.api_register, name='api_register'),
+    path('api/profile/', views.api_profile, name='api_profile'),
+    path('api/profile/update/', views.api_profile_update, name='api_profile_update'),
 ]

@@ -20,4 +20,6 @@ urlpatterns = [
     path("pp-return/",          views.pp_return,        name="pp_return"),
     path("pp-cancel/",          views.pp_cancel,        name="pp_cancel"),
     path("pp-webhook/",         views.pp_webhook,       name="pp_webhook"),
+    # API
+    path("api/balance/",        views.api_balance,      name="api_balance"),
 ]
