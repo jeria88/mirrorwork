@@ -58,7 +58,6 @@ class HomePage(Page):
 
     def get_context(self, request):
         context = super().get_context(request)
-        # Pass onboarding source from URL param (for redirects from landing login)
         context['onboarding_source'] = request.GET.get('onboarding', '')
         if request.user.is_authenticated:
             from psychometrics.models import Test, TestResult
@@ -66,6 +65,13 @@ class HomePage(Page):
             from mirror.models import ConflictSession
             from community.models import SharedInsight, Follow
             from community.views import _ranked, _get_facilitador
+            from .models import UserProfile
+
+            # Ensure profile exists
+            try:
+                profile = request.user.profile
+            except Exception:
+                profile = UserProfile.objects.create(user=request.user)
 
             try:
                 token_balance = request.user.token_balance.balance

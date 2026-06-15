@@ -3646,7 +3646,7 @@ body.not-logged-in .mobile-bottom-nav {
     isAuthenticated: {% if user.is_authenticated %}true{% else %}false{% endif %},
     activeTab: "{% if user.is_authenticated %}feed{% else %}landing{% endif %}",
     userName: "{% if user.is_authenticated %}{{ user.first_name|escapejs }}{% else %}Franco Jeria{% endif %}",
-    userPlan: "{% if user.is_authenticated %}{% if user.profile.plan == 'free' %}Mi Cuenta{% else %}{{ user.profile.get_plan_display }}{% endif %}{% else %}Mi Cuenta{% endif %}",
+    userPlan: "{% if user.is_authenticated %}{{ user.profile.get_plan_display|default:'Mi Cuenta' }}{% else %}Mi Cuenta{% endif %}",
     fractons: {{ token_balance_val|default:450 }},
     completedTests: {{ completed_tests_val|default:4 }},
     totalTests: {{ total_tests_val|default:12 }},
