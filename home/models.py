@@ -61,7 +61,7 @@ class HomePage(Page):
         context['onboarding_source'] = request.GET.get('onboarding', '')
         if request.user.is_authenticated:
             from psychometrics.models import Test, TestResult
-            from tokens.models import TokenBalance
+            from tokens.models import TokenBalance, TokenTransaction
             from mirror.models import ConflictSession
             from community.models import SharedInsight, Follow
             from community.views import _ranked, _get_facilitador

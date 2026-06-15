@@ -4079,14 +4079,16 @@ body.not-logged-in .mobile-bottom-nav {
 </div>
 <button class="btn btn-primary" style="align-self: flex-end;">Guardar Registro</button>
 <div class="feed-posts" style="display: flex; flex-direction: column; gap: 12px; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
+{% for entry in bitacora_entries %}
 <div class="feed-post" style="padding: 12px; background: rgba(255,255,255,0.02); border-radius: 8px; border-left: 2px solid var(--calipso);">
-<span style="font-size: 0.75rem; color: var(--muted); display: block; margin-bottom: 4px;">Hoy, 14:30</span>
-<p style="font-size: 0.9rem; margin: 0; color: var(--text);">He notado que cuando evito la confrontación, mi respiración se vuelve más superficial.</p>
+<span style="font-size: 0.75rem; color: var(--muted); display: block; margin-bottom: 4px;">{{ entry.created_at|date:"d/m/Y H:i" }}</span>
+<p style="font-size: 0.9rem; margin: 0; color: var(--text);">{{ entry.text }}</p>
 </div>
-<div class="feed-post" style="padding: 12px; background: rgba(255,255,255,0.02); border-radius: 8px; border-left: 2px solid var(--violet);">
-<span style="font-size: 0.75rem; color: var(--muted); display: block; margin-bottom: 4px;">Ayer, 09:15</span>
-<p style="font-size: 0.9rem; margin: 0; color: var(--text);">Descubrí mi patrón de autoexigencia conectado con la rigidez en el cuello.</p>
+{% empty %}
+<div class="feed-post" style="padding: 12px; background: rgba(255,255,255,0.02); border-radius: 8px; border-left: 2px solid var(--muted); text-align: center; color: var(--muted);">
+No hay registros en tu bitácora aún. ¡Empieza a escribir!
 </div>
+{% endfor %}
 </div>
 </div>
 </div>
@@ -4295,29 +4297,24 @@ body.not-logged-in .mobile-bottom-nav {
         <!-- Mis Foros -->
         <div class="perfil-subsection" style="grid-column: span 1;">
             <h3 style="color: var(--calipso); margin-bottom: 2vh; border-bottom: 1px solid var(--border); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
-                Mis Foros <span style="background: var(--calipso); color: #000; font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; font-weight: bold;">2 Nuevos</span>
+                Mis Foros {% if user_foros.count > 0 %}<span style="background: var(--calipso); color: #000; font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; font-weight: bold;">{{ user_foros.count }}</span>{% endif %}
             </h3>
-            
+            {% for forum in user_foros %}
             <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 12px; cursor: pointer; transition: background 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='rgba(255,255,255,0.02)'">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                    <strong style="color: var(--text);">Integración de Eneagrama 5</strong>
-                    <span style="width: 8px; height: 8px; background: var(--calipso); border-radius: 50%; display: inline-block;"></span>
+                    <strong style="color: var(--text);">{{ forum.name }}</strong>
+                    {% if forum.is_active %}<span style="width: 8px; height: 8px; background: var(--calipso); border-radius: 50%; display: inline-block;"></span>{% endif %}
                 </div>
-                <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 12px;">Último post: "¿Cómo salir de la cueva mental y actuar?"</p>
+                <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 12px;">{{ forum.description|truncatewords:15 }}</p>
                 <div style="display: flex; align-items: center; gap: 8px; font-size: 0.75rem; color: var(--dim);">
-                    <span>145 Miembros</span> • <span>Activo hace 2 min</span>
+                    <span>{{ forum.member_count }} Miembros</span> • <span>{{ forum.last_activity|default:"Sin actividad" }}</span>
                 </div>
             </div>
-
-            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 12px; cursor: pointer; transition: background 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='rgba(255,255,255,0.02)'">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                    <strong style="color: var(--text);">Tránsitos Plutonianos</strong>
-                </div>
-                <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 12px;">Último post: "Destrucción y renacimiento de estructuras."</p>
-                <div style="display: flex; align-items: center; gap: 8px; font-size: 0.75rem; color: var(--dim);">
-                    <span>89 Miembros</span> • <span>Activo hace 4 horas</span>
-                </div>
+            {% empty %}
+            <div style="text-align: center; padding: 20px; color: var(--muted);">
+                <p>No te has unido a ningún foro aún. ¡Explora los foros destacados!</p>
             </div>
+            {% endfor %}
         </div>
 
         <!-- Descubrir Foros -->
