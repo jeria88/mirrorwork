@@ -500,7 +500,7 @@ if(mainContent) {
         const email = emailInput?.value?.trim() || '';
         const password = passwordInput?.value || '';
         const firstName = nameInput?.value?.trim() || '';
-        const isRegister = this.authModalTitle?.innerText === 'Registrarse';
+        const isRegister = document.getElementById('tab-register')?.classList.contains('active') || false;
 
         // Basic validation
         if (!email || !password) {

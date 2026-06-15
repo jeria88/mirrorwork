@@ -4995,19 +4995,19 @@ body.not-logged-in .mobile-bottom-nav {
 <div class="auth-forms">
 <form id="auth-form-element" onsubmit="event.preventDefault(); window.app.processAuth();">
   {% csrf_token %}
-<div class="form-group" id="group-name" style="display: none; flex-direction: column; gap: 6px; margin-bottom: 12px;">
-<label for="auth-name" style="font-size: 0.8rem; color: var(--muted)">Nombre Completo</label>
-<input id="auth-name" placeholder="Franco Jeria" style="background: rgba(0,0,0,0.25); border: 1px solid var(--border); padding: 10px 14px; border-radius: 8px; color: var(--text);" type="text" value="Franco Jeria"/>
-</div>
-<div class="form-group" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px;">
-<label for="auth-email" style="font-size: 0.8rem; color: var(--muted)">Correo Electrónico</label>
-<input id="auth-email" placeholder="hola@endonautas.cl" required="" style="background: rgba(0,0,0,0.25); border: 1px solid var(--border); padding: 10px 14px; border-radius: 8px; color: var(--text);" type="email" value="{% if user.is_authenticated %}{{ user.email }}{% else %}hola@endonautas.cl{% endif %}"/>
-</div>
-<div class="form-group" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px;">
-<label for="auth-password" style="font-size: 0.8rem; color: var(--muted)">Firma Psíquica (Contraseña)</label>
-<input id="auth-password" placeholder="••••••••••••" required="" style="background: rgba(0,0,0,0.25); border: 1px solid var(--border); padding: 10px 14px; border-radius: 8px; color: var(--text);" type="password" value=""/>
-</div>
-<button class="btn btn-primary btn-full-width" id="btn-submit-auth" style="padding: 12px; font-weight: 700;" type="submit">Acceder a la Consola</button>
+  <div class="form-group" id="group-name" style="display: none; flex-direction: column; gap: 6px; margin-bottom: 12px;">
+    <label for="auth-name" style="font-size: 0.8rem; color: var(--muted)">Nombre Completo</label>
+    <input id="auth-name" placeholder="Franco Jeria" style="background: rgba(0,0,0,0.25); border: 1px solid var(--border); padding: 10px 14px; border-radius: 8px; color: var(--text);" type="text" value="Franco Jeria"/>
+  </div>
+  <div class="form-group" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px;">
+    <label for="auth-email" style="font-size: 0.8rem; color: var(--muted)">Correo Electrónico</label>
+    <input id="auth-email" placeholder="hola@endonautas.cl" required="" style="background: rgba(0,0,0,0.25); border: 1px solid var(--border); padding: 10px 14px; border-radius: 8px; color: var(--text);" type="email" value="{% if user.is_authenticated %}{{ user.email }}{% else %}hola@endonautas.cl{% endif %}"/>
+  </div>
+  <div class="form-group" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px;">
+    <label for="auth-password" style="font-size: 0.8rem; color: var(--muted)">Firma Psíquica (Contraseña)</label>
+    <input id="auth-password" placeholder="••••••••••••" required="" style="background: rgba(0,0,0,0.25); border: 1px solid var(--border); padding: 10px 14px; border-radius: 8px; color: var(--text);" type="password" value=""/>
+  </div>
+  <button class="btn btn-primary btn-full-width" id="btn-submit-auth" style="padding: 12px; font-weight: 700;" type="submit">Acceder a la Consola</button>
 </form>
 </div>
 </div>
