@@ -2,11 +2,12 @@
 // ==========================================================================
    // THREE.JS KEPLERIAN BLACK HOLE SIMULATION
    // ==========================================================================
-   // Import Three.js and addons via importmap (defined in HTML head)
-   import * as THREE from 'three';
-   import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-   import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-   import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+   // Three.js loaded as global from CDN script tag
+   // Use THREE directly - addons may not be available as globals
+   // Fallback: create stubs if addons not loaded
+   var EffectComposer = THREE.EffectComposer || function(){};
+   var RenderPass = THREE.RenderPass || function(){};
+   var UnrealBloomPass = THREE.UnrealBloomPass || function(){};
 
    // Configuración de Presets por Sección (Alineados con mirrorwork/base.html)
    const PRESETS = {
@@ -1092,7 +1093,18 @@ if(mainContent) {
 
    // --- INICIALIZACIÓN DE THREE.JS E INTERACTIVIDAD ---
    window.addEventListener('DOMContentLoaded', () => {
-     initCosmos();
-     window.app = new EndonautasApp();
+     try {
+       initCosmos();
+       window.app = new EndonautasApp();
+       console.log('EndonautasApp initialized successfully');
+     } catch (e) {
+       console.error('EndonautasApp initialization error:', e);
+       // Fallback: try to initialize without Three.js
+       try {
+         window.app = new EndonautasApp();
+       } catch (e2) {
+         console.error('Fallback init also failed:', e2);
+       }
+     }
    });
 
