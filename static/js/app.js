@@ -47,6 +47,12 @@ if(mainContent) {
      const container = document.getElementById('cosmos-bg-container');
      if (!container) return;
 
+     // Check if Three.js addons are available
+     if (typeof EffectComposer === 'undefined' || typeof RenderPass === 'undefined' || typeof UnrealBloomPass === 'undefined') {
+       console.warn('Three.js addons not loaded, cosmos background disabled');
+       return;
+     }
+
      // Escena y Cámara
      scene = new THREE.Scene();
      camera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 0.1, 3000);
