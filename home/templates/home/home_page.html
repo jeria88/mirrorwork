@@ -5075,6 +5075,14 @@ body.not-logged-in .mobile-bottom-nav {
   }
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+<script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+</script>
 <script type="module" src="{% static 'js/app.js' %}"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
