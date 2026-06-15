@@ -960,6 +960,63 @@ if(mainContent) {
           setTimeout(() => toast.remove(), 300);
         }, 4000);
       }
+
+      // --- PERFIL PÚBLICO ---
+      buscarUsuario() {
+        const query = document.getElementById('perfil-search-input')?.value?.trim();
+        if (!query) return;
+
+        fetch(`/comunidad/api/buscar/?q=${encodeURIComponent(query)}`)
+          .then(r => r.json())
+          .then(data => {
+            const resultsDiv = document.getElementById('perfil-search-results');
+            resultsDiv.innerHTML = '';
+            if (!data.results || data.results.length === 0) {
+              resultsDiv.innerHTML = '<div class="card telemetry-console-border" style="padding:16px;text-align:center;color:var(--muted);">No se encontraron usuarios.</div>';
+              return;
+            }
+            data.results.forEach(u => {
+              const div = document.createElement('div');
+              div.className = 'card telemetry-console-border';
+              div.style.cssText = 'padding:12px;display:flex;align-items:center;gap:12px;cursor:pointer;';
+              div.innerHTML = `
+                <div style="width:40px;height:40px;border-radius:50%;background:var(--calipso-glow);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--calipso);flex-shrink:0;">${(u.first_name||'?')[0].toUpperCase()}</div>
+                <div><div style="color:#fff;font-weight:600;">${u.first_name||'Sin nombre'}</div><div style="font-size:0.75rem;color:var(--muted);">${u.email}</div></div>
+              `;
+              div.onclick = () => this.verPerfilPublico(u);
+              resultsDiv.appendChild(div);
+            });
+          })
+          .catch(() => {
+            this.showToast('error', 'Error en la búsqueda.');
+          });
+      }
+
+      verPerfilPublico(usuario) {
+        document.getElementById('perfil-public-view').style.display = 'block';
+        document.getElementById('perfil-public-name').innerText = usuario.first_name || 'Usuario';
+        document.getElementById('perfil-public-display-name').innerText = usuario.first_name || 'Sin nombre';
+        document.getElementById('perfil-public-email').innerText = usuario.email;
+        document.getElementById('perfil-public-bio').innerText = usuario.bio || 'Sin biografía';
+        document.getElementById('perfil-public-avatar-placeholder').innerText = (usuario.first_name||'?')[0].toUpperCase();
+        if (usuario.avatar) {
+          document.getElementById('perfil-public-avatar-img').src = usuario.avatar;
+          document.getElementById('perfil-public-avatar-img').style.display = 'block';
+          document.getElementById('perfil-public-avatar-placeholder').style.display = 'none';
+        }
+        document.getElementById('perfil-public-tests').innerText = usuario.tests_count || 0;
+        document.getElementById('perfil-public-fractons').innerText = (usuario.fractons_balance || 0) + ' FK';
+        document.getElementById('perfil-public-espejo').innerText = usuario.espejo_count || 0;
+        document.getElementById('perfil-public-plan').innerText = usuario.plan || 'Free';
+      }
+
+      seguirUsuario() {
+        this.showToast('info', 'Función de seguir en desarrollo.');
+      }
+
+      enviarMensaje() {
+        this.showToast('info', 'Función de mensajería en desarrollo.');
+      }
     }
 
    // --- INICIALIZACIÓN DE THREE.JS E INTERACTIVIDAD ---

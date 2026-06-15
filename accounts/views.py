@@ -77,7 +77,7 @@ def register_view(request):
 
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect('dashboard')
+        return redirect('/')
     form = LoginForm(request.POST or None)
     error = None
     if request.method == 'POST' and form.is_valid():
@@ -88,7 +88,7 @@ def login_view(request):
         )
         if user:
             login(request, user)
-            return redirect(request.GET.get('next', 'dashboard'))
+            return redirect('/')
         error = 'Correo o contraseña incorrectos.'
     return render(request, 'accounts/login.html', {'form': form, 'error': error})
 

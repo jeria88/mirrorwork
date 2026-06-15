@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 
 from .models import Comment, Follow, Reaction, SharedInsight
 
@@ -424,3 +424,45 @@ def repostear(request, pk):
     )
     count = original.reposts.count()
     return JsonResponse({'ok': True, 'repost_id': repost.pk, 'reposts': count})
+
+
+@require_GET
+def api_buscar(request):
+    """Buscar usuarios por nombre o correo para el perfil público."""
+    from django.db.models import Count, Q
+    from accounts.models import UserProfile
+    from psychometrics.models import TestResult
+    from mirror.models import ConflictSession
+    from tokens.models import TokenBalance
+
+    q = request.GET.get('q', '').strip()
+    if not q or len(q) < 2:
+        return JsonResponse({'results': []})
+
+    users = get_user_model().objects.filter(
+        Q(first_name__icontains=q) | Q(email__icontains=q),
+        is_active=True
+    ).exclude(pk=request.user.pk if request.user.is_authenticated else None)[:20]
+
+    results = []
+    for u in users:
+        profile = getattr(u, 'profile', None)
+        tests_count = TestResult.objects.filter(user=u).values('test').distinct().count()
+        espejo_count = ConflictSession.objects.filter(user=u).count()
+        try:
+            fractons = u.token_balance.balance
+        except Exception:
+            fractons = 0
+        results.append({
+            'id': u.pk,
+            'first_name': u.first_name or '',
+            'email': u.email,
+            'bio': profile.bio if profile and profile.bio else '',
+            'avatar': profile.avatar.url if profile and profile.avatar else None,
+            'plan': profile.get_plan_display() if profile else 'Free',
+            'tests_count': tests_count,
+            'espejo_count': espejo_count,
+            'fractons_balance': fractons,
+        })
+
+    return JsonResponse({'results': results})
